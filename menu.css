@@ -359,6 +359,9 @@ body[data-menu-open=true] > :is(.topbar, .scanlines, .art-stamp, .compass, .left
 .menu-shell .menu-save-hub-preview li[data-action="add"] { color: #b6eac7; }
 .menu-shell .menu-save-hub [data-save-status][data-error="true"] { color: #ff9a9a; }
 .menu-shell .menu-card .menu-save-hub button:disabled { opacity: .45; cursor: not-allowed; }
+.menu-shell .menu-telemetry { display: flex; gap: 12px; align-items: flex-start; font-size: 12px; color: #c5e8d3; cursor: pointer; }
+.menu-shell .menu-telemetry input { margin-top: 3px; accent-color: #7de3b1; }
+.menu-shell .menu-telemetry small { display: block; margin-top: 4px; font-size: 11px; color: #718f81; line-height: 1.5; }
 .menu-shell .menu-records-only { grid-template-columns: 1fr; max-width: 880px; }
 @media (min-width: 801px) and (min-height: 781px) {
   .menu-home h1 { font-size: clamp(64px, 5.8vw, 88px); margin-top: 20px; margin-bottom: 14px; }

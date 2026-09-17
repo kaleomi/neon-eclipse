@@ -3,6 +3,7 @@ import {createMeleeSweep} from './melee-sweep.js';
 import {createAchievementUI} from './achievement-ui.js';
 import {createPresentation} from './presentation.js';
 import {createFieldRecord} from './field-record.js';
+import {createTelemetry,createTelemetryAttempt} from './telemetry.js';
 import {createHarborCombatUI} from './harbor-combat-ui.js';
 import {createHarborWorld} from './harbor-world.js';
 import {createHarborNavigation} from './harbor-navigation.js';
@@ -45,6 +46,8 @@ import { createCampaignStore, STAGE_ENTRIES } from './campaign.js';
 import { createCampaignUI } from './campaign-ui.js';
 
 const fieldRecord=createFieldRecord();
+const telemetry=createTelemetry();let telemetryAttempt=null,telemetryShots=[0,0,0,0];
+window.neonTelemetry=telemetry;
 const meleeSweep=createMeleeSweep();
 let gameMenu=null,navigating=false;
 const $ = s => document.querySelector(s);
@@ -197,6 +200,7 @@ function spawnEncounter(stage){
 }
 function reset(stageIndex=0,snapshot=null){
  fieldRecord.begin(stageIndex);achievementUI.begin({map:MAP_ID,stage:stageIndex,snapshot:!!snapshot,replay:runMode==='replay'});
+ telemetryAttempt=createTelemetryAttempt({map:MAP_ID,mode:runMode,difficulty:currentDifficulty().id,stage:stageIndex,snapshot:!!snapshot});telemetryShots=[0,0,0,0];
  bossRecordUI?.clear();lookInput.reset();transport?.reset(snapshot?.transportTime||0,snapshot?.transportTrip===true);meleePending=false;sprintBlend=0;
  overseer?.clear();art.clear();enemyProjectiles.clear();handling.reset();combatUI.clear();enemyUI.clear();mission.reset(stageIndex);missionWorld.reset();fireBuffer=0;enemyFireGate=0;moving=false;sprinting=false;aiming=false;firing=false;keys.clear();
  enemies.forEach(e=>disposeGroup(e.group));enemies.length=0; effects.forEach(e=>{scene.remove(e.mesh);e.mesh.geometry.dispose();e.mesh.material.dispose();});effects.length=0;
@@ -212,7 +216,8 @@ function reset(stageIndex=0,snapshot=null){
  playerMotion.reset(camera.position,restoredFeet);camera.rotation.set(pitch,yaw,0);spawnEncounter(mission.current);campaignUI.announce(mission.current,runMode==='replay');
 
 }
-function end(win){if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';document.exitPointerLock?.();overlay.hidden=false;
+function end(win){if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
+ if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';document.exitPointerLock?.();overlay.hidden=false;
  $('#session-title').innerHTML=win?(runMode==='replay'?'阶段<span>训练完成</span>':'行动<span>撤离成功</span>'):'信号<span>连接中断</span>';
  const seconds=Math.floor(mission.state.time);
  $('#brief').textContent=`${win?(runMode==='replay'?'本阶段训练完成，主行动检查点未改变。':(IS_HARBOR?'小队已登船，离开风暴港口。':IS_TRAIN?'列车控制权已移交，接应队伍已登车。':IS_TOWER?'中枢已隔离，小队已从大厅撤离。':IS_ROOF?'信号已送出，小队已返回升降平台。':IS_STATION?'已登上末班列车，运输站行动完成。':'反应堆已移交，撤离完成。')):'可从阶段入口检查点重试，或重新开始行动。'} 击破 ${kills} 个目标 · 用时 ${Math.floor(seconds/60)}分${seconds%60}秒 · 阶段 ${runMode==='replay'?replayEntry.stageIndex+1:Math.min(5,mission.state.index+1)}/5。`;
@@ -335,7 +340,7 @@ function shoot(meleeImpact=false){
  if(selected===3&&!meleeImpact){cooldown=weapons[3].delay;meleeRemaining=.42;meleePending=true;overseer?.battle.shot(3);return true;}
  if(reload>0){if(weapons[selected].perShell&&rounds[selected]>0)reload=0;else return false;}
  if(rounds[selected]<=0){startReload();cooldown=.2;fireBuffer=0;return false;}
- const w=weapons[selected];if(selected!==3)overseer?.battle.shot(selected);rounds[selected]--;if(selected!==3){fieldRecord.shot();achievementUI.attempt.shot(selected);}if(!meleeImpact)cooldown=w.delay;recoil=1;
+ const w=weapons[selected];if(selected!==3)overseer?.battle.shot(selected);rounds[selected]--;if(selected!==3){fieldRecord.shot();achievementUI.attempt.shot(selected);}telemetryShots[selected]++;if(!meleeImpact)cooldown=w.delay;recoil=1;
  sound(selected===1?75:selected===3?440:150,selected===3?.16:.075,'sawtooth');
  scene.updateMatrixWorld(true);
  let totalDamage=0,headshot=false,killed=0,armoredHit=false,coreHit=false;

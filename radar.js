@@ -1,10 +1,10 @@
 import {radarHeight,drawRadarEnemy} from './radar-height.js';
-import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR} from './level.js';
+import {MAP} from './level.js';
 import { ARENA } from './arena.js';
 export function createRadar(obstacles){
  const panel=document.createElement('aside');panel.className='tactical-radar';panel.setAttribute('aria-label','战术地图：青色为玩家；敌人上三角在高处，下三角在低处，圆点同层');
  panel.style.cssText='position:fixed;left:3vw;bottom:155px;z-index:3;width:160px;padding:9px;background:#061822d9;border:1px solid #54898f66;pointer-events:none;font:9px monospace;color:#86b8c2;letter-spacing:.1em';
- panel.innerHTML='<div style="margin-bottom:7px">'+(IS_HARBOR?'H-06 / 风暴港口':IS_TRAIN?'T-05 / 疾驰列车':IS_TOWER?'C-04 / 多层中枢塔':IS_ROOF?'A-03 / 天穹枢纽':IS_STATION?'U-02 / 地下运输站':'K-19 / 80 × 80')+'</div>';
+ panel.innerHTML='<div style="margin-bottom:7px">'+MAP.radarLabel+'</div>';
  const canvas=document.createElement('canvas');canvas.width=140;canvas.height=140;canvas.style.cssText='width:140px;height:140px';panel.append(canvas);document.body.append(panel);
  const legend=document.createElement('div');legend.style.cssText='margin-top:6px;line-height:1.5;letter-spacing:0;color:#d0e6e6';legend.textContent='▲ 高处 · ● 同层 · ▼ 低处';panel.append(legend);
  const ctx=canvas.getContext('2d'),scale=140/ARENA.size,px=x=>(x+ARENA.half)*scale;let timer=0;

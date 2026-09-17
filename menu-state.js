@@ -1,5 +1,6 @@
 import {CHAPTERS} from './journey.js';
 import {validCheckpoint} from './campaign.js';
+import {mapById} from './maps/registry.js';
 
 export const HOME_MENU_ITEMS = Object.freeze([
   {id: 'menu-new', label: '新游戏', hint: '从第一章开始完整战役', icon: 'play'},
@@ -9,19 +10,15 @@ export const HOME_MENU_ITEMS = Object.freeze([
   {id: 'menu-settings', label: '设置', hint: '画面、界面与操作', icon: 'settings'}
 ].map(Object.freeze));
 
-const themes = [
-  ['K-19', 'REACTOR COMPLEX', '突破封锁，夺回反应堆。', '冷却装置 · 权限上传 · Warden', '#a2f5da'],
-  ['U-02', 'UNDERGROUND TRANSIT', '穿过停靠列车，接通撤离线路。', '维护通道 · 站台交火 · 调度防守', '#8ed8ff'],
-  ['A-03', 'SKYLINK ARRAY', '登上天穹枢纽，让信号重返城市。', '双中继 · 随机高压 · 枢纽监察者', '#d1b8ff'],
-  ['C-04', 'CONTROL SPIRE', '逐层突破中枢塔，切断核心控制。', '三层空间 · 核心防守 · 升降机', '#f1d39d'],
-  ['T-05', 'RUNAWAY FREIGHT', '登上疾驰列车，夺取最后的数据。', '五节车厢 · 车顶交火 · 控制链路', '#ffa684'],
-  ['H-06', 'STORM HARBOR', '穿越风暴港口，为小队点亮信标。', '集装箱堆场 · 港务精英 · 登船撤离', '#83e4e7']
-];
-export const MENU_CHAPTERS = CHAPTERS.map((chapter, index) => Object.freeze({
-  map: chapter.map, name: chapter.name, index, number: String(index + 1).padStart(2, '0'),
-  sector: themes[index][0], english: themes[index][1], brief: themes[index][2],
-  features: themes[index][3], color: themes[index][4]
-}));
+// Presentation strings (sector code, English title, brief, feature line, accent color) live in maps/registry.js.
+export const MENU_CHAPTERS = CHAPTERS.map((chapter, index) => {
+  const entry = mapById(chapter.map);
+  return Object.freeze({
+    map: chapter.map, name: chapter.name, index, number: String(index + 1).padStart(2, '0'),
+    sector: entry.code, english: entry.english, brief: entry.brief,
+    features: entry.features, color: entry.color
+  });
+});
 export const chapterInfo = map => MENU_CHAPTERS.find(chapter => chapter.map === map) || MENU_CHAPTERS[0];
 export const nextChapter = map => MENU_CHAPTERS[chapterInfo(map).index + 1] || null;
 export const chapterURL = (map, mode = 'campaign', entry = 'chapter') => {

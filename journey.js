@@ -5,11 +5,14 @@ import {REACTOR_SUPPLIES} from './mission.js';
 import {STATION_SUPPLIES} from './station-data.js';
 import {ROOF_SUPPLIES} from './roof-data.js';
 import {TOWER_SUPPLIES} from './tower-data.js';
+import {MAP_REGISTRY} from './maps/registry.js';
 export const LEGACY_JOURNEY_KEY='neon-eclipse.journey.v1';
 export const FOUR_CHAPTER_JOURNEY_KEY='neon-eclipse.journey.v2';
 export const FIVE_CHAPTER_JOURNEY_KEY='neon-eclipse.journey.v3';
 export const JOURNEY_KEY='neon-eclipse.journey.v4';
-export const CHAPTERS=[{map:'reactor',name:'反应堆设施',supplies:REACTOR_SUPPLIES},{map:'station',name:'地下运输站',supplies:STATION_SUPPLIES},{map:'roof',name:'天穹通讯枢纽',supplies:ROOF_SUPPLIES},{map:'tower',name:'多层中枢塔',supplies:TOWER_SUPPLIES},{map:'train',name:'疾驰货运列车',supplies:TRAIN_SUPPLIES},{map:'harbor',name:'风暴港口',supplies:HARBOR_SUPPLIES}];
+const CHAPTER_SUPPLIES={reactor:REACTOR_SUPPLIES,station:STATION_SUPPLIES,roof:ROOF_SUPPLIES,tower:TOWER_SUPPLIES,train:TRAIN_SUPPLIES,harbor:HARBOR_SUPPLIES};
+// Chapter order and names come from the map registry; supplies stay owned by each chapter's data module.
+export const CHAPTERS=MAP_REGISTRY.map(m=>({map:m.id,name:m.title,supplies:CHAPTER_SUPPLIES[m.id]||[]}));
 const resultOK=r=>r&&Number.isFinite(r.time)&&r.time>=0&&r.time<=86400&&Number.isInteger(r.kills)&&r.kills>=0&&r.kills<=10000;
 function valid(d,count,version){
  if(!d||d.version!==version||!Number.isInteger(d.chapter)||d.chapter<0||d.chapter>=count||!['active','between','complete'].includes(d.status)||!Array.isArray(d.results))return false;

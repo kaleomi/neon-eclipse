@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NEON ECLIPSE // FPS</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="game.css" />
+  <link rel="stylesheet" href="art.css" />
+  <link rel="stylesheet" href="combat.css" />
+  <link rel="stylesheet" href="mission.css" />
+  <link rel="stylesheet" href="enemies.css" />
+  <link rel="stylesheet" href="campaign.css" />
+  <link rel="stylesheet" href="weapons.css" />
+  <link rel="stylesheet" href="hud.css" />
+  <link rel="stylesheet" href="levels.css" />
+  <link rel="stylesheet" href="hologram.css" />
+  <link rel="stylesheet" href="journey.css" />
+  <link rel="stylesheet" href="presentation.css" />
+  <link rel="stylesheet" href="impact.css" />
+  <link rel="stylesheet" href="menu.css" />
+  <link rel="stylesheet" href="hud-counter-art.css" />
+  <link rel="stylesheet" href="challenge-progress.css" />
+</head>
+<body>
+  <div id="game"></div>
+  <div class="scanlines"></div>
+  <header class="topbar"><div class="brand"><span class="dot"></span> NEON ECLIPSE <small>TACTICAL SIMULATION</small></div><div class="topstat">MISSION // 07 <span>•</span> SECTOR K-19</div><div class="topstat">FPS <b id="fps">60</b></div></header>
+  <aside class="left-panel"><div class="eyebrow">OBJECTIVE</div><h1>SHADOW<br/><em>BREACH</em></h1><p>INFILTRATE THE<br/>REACTOR COMPLEX</p><div class="divider"></div><div class="eyebrow">THREAT LEVEL</div><div class="threat"><span></span><span></span><span></span><span></span><span class="off"></span></div><div class="boss-note">BOSS DETECTED<br/><b>THE WARDEN</b></div></aside>
+  <section class="right-panel"><div class="eyebrow">LOADOUT</div><div class="loadout-card active"><div class="weapon-icon rifle"><svg viewBox="0 0 160 74" aria-hidden="true"><path class="metal" d="M4 23h24l10 7h48l6-8h39v18H88l-8 8H49l-6 18H31l2-27H20L4 43Z"/><path class="dark" d="m54 45 18 1 7 20-20 1Z"/><path class="metal" d="M130 27h23v8h-23M58 14h23v11H58Z"/><path class="line" d="M96 26v12m9-12v12m9-12v12m-69-7h36M62 17h13M12 27v11"/><path class="accent" d="M43 26h10v5H43ZM146 24h7v13h-7Z"/></svg></div><div><b>VANGUARD</b><small>ASSAULT RIFLE // 5.56</small></div><strong>01</strong></div><div class="loadout-card"><div class="weapon-icon shotgun"><svg viewBox="0 0 160 74" aria-hidden="true"><path class="metal" d="M3 26h27l9 5h40l7-6h57v12H80l-8 10H47l-4 17H31l2-22H21L3 48Z"/><path class="dark" d="M79 39h51v13H79Z"/><path class="metal" d="M131 40h20v6h-20M58 29h7v18h-7M68 29h7v18h-7"/><path class="line" d="M86 41v9m9-9v9m9-9v9m9-9v9m9-9v9M9 30v12"/><path class="accent" d="M144 22h9v18h-9M40 27h10v5H40Z"/></svg></div><div><b>BREACHER</b><small>AUTO SHOTGUN // 12G</small></div><strong>02</strong></div><div class="loadout-card"><div class="weapon-icon pistol"><svg viewBox="0 0 160 74" aria-hidden="true"><path class="metal" d="M32 19h67v23H68l-3 22H43l6-25H32Z"/><path class="dark" d="M99 23h51v17H99ZM49 42h16l-5 18H44Z"/><path class="line" d="M39 23v10m7-10v10m7-10v10m57-6v10m10-10v10m10-10v10M65 44h13v8H64"/><path class="accent" d="M36 15h9v5h-9m43-5h7v5h-7M144 23h6v17h-6Z"/></svg></div><div><b>GHOST</b><small>SUPPRESSED // 9MM</small></div><strong>03</strong></div><div class="loadout-card"><div class="weapon-icon blade"><svg viewBox="0 0 160 74" aria-hidden="true"><path class="metal" d="m51 43 73-32 31 1-21 20-75 22Z"/><path class="dark" d="m53 43 49-17-43 25Z"/><path class="accent" d="m61 50 73-24 15-12-15 16-75 24Z"/><path class="metal" d="m43 35 9-3 16 30-9 3Z"/><path class="dark" d="m18 51 28-11 10 20-29 10Z"/><path class="line" d="m24 50 7 15m2-19 7 15m1-19 7 15"/></svg></div><div><b>ARC BLADE</b><small>ENERGY // MELEE</small></div><strong>04</strong></div></section>
+  <div class="center-reticle"><span></span></div>
+  <footer id="player-hud" aria-label="玩家状态">
+    <div class="health"><span class="eyebrow">生命 / HP</span><div class="bar"><i id="healthbar"></i></div><b id="health">100</b></div>
+    <div class="ammo" aria-label="当前弹匣和备用弹药"><span>弹药</span><div><b id="ammo">30</b><i>/ 150</i></div></div>
+  </footer>
+  <script type="module" src="app.js"></script>
+  <script type="module" src="hologram-ui.js"></script>
+</body></html>

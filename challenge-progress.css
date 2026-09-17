@@ -1,0 +1,39 @@
+/* Ephemeral challenge conditions and historical awards are deliberately separate. */
+.menu-shell .achievement-panel .challenge-progress-note { padding: 11px 13px; margin: 12px 0 17px; border-left: 2px solid #8fae9a66; background: #9acdae08; color: #8aa895; font-size: 11px; line-height: 1.8; }
+.menu-shell .achievement-panel .achievement-history { color: #c9bd92; font-size: 11px; margin: 8px 0 0; }
+.menu-shell .achievement-panel .challenge-attempt { margin-top: 11px; padding: 12px; background: #05131894; border: 1px solid #74998c26; border-radius: 3px; }
+.menu-shell .achievement-panel .challenge-attempt-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; }
+.menu-shell .achievement-panel .challenge-attempt-heading > span { margin: 0; font: 10px/1.5 'Segoe UI', 'Microsoft YaHei', sans-serif; color: #6e8c7d; letter-spacing: .12em; }
+.menu-shell .achievement-panel .challenge-attempt-heading > b { color: #9fcdb7; font: 500 11px/1.6 'Segoe UI', 'Microsoft YaHei', sans-serif; }
+.menu-shell .achievement-panel .challenge-attempt > p { font-size: 11px; line-height: 1.8; margin: 8px 0 0; color: #8cab99; }
+.menu-shell .achievement-panel .challenge-attempt[data-status=completed] { border-color: #bbdaa354; }
+.menu-shell .achievement-panel .challenge-attempt[data-status=completed] .challenge-attempt-heading > b { color: #d7edb4; }
+.menu-shell .achievement-panel .challenge-attempt[data-status=ready] .challenge-attempt-heading > b { color: #bbe9d6; }
+.menu-shell .achievement-panel .challenge-attempt[data-status=failed] .challenge-attempt-heading > b { color: #e7b29e; }
+.menu-shell .achievement-panel .challenge-attempt:is([data-status=blocked],[data-status=idle],[data-status=unavailable]) .challenge-attempt-heading > b { color: #84958c; }
+.menu-shell .achievement-panel .challenge-meter { height: 5px; background: #3751445e; border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.menu-shell .achievement-panel .challenge-meter > i { display: block; height: 100%; background: #acd9ba; }
+.menu-shell .achievement-panel .challenge-attempt:is([data-status=blocked],[data-status=failed]) .challenge-meter > i { background: #6b7e72; }
+.menu-shell .achievement-panel .challenge-weapon-progress { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); list-style: none; gap: 5px; margin: 9px 0 0; padding: 0; }
+.menu-shell .achievement-panel .challenge-weapon-progress li { color: #6c8c7b; font-size: 10px; line-height: 1.6; border: 1px solid #71998325; border-radius: 2px; padding: 5px 6px; }
+.menu-shell .achievement-panel .challenge-weapon-progress li[data-met=true] { color: #c8e9d5; border-color: #aac8b84b; background: #a0ccb410; }
+@media (max-width: 1000px) {
+  .menu-shell .achievement-panel .challenge-weapon-progress { grid-template-columns: 1fr 1fr; }
+}
+
+/* Gallery additions stay inside the existing secondary achievement page. */
+.menu-shell .achievement-panel .achievement-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin:18px 0 12px; }
+.menu-shell .achievement-panel .achievement-filters label { display:flex; flex-direction:column; gap:7px; color:#a9c3b4; font-size:12px; min-width:0; }
+.menu-shell .achievement-panel .achievement-filters select { max-width:100%; background:#0c2022; border:1px solid #74998c66; border-radius:3px; padding:10px; color:#e0eee5; font:inherit; }
+.menu-shell .achievement-panel .achievement-filters .achievement-notice-toggle { flex-direction:row; align-items:center; padding:10px 0; }
+.menu-shell .achievement-panel .achievement-preference-status { flex-basis:100%; }
+.menu-shell .achievement-panel .achievement-gallery-summary,.menu-shell .achievement-panel .achievement-empty { color:#94b3a1; font-size:12px; line-height:1.8; margin:12px 0; }
+.menu-shell .achievement-panel .achievement-badge { display:grid; place-items:center; width:44px; height:44px; border:1px solid #76877b66; border-radius:10px 0; background:#66776c13; color:#71897b; font:24px Georgia,serif; margin-bottom:12px; }
+.menu-shell .achievement-panel [data-unlocked=true] .achievement-badge { color:#e7d7a6; border-color:#d1bc7866; background:#bea96512; }
+.menu-shell .achievement-panel .achievement-honor { color:#a2b6a6; margin:6px 0 12px; font-size:11px; }
+.menu-shell .achievement-panel [data-unlocked=true] .achievement-honor { color:#d7c798; }
+.achievement-toast { position:fixed; z-index:10000; top:20px; left:50%; transform:translateX(-50%); box-sizing:border-box; width:max-content; max-width:calc(100vw - 32px); display:flex; align-items:center; gap:16px; padding:16px 20px; background:#0a2025f5; border:1px solid #d2c08a80; border-radius:4px; color:#eadbb0; box-shadow:0 8px 32px #0008; font:13px/1.7 'Microsoft YaHei',sans-serif; }
+.achievement-toast[hidden] { display:none; }
+.achievement-toast button { flex-shrink:0; background:transparent; border:1px solid #b4c6b344; color:#dce6d8; border-radius:3px; font-size:20px; cursor:pointer; padding:2px 10px; }
+.achievement-toast button:focus-visible { outline:2px solid #edffe5; outline-offset:3px; }
+@media(max-width:480px){.menu-shell .achievement-panel .achievement-filters > label:not(.achievement-notice-toggle){width:100%;}}

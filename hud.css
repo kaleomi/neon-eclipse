@@ -1,0 +1,12 @@
+/* Keep mission information in the upper-left tracker. Bottom edge: HP and ammo only. */
+footer{left:3vw;right:3vw;bottom:max(22px,env(safe-area-inset-bottom));display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:0;border:0;background:none;pointer-events:none}
+footer .health{width:180px;padding:12px 16px;background:linear-gradient(90deg,#061922e8,#06192250);border-left:2px solid #7ce9da}
+footer .health .eyebrow{font:9px monospace;letter-spacing:.14em;color:#96bfbe}
+footer .health .bar{height:3px;margin:9px 0 7px;background:#31585b77}
+footer .health b{font:32px/1 monospace;color:#baf7ea}
+footer .ammo{min-width:155px;margin:0;padding:12px 16px;background:linear-gradient(270deg,#061922e8,#06192250);border:0;border-right:2px solid #7ce9da;text-align:right;font-family:monospace}
+footer .ammo span{display:block;margin-bottom:8px;color:#96bfbe;font:9px monospace;letter-spacing:.14em}
+footer .ammo>div{display:flex;align-items:baseline;justify-content:flex-end;gap:8px;white-space:nowrap}
+footer .ammo b{margin:0;color:#e0fff7;font:36px/1 monospace}
+footer .ammo i{color:#9bb5bd;font:14px monospace;font-style:normal}
+@media(max-width:700px){footer{left:16px;right:16px;bottom:max(16px,env(safe-area-inset-bottom))}footer .health{width:140px;padding:10px 12px}footer .ammo{min-width:120px;padding:10px 12px}footer .health b{font-size:28px}footer .ammo b{font-size:32px}}

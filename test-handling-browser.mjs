@@ -1,0 +1,26 @@
+import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import assert from 'node:assert/strict';
+const {chromium}=await import(process.env.VEHICLE_PLAYWRIGHT_MODULE||'playwright');
+const shots=process.env.VEHICLE_SCREENSHOT_DIR||fs.mkdtempSync(path.join(os.tmpdir(),'neon-handling-'));fs.mkdirSync(shots,{recursive:true});
+const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+try{
+ const page=await browser.newPage({viewport:{width:960,height:640}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(60000);
+ await page.goto(process.env.VEHICLE_TEST_URL||'http://127.0.0.1:5173/vehicle.html');await page.waitForSelector('#vehicle-scene canvas');
+ await page.click('[data-station=airfield]');await page.click('[data-station=airfield]');await page.keyboard.press('KeyE');await page.waitForFunction(()=>document.body.dataset.vehicleKind==='plane');
+ await page.keyboard.down('Shift');await page.keyboard.down('KeyS');await page.waitForFunction(()=>parseFloat(document.querySelector('#flight-altitude').textContent)>12);await page.keyboard.up('Shift');await page.keyboard.up('KeyS');
+ await page.keyboard.down('Control');await page.waitForFunction(()=>parseFloat(document.querySelector('#flight-throttle').textContent)<=28);await page.keyboard.up('Control');
+ await page.mouse.move(480,320);await page.mouse.down();await page.mouse.move(380,320,{steps:10});
+ await page.waitForFunction(()=>Number(document.body.dataset.flightHeadingError)<-5);const leftLook=Number(await page.getAttribute('body','data-flight-look-heading'));
+ await page.waitForFunction(()=>Math.abs(Number(document.body.dataset.flightHeadingError))<1);const leftYaw=Number(await page.getAttribute('body','data-flight-yaw'));assert(leftYaw<-.1);
+ assert(Math.abs(Number(await page.getAttribute('body','data-flight-look-heading'))-leftLook)<.002,'world look heading stays fixed while aircraft aligns');
+ await page.screenshot({path:path.join(shots,'mouse-left-aligned.png')});
+ await page.mouse.move(580,320,{steps:10});await page.waitForFunction(()=>Number(document.body.dataset.flightHeadingError)>5);
+ await page.waitForFunction(()=>Math.abs(Number(document.body.dataset.flightHeadingError))<1);const rightYaw=Number(await page.getAttribute('body','data-flight-yaw'));assert(rightYaw>leftYaw+.25);
+ await page.screenshot({path:path.join(shots,'mouse-right-aligned.png')});await page.mouse.up();await page.keyboard.press('Escape');await page.waitForSelector('#drive-overlay:not([hidden])');
+ const pausedYaw=await page.getAttribute('body','data-flight-yaw');await page.waitForTimeout(300);assert.equal(await page.getAttribute('body','data-flight-yaw'),pausedYaw);
+ await page.click('[data-station=marina]');await page.click('[data-station=marina]');await page.keyboard.press('KeyE');await page.waitForFunction(()=>document.body.dataset.vehicleKind==='yacht');
+ await page.keyboard.down('KeyW');await page.waitForFunction(()=>Number(document.querySelector('#drive-speed').textContent)>=110);await page.keyboard.up('KeyW');
+ assert(Number(await page.locator('#drive-speed').textContent())<=116);await page.keyboard.press('KeyE');assert.equal(await page.getAttribute('body','data-vehicle-kind'),'yacht');
+ await page.screenshot({path:path.join(shots,'yacht-chase-speed.png')});await page.keyboard.down('Space');await page.waitForFunction(()=>document.querySelector('#drive-speed').textContent==='0');await page.keyboard.up('Space');
+ await page.keyboard.press('KeyE');assert.equal(await page.getAttribute('body','data-vehicle-kind'),'yacht','still cannot exit into open water');
+ assert.deepEqual(errors,[]);console.log('PASS: real mouse drag sets left/right world heading; aircraft catches up and centers without further mouse movement; look heading stays fixed; pause freezes heading; yacht exceeds 110 km/h and brakes safely with exit protections');
+}finally{await browser.close();}

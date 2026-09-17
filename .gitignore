@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+desktop/node_modules/
+
+# generated desktop artifacts
+desktop/web/
+release-desktop/*.exe
+release-desktop/*.blockmap
+release-desktop/win-unpacked/
+release-desktop/builder-debug.yml
+release-desktop/builder-effective-config.yaml
+
+# tooling / scratch
+.tokeny/
+*.log
+.DS_Store
+Thumbs.db

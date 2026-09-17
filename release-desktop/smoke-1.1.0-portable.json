@@ -1,0 +1,71 @@
+{
+  "version": "1.1.0",
+  "electron": "44.4.1",
+  "checks": [
+    {
+      "map": "reactor",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "station",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "roof",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "tower",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "train",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "harbor",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "vehicle",
+      "webgl": true,
+      "storage": true,
+      "naval": true,
+      "flight": true,
+      "paused": true,
+      "reset": true
+    }
+  ],
+  "errors": [],
+  "ok": true
+}

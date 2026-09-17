@@ -1,0 +1,9 @@
+{
+  "ok": true,
+  "version": "1.2.0",
+  "assets": 113,
+  "exe": "NEON-ECLIPSE-1.2.0-win-x64.exe",
+  "bytes": 100571607,
+  "sha256": "9002582b92dc24a1e48a408f8aaad946336ece29b54c62ffa515f7498402301b",
+  "scope": "Unpacked app.asar verified against generated offline manifest; portable EXE hashed, with separate smoke test required."
+}

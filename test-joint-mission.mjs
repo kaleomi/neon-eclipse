@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {createJointMission,stepJointMission,finishJointFlight,jointBoardAllowed,JOINT_POINTS,JOINT_STAGES,jointGoal} from './joint-mission.js';
+import {createPlane,stepPlane} from './flight-rules.js';import {createYacht} from './maritime-rules.js';import {createRover} from './vehicle-rules.js';
+import {createFlightMission,stepFlightMission} from './flight-mission.js';import {flightPilot} from './test-flight-pilot.mjs';import {planeBoxes} from './test-flight-mission-route.mjs';
+const m=createJointMission(true),s={kind:null,player:{...JOINT_POINTS.pickup},rover:createRover(),yacht:createYacht(),plane:createPlane(),action:true};
+const hold=(n=2.1)=>{for(let i=0;i<120*n;i++)stepJointMission(m,s,1/120);};
+hold(.5);assert(m.hold>0);s.action=false;hold(.1);assert.equal(m.hold,0);s.action=true;hold(1.1);assert.equal(m.stage,'drive');assert.equal(jointBoardAllowed(m,'plane'),false);
+s.player={...JOINT_POINTS.drive};hold();assert.equal(m.stage,'drive','walking cannot replace drive leg');s.kind='rover';Object.assign(s.rover,JOINT_POINTS.drive,{speed:2});hold();assert.equal(m.stage,'drive');s.rover.speed=0;hold();assert.equal(m.stage,'board');assert.equal(jointBoardAllowed(m,'rover'),false);
+s.kind='yacht';hold(.01);assert.equal(m.stage,'deliver');Object.assign(s.yacht,JOINT_POINTS.deliver);s.action=false;hold();assert.equal(m.stage,'deliver');s.action=true;hold();assert.equal(m.stage,'return');
+Object.assign(s.yacht,{x:278,z:180});hold();assert.equal(m.stage,'return','must actually disembark');s.kind=null;s.player={x:272,z:180};hold(.01);assert.equal(m.stage,'airfield');assert.equal(jointGoal(m,{...s}).x,218,'return via gangway');
+s.kind='rover';Object.assign(s.rover,JOINT_POINTS.airfield);hold();assert.equal(m.stage,'board-plane');s.kind='plane';hold(.01);assert.equal(m.stage,'recon');
+const f=createFlightMission(s.plane,'recon');m.flightId=f.attempt.id;for(let i=0;i<120*310&&f.status==='active';i++){const from={...s.plane};stepPlane(s.plane,flightPilot(s.plane,f),1/120,planeBoxes);stepFlightMission(f,s.plane,from,1/120,{scan:true,boxes:planeBoxes});stepJointMission(m,s,1/120);}assert.equal(f.status,'won');assert(finishJointFlight(m,f.result));assert.equal(m.stage,'handoff');assert.equal(finishJointFlight(m,f.result),false,'duplicate finish cannot advance');
+s.player={...JOINT_POINTS.handoff};hold();assert.equal(m.stage,'handoff','must leave aircraft');s.kind=null;hold();assert.equal(m.status,'won');assert.deepEqual(m.completed,JOINT_STAGES);const frozen=JSON.stringify(m);hold(5);assert.equal(JSON.stringify(m),frozen);
+const bad=createJointMission(true);bad.stage='recon';bad.flightId='wrong-id';assert.equal(finishJointFlight(bad,f.result),false);assert.equal(bad.status,'lost');const paused=createJointMission(true),before=JSON.stringify(paused);stepJointMission(paused,{...s,paused:true},1);assert.equal(JSON.stringify(paused),before);
+console.log('PASS: sequential joint lifecycle, hold/reset, vehicle/parking requirements, no early/duplicate finish, real physics recon proof, flight attempt isolation and pause');

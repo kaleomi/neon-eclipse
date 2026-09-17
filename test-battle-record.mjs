@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {createBossBattleRecord,formatBossBattleRecord} from './boss-battle-record.js';
+import {radarHeight,drawRadarEnemy} from './radar-height.js';
+const b=createBossBattleRecord();assert.equal(formatBossBattleRecord(b.summary),'');b.tick(10);assert.equal(b.summary.seconds,0);
+b.start();b.tick(5);b.tick(0);b.tick(NaN);b.shot(0);b.shot(1);b.shot(1);b.shot(2);b.shot(3);b.shot(-1);b.hit(65,false);b.hit(65,false,true);b.hit(1920,true);b.hurt(18);b.hurt(-1);
+const loadout={health:82,rounds:[20,6,14],reserves:[100,30,60]};b.finish('won',loadout);loadout.health=1;b.tick(20);b.shot(0);b.hit(100,true);b.finish('lost',loadout);
+assert.equal(b.summary.status,'won');assert.equal(b.summary.seconds,5);assert.equal(b.summary.windows,1);assert.deepEqual(b.summary.shots,[1,2,1]);assert.equal(b.summary.melee,1);assert.equal(b.summary.arcDamage,18);assert.equal(b.summary.coreDamage,1920);assert.equal(b.summary.nodeDamage,130);assert.equal(b.summary.loadout.health,82);
+const copy=b.summary;copy.shots[0]=100;assert.equal(b.summary.shots[0],1);assert(formatBossBattleRecord(b.summary).includes('120 / 36 / 74'));
+b.start();assert.equal(b.summary.windows,0);b.finish('lost');assert.equal(b.summary.status,'lost');b.clear();assert.equal(b.summary.status,'idle');
+assert.equal(radarHeight(0,1.7),'same');assert.equal(radarHeight(3,1.7),'above');assert.equal(radarHeight(0,4.7),'below');assert.equal(radarHeight(3,4.7),'same');assert.equal(radarHeight(.25,1.7),'same');assert.equal(radarHeight(NaN,1.7),'same');
+const ops=[],ctx={beginPath(){},arc(){ops.push('circle')},moveTo(x,y){ops.push(y)},lineTo(){},closePath(){},fill(){}};drawRadarEnemy(ctx,10,10,3,'above');assert.equal(ops[0],6);ops.length=0;drawRadarEnemy(ctx,10,10,3,'below');assert.equal(ops[0],14);ops.length=0;drawRadarEnemy(ctx,10,10,3,'same');assert.equal(ops[0],'circle');
+console.log('PASS: battle timer, pause, shots vs pellets, exposure rounds, damage categories, immutable outcome/loadout, retry and height radar glyphs');

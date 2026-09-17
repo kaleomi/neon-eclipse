@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {SAVE_KEY,validCheckpoint,createCampaignStore} from './campaign.js';
+const entries=new Map(),storage={getItem:k=>entries.get(k)||null,setItem:(k,v)=>entries.set(k,v)};
+const snapshot={stageIndex:1,health:73,rounds:[18,4,10],reserves:[97,30,60],selected:2,x:-28,z:2.4,yaw:.1,pitch:0,time:93.5,kills:5,collected:['med-west']};
+assert(validCheckpoint(snapshot));for(const bad of [{health:0},{stageIndex:5},{rounds:[31,8,15]},{reserves:[1000,1,1]},{collected:['unknown']},{collected:['med-west','med-west']},{x:999},{time:Infinity}])assert(!validCheckpoint({...snapshot,...bad}));
+const s=createCampaignStore(storage);assert.equal(s.checkpoint,null);assert(s.save(snapshot));assert.equal(s.unlocked,1);const resumed=createCampaignStore(storage);assert.deepEqual(resumed.checkpoint,snapshot);const copy=resumed.checkpoint;copy.health=1;assert.equal(resumed.checkpoint.health,73);
+assert(resumed.save({...snapshot,stageIndex:4}));assert.equal(createCampaignStore(storage).unlocked,4);resumed.complete();assert.equal(createCampaignStore(storage).checkpoint,null);assert(createCampaignStore(storage).completed);resumed.save({...snapshot,stageIndex:0});assert.equal(resumed.unlocked,4);
+entries.set(SAVE_KEY,'{"version":1,"unlocked":99}');assert.equal(createCampaignStore(storage).checkpoint,null);entries.set(SAVE_KEY,'malformed');assert.doesNotThrow(()=>createCampaignStore(storage));
+const broken=createCampaignStore({getItem(){throw new Error('blocked')},setItem(){throw new Error('full')}});assert(!broken.persistent);assert(!broken.save(snapshot));assert.deepEqual(broken.checkpoint,snapshot,'session retry still works without durable storage');
+console.log('PASS: checkpoint validation, durable round-trip, immutable reads, stage unlocks, completion, corrupted data and storage-denied fallback');

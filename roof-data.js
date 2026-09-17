@@ -1,0 +1,15 @@
+export const ROOF_ARENA={size:80,half:40,start:{x:0,z:32},reactor:{x:0,z:0},covers:[],spawns:[],zones:[{name:'SERVICE LIFT',x:0,z:32},{name:'RELAY ARRAY',x:0,z:8},{name:'UPLINK',x:0,z:-30}]};
+export const ROOF_ENTRIES=[{x:0,z:32},{x:0,z:28.4},{x:24,z:10.4},{x:-12,z:-17.6},{x:0,z:-27.6}];
+export const ROOF_STAGES=[
+ {id:'roof-entry',title:'解除检修通道门锁',short:'检修门锁',x:0,z:26,duration:1.5,count:0,level:1,action:'解除门锁',message:'检修门开启。接通东西两座中继站。',radio:'列车已经把我们送到枢纽下方。这里暂时安全，解除检修门锁后进入露天阵列。'},
+ {id:'relays',title:'依次接通西、东双中继',short:'西侧中继 / 1·2',x:-24,z:8,duration:2,count:6,level:3,action:'接通中继',points:[{x:-24,z:8,short:'西侧中继 / 1·2'},{x:24,z:8,short:'东侧中继 / 2·2'}],roles:['ranged','assault','heavy','ranged','assault','heavy'],spawns:[[-30,0],[-16,14],[-10,0],[10,0],[20,16],[32,-4]],message:'双中继已接通，北部控制区已解锁。注意：高压回路开始周期性放电。',radio:'先清理阵列守卫，再从西侧中继切到东侧中继。两座都接通后，北部门锁才会释放。'},
+ {id:'roof-control',title:'接管天线控制权',short:'天线控制柜',x:-12,z:-20,duration:2,count:5,level:3,action:'接管天线',roles:['heavy','ranged','assault','ranged','assault'],spawns:[[-32,-20],[-8,-24],[0,-18],[10,-16],[28,-12]],message:'控制权已取得。前往北端上传窗口。',radio:'清理守卫后，直接前往西北控制柜接管天线。东侧高架远端有窄平台跳跃挑战，星星位于最高落点。可乘运输车探索，不影响主线。每轮随机两处高压区先黄灯预警再放电，北部两侧留有绕行空间。'},
+ {id:'uplink',title:'守住天穹信号上传',short:'天穹上传台',x:0,z:-30,duration:2,count:4,level:4,action:'建立上传链路',defenseDuration:20,defenseRadius:11,defenseCount:3,defenseLabel:'信号上传',roles:['ranged','heavy','assault','ranged'],spawns:[[-30,-32],[-12,-32],[14,-32],[30,-28]],message:'信号已送出，高压回路已断开。返回南部升降平台。',radio:'枢纽监察者封锁了上传台！击破两座金色供电节点，在八秒暴露窗口攻击青色核心。黄色电弧锁定方向后横移或跳跃躲避；Boss 存活时地面高压关闭。击败它和守卫后，建立二十秒上传链路。'},
+ {id:'extract',title:'返回升降平台撤离',short:'升降平台',x:0,z:32,duration:3,count:5,level:3,action:'确认平台撤离',roles:['assault','ranged','heavy','assault','ranged'],spawns:[[-24,14],[24,14],[-10,4],[10,4],[0,34]],message:'通讯任务完成，升降平台已回收小队。',radio:'上传成功，放电已经停止。沿来路回到南部升降平台，清理追兵后确认撤离。'}
+];
+export const ROOF_SUPPLIES=[{id:'roof-med-entry',type:'health',x:4,z:32},{id:'roof-ammo-west',type:'ammo',x:-30,z:12},{id:'roof-med-west',type:'health',x:-30,z:-4},{id:'roof-ammo-east',type:'ammo',x:30,z:12},{id:'roof-med-east',type:'health',x:30,z:-4},{id:'roof-ammo-control',type:'ammo',x:-30,z:-28},{id:'roof-med-north',type:'health',x:28,z:-32},{id:'roof-ammo-north',type:'ammo',x:8,z:-34}];
+export const ROOF_WALLS=[[1,1.3,77,-38,0],[1,1.3,77,38,0],[77,1.3,1,0,-38],[77,1.3,1,0,38],[1,3,16,-8,30],[1,3,8,8,26],[1,3,4,8,36],[33,3,1,-21.5,22],[33,3,1,21.5,22],[33,2.8,1,-21.5,-8],[33,2.8,1,21.5,-8]];
+export const ROOF_COVER=[[4,1.6,4,-28,16],[4,1.6,4,28,16],[3,3,3,0,-35],[5,2.4,3,-18,2],[5,2.4,3,18,2],[3,1.4,3,-10,14],[3,1.4,3,10,14],[12,4.2,10,-22,-19],[8,2,8,22,-22],[3,1.2,2,-16,-32],[3,1.2,2,12,-20],[3,1.2,2,0,0]];
+export const ROOF_GATES=[{w:10,d:.8,x:0,z:22,openAt:1},{w:10,d:.8,x:0,z:-8,openAt:2}];
+export const ARC_ZONES=[[-10,-14],[10,-14],[-10,-27],[10,-27],[-24,-32],[24,-32],[0,-18],[0,-24]].map(([x,z])=>({x,z,w:4,d:4}));
+export function roofObstacles(index=0){return [...ROOF_WALLS,...ROOF_COVER].map(([w,h,d,x,z])=>({w,h,d,x,z})).concat(ROOF_GATES.filter(g=>index<g.openAt).map(g=>({...g,h:3})));}

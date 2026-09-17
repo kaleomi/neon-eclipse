@@ -1,0 +1,36 @@
+// Optional browser regression. Install Playwright separately; no test API in gameplay code.
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+const {chromium}=await import(process.env.VEHICLE_PLAYWRIGHT_MODULE||'playwright');
+const shots=process.env.VEHICLE_SCREENSHOT_DIR||fs.mkdtempSync(path.join(os.tmpdir(),'neon-vehicle-browser-'));
+fs.mkdirSync(shots,{recursive:true});
+import assert from 'node:assert/strict';
+const url=process.env.VEHICLE_TEST_URL||'http://127.0.0.1:5173/vehicle.html';
+const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const context=await browser.newContext({viewport:{width:1280,height:800}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto(url);await page.waitForSelector('#vehicle-scene canvas');
+await page.evaluate(()=>{localStorage.setItem('neon-eclipse.journey.v4','sentinel-journey');localStorage.setItem('neon-eclipse.chapter-achievements.v1','sentinel-honors');});
+await page.screenshot({path:`${shots}/vehicle-intro.png`});
+await page.click('#resume-drive');await page.waitForFunction(()=>document.body.dataset.driveActive==='true');
+await page.screenshot({path:`${shots}/vehicle-walking.png`});
+await page.keyboard.press('KeyE');await page.waitForFunction(()=>document.body.dataset.vehicleMode==='driving');
+await page.screenshot({path:`${shots}/vehicle-driving.png`});
+await page.keyboard.down('KeyW');await page.waitForFunction(()=>Number(document.querySelector('#drive-speed').textContent)>35,{},{timeout:20000});
+await page.keyboard.press('KeyE');assert.equal(await page.getAttribute('body','data-vehicle-mode'),'driving','cannot exit moving car');
+await page.keyboard.up('KeyW');await page.keyboard.down('Space');await page.waitForFunction(()=>document.querySelector('#drive-speed').textContent==='0');await page.keyboard.up('Space');
+await page.keyboard.press('KeyC');await page.waitForFunction(()=>document.body.dataset.cameraMode==='hood');
+await page.screenshot({path:`${shots}/vehicle-hood.png`});
+await page.keyboard.press('KeyE');await page.waitForFunction(()=>document.body.dataset.vehicleMode==='walking');
+await page.keyboard.press('KeyE');await page.waitForFunction(()=>document.body.dataset.vehicleMode==='driving');
+await page.keyboard.down('KeyS');await page.waitForFunction(()=>document.querySelector('#drive-gear').textContent==='R');await page.keyboard.up('KeyS');
+await page.keyboard.press('Escape');await page.waitForSelector('#drive-overlay:not([hidden])');
+const before=await page.locator('#drive-distance').textContent();await page.waitForTimeout(400);assert.equal(await page.locator('#drive-distance').textContent(),before,'paused vehicle frozen');
+await page.click('#recover-drive');assert((await page.locator('#recover-drive').textContent()).includes('确认'));await page.click('#recover-drive');await page.click('#resume-drive');await page.waitForFunction(()=>document.body.dataset.vehicleMode==='walking');
+await page.keyboard.press('KeyE');await page.keyboard.down('KeyW');await page.waitForFunction(()=>document.querySelector('#route-label').textContent.includes('1 / 6'),{},{timeout:30000});await page.keyboard.up('KeyW');
+await page.screenshot({path:`${shots}/vehicle-checkpoint.png`});
+await page.evaluate(()=>window.dispatchEvent(new Event('blur')));await page.waitForSelector('#drive-overlay:not([hidden])');
+assert.deepEqual(await page.evaluate(()=>[localStorage.getItem('neon-eclipse.journey.v4'),localStorage.getItem('neon-eclipse.chapter-achievements.v1')]),['sentinel-journey','sentinel-honors']);
+for(const size of [{width:960,height:640},{width:390,height:780}]){await page.setViewportSize(size);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
+assert.deepEqual(errors,[]);console.log('PASS: actual WebGL vehicle page, keyboard entry/drive/brake/reverse/exit, moving-exit refusal, camera modes, pause/focus-loss, recovery, first route gate, narrow layouts, untouched campaign storage');
+await browser.close();

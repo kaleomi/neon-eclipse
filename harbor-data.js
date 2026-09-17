@@ -1,0 +1,21 @@
+const v=(x,z,w,d,bottom,top,extra={})=>({x,z,w,d,bottom,top,h:top,...extra});
+export const HARBOR_ARENA={size:80,half:40,start:{x:0,z:32},reactor:{x:-8,z:-16},covers:[],spawns:[],zones:[{name:'CUSTOMS',x:0,z:26},{name:'CONTAINERS',x:-22,z:4},{name:'CRANE',x:-8,z:-16},{name:'PIER',x:12,z:-20},{name:'EXTRACTION',x:31,z:-28}]};
+export const HARBOR_ENTRIES=[{x:0,z:32,feetY:0},{x:0,z:26.4,feetY:0},{x:-22,z:6.4,feetY:0},{x:-8,z:-13.6,feetY:3},{x:12,z:-17.6,feetY:0}];
+export const HARBOR_STAGES=[
+ {id:'harbor-customs',title:'解除港区封锁',short:'港区门控',x:0,z:24,feetY:0,facing:0,duration:2,count:3,level:3,action:'解锁港区',spawns:[[-12,24],[12,24],[14,32]],roles:['assault','ranged','heavy'],message:'港区通道打开，前往西侧集装箱堆场。',radio:'列车已抵达港区。暴雨掩护了接应船，也掩护了守卫。清理入口，解除封锁，再到西侧堆场取得吊机权限。'},
+ {id:'harbor-cargo',title:'取得吊机授权',short:'堆场授权柜',x:-22,z:4,feetY:0,facing:0,duration:2.5,count:4,level:4,action:'读取吊机授权',spawns:[[-32,2],[-32,10],[-12,2],[8,4]],roles:['harborElite','ranged','assault','ranged'],harborFlanks:{2:[{x:-12,z:8},{x:-24,z:8}],3:[{x:8,z:0},{x:0,z:0},{x:-14,z:8}]},message:'吊机区已解锁，登上高架控制台。',radio:'堆场新增两条穿行视线，注意左右包抄。港务镇压者会锁定金色瞄准线再双轮扇射，横移躲避，射击后青色胸核暴露 2.4 秒。取得授权后穿过北门，沿吊机西侧的金色台阶登上三米高架。'},
+ {id:'harbor-crane',title:'转移吊机控制权',short:'吊机控制台 / 3m',x:-8,z:-16,feetY:3,facing:0,duration:2.5,count:3,level:4,action:'接管吊机权限',spawns:[[-10,-19],[-6,-19],[-10,-13]],roles:['ranged','assault','assault'],message:'装卸区控制权已移交。前往东侧码头恢复接应信标。',radio:'控制台在三米高架，必须到同一楼层操作。吊机旁的窄平台通向隐藏星星，落下后可以沿地面绕回西侧楼梯；探索不影响主线。'},
+ {id:'harbor-beacon',title:'守住码头接应信标',short:'接应信标',x:12,z:-20,feetY:0,facing:0,duration:2,count:4,level:4,action:'启用接应信标',spawns:[[0,-28],[18,-32],[20,-14],[2,-14]],roles:['heavy','ranged','assault','ranged'],defenseDuration:24,defenseRadius:9,defenseCount:3,defenseLabel:'接应信标',defenseSpawns:[[-2,-26],[2,-34],[20,-34]],defenseRoles:['assault','ranged','assault'],defenseWaves:[{at:8,count:3,spawns:[[-8,-24],[-4,-34],[20,-35]],roles:['assault','ranged','heavy'],message:'第二批强袭到场 // 西侧包抄与北侧压制'},{at:16,count:2,spawns:[[-10,-30],[16,-35]],roles:['harborElite','ranged'],message:'末批强袭到场 // 港务镇压者，留意金色预警与青色胸核'}],message:'接应船已确认靠泊。清理甲板守卫，上船撤离。',radio:'守住二十四秒信标。增援分三批到场，计时第八、十六秒追加强袭，最后清除所有守卫才能登船。不要离开地面的九米范围。东侧水域不可步行，落水将回到当前阶段入口，不会丢失星星。'},
+ {id:'extract',title:'登上接应船撤离',short:'接应船甲板 / 3m',x:32,z:-28,feetY:3,duration:3,count:4,level:4,action:'确认登船撤离',spawns:[[28,-32],[33,-32],[28,-24],[33,-24]],roles:['assault','ranged','harborElite','assault'],message:'接应完成，小队离开风暴港口。六章战役完成。',radio:'沿码头东侧金色台阶登上三米甲板，清理守卫后确认撤离。不要从水面直接接近船体。'}
+];
+export const HARBOR_SUPPLIES=[{id:'harbor-med-entry',type:'health',x:-6,z:30},{id:'harbor-ammo-entry',type:'ammo',x:6,z:30},{id:'harbor-med-yard',type:'health',x:-30,z:8},{id:'harbor-ammo-yard',type:'ammo',x:8,z:6},{id:'harbor-med-crane',type:'health',x:-6,z:-19,feetY:3},{id:'harbor-ammo-crane',type:'ammo',x:-10,z:-13,feetY:3},{id:'harbor-med-pier',type:'health',x:16,z:-26},{id:'harbor-ammo-pier',type:'ammo',x:18,z:-18}];
+export const HARBOR_LINKS=[{base:{x:-20,z:-16},end:{x:-10,z:-16},start:-18},{base:{x:18,z:-28},end:{x:28,z:-28},start:20}];
+export const HARBOR_STAIRS=HARBOR_LINKS.flatMap(l=>Array.from({length:12},(_,i)=>v(l.start+.25+i*.5,l.base.z,.5,3.2,0,(i+1)*.25,{walkStep:true})));
+export const HARBOR_DECKS=[v(-7,-16,10,8,2.75,3),v(31,-28,10,14,2.75,3)];
+export const HARBOR_WALLS=[v(-38,0,.5,76,0,8),v(38,0,.5,76,0,1.3),v(0,38,76,.5,0,8),v(0,-38,76,.5,0,1.3),...[-1,1].flatMap(sign=>[v(sign*22,18,32,.5,0,3),v(sign*22,-10,32,.5,0,3)])];
+export const HARBOR_CONTAINERS=[v(-27.3,12,3.4,3,0,3.4),v(-20.7,12,3.4,3,0,3.4),v(-19.8,-3,4.4,3,0,3.4),v(-12.2,-3,4.4,3,0,3.4),v(18,9,12,3,0,3.4),v(25,-2,10,4,0,3.4),v(-29,-25,9,4,0,3.4),v(4,-31,4,3,0,1.2),v(8,-13,3,2,0,1.2),v(-5,-16,1,1,0,12),v(31,-35.4,5,2,3,5.5,{shipCabin:true})];
+export const HARBOR_GATES=[v(0,18,12,.5,0,3,{openAt:1}),v(0,-10,12,.5,0,3,{openAt:2})];
+export const HARBOR_STAR_PLATFORMS=[v(-12,-23,1.15,1.15,0,3.8,{hiddenArea:true}),v(-15,-25,1.05,1.05,0,4.6,{hiddenArea:true}),v(-12.5,-28,1,1,0,5.4,{hiddenArea:true})];
+export const HARBOR_STAR={x:-12.5,z:-28,feetY:5.4};
+export const harborWater=p=>p.x>24&&p.z<-12;
+export function harborObstacles(stage=0){return [...HARBOR_WALLS,...HARBOR_CONTAINERS,...HARBOR_DECKS,...HARBOR_STAIRS,...HARBOR_STAR_PLATFORMS,...HARBOR_GATES.filter(g=>stage<g.openAt)].map(o=>({...o}));}

@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {createPlayerMotion} from './player-motion.js';
+import {HARBOR_STAGES,HARBOR_ENTRIES,HARBOR_STAR_PLATFORMS,harborObstacles} from './harbor-data.js';
+globalThis.location={search:'?map=harbor'};
+const {createMission,chooseEncounterSpawns}=await import('./mission.js');const {createHarborNavigation}=await import('./harbor-navigation.js');
+const terminals=HARBOR_STAGES.filter(s=>s.id!=='extract').map(s=>({x:s.x,z:s.z,w:1.8,d:1,bottom:s.feetY,top:s.feetY+1.4}));
+for(let i=0;i<5;i++){const obs=harborObstacles(i).concat(terminals),e=HARBOR_ENTRIES[i];assert.equal(chooseEncounterSpawns(HARBOR_STAGES[i],{...e,y:e.feetY+1.7},obs).length,HARBOR_STAGES[i].count,'spawn '+i);assert(createPlayerMotion(obs).canOccupy(e.x,e.z,e.feetY),'entry '+i);}
+const obs=harborObstacles(4).concat(terminals),m=createPlayerMotion(obs),p={x:-20,z:-16,y:1.7};m.reset(p);
+function walk(x,z){for(let i=0;i<5000;i++){const dx=x-p.x,dz=z-p.z,d=Math.hypot(dx,dz);if(d<.02)return;m.step(.01,p,dx/d*Math.min(.05,d),dz/d*Math.min(.05,d));}assert.fail('walk blocked '+JSON.stringify(p)+' -> '+x+','+z);}
+walk(-10,-16);assert.equal(m.state.y,3);walk(-10,-19.8);
+for(const plat of HARBOR_STAR_PLATFORMS){for(let i=0;i<100;i++){const dx=plat.x-p.x,dz=plat.z-p.z,d=Math.hypot(dx,dz);m.step(.01,p,d>.01?dx/d*Math.min(.05,d):0,d>.01?dz/d*Math.min(.05,d):0,i===0);}assert(Math.abs(m.state.y-plat.top)<.01,'star jump '+plat.top);}
+walk(-8,-28);for(let i=0;i<150;i++)m.step(.01,p,0,0);assert.equal(m.state.y,0);walk(-8,-31);walk(-20,-31);walk(-20,-16);walk(-10,-16);assert.equal(m.state.y,3,'fall returns to challenge entrance');walk(-20,-16);assert.equal(m.state.y,0);walk(-20,-22);walk(18,-22);walk(18,-28);walk(28,-28);assert.equal(m.state.y,3,'board ship');
+for(const radius of [.65,.85]){const nav=createHarborNavigation(obs),a={x:-24,z:-16,y:0};let target={x:-8,z:-13,y:4.7};for(let i=0;i<12000;i++){const d=nav.route(a,target),n=Math.hypot(d.x,d.z)||1;nav.move(a,d.x/n*.035,d.z/n*.035,radius);}assert.equal(a.y,3,'enemy crane '+JSON.stringify(a));target={x:31,z:-28,y:4.7};for(let i=0;i<16000;i++){const d=nav.route(a,target),n=Math.hypot(d.x,d.z)||1;nav.move(a,d.x/n*.035,d.z/n*.035,radius);}assert.equal(a.y,3,'enemy ship '+JSON.stringify(a));assert(a.x>26);}
+const mission=createMission();for(let i=0;i<5;i++){const s=HARBOR_STAGES[i];let e=mission.tick(3.1,{player:{...s,y:s.feetY+1.7},held:true,clear:true});if(e?.type==='defense'){const before=mission.state.progress;mission.tick(2,{player:{x:s.x,z:s.z,y:4.7},held:false,clear:true});assert.equal(mission.state.progress,before);e=mission.tick(24,{player:{...s,y:1.7},held:false,clear:true});while(e?.type==='reinforcement')e=mission.tick(0,{player:{...s,y:1.7},held:false,clear:true});}assert(e?.finished,'stage '+i);}assert(mission.state.complete);
+console.log('PASS: harbor five stages/spawns/entries, crane/ship stairs, three star jumps, actual fall-to-ground return and retry, two enemy sizes moving between elevated islands, floor defense');

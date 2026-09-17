@@ -1,0 +1,68 @@
+import {harborEliteDamage} from './harbor-elite.js';
+// Pure combat rules: silhouettes/colors identify roles, never hidden invulnerability.
+export const ENEMY_TYPES={
+ harborElite:{name:'港务镇压者',color:0x8fe3ec,hp:230,hpPerLevel:0,speed:1.65,turn:1.15,scale:1.12,radius:.85,near:9,far:14,range:34,cooldown:5.2,hint:'金色瞄准锁定 · 双轮扇射后青色胸核暴露 2.4 秒',attack:{color:'amber',charge:1.3,speed:18,damage:9,angles:[-.12,0,.12],bursts:2,burstDelay:.35,burstOffset:.06,showAim:true}},
+ assault:{name:'突击守卫',color:0xff8f50,hp:72,hpPerLevel:9,speed:3.35,turn:3.5,scale:1,radius:.65,near:5.5,far:9,range:21,cooldown:1.8,
+  hint:'快速接近 · 拉开距离，利用近战与霰弹枪',attack:{color:'orange',charge:.45,speed:17,damage:5,angles:[-.025,.025],bursts:1}},
+ ranged:{name:'远程守卫',color:0xc59bff,hp:60,hpPerLevel:8,speed:2.1,turn:2.5,scale:1,radius:.65,near:17,far:25,range:46,cooldown:3,
+  hint:'紫色瞄准线锁定旧位置 · 横移或寻找掩体',attack:{color:'purple',charge:1,speed:24,damage:10,angles:[0],bursts:1,showAim:true}},
+ heavy:{name:'重装守卫',color:0xffd16c,hp:150,hpPerLevel:12,speed:1.3,turn:.95,scale:1.12,radius:.85,near:10,far:14,range:32,cooldown:3.1,
+  hint:'正面装甲减伤 · 绕侧或命中背部核心',attack:{color:'amber',charge:.9,speed:12,damage:8,angles:[-.13,0,.13],bursts:1}},
+ warden:{name:'THE WARDEN',color:0xff668d,hp:1000,hpPerLevel:0,speed:1.75,turn:.95,scale:1.9,radius:1.235,near:10,far:15,range:44,cooldown:2.5,
+  hint:'等待过载窗口 · 攻击青色胸口核心'}
+};
+export const BOSS_PHASES=[
+ {name:'I / 精确压制',hint:'紫色瞄准线锁定旧位置，横移躲避',attacks:2,window:3.4,cooldown:2.5,
+  attack:{color:'pink',charge:.9,speed:20,damage:10,angles:[0],bursts:1,showAim:true}},
+ {name:'II / 扇形封锁',hint:'五连扇形弹幕，利用掩体与弹间空隙',attacks:3,window:3.2,cooldown:2.6,
+  attack:{color:'pink',charge:1,speed:13,damage:7,angles:[-.32,-.16,0,.16,.32],bursts:1}},
+ {name:'III / 交错扫射',hint:'两轮交错弹幕，不要停在第一轮空隙',attacks:2,window:3,cooldown:2.4,
+  attack:{color:'pink',charge:.8,speed:15,damage:7,angles:[-.22,0,.22],bursts:2,burstDelay:.3,burstOffset:.11}}
+];
+const ROLE_SETS={
+ coolant:['assault','assault','ranged','assault','heavy'],
+ access:['ranged','assault','heavy','ranged','assault','assault'],
+ reactor:['heavy','ranged','assault','ranged','heavy','assault','assault'],
+ warden:['warden','assault','ranged','assault'],
+ extract:['assault','ranged','assault','heavy']
+};
+export function roleForStage(stage,index){const roles=stage.roles||ROLE_SETS[stage.id]||['assault'];return roles[index%roles.length];}
+export function turnTowards(current,target,maxStep){const delta=Math.atan2(Math.sin(target-current),Math.cos(target-current));return current+Math.max(-maxStep,Math.min(maxStep,delta));}
+export function facingDot(enemyPosition,rotation,attacker){
+ const dx=attacker.x-enemyPosition.x,dz=attacker.z-enemyPosition.z,length=Math.hypot(dx,dz)||1;
+ return (dx*Math.sin(rotation)+dz*Math.cos(rotation))/length;
+}
+export function resolveEnemyDamage(enemy,baseDamage,zone,attacker){
+ let multiplier=1,armored=false,weak=false;
+ if(enemy.boss){
+  const exposed=enemy.bossState?.openRemaining>0;
+  if(exposed&&zone==='core'){multiplier=2.5;weak=true;}
+  else if(!exposed){multiplier=.55;armored=true;}
+ } else if(enemy.type==='harborElite'){const result=harborEliteDamage(enemy,zone,facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.55);multiplier=result.multiplier;armored=result.armored;weak=result.weak;
+ } else if(enemy.type==='heavy'){
+  if(zone==='core'){multiplier=2;weak=true;}
+  else if(facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.55){multiplier=.3;armored=true;}
+ }
+ return {damage:baseDamage*multiplier,armored,weak};
+}
+export function createBossState(){return {phase:0,attacks:0,openQueued:false,openRemaining:0,transitionRemaining:1.2};}
+export function recordBossAttack(state){state.attacks++;if(state.attacks>=BOSS_PHASES[state.phase].attacks)state.openQueued=true;}
+export function stepBossState(enemy,dt,attackFinished=true){
+ const state=enemy.bossState,phase=enemy.hp/enemy.maxHp>.67?0:enemy.hp/enemy.maxHp>.34?1:2;
+ let changed=false,opened=false,closed=false;
+ if(phase>state.phase){Object.assign(state,{phase,attacks:0,openQueued:false,openRemaining:0,transitionRemaining:1.2});changed=true;}
+ else state.transitionRemaining=Math.max(0,state.transitionRemaining-dt);
+ if(state.openRemaining>0){state.openRemaining=Math.max(0,state.openRemaining-dt);closed=state.openRemaining===0;}
+ if(!changed&&state.openQueued&&attackFinished&&state.transitionRemaining===0){
+  state.openRemaining=BOSS_PHASES[state.phase].window;state.openQueued=false;state.attacks=0;opened=true;
+ }
+ return {changed,opened,closed};
+}
+export function movementIntent(type,distance,visible){
+ const p=ENEMY_TYPES[type];
+ if(!visible||distance>p.far)return 'approach';
+ if(type==='ranged'&&distance<p.near)return 'retreat';
+ if(type==='ranged')return 'strafe';
+ if(type==='assault'&&distance>p.near)return 'approach';
+ return 'hold';
+}

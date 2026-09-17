@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import {createChapterAttempt,createAchievementStore,ACHIEVEMENT_KEY} from './chapter-achievements.js';
+import {deriveChallengeProgress} from './challenge-progress.js';
+const a=createChapterAttempt();
+const row=id=>deriveChallengeProgress(a.state,'harbor').find(item=>item.id===id);
+assert(deriveChallengeProgress(null,'harbor').every(item=>item.status==='idle'));
+assert.equal(deriveChallengeProgress(null,'reactor').find(item=>item.id==='counter').status,'unavailable');
+a.begin({map:'harbor'});assert.equal(a.state.complete,false);
+assert.equal(row('arsenal').value,0);assert.equal(row('counter').value,0);
+assert.equal(row('blade').status,'active');
+a.hit(0,2);a.hit(2,1);assert.equal(row('arsenal').value,2);assert.deepEqual(row('arsenal').weapons.map(item=>item.kills),[2,0,1,0]);
+a.hit(1,1);a.hit(3,1);assert.equal(row('arsenal').value,4);assert.equal(row('arsenal').status,'ready');assert.notEqual(row('arsenal').status,'completed','counts alone are not a completed chapter');
+a.counter();a.counter();assert.equal(row('counter').value,2);a.counter();a.counter();assert.equal(row('counter').value,3);assert.equal(row('counter').status,'ready');
+a.shot(0);assert.equal(row('blade').status,'failed');a.hurt(4.5);assert.equal(row('untouched').status,'failed');assert(row('untouched').detail.includes('4.5'));
+const snapshot=JSON.stringify(a.state);deriveChallengeProgress(a.state,'harbor');assert.equal(JSON.stringify(a.state),snapshot,'presentation is read-only');
+const awards=a.finish(true);assert(a.state.complete);assert(awards.includes('arsenal'));assert(awards.includes('counter'));assert.equal(row('arsenal').status,'completed');assert.equal(row('blade').status,'failed');
+assert.deepEqual(a.finish(true),[],'finish remains idempotent');
+a.begin({map:'harbor'});a.hit(3,1);a.finish(false);assert.equal(a.state.complete,false);assert.equal(row('blade').status,'blocked','non-chapter finish never shown as achieved');
+a.begin({map:'harbor'});a.hit(3,1);a.die();assert.equal(row('blade').status,'failed');assert.equal(row('survivor').status,'failed');assert.deepEqual(a.finish(true),[]);
+for(const options of [{snapshot:true},{replay:true},{stage:2}]){a.begin({map:'harbor',...options});a.hit(3,1);assert(deriveChallengeProgress(a.state,'harbor').every(item=>item.status==='blocked'));assert.deepEqual(a.finish(true),[]);}
+a.begin({map:'harbor'});assert(deriveChallengeProgress(a.state,'tower').filter(item=>item.id!=='counter').every(item=>item.status==='idle'),'other-map attempts are not displayed as current');
+const invalid={...a.state,damage:NaN};assert.equal(deriveChallengeProgress(invalid,'harbor').find(item=>item.id==='untouched').status,'blocked');
+const old=JSON.stringify({version:1,awards:[{id:'blade',map:'harbor'}]});let raw=old,writes=0;
+const storage={getItem:key=>key===ACHIEVEMENT_KEY?raw:null,setItem(_key,value){writes++;raw=value;}},store=createAchievementStore(storage);
+a.shot(0);assert.equal(row('blade').status,'failed');assert.deepEqual(store.read().awards,[{id:'blade',map:'harbor'}]);assert.equal(raw,old);assert.equal(writes,0,'a failed new attempt does not revoke historical awards');
+console.log('PASS: real four-weapon/core-kill counters, pending-vs-completed conditions, shot/damage/death disqualification, snapshot/training isolation, incomplete-finish protection and unchanged historical awards');

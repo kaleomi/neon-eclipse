@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {createLookInput} from './look-input.js';
+const l=createLookInput(),e={movementX:10,movementY:-5,buttons:1,clientX:100,clientY:100};
+assert.equal(l.sample(e,true),null);assert.deepEqual(l.sample(e,true),{x:10,y:-5});
+assert.equal(l.sample({...e,movementX:3000},true),null);assert.equal(l.sample({...e,movementY:NaN},true),null);
+assert.deepEqual(l.sample({...e,movementX:200},true),{x:200,y:-5});
+l.reset();assert.equal(l.sample(e,true),null);
+l.reset();l.begin(100,100);assert.deepEqual(l.sample({...e,clientX:105,movementX:99999},false),{x:5,y:0});
+assert.equal(l.sample({...e,buttons:0},false),null);assert.equal(l.sample(e,false),null);
+l.begin(100,100);l.end();assert.equal(l.sample(e,false),null);
+l.begin(100,100);assert.equal(l.sample(e,true),null);assert.equal(l.sample(e,false),null);
+console.log('PASS: look lock transitions, warp/NaN rejection, fast valid movement, client-coordinate drag and released/aborted drag');

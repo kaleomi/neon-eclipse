@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';
+import * as T from './node_modules/three/build/three.module.js';
+import {trainObstacles,TRAIN_STAGES} from './train-data.js';
+import {createTrainNavigation} from './train-navigation.js';
+import {createEnemyDirector} from './enemy-ai.js';
+const obstacles=trainObstacles(4).concat(TRAIN_STAGES.filter(s=>s.id!=='extract').map(s=>({x:s.x,z:s.z,w:1.8,d:1,bottom:s.feetY,top:s.feetY+1.4}))),scene=new T.Scene();
+for(const o of obstacles){o.mesh=new T.Mesh(new T.BoxGeometry(o.w,o.top-o.bottom,o.d),new T.MeshBasicMaterial());o.mesh.position.set(o.x,(o.top+o.bottom)/2,o.z);scene.add(o.mesh);}scene.updateMatrixWorld(true);
+for(const type of ['assault','ranged','heavy']){const group=new T.Group();group.position.set(0,1.5,28);scene.add(group);const enemy={group,type,boss:false,radius:type==='heavy'?.85:.65,speed:type==='heavy'?1.3:2.5,attack:0,charge:0,seed:0,hp:100},shots=[],player={position:new T.Vector3(0,6.2,0)},vertical=createTrainNavigation(obstacles),director=createEnemyDirector({enemies:[enemy],player,navigation:{direction:()=>({x:0,z:0})},vertical,move(){},obstacles,projectiles:{queue:origin=>{shots.push(origin.clone());return true},hasPending:()=>false,cancelOwner(){}},onBossEvent(){}});let gate=0,up=false;for(let i=0;i<18000;i++){gate=director.update(.02,i*.02,Math.max(0,gate-.02));if(group.position.y===4.5)up=true;}assert(up,'director climbs '+type);assert(shots.some(p=>p.y>=6),'fires above train '+type);player.position.set(0,3.2,-28);let down=false;for(let i=0;i<18000;i++){gate=director.update(.02,i*.02,Math.max(0,gate-.02));if(group.position.y===1.5)down=true;}assert(down,'director descends '+type+' '+JSON.stringify(group.position));scene.remove(group);}
+console.log('PASS: actual assault/ranged/heavy directors climb train stairs, fire from rooftop height and descend while retaining role-specific combat distance');

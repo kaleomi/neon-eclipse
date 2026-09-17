@@ -380,3 +380,25 @@ body[data-menu-open=true] > :is(.topbar, .scanlines, .art-stamp, .compass, .left
 @media (max-width: 460px) {
   .menu-achievements-grid > section { padding: 23px 19px; }
 }
+
+/* Audio settings panel (Phase 2). */
+.menu-shell .menu-audio-panel h4 { margin: 0 0 12px; font-size: 12px; letter-spacing: .12em; color: #9fc7b3; }
+.menu-shell .menu-audio-sliders { display: grid; gap: 9px; }
+.menu-shell .menu-audio-row { display: grid; grid-template-columns: 68px 1fr 44px; gap: 12px; align-items: center; font-size: 12px; color: #c5e8d3; }
+.menu-shell .menu-audio-row input[type=range] { width: 100%; accent-color: #7de3b1; }
+.menu-shell .menu-audio-row b { text-align: right; font: 11px/1 monospace; color: #9fc7b3; }
+.menu-shell .menu-audio-mute { display: flex; gap: 10px; align-items: center; margin-top: 14px; font-size: 12px; color: #c5e8d3; cursor: pointer; }
+.menu-shell .menu-audio-mute input { accent-color: #7de3b1; }
+.menu-shell .menu-audio-panel .menu-setting-hint { margin-top: 12px; }
+.menu-shell .menu-audio-lab { margin-top: 14px; }
+.menu-shell .menu-audio-lab summary { font-size: 12px; color: #9fc7b3; cursor: pointer; }
+.menu-shell .menu-audio-lab-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.menu-shell .menu-audio-lab-grid .menu-secondary { padding: 6px 10px; font-size: 11px; }
+
+/* Kill streak banner (Phase 2 presentation). */
+.streak-banner { position: fixed; left: 50%; top: 27%; z-index: 6; transform: translate(-50%, 0) skewX(-7deg); padding: 6px 18px; border: 1px solid #ffb35c; border-left-width: 4px; background: linear-gradient(90deg, #2a1206f0, #2a120680); color: #ffd28a; font: 900 17px/1.2 'Arial Black', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; letter-spacing: .14em; text-shadow: 0 0 10px #ff8a2a; opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s; }
+.streak-banner[data-show=true] { opacity: 1; transform: translate(-50%, -8px) skewX(-7deg); }
+.streak-banner[data-step="5"] { border-color: #ff6e9a; color: #ffc0d4; text-shadow: 0 0 10px #ff3a7a; }
+.streak-banner[data-step="10"] { border-color: #74f8ed; color: #d4fffb; text-shadow: 0 0 12px #34e0d0; }
+.hitmarker[data-kind=armor] { color: #9fb4c8; }
+.hitmarker[data-kind=core] { color: #74f8ed; text-shadow: 0 0 7px #34e0d0; }

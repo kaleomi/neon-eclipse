@@ -2,6 +2,7 @@ import {bindCombatDifficulty} from './combat-difficulty.js';
 import {bindFlightPitchSetting} from './flight-settings.js';
 import {bindSaveHub} from './save-hub-ui.js';
 import {bindTelemetrySetting} from './telemetry.js';
+import {bindAudioSettings} from './audio/audio-settings-ui.js';
 import {createFlightRecordStore} from './flight-records-store.js';
 import {vehicleEntryDecision} from './vehicle-entry.js';
 import {HOME_MENU_ITEMS, MENU_CHAPTERS, chapterInfo, chapterURL, readSingleSlots, continueTarget, primaryAction, formatPlayTime} from './menu-state.js';
@@ -65,6 +66,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
           </section>
           <section class="menu-settings-panel"><h3>${menuIcon('play')} 操作</h3><div class="menu-sensitivity-slot"></div><div id="menu-flight-pitch"></div><div id="menu-combat-difficulty"></div><h4>键位说明</h4><div class="menu-controls-slot"></div><p class="menu-setting-hint">进入战斗后锁定鼠标。按 Esc 暂停；无法锁定时可按住左键拖动瞄准。</p></section>
           <section class="menu-settings-panel menu-save-hub" id="menu-save-hub"></section>
+          <section class="menu-settings-panel menu-audio-panel"><h3>${menuIcon('play')} 声音</h3><div id="menu-audio"></div></section>
           <section class="menu-settings-panel menu-telemetry-panel"><h3>${menuIcon('star')} 本地统计</h3><div id="menu-telemetry"></div></section>
         </div>
         <div class="menu-page-bottom"><span>设置在当前界面直接生效</span><button type="button" data-back class="menu-secondary">完成设置 ${menuIcon('check')}</button></div>
@@ -350,6 +352,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   bindCombatDifficulty($('#menu-combat-difficulty'));
   bindSaveHub($('#menu-save-hub'), {records: createFlightRecordStore(), onChanged: () => { if (getSession().state !== 'playing') refresh(); }});
   bindTelemetrySetting($('#menu-telemetry'), window.neonTelemetry);
+  bindAudioSettings($('#menu-audio'), window.neonAudio);
   $('#menu-settings').addEventListener('click', () => show('settings'));
   $('#menu-back').addEventListener('click', back);
   card.querySelectorAll('[data-back]').forEach(button => button.addEventListener('click', back));

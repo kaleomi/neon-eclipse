@@ -61,7 +61,10 @@ function checkTargets(){
  const scripts=path.join(root,'scripts');
  let scriptFiles=[];
  try{scriptFiles=readdirSync(scripts).filter(f=>/\.(js|mjs|cjs)$/.test(f)).map(f=>path.join('scripts',f));}catch{}
- return [...rootFiles,...desktopFiles,...scriptFiles].sort();
+ // Source sub-modules (ES modules only; no tests live here).
+ const moduleFiles=[];
+ for(const dir of ['audio','maps']){try{for(const f of readdirSync(path.join(root,dir)))if(/\.js$/.test(f))moduleFiles.push(path.join(dir,f));}catch{}}
+ return [...rootFiles,...desktopFiles,...scriptFiles,...moduleFiles].sort();
 }
 
 // Browser tests import Playwright via VEHICLE_PLAYWRIGHT_MODULE. If it is not set, look for a

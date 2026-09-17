@@ -1,0 +1,80 @@
+// Continuous vehicle sounds: engine (rover), turbine (plane), marine engine + waves (yacht),
+// wind at speed, stall warning. Driven every frame from vehicle state; no per-frame allocations.
+// Pure mapping functions are exported for tests.
+import {createAudioBus} from './audio-bus.js';
+import {createSfxPlayer} from './sfx-player.js';
+import {noiseBuffer} from './synth.js';
+// speed m/s, throttle -1..1 -> engine params. Pure.
+export function roverEngine(speed,throttle){
+ const s=Math.abs(speed);const load=Math.max(0,Math.min(1,Math.abs(throttle)));
+ const rpm=.25+Math.min(1,s/29)*.75*(.6+.4*load); // 0.25 idle .. 1
+ return {freq:38+rpm*110,gain:.16+rpm*.22+load*.06,cutoff:400+rpm*1600};
+}
+export function planeEngine(throttle,speed,onGround){
+ const t=Math.max(0,Math.min(1,throttle)),s=Math.min(1,Math.abs(speed)/50);
+ return {freq:90+t*260,gain:.08+t*.28,whine:1800+t*2600,wind:onGround?s*.05:.06+s*.3};
+}
+export function yachtEngine(speed,throttle){
+ const s=Math.min(1,Math.abs(speed)/13),load=Math.max(0,Math.min(1,Math.abs(throttle)));
+ return {freq:28+s*40+load*10,gain:.1+s*.18+load*.05,wave:.06+s*.14};
+}
+export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
+ const sfx=createSfxPlayer(bus);
+ let nodes=null,kind=null,stallTimer=0,lastImpacts=0,lastKind=null;
+ function build(){
+  const ctx=bus.context,out=bus.input('sfx');if(!ctx||!out||nodes)return !!nodes;
+  const mk=(type,f)=>{const o=ctx.createOscillator();o.type=type;o.frequency.value=f;return o;};
+  const gainNode=v=>{const g=ctx.createGain();g.gain.value=v;return g;};
+  const lp=(f,q=.8)=>{const b=ctx.createBiquadFilter();b.type='lowpass';b.frequency.value=f;b.Q.value=q;return b;};
+  const noise=color=>{const s=ctx.createBufferSource();s.buffer=noiseBuffer(ctx,color);s.loop=true;s.start();return s;};
+  // Engine: saw + sub square through low-pass.
+  const engOsc=mk('sawtooth',60),subOsc=mk('square',30),engFilter=lp(800),engGain=gainNode(0);
+  engOsc.connect(engFilter);subOsc.connect(engFilter);engFilter.connect(engGain).connect(out);engOsc.start();subOsc.start();
+  // Whine (plane turbine): high sine + bandpassed noise.
+  const whineOsc=mk('sine',2000),whineGain=gainNode(0);whineOsc.connect(whineGain).connect(out);whineOsc.start();
+  // Wind / wave / water: filtered noise beds.
+  const windSrc=noise('white'),windFilter=lp(1200),windGain=gainNode(0);windSrc.connect(windFilter).connect(windGain).connect(out);
+  const waveSrc=noise('brown'),waveFilter=lp(500),waveGain=gainNode(0);waveSrc.connect(waveFilter).connect(waveGain).connect(out);
+  // Slow LFO on waves.
+  const lfo=mk('sine',.35),lfoGain=gainNode(.5);lfo.connect(lfoGain).connect(waveGain.gain);lfo.start();
+  nodes={engOsc,subOsc,engFilter,engGain,whineOsc,whineGain,windFilter,windGain,waveGain};
+  return true;
+ }
+ function set(param,value,t,tc=.08){param.setTargetAtTime(value,t,tc);}
+ function silence(t){if(!nodes)return;set(nodes.engGain.gain,0,t);set(nodes.whineGain.gain,0,t);set(nodes.windGain.gain,0,t);set(nodes.waveGain.gain,0,t);}
+ // state: {kind:'rover'|'plane'|'yacht'|null, speed, throttle, onGround, stall, crashed, impacts, active}
+ function update(dt,state){
+  if(!bus.ready||!build())return;
+  const t=bus.context.currentTime;
+  if(!state.active){silence(t);return;}
+  if(state.kind!==lastKind){if(lastKind!==null||state.kind!==null)sfx.play(state.kind?'vehicle.enter':'vehicle.exit');lastKind=state.kind;lastImpacts=state.impacts||0;}
+  if((state.impacts||0)>lastImpacts){sfx.play('vehicle.impact',{gain:Math.min(1,.5+Math.abs(state.speed||0)/20)});lastImpacts=state.impacts;}
+  kind=state.kind;
+  if(kind==='rover'){
+   const e=roverEngine(state.speed||0,state.throttle||0);
+   set(nodes.engOsc.frequency,e.freq,t);set(nodes.subOsc.frequency,e.freq/2,t);set(nodes.engFilter.frequency,e.cutoff,t);set(nodes.engGain.gain,e.gain,t);
+   set(nodes.whineGain.gain,0,t);set(nodes.windGain.gain,Math.min(.12,Math.abs(state.speed||0)/29*.12),t);set(nodes.waveGain.gain,0,t);
+  }else if(kind==='plane'){
+   const e=planeEngine(state.crashed?0:(state.throttle||0),state.speed||0,state.onGround);
+   set(nodes.engOsc.frequency,e.freq,t,.25);set(nodes.subOsc.frequency,e.freq/2,t,.25);set(nodes.engFilter.frequency,900+e.freq*4,t);set(nodes.engGain.gain,e.gain*.7,t,.25);
+   set(nodes.whineOsc.frequency,e.whine,t,.25);set(nodes.whineGain.gain,e.gain*.12,t,.25);set(nodes.windFilter.frequency,600+Math.abs(state.speed||0)*40,t);set(nodes.windGain.gain,e.wind,t);set(nodes.waveGain.gain,0,t);
+   if(state.stall&&!state.onGround){stallTimer-=dt;if(stallTimer<=0){sfx.play('vehicle.stall');stallTimer=.6;}}else stallTimer=0;
+   if(state.touchdown)sfx.play('vehicle.touchdown');
+  }else if(kind==='yacht'){
+   const e=yachtEngine(state.speed||0,state.throttle||0);
+   set(nodes.engOsc.frequency,e.freq,t,.2);set(nodes.subOsc.frequency,e.freq/2,t,.2);set(nodes.engFilter.frequency,350+e.freq*3,t);set(nodes.engGain.gain,e.gain,t,.2);
+   set(nodes.whineGain.gain,0,t);set(nodes.windGain.gain,Math.min(.08,Math.abs(state.speed||0)/13*.08),t);set(nodes.waveGain.gain,e.wave,t,.3);
+  }else{
+   silence(t);
+   set(nodes.waveGain.gain,state.nearWater?.05:0,t,.5);
+  }
+ }
+ function bindLifecycle(){
+  if(typeof document==='undefined')return;
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)bus.hold('hidden');else bus.release('hidden');});
+  const gesture=()=>{bus.unlock();};
+  for(const type of ['pointerdown','keydown'])window.addEventListener(type,gesture,{passive:true});
+ }
+ bindLifecycle();
+ return {bus,sfx,update,play:(n,o)=>sfx.play(n,o),pause(){bus.hold('paused');},resume(){bus.release('paused');},unlock:()=>bus.unlock()};
+}

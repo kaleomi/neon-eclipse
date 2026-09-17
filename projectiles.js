@@ -1,7 +1,9 @@
 import * as THREE from './node_modules/three/build/three.module.js';
 import {segmentBox,segmentSphere} from './collision.js';
 
-export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact){
+// `hooks` is optional: onQueue(origin,attack,boss,owner) fires when a telegraph ring appears,
+// onEmit(origin,attack,boss) when its bolts are actually released. Used for audio cues only.
+export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact,hooks={}){
  const active=[],pending=[];
  const coreGeometry=new THREE.SphereGeometry(.11,8,6),trailGeometry=new THREE.CylinderGeometry(.05,.015,1,6);
  const haloGeometry=new THREE.SphereGeometry(.22,8,6),ringGeometry=new THREE.TorusGeometry(.27,.035,6,24);
@@ -19,7 +21,7 @@ export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact){
   if(attack.showAim){
    line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([origin,target]),new THREE.LineBasicMaterial({color:material.color,transparent:true,opacity:.48,depthWrite:false}));scene.add(line);
   }
-  pending.push({origin:origin.clone(),target:target.clone(),boss,owner,ring,line,attack,emitted:0,remaining:attack.charge,total:attack.charge});return true;
+  pending.push({origin:origin.clone(),target:target.clone(),boss,owner,ring,line,attack,emitted:0,remaining:attack.charge,total:attack.charge});hooks.onQueue?.(origin,attack,boss,owner);return true;
  }
  function spawn(origin,direction,charge){
   if(active.length>=96)return;
@@ -56,7 +58,7 @@ export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact){
    if(charge.remaining<=0){
     const direction=charge.target.clone().sub(charge.origin).normalize();
     for(const angle of charge.attack.angles)spawn(charge.origin,direction.clone().applyAxisAngle(up,angle+charge.emitted*charge.attack.burstOffset),charge);
-    charge.emitted++;
+    charge.emitted++;hooks.onEmit?.(charge.origin,charge.attack,charge.boss);
     if(charge.emitted>=charge.attack.bursts)removePending(i);
     else charge.remaining=charge.attack.burstDelay;
    }

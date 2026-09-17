@@ -2,6 +2,7 @@ import {currentDifficulty,incomingDamage,outgoingDamage,attackCooldown} from './
 import {createMeleeSweep} from './melee-sweep.js';
 import {createAchievementUI} from './achievement-ui.js';
 import {createPresentation} from './presentation.js';
+import {createGameAudio} from './audio/game-audio.js';
 import {createFieldRecord} from './field-record.js';
 import {createTelemetry,createTelemetryAttempt} from './telemetry.js';
 import {createHarborCombatUI} from './harbor-combat-ui.js';
@@ -144,8 +145,11 @@ const playerMotion=createPlayerMotion(obstacles,art.ceilings||playerCeilings,IS_
 let jumpRequested=false,pendingJourneyResult=null;
 const radar=createRadar(obstacles);
 const enemyProjectiles=createEnemyProjectiles(scene,obstacles,(damage,source)=>{
- damage=incomingDamage(damage);fieldRecord.hurt(Math.min(health,damage));achievementUI.attempt.hurt(Math.min(health,damage));health=Math.max(0,health-damage);mission.interrupt();combatUI.damaged(source);damageTime=.3;sound(60,.12,'triangle',.04);hud();
-},(position,color,count)=>art.burst(position,color,count));
+ damage=incomingDamage(damage);fieldRecord.hurt(Math.min(health,damage));achievementUI.attempt.hurt(Math.min(health,damage));health=Math.max(0,health-damage);mission.interrupt();combatUI.damaged(source);damageTime=.3;gameAudio.hurt(health);hud();
+},(position,color,count)=>{art.burst(position,color,count);if(color!==0xff5435)gameAudio.play('bolt.wall',{position:{x:position.x,z:position.z}});},{
+ onQueue:(origin,attack,boss)=>gameAudio.telegraph(attack.color,{x:origin.x,z:origin.z},boss?false:!lineOfSight(origin)),
+ onEmit:(origin)=>gameAudio.play('enemy.fire',{position:{x:origin.x,z:origin.z}})
+});
 const viewModel=createWeapons(camera);
 const {gun,flash}=viewModel;
 const weapons=WEAPONS;
@@ -157,19 +161,17 @@ let fireBuffer=0,moving=false,sprinting=false,enemyFireGate=0;
 const keys=new Set(), enemies=[], effects=[], ray=new THREE.Raycaster();
 const interactionRay=new THREE.Raycaster();
 const lookInput=createLookInput();
-let rounds=[], reserves=[], audio;
+let rounds=[], reserves=[];
+const gameAudio=createGameAudio({storage:localStorage});window.neonAudio=gameAudio;
+let streakTime=0;const streakBanner=document.createElement('div');streakBanner.className='streak-banner';document.body.append(streakBanner);
+function showStreak(step){if(!step)return;streakBanner.textContent=step>=10?'连续击破 ×10 // 清场':step>=5?'连续击破 ×5 // 压制':'连续击破 ×3';streakBanner.dataset.step=String(step);streakBanner.dataset.show='true';streakTime=1.6;}
+function lineOfSight(origin){ray.set(camera.position,origin.clone().sub(camera.position).normalize());ray.far=camera.position.distanceTo(origin);return !obstacles.some(o=>ray.intersectObject(o.mesh,false).length);}
 const enemyDirector=createEnemyDirector({scaleCooldown:attackCooldown,onEliteWindow:()=>fieldRecord.window(),enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
- if(event.changed)notify('Warden 阶段切换 // '+BOSS_PHASES[enemy.bossState.phase].name);
- else if(event.opened)notify('Warden 过载 // 青色胸口核心暴露，集中攻击！');
+ if(event.changed){notify('Warden 阶段切换 // '+BOSS_PHASES[enemy.bossState.phase].name);gameAudio.play('boss.phase');}
+ else if(event.opened){notify('Warden 过载 // 青色胸口核心暴露，集中攻击！');gameAudio.play('boss.window.open');}
+ else if(event.closed)gameAudio.play('boss.window.close');
  hud();
 }});
-function sound(freq=150,duration=.07,type='sawtooth',volume=.035) {
- if(!audio) return;
- const osc=audio.createOscillator(), gain=audio.createGain(); osc.type=type; osc.frequency.setValueAtTime(freq,audio.currentTime);
- osc.frequency.exponentialRampToValueAtTime(Math.max(20,freq*.3),audio.currentTime+duration);
- gain.gain.setValueAtTime(volume,audio.currentTime); gain.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);
- osc.connect(gain).connect(audio.destination); osc.start(); osc.stop(audio.currentTime+duration);
-}
 function notify(text){toast.textContent=text;toastTime=3;}
 function hud(){
  $('#health').textContent=Math.ceil(health); $('#healthbar').style.width=`${health}%`;
@@ -217,7 +219,7 @@ function reset(stageIndex=0,snapshot=null){
 
 }
 function end(win){if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
- if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';document.exitPointerLock?.();overlay.hidden=false;
+ if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';gameAudio.play(win?'mission.won':'mission.lost');if(!win)gameAudio.play('player.death');document.exitPointerLock?.();overlay.hidden=false;
  $('#session-title').innerHTML=win?(runMode==='replay'?'阶段<span>训练完成</span>':'行动<span>撤离成功</span>'):'信号<span>连接中断</span>';
  const seconds=Math.floor(mission.state.time);
  $('#brief').textContent=`${win?(runMode==='replay'?'本阶段训练完成，主行动检查点未改变。':(IS_HARBOR?'小队已登船，离开风暴港口。':IS_TRAIN?'列车控制权已移交，接应队伍已登车。':IS_TOWER?'中枢已隔离，小队已从大厅撤离。':IS_ROOF?'信号已送出，小队已返回升降平台。':IS_STATION?'已登上末班列车，运输站行动完成。':'反应堆已移交，撤离完成。')):'可从阶段入口检查点重试，或重新开始行动。'} 击破 ${kills} 个目标 · 用时 ${Math.floor(seconds/60)}分${seconds%60}秒 · 阶段 ${runMode==='replay'?replayEntry.stageIndex+1:Math.min(5,mission.state.index+1)}/5。`;
@@ -225,7 +227,7 @@ function end(win){if(!win){fieldRecord.die(camera.position);achievementUI.attemp
  if(win&&runMode==='journey'){pendingJourneyResult={time:mission.state.time,kills};if(journey.finish(MAP_ID,pendingJourneyResult))pendingJourneyResult=null;else $('#brief').textContent='章节已完成，但战役存档写入失败。请重试保存后再继续。';}
  if(win&&runMode==='journey'&&journey.data?.status==='complete'){$('#session-title').innerHTML='港口撤离<span>战役完成</span>';$('#brief').textContent='反应堆、地下运输站、天穹通讯枢纽、多层中枢塔、疾驰货运列车、风暴港口：六章行动全部完成。共击破 '+journey.data.results.reduce((n,r)=>n+r.kills,0)+' 个目标。可继续单章训练，或重新开始战役。';}
  $('#deploy').textContent='开始新行动 ↗';firing=false;fireBuffer=0;aiming=false;keys.clear();campaignUI.refresh(state,runMode);refreshJourney();}
-function pause(){lookInput.reset();if(state!=='playing')return;bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';firing=false;fireBuffer=0;aiming=false;keys.clear();overlay.hidden=false;
+function pause(){lookInput.reset();if(state!=='playing')return;bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';gameAudio.play('ui.pause');gameAudio.pause();firing=false;fireBuffer=0;aiming=false;keys.clear();overlay.hidden=false;
  $('#session-title').innerHTML='行动<span>已暂停</span>';$('#brief').textContent='战场已冻结。当前目标：'+mission.current.title+'。';$('#deploy').textContent='继续当前战斗 ↗';campaignUI.refresh(state,runMode);refreshJourney();}
 function bossLoadout(){return {health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3)};}
 function checkpoint(){
@@ -275,7 +277,8 @@ function startSingleChapter(){
  runMode='campaign';reset();saveCheckpoint();return enterPlay();
 }
 async function enterPlay(){
- try{audio ||= new (window.AudioContext||window.webkitAudioContext)();await audio.resume();}catch{}
+ try{await gameAudio.unlock();}catch{}
+ gameAudio.resume();gameAudio.play('ui.resume');
  lookInput.reset();state='playing';overlay.hidden=true;
  try{await renderer.domElement.requestPointerLock();}catch{notify('鼠标锁定不可用：按住左键拖动瞄准，方向键也可转向');}
 }
@@ -328,7 +331,7 @@ function changeWeapon(index){
 function startReload(){
  const w=weapons[selected];if(reload||selected===3||rounds[selected]===w.cap)return;
  if(!reserves[selected]){notify('备用弹药耗尽 · 切换武器');return;}
- reload=w.reload;fireBuffer=0;sound(330,.15,'triangle');hud();
+ reload=w.reload;fireBuffer=0;gameAudio.play('reload.start');hud();
 }
 function blocked(x,z,r){return obstacles.some(o=>Math.abs(x-o.x)<o.w/2+r&&Math.abs(z-o.z)<o.d/2+r);}
 function move(pos,dx,dz,r){if(!blocked(pos.x+dx,pos.z,r))pos.x+=dx;if(!blocked(pos.x,pos.z+dz,r))pos.z+=dz;}
@@ -341,9 +344,9 @@ function shoot(meleeImpact=false){
  if(reload>0){if(weapons[selected].perShell&&rounds[selected]>0)reload=0;else return false;}
  if(rounds[selected]<=0){startReload();cooldown=.2;fireBuffer=0;return false;}
  const w=weapons[selected];if(selected!==3)overseer?.battle.shot(selected);rounds[selected]--;if(selected!==3){fieldRecord.shot();achievementUI.attempt.shot(selected);}telemetryShots[selected]++;if(!meleeImpact)cooldown=w.delay;recoil=1;
- sound(selected===1?75:selected===3?440:150,selected===3?.16:.075,'sawtooth');
+ gameAudio.weaponFire(selected);
  scene.updateMatrixWorld(true);
- let totalDamage=0,headshot=false,killed=0,armoredHit=false,coreHit=false;
+ let totalDamage=0,headshot=false,killed=0,armoredHit=false,coreHit=false,killedElite=false,killedBoss=false;
  const spread=shotSpread(w,handling.state.ads,handling.state.heat,moving);
  const meshes=enemies.flatMap(e=>e.group.children).concat(obstacles.map(o=>o.mesh),overseer?.targets||[]);
  for(let p=0;p<w.pellets;p++){
@@ -358,7 +361,7 @@ function shoot(meleeImpact=false){
   if(impact)art.burst(impact.point,target?0xff9459:0x74f8ed,selected===1?4:10);
   if(impact&&impact.object.userData.overseer!==undefined){
    const result=overseer.hit(impact.object,outgoingDamage(damageAtDistance(w,impact.distance,false)));if(result.shielded)notify('核心无敌！先击破两座金色供电节点，再攻击青色核心');totalDamage+=result.damage;coreHit ||= result.weak;armoredHit ||= result.damage===0;
-   if(result.killed){overseer.battle.finish('won',bossLoadout());kills++;killed++;notify('枢纽监察者已击破 // 清理守卫，建立上传链路');}
+   if(result.killed){overseer.battle.finish('won',bossLoadout());kills++;killed++;killedBoss=true;notify('枢纽监察者已击破 // 清理守卫，建立上传链路');}
   }
   if(target&&target.hp>0){
    const isHead=selected!==3&&impact.object.userData.hitZone==='head';
@@ -372,12 +375,13 @@ function shoot(meleeImpact=false){
   if(selected!==3)trace(gun.localToWorld(flash.position.clone()),endpoint);
  }
  for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0){
+  if(enemies[i].boss)killedBoss=true;else if(enemies[i].type==='harborElite'||enemies[i].elite)killedElite=true;
   art.burst(enemies[i].group.position.clone().add(new THREE.Vector3(0,1.2,0)),0xffad68,32);disposeGroup(enemies[i].group);enemies.splice(i,1);kills++;killed++;
  }
  achievementUI.attempt.hit(selected,killed);
  if(totalDamage>0){
-  hitTime=killed?.25:.16;hit.dataset.kind=killed?'kill':headshot?'head':'body';combatUI.registerHit(totalDamage,headshot,killed);
-  sound(killed?780:headshot?680:armoredHit?240:520,killed?.1:.045,'sine',.025);
+  hitTime=killed?.25:.16;hit.dataset.kind=killed?'kill':coreHit?'core':headshot?'head':armoredHit?'armor':'body';combatUI.registerHit(totalDamage,headshot,killed);
+  showStreak(gameAudio.hit({killed:killed>0,headshot,armored:armoredHit&&!coreHit,core:coreHit,elite:killedElite,boss:killedBoss}));
   enemyUI.hit(armoredHit&&!coreHit,coreHit);
  }
  handling.shot(w,Math.random());flash.visible=selected!==3;hud();return true;
@@ -388,7 +392,7 @@ function update(dt){
  elapsed+=dt;cooldown=Math.max(0,cooldown-dt);recoil=Math.max(0,recoil-dt*7);enemyFireGate=Math.max(0,enemyFireGate-dt);
  fireBuffer=Math.max(0,fireBuffer-dt);
  const previousMelee=meleeRemaining;meleeRemaining=Math.max(0,meleeRemaining-dt);
- if(reload>0){const next=advanceReload(dt,reload,rounds[selected],reserves[selected],weapons[selected]);reload=next.remaining;rounds[selected]=next.rounds;reserves[selected]=next.reserve;if(next.inserted){sound(420,.07,'triangle',.02);hud();}}
+ if(reload>0){const next=advanceReload(dt,reload,rounds[selected],reserves[selected],weapons[selected]);reload=next.remaining;rounds[selected]=next.rounds;reserves[selected]=next.reserve;if(next.inserted){gameAudio.play('reload.shell');hud();}}
 
  if(keys.has('ArrowLeft'))yaw+=dt*1.6;if(keys.has('ArrowRight'))yaw-=dt*1.6;
  let mx=Number(keys.has('KeyD'))-Number(keys.has('KeyA')),mz=Number(keys.has('KeyS'))-Number(keys.has('KeyW'));
@@ -400,7 +404,7 @@ function update(dt){
  const airborne=playerMotion.step(dt,camera.position,mx*Math.cos(yaw)+mz*Math.sin(yaw),-mx*Math.sin(yaw)+mz*Math.cos(yaw),jumpRequested);jumpRequested=false;
  if(IS_TRAIN&&playerMotion.state.y<.25){const e=STAGE_ENTRIES[mission.state.index];camera.position.set(e.x,e.feetY+1.7,e.z);playerMotion.reset(camera.position,e.feetY);mission.interrupt();notify('脱离列车 // 已返回当前阶段入口，重新尝试');}
  if(IS_HARBOR&&playerMotion.state.y<.25&&harborWater(camera.position)){const e=STAGE_ENTRIES[mission.state.index];camera.position.set(e.x,e.feetY+1.7,e.z);playerMotion.reset(camera.position,e.feetY);mission.interrupt();notify('落水重试 // 已返回当前阶段入口，收集记录保留');}
- if(airborne.jumped)sound(170,.06,'triangle',.012);if(airborne.landed)sound(85,.07,'triangle',.02);
+ if(airborne.jumped)gameAudio.play('player.jump');if(airborne.landed)gameAudio.play('player.land');
  camera.rotation.set(THREE.MathUtils.clamp(pitch+handling.state.pitch,-1.45,1.45),yaw+handling.state.yaw,0);
  const fov=74-ads*22+(sprinting?5:0);camera.fov=THREE.MathUtils.lerp(camera.fov,fov,1-Math.exp(-dt*12));camera.updateProjectionMatrix();
  const reloadArc=reload>0?Math.sin((1-reload/weapons[selected].reload)*Math.PI):0;
@@ -419,27 +423,27 @@ function update(dt){
  enemyFireGate=enemyDirector.update(dt,elapsed,enemyFireGate);
  enemyProjectiles.update(dt,camera.position,previousPlayer);
  const bossDamage=incomingDamage(overseer?.update(dt,camera.position,playerMotion.state.y,true)||0);
- if(bossDamage){overseer.battle.hurt(Math.min(health,bossDamage));fieldRecord.hurt(Math.min(health,bossDamage));achievementUI.attempt.hurt(Math.min(health,bossDamage));health=Math.max(0,health-bossDamage);mission.interrupt();combatUI.damaged(new THREE.Vector3(0,0,-21));damageTime=.3;hud();}
+ if(bossDamage){overseer.battle.hurt(Math.min(health,bossDamage));fieldRecord.hurt(Math.min(health,bossDamage));achievementUI.attempt.hurt(Math.min(health,bossDamage));health=Math.max(0,health-bossDamage);mission.interrupt();combatUI.damaged(new THREE.Vector3(0,0,-21));damageTime=.3;gameAudio.hurt(health);hud();}
  art.setBossActive?.(Boolean(overseer?.blocking));
- const hazard=art.hazardDamage?.(dt,{x:camera.position.x,z:camera.position.z,feetY:playerMotion.state.y});if(hazard){fieldRecord.hurt(Math.min(health,hazard.damage));achievementUI.attempt.hurt(Math.min(health,hazard.damage));health=Math.max(0,health-hazard.damage);mission.interrupt();combatUI.damaged(new THREE.Vector3(hazard.x,0,hazard.z));damageTime=.3;sound(75,.08,'sawtooth',.025);hud();}
+ const hazard=art.hazardDamage?.(dt,{x:camera.position.x,z:camera.position.z,feetY:playerMotion.state.y});if(hazard){fieldRecord.hurt(Math.min(health,hazard.damage));achievementUI.attempt.hurt(Math.min(health,hazard.damage));health=Math.max(0,health-hazard.damage);mission.interrupt();combatUI.damaged(new THREE.Vector3(hazard.x,0,hazard.z));damageTime=.3;gameAudio.play('player.hazard');hud();}
  if(health<=0){end(false);return;}
  missionWorld.collect(camera.position,type=>{
   const supply=applySupply(type,health,reserves,weapons);if(!supply.changed)return false;
-  health=supply.health;reserves=supply.reserves;notify(type==='health'?'医疗补给 // 恢复最多 35 点生命':'弹药补给 // 备用弹药已增加');sound(type==='health'?620:440,.13,'sine',.025);hud();return true;
+  health=supply.health;reserves=supply.reserves;notify(type==='health'?'医疗补给 // 恢复最多 35 点生命':'弹药补给 // 备用弹药已增加');gameAudio.play(type==='health'?'pickup.health':'pickup.ammo');hud();return true;
  });
  starWorld.update(dt,elapsed,camera.position,true);
  const interaction=interactionStatus();
  const event=mission.tick(dt,{player:camera.position,held:keys.has('KeyE'),clear:enemies.length===0&&!overseer?.blocking,canInteract:interaction.allowed,transportReady:transport?.tripCompleted===true});
  if(event){
-  if(event.type==='node'){keys.delete('KeyE');firing=false;fireBuffer=0;notify(event.message);sound(660,.16,'sine',.025);hud();}
-  else if(event.type==='reinforcement'){spawnEncounter(event.stage);notify(event.message);sound(330,.2,'triangle',.035);hud();}
+  if(event.type==='node'){keys.delete('KeyE');firing=false;fireBuffer=0;notify(event.message);gameAudio.play('objective.node');hud();}
+  else if(event.type==='reinforcement'){spawnEncounter(event.stage);notify(event.message);gameAudio.play('objective.reinforcement');hud();}
   else if(event.type==='defense'){
    keys.delete('KeyE');firing=false;fireBuffer=0;
    spawnEncounter({...event.stage,count:event.stage.defenseCount,spawns:event.stage.defenseSpawns||event.stage.spawns,roles:event.stage.defenseRoles||event.stage.roles});
-   notify((event.stage.defenseLabel||'权限上传')+'开始 // 留在 '+event.stage.defenseRadius+' 米内防守 '+event.stage.defenseDuration+' 秒 · 可移动射击');sound(440,.18,'sine',.035);hud();
+   notify((event.stage.defenseLabel||'权限上传')+'开始 // 留在 '+event.stage.defenseRadius+' 米内防守 '+event.stage.defenseDuration+' 秒 · 可移动射击');gameAudio.play('objective.defense');hud();
   }else{
    enemyProjectiles.clear();keys.delete('KeyE');firing=false;fireBuffer=0;enemyFireGate=0;
-   notify(event.finished.message);sound(event.complete?880:660,.2,'sine',.035);
+   notify(event.finished.message);gameAudio.play(event.complete?'objective.extract':'objective.complete');
    if(event.complete||runMode==='replay'){end(true);return;}
    spawnEncounter(event.next);saveCheckpoint();campaignUI.announce(event.next);hud();
   }
@@ -495,6 +499,8 @@ function frame(now){
  const heading=((Math.round(-yaw*180/Math.PI)%360)+360)%360;compass.firstChild.textContent=String(heading).padStart(3,'0')+'° / '+['N','NE','E','SE','S','SW','W','NW'][Math.round(heading/45)%8];
  for(let i=effects.length-1;i>=0;i--){effects[i].life-=dt;if(effects[i].life<=0){const m=effects[i].mesh;scene.remove(m);m.geometry.dispose();m.material.dispose();effects.splice(i,1);}}
  toastTime=Math.max(0,toastTime-dt);toast.style.opacity=toastTime>0?'1':'0';damageTime=Math.max(0,damageTime-dt);damageScreen.style.opacity=damageTime*2;hitTime=Math.max(0,hitTime-dt);hit.style.opacity=hitTime>0?'1':'0';
+ if(streakTime>0){streakTime-=dt;if(streakTime<=0)streakBanner.dataset.show='false';}
+ gameAudio.setListener(camera.position.x,camera.position.z,yaw);gameAudio.update(dt,{playState:state,health,enemiesNear:enemies.reduce((n,e)=>n+(e.group.position.distanceToSquared(camera.position)<45*45?1:0),0),bossActive:Boolean(overseer?.blocking||enemies.some(e=>e.boss)),defending:mission.state.defending===true,extracting:mission.state.extracting===true});
  frames++;fpsTime+=Math.min((now-(frame.previousNow||now))/1000,1);frame.previousNow=now;if(fpsTime>.5){$('#fps').textContent=Math.round(frames/fpsTime);frames=0;fpsTime=0;}
  achievementUI.update(state);
  presentation.update(dt,yaw,pitch,state);

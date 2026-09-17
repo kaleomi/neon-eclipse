@@ -71,6 +71,43 @@ try{
   await page.close();
  });
 
+ // 2b. Phase 2 audio: context unlocks on the first gesture, pause/blur suspend it, volumes persist,
+ // firing / reload / telegraphs run without console errors, and the settings panel round-trips.
+ await step('audio: unlock, pause suspend, volume persistence, sfx during play',async()=>{
+  const {page,errors}=await newPage(context);
+  await page.goto(`${server.base}/index.html`);await menuOpen(page);
+  assert.equal(await page.evaluate(()=>window.neonAudio?.bus.snapshot().state),'none','no AudioContext before a gesture');
+  await page.click('#menu-new');await confirmIfShown(page);await playing(page);
+  await page.waitForTimeout(400);
+  const snap=await page.evaluate(()=>window.neonAudio.bus.snapshot());
+  assert.ok(snap.state==='running'||snap.state==='suspended','context exists after gesture: '+snap.state);
+  // Fire, reload, swing the blade; all must go through the procedural player without throwing.
+  await page.mouse.move(640,360);await page.mouse.down();await page.waitForTimeout(350);await page.mouse.up();
+  await page.keyboard.press('KeyR');await page.keyboard.press('Digit4');await page.mouse.click(640,360);await page.waitForTimeout(700);
+  const stats=await page.evaluate(()=>({voices:window.neonAudio.sfx.stats().played,state:window.neonAudio.director?.state}));
+  assert.ok(stats.voices>=3,'sfx played during play: '+stats.voices);
+  assert.ok(['explore','combat','boss'].includes(stats.state),'music state while playing: '+stats.state);
+  await page.keyboard.press('Escape');await menuOpen(page);
+  const paused=await page.evaluate(()=>window.neonAudio.bus.snapshot());
+  assert.ok(paused.suspendedBy.includes('paused'),'bus held while paused: '+JSON.stringify(paused));
+  // Settings live on the home page of the menu, not the pause context page.
+  await page.reload();await menuOpen(page);
+  await page.click('#menu-settings');await page.waitForSelector('#menu-audio [data-audio-bus="music"]');
+  await page.locator('#menu-audio [data-audio-bus="music"]').fill('20');
+  await page.locator('#menu-audio [data-audio-mute]').check();
+  const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('neon-eclipse.audio.v1')));
+  assert.equal(stored.music,.2);assert.equal(stored.muted,true);
+  await page.reload();await menuOpen(page);await page.click('#menu-settings');await page.waitForSelector('#menu-audio [data-audio-bus="music"]');
+  assert.equal(await page.locator('#menu-audio [data-audio-bus="music"]').inputValue(),'20','music slider restored');
+  assert.equal(await page.locator('#menu-audio [data-audio-mute]').isChecked(),true,'mute restored');
+  await page.locator('#menu-audio [data-audio-mute]').uncheck();
+  await page.click('#menu-audio .menu-audio-lab summary');
+  await page.click('#menu-audio [data-audio-preview="kill"]');await page.waitForTimeout(150);
+  assert.ok(await page.evaluate(()=>window.neonAudio.sfx.stats().played)>=1,'preview played after unlock');
+  assert.deepEqual(errors,[]);
+  await page.close();
+ });
+
  // 3. Legacy journey v3 import is honoured and the old key preserved (migration sanity).
  await step('legacy journey v3 migration keeps old key',async()=>{
   const ctx=await browser.newContext({viewport:{width:1280,height:850}});

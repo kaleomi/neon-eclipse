@@ -6,10 +6,10 @@
 //   integration  test-*.mjs that import three (real Three.js directors, physics, worlds)
 //   browser      test-*-browser.mjs (Playwright; opt-in, never part of the default run)
 // Usage: node scripts/run-tests.mjs [--layer check|rules|integration|browser|all] [--filter text] [--jobs n] [--list] [--verbose]
-import {readdirSync,readFileSync,statSync} from 'node:fs';
+import {readdirSync,readFileSync,existsSync} from 'node:fs';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
-import {fileURLToPath} from 'node:url';
+import {fileURLToPath,pathToFileURL} from 'node:url';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const args=process.argv.slice(2);
@@ -64,10 +64,19 @@ function checkTargets(){
  return [...rootFiles,...desktopFiles,...scriptFiles].sort();
 }
 
-function run(cmdArgs,label){
+// Browser tests import Playwright via VEHICLE_PLAYWRIGHT_MODULE. If it is not set, look for a
+// tooling install outside the project (workspace/.tools/playwright) so the repo keeps zero test dependencies.
+function browserEnv(){
+ if(process.env.VEHICLE_PLAYWRIGHT_MODULE)return process.env;
+ const candidates=[path.join(root,'node_modules','playwright','index.mjs'),path.resolve(root,'..','..','.tools','playwright','node_modules','playwright','index.mjs')];
+ const found=candidates.find(c=>existsSync(c));
+ if(!found)return process.env;
+ return {...process.env,VEHICLE_PLAYWRIGHT_MODULE:pathToFileURL(found).href};
+}
+function run(cmdArgs,label,env=process.env){
  return new Promise(resolve=>{
   const started=Date.now();
-  const child=spawn(process.execPath,cmdArgs,{cwd:root,env:process.env,stdio:['ignore','pipe','pipe']});
+  const child=spawn(process.execPath,cmdArgs,{cwd:root,env,stdio:['ignore','pipe','pipe']});
   let out='',err='';
   child.stdout.on('data',d=>{out+=d;if(verbose)process.stdout.write(d);});
   child.stderr.on('data',d=>{err+=d;if(verbose)process.stderr.write(d);});
@@ -132,7 +141,9 @@ async function main(){
  if(wanted.includes('browser')){
   const targets=browser.map(m=>m.file).filter(matches);
   // Browser tests share one game server and a real Chromium; keep them sequential.
-  const results=[];for(const t of targets)results.push(await run([t],t));
+  const env=browserEnv();
+  if(!env.VEHICLE_PLAYWRIGHT_MODULE)console.log('browser: VEHICLE_PLAYWRIGHT_MODULE not set and no Playwright install found; tests will fail to import playwright');
+  const results=[];for(const t of targets)results.push(await run([t],t,env));
   ok=report('browser',results)&&ok;
  }
  console.log(`total wall time ${((Date.now()-wall)/1000).toFixed(1)} s`);

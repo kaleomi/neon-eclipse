@@ -8,7 +8,8 @@ import {noiseBuffer} from './synth.js';
 export function roverEngine(speed,throttle){
  const s=Math.abs(speed);const load=Math.max(0,Math.min(1,Math.abs(throttle)));
  const rpm=.25+Math.min(1,s/29)*.75*(.6+.4*load); // 0.25 idle .. 1
- return {freq:38+rpm*110,gain:.16+rpm*.22+load*.06,cutoff:400+rpm*1600};
+ // Trim only the rover engine bed (~-3.7 dB); do not alter user/bus volumes or other vehicles.
+ return {freq:38+rpm*110,gain:(.16+rpm*.22+load*.06)*.65,cutoff:400+rpm*1600};
 }
 export function planeEngine(throttle,speed,onGround){
  const t=Math.max(0,Math.min(1,throttle)),s=Math.min(1,Math.abs(speed)/50);

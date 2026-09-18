@@ -4,9 +4,12 @@ import {FLIGHT_GATES} from './flight-rules.js';
 const mat=(color,extra={})=>new T.MeshStandardMaterial({color,roughness:.68,...extra});
 function block(parent,w,h,d,x,y,z,material){const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),material);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
 function sign(scene,text,x,y,z,width=12){const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const c=canvas.getContext('2d');c.fillStyle='#12323b';c.fillRect(0,0,512,128);c.strokeStyle='#bdded1';c.lineWidth=5;c.strokeRect(4,4,504,120);c.fillStyle='#e8efda';c.font='bold 40px sans-serif';c.textAlign='center';c.fillText(text,256,82);const tex=new T.CanvasTexture(canvas);tex.colorSpace=T.SRGBColorSpace;const s=new T.Sprite(new T.SpriteMaterial({map:tex,depthTest:true}));s.position.set(x,y,z);s.scale.set(width,width/4,1);scene.add(s);return s;}
-export function buildSeaAirField(scene){
+export function buildSeaAirField(scene,{provingGroundPresent=false}={}){
  const ground=mat(0x7a7968),road=mat(0x2c3d45),white=mat(0xe1ded0),mint=mat(0x93e4cb,{emissive:0x185d49}),steel=mat(0x2b4854),wood=mat(0x9b8869);
- block(scene,820,.08,1200,-190,-.095,0,ground);
+ // Tile around the existing [-220,220] proving terrain instead of putting a near-coplanar slab below it.
+ // One upward-facing surface per area also avoids a thin ground box casting onto itself.
+ const landTiles=provingGroundPresent?[[380,1200,-410,0],[440,380,0,-410],[440,380,0,410]]:[[820,1200,-190,0]];
+ for(const [width,depth,x,z] of landTiles){const geometry=new T.PlaneGeometry(width,depth);geometry.rotateX(-Math.PI/2);const surface=new T.Mesh(geometry,ground);surface.position.set(x,-.025,z);surface.receiveShadow=true;scene.add(surface);}
  block(scene,44,.1,760,-300,.02,-100,road);
  for(const x of [-320,-280])block(scene,.6,.04,745,x,.09,-100,white);
  for(let z=-450;z<275;z+=25)block(scene,1.2,.05,12,-300,.11,z,white);

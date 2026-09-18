@@ -55,7 +55,7 @@ scene.add(new T.HemisphereLight(0xd5f2ff,0x66533a,2.6));const sun=new T.Directio
 const geometry=new CollisionGrid([...collisionBoxes(),...FIELD_BUILDINGS],24,FIELD.bounds);
 const footWorld={geometry,free:(x,z,r)=>isFootSurface(x,z,r)&&geometry.free(x,z,r)};
 const baseLand={geometry,free:(x,z,r)=>landSurface(x,z,r)&&geometry.free(x,z,r),clearSegment:(a,b,r)=>geometry.clearSegment(a,b,r)};
-const environment=buildProvingGround(scene,{extended:true}),seaAir=buildSeaAirField(scene),roverModel=createRoverModel(scene),planeModel=createAircraftModel(scene),yachtModel=createYachtModel(scene);
+const environment=buildProvingGround(scene,{extended:true}),seaAir=buildSeaAirField(scene,{provingGroundPresent:true}),roverModel=createRoverModel(scene),planeModel=createAircraftModel(scene),yachtModel=createYachtModel(scene);
 const chaseWorld=buildChaseWorld(scene),seaCombatWorld=buildSeaCombatWorld(scene),interceptorWorld=buildChaseWorld(scene,{showMarkers:false,role:'interceptor'}),interceptorCombat=buildSeaCombatWorld(scene,{showPlayerGun:false});
 const rover=createRover(),plane=createPlane(),yacht=createYacht();
 const navalAim=createNavalAim(yacht.yaw);

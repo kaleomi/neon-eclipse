@@ -76,5 +76,24 @@ export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
   for(const type of ['pointerdown','keydown'])window.addEventListener(type,gesture,{passive:true});
  }
  bindLifecycle();
- return {bus,sfx,update,play:(n,o)=>sfx.play(n,o),pause(){bus.hold('paused');},resume(){bus.release('paused');},unlock:()=>bus.unlock()};
+ // One-shot events derived from monotonic gameplay counters (see vehicleAudioEvents). Keeps vehicle-app.js to a single call.
+ let counters=null;
+ function events(next){const out=vehicleAudioEvents(counters,next);counters={...next};for(const e of out)sfx.play(e.name,e.opts);return out;}
+ return {bus,sfx,update,events,play:(n,o)=>sfx.play(n,o),pause(){bus.hold('paused');},resume(){bus.release('paused');},unlock:()=>bus.unlock(),resetEvents(){counters=null;}};
+}
+// Pure: diff two counter snapshots into sfx events. `prev` null = first frame (records baseline, plays nothing).
+// counters: {roofShots,planeShots,rocketShots,roofHits,planeHits,seaShots,seaHits,seaSplashes,repairs,rearms,landings,checkpoints,hullHits,waves,houndKills,paused}
+export const VEHICLE_EVENT_SFX=Object.freeze({
+ roofShots:'fire.vanguard',planeShots:'fire.tempest',rocketShots:'cannon.fire',roofHits:'hit.body',planeHits:'hit.body',
+ seaShots:'cannon.fire',seaHits:'cannon.hit',seaSplashes:'cannon.splash',repairs:'supply.health',rearms:'supply.ammo',
+ landings:'vehicle.touchdown',checkpoints:'vehicle.checkpoint',hullHits:'vehicle.impact',waves:'telegraph.orange',houndKills:'kill'
+});
+export function vehicleAudioEvents(prev,next){
+ if(!prev||!next)return [];
+ const out=[];
+ for(const key of Object.keys(VEHICLE_EVENT_SFX)){
+  const a=Number(prev[key])||0,b=Number(next[key])||0;
+  if(b>a)out.push({name:VEHICLE_EVENT_SFX[key],opts:key==='hullHits'?{gain:.9}:undefined,count:b-a});
+ }
+ return out;
 }

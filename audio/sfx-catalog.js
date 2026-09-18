@@ -49,6 +49,7 @@ export const SFX={
  'supply.health':{tones:[{type:'sine',f:620,gain:.12,a:.005,d:.08,r:.06},{type:'sine',f:930,gain:.12,a:.005,d:.1,r:.1,delay:.09}],bus:'ui'},
  'supply.ammo':{tones:[{type:'square',f:440,gain:.08,a:.001,d:.04,r:.03},{type:'square',f:440,gain:.08,a:.001,d:.04,r:.03,delay:.06},{type:'triangle',f:660,gain:.08,a:.001,d:.08,r:.06,delay:.12}],bus:'ui'},
  // ---- enemy telegraphs (colour language) ----
+ 'telegraph.blue':{tones:[{type:'triangle',f:740,fEnd:920,gain:.085,a:.01,d:.22,r:.05},{type:'sine',f:1480,fEnd:1840,gain:.045,a:.01,d:.22,r:.06,delay:.35}],bus:'sfx',cooldown:.15},
  'telegraph.orange':{tones:[{type:'square',f:520,gain:.09,a:.002,d:.035,r:.02},{type:'square',f:520,gain:.09,a:.002,d:.035,r:.02,delay:.08}],bus:'sfx',cooldown:.05},
  'telegraph.purple':{tones:[{type:'sine',f:420,fEnd:1250,fCurve:'exp',gain:.11,a:.01,d:.7,r:.1}],bus:'sfx',cooldown:.1},
  'telegraph.amber':{tones:[{type:'triangle',f:95,gain:.16,a:.003,d:.07,r:.04},{type:'triangle',f:95,gain:.16,a:.003,d:.07,r:.04,delay:.16},{type:'triangle',f:80,gain:.18,a:.003,d:.09,r:.05,delay:.32}],bus:'sfx',cooldown:.1},
@@ -95,8 +96,31 @@ export const SFX={
  'cannon.splash':{noise:[{color:'white',gain:.35,a:.005,d:.25,r:.3,filter:{type:'lowpass',f:3000,fEnd:500,q:.8}}],bus:'sfx',vary:.1,cooldown:.1},
  'cannon.hit':{tones:[{type:'triangle',f:120,fEnd:50,gain:.3,a:.001,d:.15,r:.1}],noise:[{color:'brown',gain:.6,a:.001,d:.2,r:.2,filter:{type:'lowpass',f:1200,fEnd:250,q:.8}}],fm:[{carrier:600,ratio:2.4,index:500,indexEnd:20,gain:.15,a:.001,d:.12,r:.1}],bus:'sfx',cooldown:.08},
  'scan.tick':{tones:[{type:'sine',f:1568,gain:.04,a:.001,d:.03,r:.02}],bus:'ui',cooldown:.24},
- 'scan.done':{tones:[{type:'sine',f:1046,gain:.1,a:.002,d:.08,r:.06},{type:'sine',f:1568,gain:.12,a:.002,d:.2,r:.2,delay:.08}],bus:'ui'}
+ 'scan.done':{tones:[{type:'sine',f:1046,gain:.1,a:.002,d:.08,r:.06},{type:'sine',f:1568,gain:.12,a:.002,d:.2,r:.2,delay:.08}],bus:'ui'},
+ // Chapter 07 orbital: band crossing (pitch set by direction), landing-pad thruster, TETHER pulse warn / pulse.
+ 'orbital.band':{tones:[{type:'sine',f:520,fEnd:780,gain:.07,a:.005,d:.14,r:.12}],noise:[{color:'pink',gain:.06,a:.01,d:.12,r:.1,filter:{type:'bandpass',f:1800,q:1.2}}],bus:'ui',cooldown:.3},
+ 'orbital.pad':{noise:[{color:'white',gain:.5,a:.005,d:.35,r:.3,filter:{type:'lowpass',f:2400,fEnd:400,q:.7}}],tones:[{type:'sawtooth',f:80,fEnd:40,gain:.2,a:.005,d:.3,r:.2}],bus:'sfx',cooldown:.4},
+ 'tether.pulse.warn':{fm:[{carrier:220,ratio:1.5,index:220,indexEnd:60,gain:.16,a:.01,d:.5,r:.5}],tones:[{type:'sine',f:110,gain:.1,a:.02,d:.6,r:.4}],bus:'sfx'},
+ 'tether.pulse':{tones:[{type:'sawtooth',f:60,fEnd:30,gain:.34,a:.001,d:.25,r:.3}],noise:[{color:'brown',gain:.7,a:.001,d:.22,r:.35,filter:{type:'lowpass',f:700,fEnd:120,q:.8}}],bus:'sfx'},
+ // Chapter 08 datacenter: tide phases, ABYSS discharge warn / discharge, summon splash.
+ 'tide.rise':{noise:[{color:'brown',gain:.32,a:.2,d:.9,r:.6,filter:{type:'lowpass',f:500,fEnd:900,q:.6}}],bus:'sfx'},
+ 'tide.high':{tones:[{type:'sine',f:196,fEnd:147,gain:.12,a:.01,d:.4,r:.4},{type:'sine',f:98,gain:.08,a:.02,d:.5,r:.5}],bus:'ui'},
+ 'tide.drain':{noise:[{color:'pink',gain:.3,a:.05,d:.8,r:.7,filter:{type:'bandpass',f:900,fEnd:300,q:1}}],bus:'sfx'},
+ 'abyss.discharge.warn':{tones:[{type:'square',f:1760,gain:.05,a:.001,d:.05,r:.03},{type:'square',f:1760,gain:.05,a:.001,d:.05,r:.03,delay:.18},{type:'square',f:1760,gain:.05,a:.001,d:.05,r:.03,delay:.36}],fm:[{carrier:330,ratio:2,index:300,indexEnd:100,gain:.1,a:.01,d:.9,r:.3}],bus:'sfx'},
+ 'abyss.discharge':{noise:[{color:'white',gain:.8,a:.001,d:.18,r:.25,filter:{type:'highpass',f:900,q:.7}}],fm:[{carrier:90,ratio:3.7,index:900,indexEnd:40,gain:.3,a:.001,d:.25,r:.2}],bus:'sfx'},
+ 'abyss.summon':{noise:[{color:'white',gain:.4,a:.005,d:.3,r:.3,filter:{type:'lowpass',f:2600,fEnd:400,q:.8}}],tones:[{type:'sine',f:180,fEnd:60,gain:.14,a:.005,d:.25,r:.2}],bus:'sfx',cooldown:.2},
+ // Chapter 09 polar: storm phases, warmth warning, frostbite, GLACIER shell warn / impact, ice crack / break, climb out.
+ 'storm.closing':{noise:[{color:'pink',gain:.28,a:.4,d:1.2,r:.8,filter:{type:'lowpass',f:600,fEnd:1400,q:.6}}],bus:'sfx'},
+ 'storm.whiteout':{noise:[{color:'white',gain:.34,a:.1,d:.9,r:.9,filter:{type:'bandpass',f:1200,fEnd:700,q:.9}}],tones:[{type:'sine',f:440,fEnd:330,gain:.08,a:.02,d:.5,r:.4}],bus:'sfx'},
+ 'storm.clearing':{noise:[{color:'pink',gain:.22,a:.05,d:1,r:1,filter:{type:'lowpass',f:1400,fEnd:300,q:.6}}],tones:[{type:'sine',f:330,fEnd:440,gain:.07,a:.02,d:.5,r:.4}],bus:'sfx'},
+ 'warmth.low':{tones:[{type:'triangle',f:392,fEnd:330,gain:.1,a:.005,d:.18,r:.15},{type:'triangle',f:392,fEnd:330,gain:.1,a:.005,d:.18,r:.15,delay:.3}],bus:'ui',cooldown:1},
+ 'frost.tick':{tones:[{type:'sine',f:2200,fEnd:1800,gain:.06,a:.001,d:.05,r:.04}],noise:[{color:'white',gain:.1,a:.001,d:.06,r:.05,filter:{type:'highpass',f:4000,q:.7}}],bus:'ui',cooldown:.3},
+ 'glacier.shell.warn':{tones:[{type:'sawtooth',f:140,fEnd:260,gain:.14,a:.01,d:.9,r:.2}],bus:'sfx'},
+ 'glacier.shell':{tones:[{type:'sawtooth',f:55,fEnd:28,gain:.4,a:.001,d:.3,r:.35}],noise:[{color:'brown',gain:.9,a:.001,d:.25,r:.4,filter:{type:'lowpass',f:600,fEnd:100,q:.8}}],bus:'sfx',cooldown:.2},
+ 'ice.crack':{noise:[{color:'white',gain:.35,a:.001,d:.08,r:.1,filter:{type:'bandpass',f:2600,fEnd:900,q:2}},{color:'brown',gain:.3,a:.001,d:.15,r:.15,filter:{type:'lowpass',f:400,q:.8}}],bus:'sfx',cooldown:.5},
+ 'ice.break':{noise:[{color:'white',gain:.6,a:.001,d:.3,r:.4,filter:{type:'bandpass',f:1800,fEnd:300,q:1.2}},{color:'brown',gain:.8,a:.005,d:.5,r:.6,filter:{type:'lowpass',f:300,fEnd:80,q:.8}}],tones:[{type:'sine',f:70,fEnd:35,gain:.25,a:.005,d:.5,r:.5}],bus:'sfx'},
+ 'glacier.climb':{tones:[{type:'sawtooth',f:90,fEnd:160,gain:.14,a:.05,d:.8,r:.4}],noise:[{color:'pink',gain:.3,a:.05,d:.7,r:.4,filter:{type:'lowpass',f:1200,fEnd:500,q:.8}}],bus:'sfx'}
 };
 export const SFX_NAMES=Object.freeze(Object.keys(SFX));
-export const TELEGRAPH_BY_COLOR=Object.freeze({orange:'telegraph.orange',purple:'telegraph.purple',amber:'telegraph.amber',pink:'telegraph.pink',gold:'telegraph.gold',green:'telegraph.green'});
+export const TELEGRAPH_BY_COLOR=Object.freeze({blue:'telegraph.blue',orange:'telegraph.orange',purple:'telegraph.purple',amber:'telegraph.amber',pink:'telegraph.pink',gold:'telegraph.gold',green:'telegraph.green'});
 export const WEAPON_FIRE=Object.freeze(['fire.vanguard','fire.breacher','fire.ghost','melee.swing','fire.tempest','fire.halo','fire.railspike','fire.volt']);

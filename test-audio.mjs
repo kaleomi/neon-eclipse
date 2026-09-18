@@ -5,7 +5,7 @@ import {SFX,SFX_NAMES,TELEGRAPH_BY_COLOR,WEAPON_FIRE} from './audio/sfx-catalog.
 import {spatialize,createSfxPlayer,MAX_VOICES} from './audio/sfx-player.js';
 import {resolveMusicState,createIntensity,LAYER_TARGETS,MUSIC_STATES,LAYER_NAMES,createMusicDirector} from './audio/music-director.js';
 import {createStreak,STREAK_STEPS,createGameAudio} from './audio/game-audio.js';
-import {roverEngine,planeEngine,yachtEngine} from './audio/vehicle-audio.js';
+import {roverEngine,planeEngine,yachtEngine,vehicleAudioEvents,VEHICLE_EVENT_SFX,createVehicleAudio} from './audio/vehicle-audio.js';
 import {WEAPONS} from './combat.js';
 
 const memory=(init={})=>{const m=new Map(Object.entries(init));return {getItem:k=>m.has(k)?m.get(k):null,setItem:(k,v)=>{m.set(k,String(v));},removeItem:k=>{m.delete(k);}};};
@@ -73,7 +73,7 @@ function fakeContext(){
  assert.ok(SFX_NAMES.length>=60,'catalog size '+SFX_NAMES.length);
  for(const name of SFX_NAMES){const r=SFX[name];assert.ok(validRecipe(r),'invalid recipe '+name);assert.ok(['sfx','ui','music','voice'].includes(r.bus),name+' bus');assert.ok(recipeDuration(r)<=3,name+' too long');}
  assert.equal(WEAPON_FIRE.length,WEAPONS.length+4);assert.deepEqual(WEAPON_FIRE.slice(0,4),['fire.vanguard','fire.breacher','fire.ghost','melee.swing']);assert.equal(WEAPON_FIRE[4],'fire.tempest');assert.equal(WEAPON_FIRE[5],'fire.halo');assert.equal(WEAPON_FIRE[6],'fire.railspike');assert.equal(WEAPON_FIRE[7],'fire.volt');
- assert.deepEqual(Object.keys(TELEGRAPH_BY_COLOR).sort(),['amber','gold','green','orange','pink','purple']);
+ assert.deepEqual(Object.keys(TELEGRAPH_BY_COLOR).sort(),['amber','blue','gold','green','orange','pink','purple']);
  const sig=name=>{const r=SFX[name];return JSON.stringify([r.tones?.map(t=>[t.type,t.f,t.fEnd,t.delay]),r.fm?.map(f=>[f.carrier,f.ratio]),r.noise?.length]);};
  const sigs=Object.values(TELEGRAPH_BY_COLOR).map(sig);assert.equal(new Set(sigs).size,sigs.length,'telegraph sounds must be distinguishable');
  assert.ok(SFX['telegraph.purple'].tones[0].fEnd>SFX['telegraph.purple'].tones[0].f,'purple rises');
@@ -204,5 +204,17 @@ function fakeContext(){
  assert.ok(planeEngine(2,0,true).freq===planeEngine(1,0,true).freq,'throttle clamped');
  const y0=yachtEngine(0,0),y1=yachtEngine(13,1);
  assert.ok(y1.freq>y0.freq&&y1.wave>y0.wave&&y1.gain>y0.gain);
+}
+// 10. Vehicle one-shot events: counter diffs -> catalog names; first frame is a silent baseline; all names exist in the catalog.
+{
+ for(const name of Object.values(VEHICLE_EVENT_SFX))assert.ok(SFX[name],'vehicle event sfx missing '+name);
+ assert.deepEqual(vehicleAudioEvents(null,{roofShots:5}),[],'first snapshot is a baseline');
+ const a={roofShots:1,seaShots:0,repairs:0,hullHits:2},b={roofShots:3,seaShots:1,repairs:1,hullHits:2};
+ const ev=vehicleAudioEvents(a,b);assert.deepEqual(ev.map(e=>e.name).sort(),['cannon.fire','fire.vanguard','supply.health'].sort());
+ assert.equal(ev.find(e=>e.name==='fire.vanguard').count,2);
+ assert.deepEqual(vehicleAudioEvents(b,a),[],'counters going down (reset) never fire');
+ const va=createVehicleAudio({storage:memory()});// no AudioContext in Node: update must be a no-op, events must still diff
+ va.update(.016,{kind:'rover',speed:3,throttle:1,active:true});
+ assert.deepEqual(va.events({roofShots:1}),[]);assert.equal(va.events({roofShots:2}).length,1);va.resetEvents();assert.deepEqual(va.events({roofShots:9}),[]);
 }
 console.log('PASS: audio settings/persistence, bus unlock + hold/release stacking, catalog validity and distinct telegraph signatures, recipe rendering, spatial pan/distance/occlusion, sfx cooldown/voice cap, music state machine + intensity + director transitions, kill streak + facade routing, vehicle engine mappings');

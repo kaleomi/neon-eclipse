@@ -76,8 +76,9 @@ const raycaster=new T.Raycaster(),desired=new T.Vector3(),focus=new T.Vector3(),
 const held=(...codes)=>codes.some(code=>keys.has(code)),entity=()=>kind==='plane'?plane:kind==='yacht'?yacht:kind==='rover'?rover:player;
 function notify(text){message.textContent=text;message.classList.add('visible');messageTime=4;}
 function clearInput(){keys.clear();drag=false;fire=false;rocketKey=false;recovery=0;accumulator=0;}
-function pause(){if(!active)return;active=false;vehicleAudio.pause();clearInput();overlay.hidden=false;document.exitPointerLock?.();$('#drive-overlay-title').textContent='联合试验已暂停';$('#drive-overlay-copy').textContent='载具、波浪与路线计时已冻结。继续会回到原位置；试验调度会回收全部载具并重置三条路线。';$('#resume-drive').textContent='继续试验 →';$('#resume-drive').focus();updateHUD();}
-function resume(){if(joint.status==='won'||joint.status==='lost'||chase.status==='won'||chase.status==='lost'||sortie.status==='won'||sortie.status==='lost'||escort.status==='won'||escort.status==='lost'){notify('请选择重试任务，或返回自由试驾。');return;}active=true;started=true;vehicleAudio.resume();vehicleAudio.unlock();clearInput();overlay.hidden=true;last=performance.now();recoveryArmed=false;armedStation=null;$('#recover-drive').textContent='回收全部载具并重置路线';canvas.focus();updateHUD();}
+// Suspending or explicitly resuming supersedes any dispatch still waiting for storage.
+function pause(){++missionIntent;if(!active)return;active=false;vehicleAudio.pause();clearInput();overlay.hidden=false;document.exitPointerLock?.();$('#drive-overlay-title').textContent='联合试验已暂停';$('#drive-overlay-copy').textContent='载具、波浪与路线计时已冻结。继续会回到原位置；试验调度会回收全部载具并重置三条路线。';$('#resume-drive').textContent='继续试验 →';$('#resume-drive').focus();updateHUD();}
+function resume(){if(joint.status==='won'||joint.status==='lost'||chase.status==='won'||chase.status==='lost'||sortie.status==='won'||sortie.status==='lost'||escort.status==='won'||escort.status==='lost'){notify('请选择重试任务，或返回自由试驾。');return;}++missionIntent;active=true;started=true;vehicleAudio.resume();vehicleAudio.unlock();clearInput();overlay.hidden=true;last=performance.now();recoveryArmed=false;armedStation=null;$('#recover-drive').textContent='回收全部载具并重置路线';canvas.focus();updateHUD();}
 function recover(station='garage'){
  vehicleAudio.reset();// New task/restore must not inherit old audio counters or warning timers.
  ++missionIntent;// A newer dispatch/mode selection cancels an older async mission launch.
@@ -115,7 +116,7 @@ function finishFlight(){if(joint.status==='active'&&joint.stage==='recon'){finis
 function finishJoint(){const expeditionOwned=expeditionUI?.finish('joint',joint);if(joint.status==='won'&&!expeditionOwned)checkpointUI.complete(joint);pause();$('#resume-drive').hidden=true;$('#drive-overlay-title').textContent='海空接力 · '+(joint.status==='won'?'联合任务完成':'任务中止');$('#drive-overlay-copy').textContent=joint.reason+'。已完成 '+joint.completed.length+'/9 阶段，用时 '+joint.elapsed.toFixed(1)+' 秒'+(joint.recovered?'（检查点继续，不是完整一命用时）':'')+'。本轮不计入单项飞行成绩。'+(expeditionOwned?'先遣队节点和提交结果以上方面板为准。':'失败时可在下方检查点面板恢复最近安全阶段；以保存状态为准。');if(expeditionOwned)$('#drive-overlay-copy').textContent+=EXPEDITION_RESULT_NOTE;$('#drive-overlay-title').tabIndex=-1;$('#drive-overlay-title').focus({preventScroll:true});$('.drive-panel').scrollTop=0;updateHUD();}
 function restoreCheckpoint(record){const restored=restoreJointCheckpoint(record);recover();joint=restored.mission;Object.assign(rover,restored.rover);Object.assign(plane,restored.plane);Object.assign(yacht,restored.yacht);player=restored.player;kind=null;orbit=0;pitch=0;flightHeading=plane.yaw;clearInput();updateCamera(1);resume();notify('已恢复安全阶段 · '+JOINT_LABELS[joint.stage]+'；本轮为检查点继续。');return joint.runId;}
 async function startJointTask(){
- const intent=++missionIntent,candidate=createJointMission(true);if(!await checkpointUI.begin(candidate.runId)||intent!==missionIntent)return null;
+ const intent=++missionIntent,candidate=createJointMission(true);if(!await checkpointUI.begin(candidate.runId,()=>intent===missionIntent)||intent!==missionIntent)return null;
  recover();joint=candidate;resume();notify('海空接力：步行到设备终端，按住 F 领取，再驾驶越野车前往码头。');return joint;
 }
 $('#start-joint').addEventListener('click',async()=>{if(!jointArmed){jointArmed=true;$('#start-joint').textContent='确认从头开始 · 到达新节点后替换旧检查点';return;}await startJointTask();});
@@ -136,7 +137,7 @@ $('#start-escort').addEventListener('blur',()=>{escortArmed=false;$('#start-esco
 $('#escort-free-drive').addEventListener('click',()=>{recover('garage');resume();});
 {const select=$('#escort-difficulty-select'),copy=$('#escort-difficulty-copy');if(select){select.value=readEscortDifficulty();const sync=()=>{copy.textContent=ESCORT_PROFILES[normalizeEscort(select.value)].description;};sync();select.addEventListener('change',()=>{try{localStorage.setItem(ESCORT_KEY,normalizeEscort(select.value));}catch{}sync();});}}
 async function startChase(difficulty=selectedNavalDifficulty()){
- const intent=++missionIntent,candidate=createNavalRun(yacht,difficulty);if(!await navalCheckpointUI.begin(candidate.runId)||intent!==missionIntent)return null;
+ const intent=++missionIntent,candidate=createNavalRun(yacht,difficulty);if(!await navalCheckpointUI.begin(candidate.runId,()=>intent===missionIntent)||intent!==missionIntent)return null;
  recover('marina');kind='yacht';cameraMode='chase';orbit=0;pitch=0;chase=createNavalRun(yacht,candidate.naval.profile.id,candidate.runId);resume();notify('南湾突围：穿过 3 个检查点，甩开或击毁全部敌艇后减速撤离；F 反击、Q 换目标，注意错峰齐射预警。每过一个检查点自动保存安全节点。');updateHUD();return chase;
 }
 function restoreNavalCheckpointRun(record){const restored=restoreNavalCheckpoint(record);recover('marina');chase=restored.task;Object.assign(yacht,restored.yacht);kind='yacht';cameraMode='chase';orbit=0;pitch=0;clearInput();updateCamera(1);resume();notify('已从安全节点恢复 · '+navalCheckpointLabel(record)+'；敌艇重新就位，本轮为检查点继续。');updateHUD();return chase.runId;}
@@ -155,7 +156,7 @@ for(const button of document.querySelectorAll('[data-station]')){const original=
 $('#return-menu').addEventListener('click',e=>{if(started&&!confirm('返回主菜单？试验区位置与路线会重置；已成功保存的飞行成绩和联合检查点会保留，原六章存档不受影响。'))e.preventDefault();});
 overlay.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const buttons=[...overlay.querySelectorAll('button,input,select,summary,a[href]')].filter(el=>!el.disabled&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden'),first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
 window.addEventListener('keydown',e=>{
- if(e.code==='Escape'){e.preventDefault();if(active)pause();else if(started)resume();return;}if(!active)return;
+ if(e.code==='Escape'){e.preventDefault();if(e.repeat)return;if(active)pause();else if(started)resume();return;}if(!active)return;
  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','KeyF','KeyE','KeyC','KeyR','KeyQ','KeyZ','KeyG','ShiftLeft','ShiftRight','ControlLeft','ControlRight'].includes(e.code))e.preventDefault();
  if(e.repeat)return;keys.add(e.code);if(e.code==='KeyQ'&&kind==='yacht'&&chase.naval&&chase.status==='active'){cycleNavalTarget(chase);notify('舰炮目标：'+navalSummary(chase).target.label);}if(e.code==='KeyE')interact();if(e.code==='KeyF'&&kind==='rover'){if(!armed())notify('任务进行中，车顶机枪不可用。');else{setGunner(!gunner);notify(gunner?(escorting()?'炮手位 · 车辆自动跟随卡车 · 鼠标瞄准，左键射击，F 回驾驶位':'已切换到炮手位 · 车辆保持直行 3 秒 · 鼠标瞄准，左键射击，空格刹车，F 回驾驶位'):'已回到驾驶位');}}if(e.code==='KeyG')rocketKey=true;if(e.code==='KeyC'&&kind&&!gunner){cameraMode=cameraMode==='chase'?'hood':'chase';orbit=0;pitch=0;flightHeading=plane.yaw;updateCamera(1);notify(cameraMode==='hood'?'已切换前向视角':'已切换追尾视角');}
 });

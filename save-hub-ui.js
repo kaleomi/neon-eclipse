@@ -5,7 +5,7 @@ import {bindExpeditionBackup} from './expedition-backup-ui.js';
 const STATUS_LABEL={ok:'正常',empty:'无数据',unknown:'版本未知',corrupt:'已损坏',unavailable:'不可用'};
 const REASON_LABEL={'unknown-key':'未识别的存档键，跳过',corrupt:'内容损坏，跳过','unknown-version':'版本未知，将原样写入'};
 const ACTION_LABEL={add:'新增',overwrite:'覆盖',same:'相同',skip:'跳过'};
-const CODE_LABEL={invalid:'不是 NEON ECLIPSE 的备份文件',unavailable:'当前浏览器无法访问本地存储','too-large':'备份文件过大','backup-failed':'无法写入导入前备份，已取消导入',partial:'部分槽位写入失败，其余已导入','no-backup':'没有可恢复的导入前备份',done:'完成'};
+const CODE_LABEL={invalid:'不是 NEON ECLIPSE 的备份文件',unavailable:'当前浏览器无法访问本地存储','too-large':'备份文件过大','backup-failed':'无法完整读取或保存导入前备份，已取消导入',busy:'另一个存档操作尚未完成，请稍后重试',partial:'部分槽位或飞行成绩未完成，请检查失败项','no-backup':'没有可恢复的导入前备份',done:'完成'};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 export function bindSaveHub(container,{hub=null,records=null,onChanged=()=>{},download=defaultDownload}={}){
  if(!container)return null;
@@ -64,7 +64,7 @@ export function bindSaveHub(container,{hub=null,records=null,onChanged=()=>{},do
   const result=await hub.importBundle(pendingBundle,{mode});
   renderPreview(null);renderHealth();
   if(!result.ok&&result.code!=='partial'){status(CODE_LABEL[result.code]||'导入失败。',true);return;}
-  const flight=result.flight.saved||result.flight.duplicates?`；飞行成绩新增 ${result.flight.saved} 条、重复 ${result.flight.duplicates} 条`:'';
+  const flight=Object.values(result.flight).some(n=>n>0)?`；飞行成绩新增 ${result.flight.saved} 条、重复 ${result.flight.duplicates} 条、跳过 ${result.flight.skipped} 条、失败 ${result.flight.failed} 条`:'';
   status(`${result.code==='partial'?CODE_LABEL.partial:'导入完成'}：写入 ${result.written.length} 个槽位${result.removed.length?`，清除 ${result.removed.length} 个`:''}${flight}。刷新页面后生效。`,result.code==='partial');
   onChanged(result);
  }
@@ -72,7 +72,7 @@ export function bindSaveHub(container,{hub=null,records=null,onChanged=()=>{},do
   const result=hub.restoreBackup();
   renderHealth();
   if(!result.ok&&result.code!=='partial'){status(CODE_LABEL[result.code]||'恢复失败。',true);return;}
-  status(`已恢复 ${result.createdAt} 的导入前备份：写入 ${result.written.length} 个槽位${result.removed.length?`，清除 ${result.removed.length} 个`:''}。刷新页面后生效。`,result.code==='partial');
+  status(`${result.code==='partial'?'恢复或撤销备份保存未全部完成；原恢复目标仍保留。已处理':'已恢复'} ${result.createdAt} 的导入前备份：写入 ${result.written.length} 个槽位${result.removed.length?`，清除 ${result.removed.length} 个`:''}。刷新页面后生效。`,result.code==='partial');
   onChanged(result);
  }
  $('[data-save-export]').addEventListener('click',doExport);

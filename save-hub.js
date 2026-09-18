@@ -40,9 +40,10 @@ export const SLOTS=Object.freeze([
 export const SLOT_KEYS=Object.freeze(SLOTS.map(s=>s.key));
 export const GROUP_TITLES=Object.freeze({journey:'连续战役',chapter:'单章检查点',collection:'收集与成就',settings:'偏好设置',records:'飞行成绩'});
 const slotFor=key=>SLOTS.find(s=>s.key===key)||null;
-function readRaw(storage,key){try{const v=storage.getItem(key);return typeof v==='string'?v:null;}catch{return null;}}
+// Read failure is not an empty slot: backups must fail closed rather than omit unreadable data.
+function readRaw(storage,key){const v=storage.getItem(key);return typeof v==='string'?v:null;}
 export function inspectSlot(storage,slot){
- const raw=readRaw(storage,slot.key);
+ let raw;try{raw=readRaw(storage,slot.key);}catch{return {key:slot.key,title:slot.title,group:slot.group,status:'unavailable',bytes:0,legacy:!!slot.legacy};}
  if(raw===null)return {key:slot.key,title:slot.title,group:slot.group,status:'empty',bytes:0,legacy:!!slot.legacy};
  let status;try{status=slot.validate(raw);}catch{status='corrupt';}
  return {key:slot.key,title:slot.title,group:slot.group,status,bytes:raw.length,legacy:!!slot.legacy};
@@ -56,26 +57,27 @@ export function validBundle(bundle){
 }
 export function createSaveHub({storage,records=null,now=()=>Date.now()}={}){
  if(storage===undefined){try{storage=globalThis.localStorage;}catch{storage=null;}}
- const available=!!storage;
+ const available=!!storage;let mutating=false;
  function health(){return SLOTS.map(slot=>available?inspectSlot(storage,slot):{key:slot.key,title:slot.title,group:slot.group,status:'unavailable',bytes:0,legacy:!!slot.legacy});}
- function snapshot(){const slots={};if(!available)return slots;for(const slot of SLOTS){const raw=readRaw(storage,slot.key);if(raw!==null)slots[slot.key]=raw;}return slots;}
+ function snapshot(){if(!available)throw Error('Storage unavailable');const slots={};for(const slot of SLOTS){const raw=readRaw(storage,slot.key);if(raw!==null)slots[slot.key]=raw;}return slots;}
  async function exportBundle(){
   const bundle={app:SAVE_HUB_APP,schema:SAVE_HUB_SCHEMA,exportedAt:new Date(now()).toISOString(),slots:snapshot()};
-  if(records){const result=await records.read();if(result.ok)bundle.flightRecords=result.records;else bundle.flightRecordsError=result.code||'failed';}
+  if(records){try{const result=await records.read();if(result.ok)bundle.flightRecords=result.records;else bundle.flightRecordsError=result.code||'failed';}catch{bundle.flightRecordsError='failed';}}
   return bundle;
  }
  function previewImport(bundle){
   if(!validBundle(bundle))return {ok:false,code:'invalid',entries:[]};
+  let currentSlots;try{currentSlots=snapshot();}catch{return {ok:false,code:'unavailable',entries:[]};}
   const entries=[];
   for(const [key,raw] of Object.entries(bundle.slots)){
    const slot=slotFor(key);
    if(!slot){entries.push({key,title:key,group:'unknown',action:'skip',reason:'unknown-key'});continue;}
    let status;try{status=slot.validate(raw);}catch{status='corrupt';}
    if(status==='corrupt'){entries.push({key,title:slot.title,group:slot.group,action:'skip',reason:'corrupt'});continue;}
-   const current=available?readRaw(storage,key):null;
+   const current=currentSlots[key]??null;
    entries.push({key,title:slot.title,group:slot.group,action:current===null?'add':current===raw?'same':'overwrite',reason:status==='unknown'?'unknown-version':null,bytes:raw.length});
   }
-  const missing=available?SLOTS.filter(s=>!(s.key in bundle.slots)&&readRaw(storage,s.key)!==null).map(s=>({key:s.key,title:s.title,group:s.group})):[];
+  const missing=SLOTS.filter(s=>!(s.key in bundle.slots)&&Object.hasOwn(currentSlots,s.key)).map(s=>({key:s.key,title:s.title,group:s.group}));
   const flightRecords=Array.isArray(bundle.flightRecords)?bundle.flightRecords.length:0;
   return {ok:true,entries,missing,flightRecords,exportedAt:bundle.exportedAt||null};
  }
@@ -83,16 +85,17 @@ export function createSaveHub({storage,records=null,now=()=>Date.now()}={}){
   if(!available)return false;
   try{storage.setItem(BACKUP_KEY,JSON.stringify({app:SAVE_HUB_APP,schema:SAVE_HUB_SCHEMA,createdAt:new Date(now()).toISOString(),slots:snapshot()}));return true;}catch{return false;}
  }
- function readBackup(){
-  if(!available)return null;
+ function readBackupStrict(){
   const p=parse(readRaw(storage,BACKUP_KEY)||'null');
   return p.ok&&p.value&&validBundle({...p.value,exportedAt:p.value.createdAt})?p.value:null;
  }
- function applySlots(slots,{replace=false}={}){
+ function readBackup(){if(!available)return null;try{return readBackupStrict();}catch{return null;}}
+ function applySlots(slots,{replace=false,preserveRaw=false}={}){
   const written=[],removed=[],failed=[],skipped=[];
   for(const [key,raw] of Object.entries(slots)){
    const slot=slotFor(key);if(!slot){skipped.push({key,reason:'unknown-key'});continue;}
-   let status;try{status=slot.validate(raw);}catch{status='corrupt';}
+   // Internal undo restores the exact original bytes, even if the old slot was corrupt. User imports still validate.
+   let status='ok';if(!preserveRaw)try{status=slot.validate(raw);}catch{status='corrupt';}
    if(status==='corrupt'){skipped.push({key,reason:'corrupt'});continue;}
    try{storage.setItem(key,raw);written.push(key);}catch{failed.push({key,reason:'write-failed'});}
   }
@@ -100,28 +103,40 @@ export function createSaveHub({storage,records=null,now=()=>Date.now()}={}){
   return {written,removed,failed,skipped};
  }
  async function importBundle(bundle,{mode='merge'}={}){
+  if(mutating)return {ok:false,code:'busy'};
   if(!available)return {ok:false,code:'unavailable'};
   if(!validBundle(bundle))return {ok:false,code:'invalid'};
-  if(JSON.stringify(bundle).length>BUNDLE_LIMIT)return {ok:false,code:'too-large'};
-  if(!writeBackup())return {ok:false,code:'backup-failed'};
-  const result=applySlots(bundle.slots,{replace:mode==='replace'});
-  let flight={saved:0,duplicates:0,failed:0,skipped:0};
-  if(records&&Array.isArray(bundle.flightRecords)){
-   for(const record of bundle.flightRecords){
-    const r=await records.save(record);
-    if(r.ok)flight[r.duplicate?'duplicates':'saved']++;else if(r.code==='corrupt')flight.skipped++;else flight.failed++;
-   }
-  }else if(Array.isArray(bundle.flightRecords)&&bundle.flightRecords.length)flight.skipped=bundle.flightRecords.length;
-  return {ok:result.failed.length===0,code:result.failed.length?'partial':'done',mode,...result,flight,backup:BACKUP_KEY};
+  try{const text=JSON.stringify(bundle);if(new TextEncoder().encode(text).length>BUNDLE_LIMIT)return {ok:false,code:'too-large'};bundle=JSON.parse(text);}catch{return {ok:false,code:'invalid'};}
+  mutating=true;
+  try{
+   if(!writeBackup())return {ok:false,code:'backup-failed'};
+   const result=applySlots(bundle.slots,{replace:mode==='replace'});
+   const flight={saved:0,duplicates:0,failed:0,skipped:0};
+   if(records&&Array.isArray(bundle.flightRecords)){
+    for(const record of bundle.flightRecords){
+     try{const r=await records.save(record);if(r.ok)flight[r.duplicate?'duplicates':'saved']++;else if(r.code==='corrupt')flight.skipped++;else flight.failed++;}catch{flight.failed++;}
+    }
+   }else if(Array.isArray(bundle.flightRecords)&&bundle.flightRecords.length)flight.skipped=bundle.flightRecords.length;
+   const ok=result.failed.length===0&&flight.failed===0;
+   return {ok,code:ok?'done':'partial',mode,...result,flight,backup:BACKUP_KEY};
+  }finally{mutating=false;}
  }
  function restoreBackup(){
+  if(mutating)return {ok:false,code:'busy'};
   if(!available)return {ok:false,code:'unavailable'};
-  const backup=readBackup();if(!backup)return {ok:false,code:'no-backup'};
-  const current=snapshot();
-  const result=applySlots(backup.slots,{replace:true});
-  try{storage.setItem(BACKUP_KEY,JSON.stringify({app:SAVE_HUB_APP,schema:SAVE_HUB_SCHEMA,createdAt:new Date(now()).toISOString(),slots:current}));}catch{}
-  return {ok:result.failed.length===0,code:result.failed.length?'partial':'done',createdAt:backup.createdAt,...result};
+  let backup,current;
+  try{backup=readBackupStrict();if(!backup)return {ok:false,code:'no-backup'};current=snapshot();}catch{return {ok:false,code:'unavailable'};}
+  mutating=true;
+  try{
+   const result=applySlots(backup.slots,{replace:true,preserveRaw:true});
+   // localStorage is not transactional. Keep the original restore target until every slot succeeds.
+   if(result.failed.length===0){
+    try{storage.setItem(BACKUP_KEY,JSON.stringify({app:SAVE_HUB_APP,schema:SAVE_HUB_SCHEMA,createdAt:new Date(now()).toISOString(),slots:current}));}
+    catch{result.failed.push({key:BACKUP_KEY,reason:'backup-write-failed'});}
+   }
+   return {ok:result.failed.length===0,code:result.failed.length?'partial':'done',createdAt:backup.createdAt,...result};
+  }finally{mutating=false;}
  }
- return {available,health,snapshot,exportBundle,previewImport,importBundle,restoreBackup,readBackup,writeBackup};
+ return {available,health,snapshot,exportBundle,previewImport,importBundle,restoreBackup,readBackup,writeBackup:()=>!mutating&&writeBackup()};
 }
 export function bundleFileName(bundle){return `neon-eclipse-save-${(bundle.exportedAt||new Date().toISOString()).slice(0,19).replace(/[:T]/g,'-')}.json`;}

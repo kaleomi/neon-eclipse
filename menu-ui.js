@@ -33,7 +33,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     <main class="menu-views">
       <section class="menu-view menu-home" data-view="home" aria-label="主菜单">
         <div class="menu-home-copy">
-          <p class="menu-eyebrow"><span></span> 六章行动 · 一个未熄灭的信号</p>
+          <p class="menu-eyebrow"><span></span> 七章行动 · 一个未熄灭的信号</p>
           <h1>NEON<br><span>ECLIPSE</span><i>暗影突围</i></h1>
           <p class="menu-home-intro">穿越封锁线，让信号重返黎明。</p>
           <nav class="menu-home-actions" aria-label="游戏主菜单">
@@ -42,13 +42,13 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
         </div>
         <div class="menu-home-scene" aria-hidden="true">
           <div class="menu-signal"><span class="signal-corner"></span><span class="signal-coordinate">SECTOR / K-19</span><div class="signal-reticle">+</div><span class="signal-coordinate signal-bottom">SIGNAL FOUND<span>●</span></span></div>
-          <div class="menu-scene-caption"><span>THE CAMPAIGN</span><strong>长夜未尽，行动继续。</strong><p>反应堆 → 运输站 → 天穹 → 中枢塔 → 列车 → 港口</p></div>
+          <div class="menu-scene-caption"><span>THE CAMPAIGN</span><strong>长夜未尽，行动继续。</strong><p>反应堆 → 运输站 → 天穹 → 中枢塔 → 列车 → 港口 → 轨道基座</p></div>
         </div>
       </section>
       <section class="menu-view menu-subpage" data-view="levels" aria-labelledby="menu-levels-title" hidden>
         <div class="menu-page-heading"><div><p class="menu-eyebrow">CHAPTER SELECT</p><h2 id="menu-levels-title" tabindex="-1">选择关卡</h2></div><p>选择一章开始。单章模式与连续战役分别保存。</p></div>
         <div id="menu-level-grid"></div>
-        <div class="menu-level-footer"><p><strong>海陆空先遣 / 载具试验</strong><br>1.2 公里联合试验区 · 越野车 / 固定翼飞机 / 游艇 · 不影响六章存档</p><button type="button" id="menu-rover" class="menu-secondary">进入驾驶试验区 →</button></div>
+        <div class="menu-level-footer"><p><strong>海陆空先遣 / 载具试验</strong><br>1.2 公里联合试验区 · 越野车 / 固定翼飞机 / 游艇 · 不影响章节存档</p><button type="button" id="menu-rover" class="menu-secondary">进入驾驶试验区 →</button></div>
         <div class="menu-level-footer"><p>隐藏星星与荣誉跨重玩保留。探索路线不会阻挡主线。</p><button type="button" data-open="achievements" class="menu-text-button">${menuIcon('star')} 收藏与单章挑战</button></div>
         <details class="menu-training"><summary>当前关卡的阶段训练 <span>独立训练，不覆盖战役</span></summary><div id="menu-training-slot"></div></details>
       </section>
@@ -183,11 +183,11 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   function requestNewGame() {
     const start = () => perform(actions.newGame);
     if (journey.data || getSession().pending || hasJourneyRecord()) {
-      confirm('开始新的战役？', '这会替换当前六章战役进度。各关独立检查点、隐藏星星和已获得的荣誉不会重置。', start, '开始新游戏');
+      confirm('开始新的战役？', '这会替换当前七章战役进度。各关独立检查点、隐藏星星和已获得的荣誉不会重置。', start, '开始新游戏');
     } else start();
   }
   function hasJourneyRecord() {
-    try { return [4, 3, 2, 1].some(version => storage?.getItem('neon-eclipse.journey.v' + version) != null); }
+    try { return [5, 4, 3, 2, 1].some(version => storage?.getItem('neon-eclipse.journey.v' + version) != null); }
     catch { return false; }
   }
   function openChapter(target, entry = 'chapter') {
@@ -246,7 +246,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     if (advancing) {
       kicker = '第 ' + (s.mode === 'journey' ? String(s.journey.chapter + 1).padStart(2, '0') : current.number) + ' 章已完成 / NEXT CHAPTER';
       description = '下一站：' + target.name + '。' + target.brief + ' 进入后生命与弹药重新整备。';
-    } else if (complete) { kicker = 'MISSION ACCOMPLISHED'; title = '六章战役完成'; description = '信号已送达，小队成功撤离。你的战役成绩、收藏和荣誉已保留。'; }
+    } else if (complete) { kicker = 'MISSION ACCOMPLISHED'; title = '七章战役完成'; description = '信号已送达，小队成功撤离。你的战役成绩、收藏和荣誉已保留。'; }
     else if (s.pending) { kicker = 'SAVE REQUIRED / 结果待保存'; title = '先保存，再继续'; description = '本章已完成，但战役结果尚未成功写入。请点击下方按钮重试；保存成功前不会进入下一关。'; }
     else if (paused) { kicker = 'OPERATION PAUSED / 行动暂停'; title = '行动已暂停'; description = '当前关卡：' + current.name + '。当前目标：' + s.stageTitle + '。'; }
     else if (lost) { kicker = 'SIGNAL LOST / 行动中断'; title = '重新集结，再次出发'; description = '从最近的阶段入口继续。读档重试不计本轮一命挑战，星星与已有荣誉保留。'; }

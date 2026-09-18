@@ -12,7 +12,8 @@ const oneOf=values=>text=>values.includes(text)?'ok':'unknown';
 const chapterSlot=(key,map,title)=>({key,group:'chapter',map,title,validate:versioned([1],v=>Number.isInteger(v.unlocked))});
 // Slot order is also the order shown in the UI. Keys mirror the owner modules exactly.
 export const SLOTS=Object.freeze([
- {key:'neon-eclipse.journey.v4',group:'journey',title:'连续战役（当前）',validate:versioned([4])},
+ {key:'neon-eclipse.journey.v5',group:'journey',title:'连续战役（当前）',validate:versioned([5])},
+ {key:'neon-eclipse.journey.v4',group:'journey',title:'连续战役（六章旧档）',legacy:true,validate:versioned([4])},
  {key:'neon-eclipse.journey.v3',group:'journey',title:'连续战役（五章旧档）',legacy:true,validate:versioned([3])},
  {key:'neon-eclipse.journey.v2',group:'journey',title:'连续战役（四章旧档）',legacy:true,validate:versioned([2])},
  {key:'neon-eclipse.journey.v1',group:'journey',title:'连续战役（三章旧档）',legacy:true,validate:versioned([1])},
@@ -22,7 +23,8 @@ export const SLOTS=Object.freeze([
  chapterSlot('neon-eclipse.tower.v1','tower','第 4 章 多层中枢塔'),
  chapterSlot('neon-eclipse.train.v1','train','第 5 章 疾驰货运列车'),
  chapterSlot('neon-eclipse.harbor.v1','harbor','第 6 章 风暴港口'),
- {key:'neon-eclipse.stars.v1',group:'collection',title:'隐藏星星',validate:versioned([1,2,3],v=>Array.isArray(v.stars))},
+ chapterSlot('neon-eclipse.orbital.v1','orbital','第 7 章 轨道电梯基座'),
+ {key:'neon-eclipse.stars.v1',group:'collection',title:'隐藏星星',validate:versioned([1,2,3,4],v=>Array.isArray(v.stars))},
  {key:'neon-eclipse.chapter-achievements.v1',group:'collection',title:'单章成就',validate:versioned([1],v=>Array.isArray(v.awards))},
  {key:'neon-eclipse.achievement-notices.v1',group:'collection',title:'成就提示状态',validate:text=>parse(text).ok?'ok':'corrupt'},
  {key:'neon-eclipse.combat-difficulty.v1',group:'settings',title:'主线战斗难度',validate:oneOf(['easy','normal','hard'])},

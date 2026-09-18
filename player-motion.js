@@ -1,7 +1,9 @@
 // Upright player AABB with small integration steps; enemy movement remains unchanged.
 export const PLAYER={radius:.4,height:1.8,eye:1.7,gravity:20,jumpSpeed:7.6};
-export function createPlayerMotion(obstacles,ceilings=[],bounds={x:39.1,z:39.1}){
+export function createPlayerMotion(obstacles,ceilings=[],bounds={x:39.1,z:39.1},{gravityAt=null}={}){
  const state={y:0,velocity:0,grounded:true};const eps=1e-5;
+ // Optional per-height gravity (chapter 07 bands). Without the hook behaviour is byte-for-byte the original.
+ const gravity=()=>gravityAt?gravityAt(state.y):PLAYER.gravity;
  const overlap=(x,z,o)=>Math.abs(x-o.x)<o.w/2+PLAYER.radius-eps&&Math.abs(z-o.z)<o.d/2+PLAYER.radius-eps;
  const bottom=o=>o.bottom??0,top=o=>o.top??o.h;
  function volumes(){return obstacles.concat(ceilings);}
@@ -24,7 +26,7 @@ export function createPlayerMotion(obstacles,ceilings=[],bounds={x:39.1,z:39.1})
    horizontal(p,p.x,p.z+dz/count);
    if(state.grounded&&!supported(p,state.y))state.grounded=false;
    if(!state.grounded){
-    const old=state.y;state.velocity-=PLAYER.gravity*h;let next=old+state.velocity*h;
+    const old=state.y;state.velocity-=gravity()*h;let next=old+state.velocity*h;
     if(state.velocity>0){for(const o of volumes())if(overlap(p.x,p.z,o)&&old+PLAYER.height<=bottom(o)+eps&&next+PLAYER.height>=bottom(o)){next=Math.min(next,bottom(o)-PLAYER.height);state.velocity=0;}}
     else{
      let floor=0;for(const o of volumes())if(overlap(p.x,p.z,o)&&old>=top(o)-eps&&next<=top(o)+eps)floor=Math.max(floor,top(o));

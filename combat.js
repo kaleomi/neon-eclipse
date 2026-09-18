@@ -15,8 +15,9 @@ export function createHandling(){
   state.heat=Math.max(0,state.heat-dt*1.5);state.pitch*=Math.exp(-dt*8);state.yaw*=Math.exp(-dt*11);
   state.switchRemaining=Math.max(0,state.switchRemaining-dt);
  }
- function shot(weapon,random=.5){
-  const multiplier=1-state.ads*.4;
+ // `scale` multiplies the kick (chapter 07 low-gravity bands); default 1 keeps every other map identical.
+ function shot(weapon,random=.5,scale=1){
+  const multiplier=(1-state.ads*.4)*(Number.isFinite(scale)&&scale>0?scale:1);
   state.pitch=Math.min(.12,state.pitch+weapon.kick*multiplier);
   state.yaw=Math.max(-.035,Math.min(.035,state.yaw+(random-.5)*weapon.kick*.45));
   state.heat=Math.min(1.5,state.heat+.28);

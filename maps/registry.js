@@ -27,7 +27,11 @@ export const MAP_REGISTRY=Object.freeze([
  {id:'harbor',order:6,code:'H-06',title:'风暴港口',english:'STORM HARBOR',brief:'穿越风暴港口，为小队点亮信标。',features:'集装箱堆场 · 港务精英 · 登船撤离',color:'#83e4e7',
   radarLabel:'H-06 / 风暴港口',saveKey:'neon-eclipse.harbor.v1',boss:null,
   traits:{multiLevel:true,movingFrame:false,water:true,weather:'rain'},
-  modules:{data:'./harbor-data.js',world:'./harbor-world.js',navigation:'./harbor-navigation.js'}}
+  modules:{data:'./harbor-data.js',world:'./harbor-world.js',navigation:'./harbor-navigation.js'}},
+ {id:'orbital',order:7,code:'O-07',title:'轨道电梯基座',english:'ORBITAL TETHER BASE',brief:'登上轨道电梯基座，切断天空的锚索。',features:'三段重力 · 蜂群与狙击 · TETHER 锚定核心',color:'#9fd2ff',
+  radarLabel:'O-07 / 轨道电梯基座',saveKey:'neon-eclipse.orbital.v1',boss:'tether',
+  traits:{multiLevel:true,movingFrame:false,water:false,weather:null},
+  modules:{data:'./orbital-data.js',world:'./orbital-world.js',navigation:'./orbital-navigation.js'}}
 ].map(Object.freeze));
 export const MAP_IDS=Object.freeze(MAP_REGISTRY.map(m=>m.id));
 export const DEFAULT_MAP_ID=MAP_REGISTRY[0].id;

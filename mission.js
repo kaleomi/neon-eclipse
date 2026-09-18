@@ -1,10 +1,11 @@
+import {ORBITAL_STAGES,ORBITAL_SUPPLIES} from './orbital-data.js';
 import {HARBOR_STAGES,HARBOR_SUPPLIES} from './harbor-data.js';
 import {TRAIN_STAGES,TRAIN_SUPPLIES} from './train-data.js';
 import {TOWER_STAGES,TOWER_SUPPLIES} from './tower-data.js';
 import {ROOF_STAGES,ROOF_SUPPLIES} from './roof-data.js';
-import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR} from './level.js';
+import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,IS_ORBITAL} from './level.js';
 import {STATION_STAGES,STATION_SUPPLIES} from './station-data.js';
-export const STAGES=IS_HARBOR?HARBOR_STAGES:IS_TRAIN?TRAIN_STAGES:IS_TOWER?TOWER_STAGES:IS_ROOF?ROOF_STAGES:IS_STATION?STATION_STAGES:[
+export const STAGES=IS_ORBITAL?ORBITAL_STAGES:IS_HARBOR?HARBOR_STAGES:IS_TRAIN?TRAIN_STAGES:IS_TOWER?TOWER_STAGES:IS_ROOF?ROOF_STAGES:IS_STATION?STATION_STAGES:[
  {id:'coolant',title:'启动西侧冷却装置',short:'冷却装置',zone:'WEST COOLANT',x:-28,z:0,duration:2,count:5,level:1,action:'启动冷却',message:'冷却回路已恢复。前往东侧仓储区取得访问权限。'},
  {id:'access',title:'获取东侧访问权限',short:'访问权限',zone:'EAST STORAGE',x:28,z:0,duration:2.5,count:6,level:2,action:'启动权限上传',defenseDuration:25,defenseRadius:12,defenseCount:3,message:'访问权限已取得。前往中央控制台解除反应堆封锁。'},
  {id:'reactor',title:'解除反应堆封锁',short:'反应堆控制台',zone:'REACTOR CONTROL',x:0,z:-11,duration:3,count:7,level:3,action:'解除封锁',message:'反应堆已解锁。警告：THE WARDEN 正在激活！'},
@@ -17,7 +18,7 @@ export const REACTOR_SUPPLIES=[
  {id:'med-east',type:'health',x:33,z:-16},{id:'ammo-core',type:'ammo',x:6,z:-23},
  {id:'med-south',type:'health',x:-6,z:26},{id:'ammo-south',type:'ammo',x:6,z:26}
 ];
-export const SUPPLIES=IS_HARBOR?HARBOR_SUPPLIES:IS_TRAIN?TRAIN_SUPPLIES:IS_TOWER?TOWER_SUPPLIES:IS_ROOF?ROOF_SUPPLIES:IS_STATION?STATION_SUPPLIES:REACTOR_SUPPLIES;
+export const SUPPLIES=IS_ORBITAL?ORBITAL_SUPPLIES:IS_HARBOR?HARBOR_SUPPLIES:IS_TRAIN?TRAIN_SUPPLIES:IS_TOWER?TOWER_SUPPLIES:IS_ROOF?ROOF_SUPPLIES:IS_STATION?STATION_SUPPLIES:REACTOR_SUPPLIES;
 export function createMission(){
  const state={index:0,progress:0,time:0,complete:false,defending:false,node:0,wave:0};
  function reset(index=0){Object.assign(state,{index:Number.isInteger(index)&&index>=0&&index<STAGES.length?index:0,progress:0,time:0,complete:false,defending:false,node:0,wave:0});}
@@ -53,7 +54,8 @@ export function applySupply(type,health,reserves,weapons){
 // Rank nearby safe sites, exclude the player's immediate vicinity and avoid overlapping spawns.
 export function chooseEncounterSpawns(stage,player,obstacles){
  const feetY=stage.spawnFeetY??stage.feetY??0;
- if(stage.spawns)return stage.spawns.map(([x,z])=>({x,z,y:feetY})).filter(p=>Math.hypot(p.x-player.x,p.z-player.z,feetY-(player.feetY??((player.y??1.7)-1.7)))>=6&&!obstacles.some(o=>Math.abs(p.x-o.x)<o.w/2+1.3&&Math.abs(p.z-o.z)<o.d/2+1.3&&feetY<(o.top??o.h)-1e-5&&feetY+2.4>(o.bottom??0)+1e-5)).slice(0,stage.count);
+ // Spawn entries are `[x,z]` on the stage's level or `{x,z,feetY}` for a specific layer (chapter 07 rings).
+ if(stage.spawns)return stage.spawns.map(s=>Array.isArray(s)?{x:s[0],z:s[1],y:feetY}:{x:s.x,z:s.z,y:s.feetY??feetY}).filter(p=>Math.hypot(p.x-player.x,p.z-player.z,p.y-(player.feetY??((player.y??1.7)-1.7)))>=6&&!obstacles.some(o=>Math.abs(p.x-o.x)<o.w/2+1.3&&Math.abs(p.z-o.z)<o.d/2+1.3&&p.y<(o.top??o.h)-1e-5&&p.y+2.4>(o.bottom??0)+1e-5)).slice(0,stage.count);
  const candidates=[];
  for(let x=-34;x<=34;x+=8)for(let z=-34;z<=34;z+=8){
   if(Math.hypot(x-player.x,z-player.z)<14)continue;

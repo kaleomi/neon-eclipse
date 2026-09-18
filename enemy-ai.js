@@ -1,7 +1,7 @@
 import {stepHarborElite,queueHarborVent} from './harbor-elite.js';
 import {sameEnemyLayer,enemyMuzzleHeight} from './roof-enemy-navigation.js';
 import * as THREE from './node_modules/three/build/three.module.js';
-import {ENEMY_TYPES,BOSS_PHASES,turnTowards,facingDot,movementIntent,stepBossState,recordBossAttack} from './enemy-rules.js';
+import {ENEMY_TYPES,BOSS_PHASES,turnTowards,facingDot,movementIntent,stepBossState,recordBossAttack,enemyBehavior} from './enemy-rules.js';
 import {animateEnemy} from './enemy-model.js';
 
 export function createEnemyDirector({enemies,player,navigation,vertical=null,move,obstacles,projectiles,onBossEvent,onEliteWindow=()=>{},scaleCooldown=seconds=>seconds}){
@@ -44,7 +44,7 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
      if(d>.01&&d<clearance)moveEnemy(pos,ox/d*(clearance-d)*dt,oz/d*(clearance-d)*dt,enemy.radius);
     }
    }
-   const aligned=facingDot(pos,enemy.group.rotation.y,player.position)>(enemy.type==='ranged'?.95:.83);
+   const aligned=facingDot(pos,enemy.group.rotation.y,player.position)>(enemyBehavior(enemy.type)==='ranged'?.95:.83);
    if(enemy.attack<=0&&enemy.charge===0&&!locked&&dist<profile.range&&visible&&aligned&&gate<=0){
     const phase=enemy.boss?BOSS_PHASES[enemy.bossState.phase]:null,attack=phase?phase.attack:profile.attack;
     // Freeze position and aim during telegraph; all bolts retain this captured target.
@@ -52,7 +52,7 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
     if(projectiles.queue(origin,target,enemy.boss,enemy.group,attack)){
      enemy.charge=attack.charge+(attack.bursts-1)*(attack.burstDelay||.3)+.05;
      enemy.attack=scaleCooldown((phase?phase.cooldown:profile.cooldown)+Math.random()*.25);
-     gate=enemy.boss?.55:enemy.type==='ranged'?.45:.28;
+     gate=enemy.boss?.55:enemyBehavior(enemy.type)==='ranged'?.45:.28;
      if(enemy.type==='harborElite')queueHarborVent(enemy);
      if(enemy.boss)recordBossAttack(enemy.bossState);
     }

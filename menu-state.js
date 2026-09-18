@@ -5,7 +5,7 @@ import {mapById} from './maps/registry.js';
 export const HOME_MENU_ITEMS = Object.freeze([
   {id: 'menu-new', label: '新游戏', hint: '从第一章开始完整战役', icon: 'play'},
   {id: 'menu-continue', label: '继续游戏', hint: '暂无可继续的进度', icon: 'resume'},
-  {id: 'menu-levels', label: '选择关卡', hint: '六个战场，独立探索', icon: 'levels'},
+  {id: 'menu-levels', label: '选择关卡', hint: '七个战场，独立探索', icon: 'levels'},
   {id: 'menu-achievements', label: '成就', hint: '单章挑战 · 星星收藏', icon: 'star'},
   {id: 'menu-settings', label: '设置', hint: '画面、界面与操作', icon: 'settings'}
 ].map(Object.freeze));
@@ -31,7 +31,8 @@ export function formatPlayTime(seconds) {
   return String(Math.floor(value / 60)).padStart(2, '0') + ':' + String(value % 60).padStart(2, '0');
 }
 
-const SINGLE_KEYS = ['campaign', 'station', 'roof', 'tower', 'train', 'harbor'].map(name => 'neon-eclipse.' + name + '.v1');
+// Slot keys come from the registry (campaign.v1 for chapter 1 is historical).
+const SINGLE_KEYS = CHAPTERS.map(chapter => mapById(chapter.map).saveKey);
 // Menu discovery is read-only. Never repair, migrate or delete a save while displaying it.
 export function readSingleSlots(storage) {
   const slots = [];
@@ -72,7 +73,7 @@ export function continueTarget({state, mode, map, journey, checkpoint, slots = [
 // A single primary action for every non-playing state. No DOM, storage writes or navigation here.
 export function primaryAction({state, mode, map, journey, checkpoint, pending = false}, singlePreview = false) {
   if (singlePreview) return {kind: checkpoint ? 'continue-single' : 'start-single', label: checkpoint ? '继续本关' : '开始本关', map};
-  if (pending) return {kind: 'save-result', label: chapterInfo(map).index === 5 ? '重试保存战役结果' : '保存结果并进入下一关', map};
+  if (pending) return {kind: 'save-result', label: chapterInfo(map).index === MENU_CHAPTERS.length - 1 ? '重试保存战役结果' : '保存结果并进入下一关', map};
   if (state === 'paused') return {kind: 'resume', label: '继续游戏', map};
   if (state === 'lost') return {kind: checkpoint ? 'retry' : 'restart', label: checkpoint ? '从检查点重试' : '重新开始本关', map};
   if (state === 'won' && mode === 'replay') return {kind: 'retry', label: '再次训练本阶段', map};

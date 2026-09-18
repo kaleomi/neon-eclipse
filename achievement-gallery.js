@@ -1,6 +1,6 @@
 import {ACHIEVEMENTS, CHALLENGE_MAPS} from './chapter-achievements.js';
 
-export const CHAPTER_NAMES = ['反应堆设施','地下运输站','天穹通讯枢纽','多层中枢塔','疾驰货运列车','风暴港口'];
+export const CHAPTER_NAMES = ['反应堆设施','地下运输站','天穹通讯枢纽','多层中枢塔','疾驰货运列车','风暴港口','轨道电梯基座'];
 export const HONORS = {
   blade: {mark:'Ⅰ', title:'孤刃先锋'}, untouched: {mark:'◇', title:'无痕行者'},
   survivor: {mark:'⚑', title:'不屈战士'}, arsenal: {mark:'Ⅳ', title:'军械大师'},

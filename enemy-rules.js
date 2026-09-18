@@ -9,6 +9,10 @@ export const ENEMY_TYPES={
   hint:'紫色瞄准线锁定旧位置 · 横移或寻找掩体',attack:{color:'purple',charge:1,speed:24,damage:10,angles:[0],bursts:1,showAim:true}},
  heavy:{name:'重装守卫',color:0xffd16c,hp:150,hpPerLevel:12,speed:1.3,turn:.95,scale:1.12,radius:.85,near:10,far:14,range:32,cooldown:3.1,
   hint:'正面装甲减伤 · 绕侧或命中背部核心',attack:{color:'amber',charge:.9,speed:12,damage:8,angles:[-.13,0,.13],bursts:1}},
+ drone:{name:'蜂群无人机',color:0xffa050,hp:34,hpPerLevel:3,speed:4.4,turn:5,scale:.8,radius:.5,near:4,far:8,range:16,cooldown:1.5,behavior:'assault',
+  hint:'血量低、成群贴近 · 霰弹或近战清理，别被围住',attack:{color:'orange',charge:.45,speed:16,damage:3,angles:[0],bursts:1}},
+ sniper:{name:'狙击守卫',color:0xb98cff,hp:58,hpPerLevel:6,speed:1.7,turn:2,scale:1.02,radius:.65,near:22,far:34,range:62,cooldown:3.6,behavior:'ranged',
+  hint:'紫色锁定线 1.6 秒 · 切断视线或换高度段',attack:{color:'purple',charge:1.6,speed:30,damage:16,angles:[0],bursts:1,showAim:true}},
  warden:{name:'THE WARDEN',color:0xff668d,hp:1000,hpPerLevel:0,speed:1.75,turn:.95,scale:1.9,radius:1.235,near:10,far:15,range:44,cooldown:2.5,
   hint:'等待过载窗口 · 攻击青色胸口核心'}
 };
@@ -59,11 +63,13 @@ export function stepBossState(enemy,dt,attackFinished=true){
  }
  return {changed,opened,closed};
 }
+// `behavior` lets new silhouettes (drone, sniper) reuse the assault / ranged movement without new branches.
+export const enemyBehavior=type=>ENEMY_TYPES[type]?.behavior||type;
 export function movementIntent(type,distance,visible){
- const p=ENEMY_TYPES[type];
+ const p=ENEMY_TYPES[type],behavior=enemyBehavior(type);
  if(!visible||distance>p.far)return 'approach';
- if(type==='ranged'&&distance<p.near)return 'retreat';
- if(type==='ranged')return 'strafe';
- if(type==='assault'&&distance>p.near)return 'approach';
+ if(behavior==='ranged'&&distance<p.near)return 'retreat';
+ if(behavior==='ranged')return 'strafe';
+ if(behavior==='assault'&&distance>p.near)return 'approach';
  return 'hold';
 }

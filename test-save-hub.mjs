@@ -11,13 +11,13 @@ const fakeRecords=(rows=[])=>({rows,read:async()=>({ok:true,records:[...rows]}),
 const now=()=>Date.UTC(2026,8,17,12,0,0);
 
 // 1. Slot registry matches the keys owner modules actually use.
-for(const key of [JOURNEY_KEY,STAR_KEY,ACHIEVEMENT_KEY,DIFFICULTY_KEY,FLIGHT_INVERT_KEY,'neon-eclipse.campaign.v1','neon-eclipse.harbor.v1','neon-eclipse.naval-difficulty.v1','neon-eclipse.presentation.v1'])assert.ok(SLOT_KEYS.includes(key),`slot registry missing ${key}`);
+for(const key of [JOURNEY_KEY,STAR_KEY,ACHIEVEMENT_KEY,DIFFICULTY_KEY,FLIGHT_INVERT_KEY,'neon-eclipse.campaign.v1','neon-eclipse.harbor.v1','neon-eclipse.orbital.v1','neon-eclipse.naval-difficulty.v1','neon-eclipse.presentation.v1'])assert.ok(SLOT_KEYS.includes(key),`slot registry missing ${key}`);
 assert.equal(new Set(SLOT_KEYS).size,SLOTS.length);
 assert.ok(!SLOT_KEYS.includes(BACKUP_KEY));
 
 // 2. Health inspection distinguishes empty / ok / unknown / corrupt without touching data.
 {
- const s=memory({[JOURNEY_KEY]:JSON.stringify({version:4,chapters:[]}),[STAR_KEY]:'{not json',[DIFFICULTY_KEY]:'hard','neon-eclipse.campaign.v1':JSON.stringify({version:9,unlocked:0})});
+ const s=memory({[JOURNEY_KEY]:JSON.stringify({version:5,chapters:[]}),[STAR_KEY]:'{not json',[DIFFICULTY_KEY]:'hard','neon-eclipse.campaign.v1':JSON.stringify({version:9,unlocked:0})});
  const hub=createSaveHub({storage:s,now});
  const h=Object.fromEntries(hub.health().map(r=>[r.key,r.status]));
  assert.equal(h[JOURNEY_KEY],'ok');assert.equal(h[STAR_KEY],'corrupt');assert.equal(h[DIFFICULTY_KEY],'ok');assert.equal(h['neon-eclipse.campaign.v1'],'unknown');assert.equal(h[ACHIEVEMENT_KEY],'empty');
@@ -27,13 +27,13 @@ assert.ok(!SLOT_KEYS.includes(BACKUP_KEY));
 
 // 3. Export contains only known slots verbatim plus flight records; unknown keys are ignored.
 {
- const s=memory({[JOURNEY_KEY]:'{"version":4}',[DIFFICULTY_KEY]:'easy','neon-eclipse.other.key':'x',[BACKUP_KEY]:'{}'});
+ const s=memory({[JOURNEY_KEY]:'{"version":5}',[DIFFICULTY_KEY]:'easy','neon-eclipse.other.key':'x',[BACKUP_KEY]:'{}'});
  const records=fakeRecords([{id:'a',schema:1}]);
  const hub=createSaveHub({storage:s,records,now});
  const bundle=await hub.exportBundle();
  assert.ok(validBundle(bundle));
  assert.deepEqual(Object.keys(bundle.slots).sort(),[DIFFICULTY_KEY,JOURNEY_KEY].sort());
- assert.equal(bundle.slots[JOURNEY_KEY],'{"version":4}');
+ assert.equal(bundle.slots[JOURNEY_KEY],'{"version":5}');
  assert.deepEqual(bundle.flightRecords,[{id:'a',schema:1}]);
  assert.equal(bundle.exportedAt,'2026-09-17T12:00:00.000Z');
  assert.equal(bundleFileName(bundle),'neon-eclipse-save-2026-09-17-12-00-00.json');
@@ -43,9 +43,9 @@ assert.ok(!SLOT_KEYS.includes(BACKUP_KEY));
 
 // 4. Preview classifies add / overwrite / same / skip and never writes.
 {
- const s=memory({[JOURNEY_KEY]:'{"version":4,"a":1}',[STAR_KEY]:'{"version":3,"stars":[]}'});
+ const s=memory({[JOURNEY_KEY]:'{"version":5,"a":1}',[STAR_KEY]:'{"version":3,"stars":[]}'});
  const hub=createSaveHub({storage:s,now});
- const p=hub.previewImport({app:'neon-eclipse',schema:SAVE_HUB_SCHEMA,exportedAt:'x',slots:{[JOURNEY_KEY]:'{"version":4,"a":2}',[STAR_KEY]:'{"version":3,"stars":[]}',[DIFFICULTY_KEY]:'hard','evil.key':'1',[ACHIEVEMENT_KEY]:'broken'}});
+ const p=hub.previewImport({app:'neon-eclipse',schema:SAVE_HUB_SCHEMA,exportedAt:'x',slots:{[JOURNEY_KEY]:'{"version":5,"a":2}',[STAR_KEY]:'{"version":3,"stars":[]}',[DIFFICULTY_KEY]:'hard','evil.key':'1',[ACHIEVEMENT_KEY]:'broken'}});
  assert.ok(p.ok);
  const by=Object.fromEntries(p.entries.map(e=>[e.key,e]));
  assert.equal(by[JOURNEY_KEY].action,'overwrite');assert.equal(by[STAR_KEY].action,'same');assert.equal(by[DIFFICULTY_KEY].action,'add');
@@ -60,33 +60,33 @@ assert.ok(!SLOT_KEYS.includes(BACKUP_KEY));
 
 // 5. Merge import writes a pre-import backup, skips corrupt/unknown keys, keeps slots not in the bundle.
 {
- const s=memory({[JOURNEY_KEY]:'{"version":4,"old":true}',[STAR_KEY]:'{"version":3,"stars":["reactor"]}'});
+ const s=memory({[JOURNEY_KEY]:'{"version":5,"old":true}',[STAR_KEY]:'{"version":3,"stars":["reactor"]}'});
  const records=fakeRecords([{id:'a'}]);
  const hub=createSaveHub({storage:s,records,now});
- const r=await hub.importBundle({app:'neon-eclipse',schema:1,slots:{[JOURNEY_KEY]:'{"version":4,"new":true}',[DIFFICULTY_KEY]:'hard','evil.key':'1',[ACHIEVEMENT_KEY]:'broken'},flightRecords:[{id:'a'},{id:'b'},{nope:1}]});
+ const r=await hub.importBundle({app:'neon-eclipse',schema:1,slots:{[JOURNEY_KEY]:'{"version":5,"new":true}',[DIFFICULTY_KEY]:'hard','evil.key':'1',[ACHIEVEMENT_KEY]:'broken'},flightRecords:[{id:'a'},{id:'b'},{nope:1}]});
  assert.ok(r.ok);assert.equal(r.mode,'merge');
  assert.deepEqual(r.written.sort(),[DIFFICULTY_KEY,JOURNEY_KEY].sort());assert.deepEqual(r.removed,[]);
  assert.deepEqual(r.failed,[]);
  assert.deepEqual(r.skipped.sort((a,b)=>a.key<b.key?-1:1),[{key:ACHIEVEMENT_KEY,reason:'corrupt'},{key:'evil.key',reason:'unknown-key'}].sort((a,b)=>a.key<b.key?-1:1),'corrupt or unknown entries are skipped, not failures');
- assert.equal(s.getItem(JOURNEY_KEY),'{"version":4,"new":true}');
+ assert.equal(s.getItem(JOURNEY_KEY),'{"version":5,"new":true}');
  assert.equal(s.getItem(STAR_KEY),'{"version":3,"stars":["reactor"]}','merge keeps slots absent from bundle');
  assert.equal(s.getItem('evil.key'),null);assert.equal(s.getItem(ACHIEVEMENT_KEY),null);
  assert.deepEqual(r.flight,{saved:1,duplicates:1,failed:0,skipped:1});
  const backup=JSON.parse(s.getItem(BACKUP_KEY));
- assert.equal(backup.slots[JOURNEY_KEY],'{"version":4,"old":true}');
+ assert.equal(backup.slots[JOURNEY_KEY],'{"version":5,"old":true}');
  assert.equal(backup.createdAt,'2026-09-17T12:00:00.000Z');
  // Restore returns to the pre-import state and keeps a backup of what was replaced.
  const restored=hub.restoreBackup();
  assert.ok(restored.ok);
- assert.equal(s.getItem(JOURNEY_KEY),'{"version":4,"old":true}');
+ assert.equal(s.getItem(JOURNEY_KEY),'{"version":5,"old":true}');
  assert.equal(s.getItem(DIFFICULTY_KEY),null,'restore removes slots that did not exist before import');
  assert.equal(s.getItem(STAR_KEY),'{"version":3,"stars":["reactor"]}');
- assert.equal(JSON.parse(s.getItem(BACKUP_KEY)).slots[JOURNEY_KEY],'{"version":4,"new":true}','restore swaps the backup so it can be undone');
+ assert.equal(JSON.parse(s.getItem(BACKUP_KEY)).slots[JOURNEY_KEY],'{"version":5,"new":true}','restore swaps the backup so it can be undone');
 }
 
 // 6. Replace import removes known slots missing from the bundle but never touches foreign keys or the backup key.
 {
- const s=memory({[JOURNEY_KEY]:'{"version":4}',[STAR_KEY]:'{"version":3,"stars":[]}','foreign.key':'keep'});
+ const s=memory({[JOURNEY_KEY]:'{"version":5}',[STAR_KEY]:'{"version":3,"stars":[]}','foreign.key':'keep'});
  const hub=createSaveHub({storage:s,now});
  const r=await hub.importBundle({app:'neon-eclipse',schema:1,slots:{[DIFFICULTY_KEY]:'easy'}},{mode:'replace'});
  assert.ok(r.ok);
@@ -104,7 +104,7 @@ assert.ok(!SLOT_KEYS.includes(BACKUP_KEY));
  assert.ok(none.health().every(r=>r.status==='unavailable'));
  assert.equal((await none.importBundle({app:'neon-eclipse',schema:1,slots:{}})).code,'unavailable');
  assert.equal(none.restoreBackup().code,'unavailable');
- const full=memory({[JOURNEY_KEY]:'{"version":4}'});const setItem=full.setItem;full.setItem=(k,v)=>{if(k===BACKUP_KEY)throw new Error('quota');setItem(k,v);};
+ const full=memory({[JOURNEY_KEY]:'{"version":5}'});const setItem=full.setItem;full.setItem=(k,v)=>{if(k===BACKUP_KEY)throw new Error('quota');setItem(k,v);};
  const hub=createSaveHub({storage:full,now});
  const r=await hub.importBundle({app:'neon-eclipse',schema:1,slots:{[DIFFICULTY_KEY]:'hard'}});
  assert.equal(r.code,'backup-failed');assert.equal(full.getItem(DIFFICULTY_KEY),null,'nothing written when backup cannot be saved');
@@ -118,7 +118,7 @@ assert.ok(!SLOT_KEYS.includes(BACKUP_KEY));
 
 // 8. Round trip: export -> import into a fresh storage reproduces every slot byte for byte.
 {
- const source=memory({[JOURNEY_KEY]:'{"version":4,"chapters":[1,2]}',[STAR_KEY]:'{"version":3,"stars":["a"]}',[DIFFICULTY_KEY]:'hard',[FLIGHT_INVERT_KEY]:'true','neon-eclipse.harbor.v1':'{"version":1,"unlocked":2,"checkpoint":null,"completed":false}'});
+ const source=memory({[JOURNEY_KEY]:'{"version":5,"chapters":[1,2]}',[STAR_KEY]:'{"version":3,"stars":["a"]}',[DIFFICULTY_KEY]:'hard',[FLIGHT_INVERT_KEY]:'true','neon-eclipse.harbor.v1':'{"version":1,"unlocked":2,"checkpoint":null,"completed":false}'});
  const bundle=await createSaveHub({storage:source,now}).exportBundle();
  const copy=JSON.parse(JSON.stringify(bundle));
  const target=memory();

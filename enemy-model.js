@@ -34,6 +34,13 @@ export function createEnemyModel(type){
   box(g,.2,.18,.92,.68,1.25,.34,dark);box(g,.21,.05,.35,.68,1.37,.38,accent);
  }else if(type==='assault'){
   box(g,.17,.16,.5,.65,1.15,.32,dark);box(g,.06,.2,.05,0,1.2,.35,accent);
+ }else if(type==='drone'){
+  // Swarm drone: stubby body, four accent rotor pods, no head plate.
+  for(const [x,z] of [[-.55,-.35],[.55,-.35],[-.55,.35],[.55,.35]]){box(g,.28,.06,.28,x,2.05,z,accent);box(g,.08,.3,.08,x,1.9,z,dark);}
+  box(g,.5,.12,.5,0,2.02,0,steel);box(g,.14,.14,.4,0,1.2,.4,accent);
+ }else if(type==='sniper'){
+  // Sniper: long barrel with a purple lens, kneeling stance is implied by the low arm.
+  box(g,.14,.14,1.5,.62,1.28,.55,dark);box(g,.16,.08,.3,.62,1.4,.05,accent);box(g,.1,.1,.1,.62,1.28,1.32,accent);box(g,.2,.34,.2,0,2.28,0,dark);box(g,.12,.06,.12,0,2.47,0,accent);
  }
  if(boss){
   for(const side of [-1,1]){box(g,.24,.75,.34,side*.8,2.03,0,dark);box(g,.29,.09,.38,side*.8,2.29,0,accent);}

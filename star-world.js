@@ -11,7 +11,7 @@ export function createStarWorld(scene,map,notify){
  function sync(){root.visible=!store.collected.includes(map);const ids=store.collected,text=ids.join(',');if(text===last&&panel.textContent)return;last=text;panel.textContent=`⭐ 星星收集 ${ids.length}/${STAR_MAPS.length} · ${STAR_MAPS.map((m,i)=>`${i+1}章${ids.includes(m)?'★':'☆'}`).join('　')}\n${store.unlocked?(store.legacyUnlocked&&ids.length<STAR_MAPS.length?'旧版成就保留：「群星归航」':'隐藏成就已解锁：「群星归航」'):'隐藏成就：??? · 每关找到一颗星星'} · 靠近自动拾取，跨重玩保存`;badge.textContent=`⭐ ${ids.length}/${STAR_MAPS.length} · 本关${root.visible?'未收集':'已收集'}${store.unlocked?' · 群星归航':''}`;}
  sync();window.addEventListener('storage',()=>{store.refresh();sync();});
  function update(dt,time,player,playing){badge.hidden=!playing;root.rotation.y=time;star.position.y=Math.sin(time*2)*.12;retry=Math.max(0,retry-dt);if(!playing||!root.visible||retry||!nearStar(map,player))return;
-  const result=store.collect(map);sync();if(result.error){retry=5;notify('星星保存失败，请允许浏览器存储后重试；星星仍保留在原处。');}else if(result.added){notify(store.collected.length===STAR_MAPS.length?'⭐ 隐藏成就解锁：群星归航 // 六章星星全部收集！':`⭐ 获得本关星星 // ${store.collected.length}/${STAR_MAPS.length} · 已保存`);}
+  const result=store.collect(map);sync();if(result.error){retry=5;notify('星星保存失败，请允许浏览器存储后重试；星星仍保留在原处。');}else if(result.added){notify(store.collected.length===STAR_MAPS.length?'⭐ 隐藏成就解锁：群星归航 // '+STAR_MAPS.length+'章星星全部收集！':`⭐ 获得本关星星 // ${store.collected.length}/${STAR_MAPS.length} · 已保存`);}
  }
  return {update,store,root};
 }

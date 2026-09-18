@@ -43,11 +43,12 @@ export function bindFlightMissionUI({getMission,getPlane,start,exit}){
   // Read-only telemetry for browser regression; no test-only control/mutation API.
   Object.assign(document.body.dataset,{flightMissionStatus:m.status,flightMissionType:m.type,reconProgress:m.recon.progress.toFixed(4),reconUpload:m.recon.uploadTime.toFixed(4),reconReason:m.recon.reason,reconRecords:JSON.stringify(m.recon.records),flightMissionPhase:m.phase,flightMissionGate:String(m.route.index),flightMissionRemaining:m.remaining.toFixed(4),flightMissionStop:m.stopTime.toFixed(4),flightPlane:JSON.stringify(Object.fromEntries(['x','y','z','yaw','pitch','roll','speed','throttle','landings','onGround','crashed'].map(k=>[k,typeof p[k]==='number'?+p[k].toFixed(5):p[k]])))});
  }
- function finish(){
-  const m=getMission();recordUI.finish(m.result);$('#resume-drive').hidden=true;$('#flight-result-actions').hidden=false;
+ function finish({record=true,expedition=false}={}){
+  const m=getMission();if(record)recordUI.finish(m.result);$('#resume-drive').hidden=true;$('#flight-result-actions').hidden=expedition;
   const title=$('#drive-overlay-title');title.textContent=flightTitle(m)+' · '+(m.status==='won'?'返航成功':'任务失败');title.tabIndex=-1;
   $('#drive-overlay-copy').textContent=m.reason+'。用时 '+m.elapsed.toFixed(1)+' 秒 · '+flightProgress(m)+'。可重试或回到机场自由试飞；本轮结果不写入战役、星星或成就存档。';
-  title.focus({preventScroll:true});$('.drive-panel').scrollTop=0;
+  if(expedition)$('#drive-overlay-copy').textContent+=' 本轮属于先遣队，成绩和进度由上方先遣队面板保存；请在该面板继续或重试，不计入原单项飞行成绩。';
+   title.focus({preventScroll:true});$('.drive-panel').scrollTop=0;
  }
  return {reset,update,finish,instruction};
 }

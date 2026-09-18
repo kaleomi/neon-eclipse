@@ -1,6 +1,7 @@
 // Settings-page widget for SaveHub: slot health, export, import preview/apply, restore last backup.
 // Distinct from the per-battle report export. Uses only local files; nothing leaves the browser.
 import {createSaveHub,GROUP_TITLES,bundleFileName,BUNDLE_LIMIT} from './save-hub.js';
+import {bindExpeditionBackup} from './expedition-backup-ui.js';
 const STATUS_LABEL={ok:'正常',empty:'无数据',unknown:'版本未知',corrupt:'已损坏',unavailable:'不可用'};
 const REASON_LABEL={'unknown-key':'未识别的存档键，跳过',corrupt:'内容损坏，跳过','unknown-version':'版本未知，将原样写入'};
 const ACTION_LABEL={add:'新增',overwrite:'覆盖',same:'相同',skip:'跳过'};
@@ -9,7 +10,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 export function bindSaveHub(container,{hub=null,records=null,onChanged=()=>{},download=defaultDownload}={}){
  if(!container)return null;
  hub=hub||createSaveHub({records});
- container.innerHTML=`<h4>存档备份</h4><p class="menu-setting-hint">导出的是战役、检查点、星星、成就、偏好设置和飞行成绩的完整本地备份，与「战斗记录」页导出的单场战报不同。</p>
+ container.innerHTML=`<h4>存档备份</h4><p class="menu-setting-hint">这里导出 FPS 战役 / 检查点、星星、成就、偏好设置和已接入的飞行成绩，与单场战报不同。先遣队使用下方独立备份；这里的合并 / 替换 / 撤销不会改动先遣队档案。</p>
  <div class="menu-save-hub-health" data-save-health></div>
  <div class="menu-save-hub-actions"><button type="button" class="menu-secondary" data-save-export>导出备份</button><label class="menu-secondary menu-save-hub-import">导入备份<input type="file" accept="application/json,.json" data-save-file hidden></label><button type="button" class="menu-secondary" data-save-restore>恢复导入前备份</button></div>
  <div class="menu-save-hub-preview" data-save-preview hidden></div>
@@ -78,7 +79,8 @@ export function bindSaveHub(container,{hub=null,records=null,onChanged=()=>{},do
  $('[data-save-file]').addEventListener('change',onFile);
  $('[data-save-restore]').addEventListener('click',restore);
  renderHealth();
- return {refresh:renderHealth,hub};
+ const expeditionBackup=bindExpeditionBackup(container);
+ return {refresh:()=>{renderHealth();if(expeditionBackup.panel.open)expeditionBackup.refresh();},hub};
 }
 function defaultDownload(name,text){
  const blob=new Blob([text],{type:'application/json'});const url=URL.createObjectURL(blob);

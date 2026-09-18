@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#132b2e">
   <title>H-01 旋翼试验场 · NEON ECLIPSE</title>
   <link rel="stylesheet" href="helicopter.css">
+  <link rel="stylesheet" href="helicopter-transfer.css">
   <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
 </head>
 <body data-heli-mode="loading">
@@ -23,6 +24,7 @@
     <div class="hold-track" role="progressbar" aria-label="当前步骤稳定时间" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="heli-hold-fill"></i></div>
     <p class="hold-copy" id="heli-hold-label">等待旋翼建立转速</p>
     <div class="readiness"><span id="heli-in-range">范围 ○</span><span id="heli-at-height">高度 ○</span><span id="heli-stable">稳定 ○</span></div>
+    <div id="heli-transfer-controls" hidden><div class="transfer-actions"><button id="heli-engine" type="button">熄火 · I</button><button id="heli-seat" type="button">下机 · F</button></div><p id="heli-transfer-hint"></p></div>
   </aside>
   <aside class="bearing"><small>HEADING / 航向</small><strong id="heli-bearing">000° <span>N</span></strong><div id="heli-camera-label">跟随视角 · V 切换俯视</div></aside>
   <div id="heli-notice" role="status" aria-live="polite"></div>
@@ -44,6 +46,7 @@
       <div class="briefing-controls"><p><b>升降与姿态</b><span>Shift 升，Ctrl / C 降；WASD 前后 / 左右倾斜。</span></p><p><b>先稳，再落</b><span>松开升降键停升，松开姿态键自平衡；空格辅助减速。</span></p><p><b>留出旋翼空间</b><span>Q / E 偏航，V 俯视。快速侧移或倾斜触地会失败。</span></p></div>
       <button id="heli-resume" class="primary" type="button" disabled>正在准备场地… <span>↗</span></button>
       <button id="heli-overlay-reset" class="secondary" type="button" hidden>回到 A 坪，重新练习</button>
+      <a id="heli-mode-link" href="helicopter.html?task=handover">进入 H-02 安全上下机 / 清点返航训练</a>
       <p class="scope-note">键盘原型 · 简化飞控，非完整气动模拟。下降与 WASD 组合时建议用 C，避免浏览器 Ctrl 快捷键。<br>不接入先遣队、吊运、战斗、检查点或成绩；关闭此页不会修改原游戏数据。<span class="keyboard-note">触屏操控尚未实现，窄屏需外接键盘试飞。</span></p>
     </div>
     <div class="range-caption" aria-hidden="true"><span>AERONAUTICS DIVISION</span><b>H–01</b><p>垂直起降 / 自稳悬停 / 本局练习</p><i></i></div>

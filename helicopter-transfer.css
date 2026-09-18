@@ -1,0 +1,10 @@
+#heli-transfer-controls[hidden]{display:none!important}
+#heli-transfer-controls{margin-top:13px;padding-top:12px;border-top:1px solid var(--line)}
+.transfer-actions{display:flex;gap:8px;flex-wrap:wrap}
+.transfer-actions button{flex:1;padding:9px 7px;font-size:11px;white-space:nowrap}
+#heli-transfer-hint{font-size:11px;line-height:1.7;margin-top:8px;color:#dfddbd;min-height:38px}
+#heli-mode-link{display:block;margin-top:14px;color:#a9ead1;text-underline-offset:4px;font-size:11px;line-height:1.8}
+body[data-heli-task=handover] .lesson-panel{max-height:calc(100dvh - 390px);overflow:auto;min-height:110px}
+body[data-heli-task=handover][data-heli-seat=foot] .bearing:after{content:'步行航向 / Q E 转向';display:block;font-size:10px;color:#f0bc70;margin-top:7px}
+@media(max-width:760px){body[data-heli-task=handover] .lesson-panel{max-height:calc(100dvh - 385px);width:min(270px,calc(100vw - 100px))}#heli-transfer-hint{font-size:10px}.transfer-actions button{font-size:10px;padding:7px 5px}}
+@media(max-height:550px){body[data-heli-task=handover] .mini-map{display:none}}

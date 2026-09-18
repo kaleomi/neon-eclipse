@@ -16,11 +16,11 @@ try{
  const errors=[];
  const native=await browser.newContext({viewport:{width:1280,height:800}}),page=await native.newPage();page.setDefaultTimeout(60000);page.on('pageerror',e=>errors.push(e.message));
  const url=new URL(base);url.search='?map=reactor&menu=chapter';await page.goto(url.href);await page.click('#deploy');await page.waitForFunction(()=>document.body.dataset.menuOpen==='false');
- await page.keyboard.press('Digit6');await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='24');assert.equal(await page.locator('.loadout-card').count(),7);assert(await page.locator('[data-weapon=halo]').evaluate(e=>e.classList.contains('active')));
+ await page.keyboard.press('Digit6');await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='24');assert.equal(await page.locator('.loadout-card').count(),8);assert(await page.locator('[data-weapon=halo]').evaluate(e=>e.classList.contains('active')));
  await page.waitForFunction(()=>document.querySelector('.dynamic-crosshair').style.opacity==='1');await page.mouse.down();await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='21');await page.waitForTimeout(700);assert.equal(await page.locator('#ammo').textContent(),'21');await page.mouse.up();
  await page.keyboard.press('r');await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='24');
  if(process.env.HALO_SCREENSHOT){await mkdir(path.dirname(process.env.HALO_SCREENSHOT),{recursive:true});await page.screenshot({path:process.env.HALO_SCREENSHOT});}
- await native.close();console.log('PASS: unmodified page, native key6, seven cards, exactly three shots while held, native reload');
+ await native.close();console.log('PASS: unmodified page, native key6, eight cards, exactly three shots while held, native reload');
  const context=await browser.newContext({viewport:{width:960,height:720}}),p=await context.newPage();p.setDefaultTimeout(60000);p.on('pageerror',e=>errors.push(e.message));
  await p.route('**/app.js',async route=>{const response=await route.fetch();let source=await response.text();assert(source.includes("if(state==='playing')update(dt);"));source=source.replace("if(state==='playing')update(dt);",'if(false)update(dt);');source+=`
 window.__haloFixture={

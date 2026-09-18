@@ -72,7 +72,7 @@ function fakeContext(){
 {
  assert.ok(SFX_NAMES.length>=60,'catalog size '+SFX_NAMES.length);
  for(const name of SFX_NAMES){const r=SFX[name];assert.ok(validRecipe(r),'invalid recipe '+name);assert.ok(['sfx','ui','music','voice'].includes(r.bus),name+' bus');assert.ok(recipeDuration(r)<=3,name+' too long');}
- assert.equal(WEAPON_FIRE.length,WEAPONS.length+3);assert.deepEqual(WEAPON_FIRE.slice(0,4),['fire.vanguard','fire.breacher','fire.ghost','melee.swing']);assert.equal(WEAPON_FIRE[4],'fire.tempest');assert.equal(WEAPON_FIRE[5],'fire.halo');assert.equal(WEAPON_FIRE[6],'fire.railspike');
+ assert.equal(WEAPON_FIRE.length,WEAPONS.length+4);assert.deepEqual(WEAPON_FIRE.slice(0,4),['fire.vanguard','fire.breacher','fire.ghost','melee.swing']);assert.equal(WEAPON_FIRE[4],'fire.tempest');assert.equal(WEAPON_FIRE[5],'fire.halo');assert.equal(WEAPON_FIRE[6],'fire.railspike');assert.equal(WEAPON_FIRE[7],'fire.volt');
  assert.deepEqual(Object.keys(TELEGRAPH_BY_COLOR).sort(),['amber','gold','green','orange','pink','purple']);
  const sig=name=>{const r=SFX[name];return JSON.stringify([r.tones?.map(t=>[t.type,t.f,t.fEnd,t.delay]),r.fm?.map(f=>[f.carrier,f.ratio]),r.noise?.length]);};
  const sigs=Object.values(TELEGRAPH_BY_COLOR).map(sig);assert.equal(new Set(sigs).size,sigs.length,'telegraph sounds must be distinguishable');

@@ -1,0 +1,4 @@
+.loadout-card[data-weapon="volt"] .accent{fill:#70f2ff}.loadout-card[data-weapon="volt"].active{box-shadow:inset 3px 0 #70f2ff;background:linear-gradient(110deg,#154c62e8,#102834e8)}.loadout-card[data-weapon="volt"].active b{color:#b5faff}
+.right-panel:has([data-weapon="volt"]) .loadout-card{height:32px;margin-block:3px}.right-panel:has([data-weapon="volt"]) .loadout-card small{font-size:7px!important}
+.volt-chain-status{position:absolute;left:50%;top:calc(50% + 86px);transform:translateX(-50%);color:#b5faff;font:11px monospace;white-space:nowrap;text-shadow:0 2px 4px #000;pointer-events:none}.volt-chain-status[data-hit="true"]{color:#fff;text-shadow:0 0 8px #27dfff}.volt-chain-status[hidden]{display:none}
+@media(max-height:760px){.right-panel:has([data-weapon="volt"]) .loadout-card{height:26px;margin-block:2px}.right-panel:has([data-weapon="volt"]) .weapon-icon{height:24px}}

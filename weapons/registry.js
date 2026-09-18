@@ -1,3 +1,4 @@
+import volt from './volt.js';
 import railspike from './railspike.js';
 import halo from './halo.js';
 import tempest from './tempest.js';
@@ -7,7 +8,7 @@ import ghost from './ghost.js';
 import arcBlade from './arc-blade.js';
 import {validateWeaponDefinitions} from './schema.js';
 
-export const WEAPON_DEFINITIONS=Object.freeze([vanguard,breacher,ghost,arcBlade,tempest,halo,railspike]);
+export const WEAPON_DEFINITIONS=Object.freeze([vanguard,breacher,ghost,arcBlade,tempest,halo,railspike,volt]);
 validateWeaponDefinitions(WEAPON_DEFINITIONS);
 const byId=new Map(WEAPON_DEFINITIONS.map(definition=>[definition.id,definition]));
 // Explicit order is a compatibility contract, not the order of imported files.

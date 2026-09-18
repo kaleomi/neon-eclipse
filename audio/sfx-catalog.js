@@ -9,6 +9,8 @@
 //   green  (overseer arc) : buzzing FM
 export const SFX={
  // ---- player weapons ----
+ 'fire.volt':{tones:[{type:'sawtooth',f:140,fEnd:48,gain:.25,a:.001,d:.09,r:.06},{type:'triangle',f:1280,fEnd:420,gain:.14,a:.001,d:.06,r:.045}],noise:[{color:'white',gain:.6,a:.001,d:.07,r:.055,filter:{type:'bandpass',f:2400,q:.8}}],bus:'sfx',cooldown:.1},
+ 'volt.chain':{tones:[{type:'square',f:1700,fEnd:580,gain:.065,a:.001,d:.045,r:.045},{type:'sine',f:1100,fEnd:1800,gain:.075,a:.001,d:.035,r:.05,delay:.035}],noise:[{color:'white',gain:.12,a:.001,d:.02,r:.04,filter:{type:'highpass',f:3600,q:.7}}],bus:'sfx',cooldown:.1},
  'rail.charge':{tones:[{type:'sine',f:620,fEnd:980,gain:.055,a:.008,d:.035,r:.015}],bus:'sfx',cooldown:.07},
  'fire.railspike':{tones:[{type:'sawtooth',f:160,fEnd:42,gain:.26,a:.001,d:.1,r:.07},{type:'sine',f:1800,fEnd:400,gain:.16,a:.001,d:.06,r:.05}],noise:[{color:'white',gain:.5,a:.001,d:.035,r:.06,filter:{type:'highpass',f:1200,q:.8}}],bus:'sfx',cooldown:.1},
  'fire.halo':{tones:[{type:'triangle',f:760,fEnd:190,gain:.22,a:.001,d:.055,r:.035}],noise:[{color:'white',gain:.34,a:.001,d:.035,r:.02,filter:{type:'bandpass',f:2700,q:1.2}}],bus:'sfx',vary:.025,cooldown:.015},
@@ -97,4 +99,4 @@ export const SFX={
 };
 export const SFX_NAMES=Object.freeze(Object.keys(SFX));
 export const TELEGRAPH_BY_COLOR=Object.freeze({orange:'telegraph.orange',purple:'telegraph.purple',amber:'telegraph.amber',pink:'telegraph.pink',gold:'telegraph.gold',green:'telegraph.green'});
-export const WEAPON_FIRE=Object.freeze(['fire.vanguard','fire.breacher','fire.ghost','melee.swing','fire.tempest','fire.halo','fire.railspike']);
+export const WEAPON_FIRE=Object.freeze(['fire.vanguard','fire.breacher','fire.ghost','melee.swing','fire.tempest','fire.halo','fire.railspike','fire.volt']);

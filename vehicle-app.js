@@ -1,4 +1,5 @@
-import {bindJointCheckpointUI} from './joint-checkpoint-ui.js';
+import {bindJointCheckpointUI,bindCheckpointUI} from './joint-checkpoint-ui.js';
+import {createNavalRun,navalCheckpointFromMission,restoreNavalCheckpoint,navalCheckpointLabel,createNavalCheckpointStore,NAVAL_CHECKPOINT_CHANNEL} from './naval-checkpoint-model.js';
 import {restoreJointCheckpoint} from './joint-checkpoint-model.js';
 import {createJointMission,stepJointMission,finishJointFlight,jointBoardAllowed,jointGoal,JOINT_STAGES,JOINT_LABELS} from './joint-mission.js';
 import {buildJointWorld} from './joint-world.js';
@@ -56,6 +57,7 @@ const armed=()=>joint.status!=='active'&&chase.status!=='active'&&sortie.status!
 const escortWorld=buildEscortWorld(scene);const escorting=()=>escort.status==='active';
 function setGunner(on){if(on===gunner)return;gunner=on;if(on)enterGunner(roofGun,rover);else leaveGunner(roofGun);orbit=0;pitch=0;updateCamera(1);}
 const checkpointUI=bindJointCheckpointUI({onNotice:notify,onRestore:restoreCheckpoint});
+const navalCheckpointUI=bindCheckpointUI({store:createNavalCheckpointStore(),prefix:'naval',fromMission:navalCheckpointFromMission,label:navalCheckpointLabel,channelName:NAVAL_CHECKPOINT_CHANNEL,startSelector:'#start-chase',onNotice:notify,onRestore:restoreNavalCheckpointRun});
 const flightWorld=buildFlightMissionWorld(scene),reconWorld=buildReconWorld(scene);
 const flightUI=bindFlightMissionUI({getMission:()=>sortie,getPlane:()=>plane,start:startFlight,exit:()=>{recover('airfield');resume();}});
 const planeBoxes=[...TEST_OBSTACLES.map(b=>({minX:b.x-b.w/2,maxX:b.x+b.w/2,minZ:b.z-b.d/2,maxZ:b.z+b.d/2,h:b.h})),...TEST_POLES.map(([x,z])=>({minX:x-.25,maxX:x+.25,minZ:z-.25,maxZ:z+.25,h:12})),...FIELD_BUILDINGS,{...DOCK,h:.85}];
@@ -110,15 +112,17 @@ $('#start-escort').addEventListener('click',()=>{if(!escortArmed){escortArmed=tr
 $('#start-escort').addEventListener('blur',()=>{escortArmed=false;$('#start-escort').textContent=escort.status==='idle'?'开始车队护送 · 荒原车队':'重试车队护送 · 荒原车队';});
 $('#escort-free-drive').addEventListener('click',()=>{recover('garage');resume();});
 {const select=$('#escort-difficulty-select'),copy=$('#escort-difficulty-copy');if(select){select.value=readEscortDifficulty();const sync=()=>{copy.textContent=ESCORT_PROFILES[normalizeEscort(select.value)].description;};sync();select.addEventListener('change',()=>{try{localStorage.setItem(ESCORT_KEY,normalizeEscort(select.value));}catch{}sync();});}}
-function startChase(){
- recover('marina');kind='yacht';cameraMode='chase';orbit=0;pitch=0;chase=createNavalMission(yacht,selectedNavalDifficulty());resume();notify('南湾突围：穿过 3 个检查点，甩开或击毁全部敌艇后减速撤离；F 反击、Q 换目标，注意错峰齐射预警。');updateHUD();
+async function startChase(){
+ const candidate=createNavalRun(yacht,selectedNavalDifficulty());if(!await navalCheckpointUI.begin(candidate.runId))return;
+ recover('marina');kind='yacht';cameraMode='chase';orbit=0;pitch=0;chase=createNavalRun(yacht,candidate.naval.profile.id,candidate.runId);resume();notify('南湾突围：穿过 3 个检查点，甩开或击毁全部敌艇后减速撤离；F 反击、Q 换目标，注意错峰齐射预警。每过一个检查点自动保存安全节点。');updateHUD();
 }
+function restoreNavalCheckpointRun(record){const restored=restoreNavalCheckpoint(record);recover('marina');chase=restored.task;Object.assign(yacht,restored.yacht);kind='yacht';cameraMode='chase';orbit=0;pitch=0;clearInput();updateCamera(1);resume();notify('已从安全节点恢复 · '+navalCheckpointLabel(record)+'；敌艇重新就位，本轮为检查点继续。');updateHUD();return chase.runId;}
 $('#start-chase').addEventListener('click',()=>{if(!chaseArmed){chaseArmed=true;$('#start-chase').textContent='确认开始 · 重置全部载具与路线';return;}startChase();});
 $('#start-chase').addEventListener('blur',()=>{chaseArmed=false;$('#start-chase').textContent=chase.status==='idle'?'开始海上追逐 · 南湾突围':'重试海上追逐 · 南湾突围';});
 $('#chase-free-drive').addEventListener('click',()=>{if(!freeArmed){freeArmed=true;$('#chase-free-drive').textContent='确认结束任务 · 返回码头自由试驾';return;}recover('marina');resume();});
 $('#chase-free-drive').addEventListener('blur',()=>{freeArmed=false;$('#chase-free-drive').textContent='结束追逐，返回自由试驾';});
 function finishChase(){
- pause();$('#resume-drive').hidden=true;$('#drive-overlay-title').textContent=chase.status==='won'?'南湾突围 · 撤离成功':'南湾突围 · 任务失败';$('#drive-overlay-copy').textContent=chase.reason+'。难度 '+chase.naval.profile.label+' · 用时 '+chase.elapsed.toFixed(1)+' 秒 · 检查点 '+chase.index+'/3 · 剩余船体 '+Math.ceil(chase.hull)+'% · 舰炮命中 '+navalSummary(chase).hits+'/'+navalSummary(chase).shots+'。可直接重试；不写入战役存档。';updateHUD();$('#start-chase').focus({preventScroll:true});$('.drive-panel').scrollTop=0;
+ if(chase.status==='won')navalCheckpointUI.complete(chase);pause();$('#resume-drive').hidden=true;$('#drive-overlay-title').textContent=chase.status==='won'?'南湾突围 · 撤离成功':'南湾突围 · 任务失败';$('#drive-overlay-copy').textContent=chase.reason+'。难度 '+chase.naval.profile.label+' · 用时 '+chase.elapsed.toFixed(1)+' 秒'+(chase.recovered?'（检查点继续，不是完整一命用时）':'')+' · 检查点 '+chase.index+'/3 · 剩余船体 '+Math.ceil(chase.hull)+'% · 舰炮命中 '+navalSummary(chase).hits+'/'+navalSummary(chase).shots+'。可直接重试'+(chase.status==='won'?'；本轮安全节点已关闭':'，或在下方从最近安全节点继续')+'；不写入战役存档。';updateHUD();$('#start-chase').focus({preventScroll:true});$('.drive-panel').scrollTop=0;
 }
 $('#resume-drive').addEventListener('click',resume);$('#pause-drive').addEventListener('click',pause);
 $('#recover-drive').addEventListener('click',()=>{if(!recoveryArmed){recoveryArmed=true;$('#recover-drive').textContent='确认回收全部载具并清零路线';return;}recover();recoveryArmed=false;$('#recover-drive').textContent='回收全部载具并重置路线';});
@@ -162,7 +166,7 @@ function updatePhysics(dt){
   const speedBefore=yacht.speed,inChase=chase.status==='active';
   stepYacht(yacht,inChase?{throttle,steer:axis,brake:held('Space')}:limitInput(wear.yacht,{throttle,steer:axis,brake:held('Space')}),dt);
   if(!inChase){clampSpeed(wear.yacht,yacht,YACHT.maxSpeed,YACHT.reverseSpeed);const tierBefore=durabilityTier(wear.yacht);if(stepImpactDamage(wear.yacht,yacht,speedBefore)){const tier=durabilityTier(wear.yacht);notify('船体受损 · 耐久 '+Math.ceil(wear.yacht.hull)+'%'+(tier!==tierBefore?(tier==='disabled'?' · 动力失效，跛行回码头维修':' · 冒烟，操控下降 20%'):''));}if(stepRepair(wear.yacht,yacht,dt))notify('码头维修完成 · 船体耐久 100%');}
-  if(chase.status==='active'){const previousHull=chase.hull,previousAlive=navalSummary(chase).alive;stepNavalMission(chase,yacht,from,dt,{fire:held('KeyF')});if(chase.hull<previousHull)notify('船体受损 · 耐久 '+Math.ceil(chase.hull)+'%');if(navalSummary(chase).alive<previousAlive)notify('敌艇已击毁 · 剩余 '+navalSummary(chase).alive+' 艘。仍需完成航点并撤离。');if(chase.status!=='active'){finishChase();return;}}
+  if(chase.status==='active'){const previousHull=chase.hull,previousAlive=navalSummary(chase).alive,previousGate=chase.index;stepNavalMission(chase,yacht,from,dt,{fire:held('KeyF')});if(chase.status==='active'&&chase.index>previousGate&&chase.index<=CHASE_GATES.length)navalCheckpointUI.save(chase);if(chase.hull<previousHull)notify('船体受损 · 耐久 '+Math.ceil(chase.hull)+'%');if(navalSummary(chase).alive<previousAlive)notify('敌艇已击毁 · 剩余 '+navalSummary(chase).alive+' 艘。仍需完成航点并撤离。');if(chase.status!=='active'){finishChase();return;}}
  }
  else walkPlayer(player,{forward:throttle,side:axis,sprint:held('ShiftLeft','ShiftRight')},dt,walkingWorld,rover);
  stepRange(range,dt);const live=armed();
@@ -222,7 +226,7 @@ function updateHUD(){
  if(chasing){
   const goal=CHASE_GATES[chase.index]||CHASE_EVAC,seconds=Math.ceil(chase.remaining);$('#chase-time').textContent=Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');$('#chase-hull').textContent=Math.ceil(chase.hull)+'%';$('#chase-hull-meter').value=chase.hull;$('#chase-range').textContent=Math.round(chase.distance)+' m';
   $('#chase-tracking').textContent=chase.status==='won'?'已撤离':chase.status==='lost'?'任务失败':chase.elapsed<profile.headStart?'离港准备 · 敌艇即将启动':fleet.sunk?'全部敌艇已击毁 · 继续完成航点':chase.escaped?'已脱离全部追踪 · 仍需防止重新发现':'剩余 '+fleet.alive+'/'+fleet.total+' 艇 · 各拉开 '+profile.loseDistance+' 米或借遮挡保持 '+profile.loseSeconds+' 秒';
-  $('#naval-active-difficulty').textContent='当前任务：'+profile.label+' · '+fleet.total+' 艇';
+  $('#naval-active-difficulty').textContent='当前任务：'+profile.label+' · '+fleet.total+' 艇'+(chase.recovered?' · 检查点继续':'');
   $('#route-label').textContent='追逐检查点 '+chase.index+' / 3 · '+(chase.index===3?'前往南湾撤离区':'按顺序通过');$('#route-fill').style.width=(chase.status==='won'?100:chase.index/4*100)+'%';
   $('#drive-task').textContent=chase.status!=='active'?chase.reason:goal.name+' · '+Math.round(Math.hypot(yacht.x-goal.x,yacht.z-goal.z))+' m'+(chase.index===3?' · 先甩开追踪，减速至 43 km/h 以下':'');
   document.body.dataset.chaseGoalX=String(goal.x);document.body.dataset.chaseGoalZ=String(goal.z);
@@ -238,7 +242,7 @@ function updateHUD(){
  }
  document.body.dataset.navalDifficulty=profile?.id||'none';document.body.dataset.navalCount=String(fleet?.total||0);document.body.dataset.navalAlive=String(fleet?.alive||0);document.body.dataset.navalTarget=String(chase.naval?.selected??-1);document.body.dataset.navalWarnings=String(chase.naval?.members.filter(m=>m.combat.warning).length||0);document.body.dataset.navalFleet=JSON.stringify(chase.naval?.members.map(m=>({id:m.id,role:m.role,x:+m.enemy.x.toFixed(3),z:+m.enemy.z.toFixed(3),hull:m.combat.enemyHull,sunk:m.combat.enemySunk,escaped:m.escaped,warning:m.combat.warning?.phase||'none'}))||[]);
  document.body.dataset.seaCombatEnabled=String(combat.enabled);document.body.dataset.seaEnemyHull=String(combat.enemyHull);document.body.dataset.seaEnemySunk=String(fleet?.sunk||false);document.body.dataset.seaShots=String(fleet?.shots||0);document.body.dataset.seaHits=String(fleet?.hits||0);document.body.dataset.seaEnemyShots=String(fleet?.enemyShots||0);document.body.dataset.seaEnemyHits=String(fleet?.enemyHits||0);document.body.dataset.seaProjectiles=String(fleet?.projectiles||0);document.body.dataset.seaWarning=warning?.phase||'none';document.body.dataset.seaWarningRemaining=(warning?.remaining||0).toFixed(4);document.body.dataset.seaGunCooldown=cooldown.toFixed(4);
- document.body.dataset.chaseStatus=chase.status;document.body.dataset.chaseGate=String(chase.index);document.body.dataset.chaseHull=chase.hull.toFixed(2);document.body.dataset.chaseRemaining=chase.remaining.toFixed(3);document.body.dataset.chaseEscaped=String(chase.escaped);document.body.dataset.chaseEnemyX=chase.enemy.x.toFixed(3);document.body.dataset.chaseEnemyZ=chase.enemy.z.toFixed(3);document.body.dataset.yachtX=yacht.x.toFixed(3);document.body.dataset.yachtZ=yacht.z.toFixed(3);document.body.dataset.yachtYaw=yacht.yaw.toFixed(5);
+ document.body.dataset.chaseStatus=chase.status;document.body.dataset.chaseRecovered=String(chase.recovered===true);document.body.dataset.chaseRunId=chase.runId||'';document.body.dataset.chaseGate=String(chase.index);document.body.dataset.chaseHull=chase.hull.toFixed(2);document.body.dataset.chaseRemaining=chase.remaining.toFixed(3);document.body.dataset.chaseEscaped=String(chase.escaped);document.body.dataset.chaseEnemyX=chase.enemy.x.toFixed(3);document.body.dataset.chaseEnemyZ=chase.enemy.z.toFixed(3);document.body.dataset.yachtX=yacht.x.toFixed(3);document.body.dataset.yachtZ=yacht.z.toFixed(3);document.body.dataset.yachtYaw=yacht.yaw.toFixed(5);
  ctx.fillStyle='#142e38';ctx.fillRect(0,0,240,240);const co=n=>120+n*.185;ctx.fillStyle='#65766a';ctx.fillRect(co(-600),co(-600),820*.185,1200*.185);ctx.fillStyle='#244b5a';ctx.fillRect(co(220),co(-600),380*.185,1200*.185);
  ctx.strokeStyle='#b2b29a';ctx.lineWidth=3;ctx.strokeRect(co(-105),co(-105),210*.185,210*.185);ctx.fillStyle='#253840';ctx.fillRect(co(-322),co(-480),44*.185,760*.185);ctx.fillStyle='#b9a581';ctx.fillRect(co(205),co(174),67*.185,12*.185);
  drawRangeOnRadar(ctx,co,range);drawEscortOnRadar(ctx,co,escort);

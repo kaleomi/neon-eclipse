@@ -6,7 +6,7 @@ function box(g,w,h,d,x,y,z,material,zone='body'){
  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.userData.hitZone=zone;g.add(m);return m;
 }
 export function createEnemyModel(type){
- const profile=ENEMY_TYPES[type],g=new THREE.Group(),heavy=type==='heavy'||type==='harborElite',boss=type==='warden';
+ const profile=ENEMY_TYPES[type],g=new THREE.Group(),heavy=type==='heavy'||type==='harborElite'||type==='shield',boss=type==='warden';
  const accent=new THREE.MeshStandardMaterial({color:profile.color,emissive:profile.color,emissiveIntensity:1.1});
  const coreMaterial=accent.clone();g.userData.ownedMaterials=[accent,coreMaterial];
  const legs=[],arms=[];
@@ -28,6 +28,17 @@ export function createEnemyModel(type){
   box(g,.13,.65,.2,-.42,1.16,.49,dark,'armor');box(g,.13,.65,.2,.42,1.16,.49,dark,'armor');
   core=new THREE.Mesh(new THREE.IcosahedronGeometry(.21,1),coreMaterial);core.position.set(0,1.28,-.6);core.userData.hitZone='core';g.add(core);
  }
+ if(type==='shield'){
+  // Tower shield: a wide translucent plate in front, rear core exposed. Frontal hits read as 'armor'.
+  const plate=box(g,1.5,2.1,.12,0,1.15,.72,new THREE.MeshStandardMaterial({color:0x9fc4ff,emissive:0x2d5fa8,emissiveIntensity:.9,transparent:true,opacity:.75}),'armor');g.userData.ownedMaterials.push(plate.material);
+  box(g,1.55,.08,.16,0,2.22,.72,accent,'armor');
+ }
+ if(type==='stalker'){
+  // Stalker: slim frame, fins, no bright plates. Materials go transparent with distance in animateEnemy.
+  box(g,.1,.7,.5,0,2.1,-.1,dark);box(g,.08,.1,.3,0,2.5,-.05,accent);
+  for(const mat of [steel,dark])void mat;
+  g.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;g.userData.ownedMaterials.push(o.material);}});
+ }
  if(type==='harborElite'){core.position.z=.63;box(g,.24,.18,.24,0,2.32,0,accent,'head');box(g,.25,.22,.9,.66,1.25,.36,dark);box(g,.25,.22,.9,-.66,1.25,.36,dark);}
  if(type==='ranged'){
   box(g,.12,.62,.12,-.4,2.08,0,dark);box(g,.15,.13,.15,-.4,2.39,0,accent);
@@ -48,10 +59,12 @@ export function createEnemyModel(type){
   const coreFrame=new THREE.Mesh(new THREE.TorusGeometry(.31,.045,6,24),steel);coreFrame.position.set(0,1.32,.49);g.add(coreFrame);
   const crown=new THREE.Mesh(new THREE.TorusGeometry(.44,.045,6,28),accent);crown.position.set(0,2.18,0);crown.rotation.x=Math.PI/2;g.add(crown);
  }
- g.userData.parts={legs,arms,accent,coreMaterial,core};return g;
+ g.userData.parts={legs,arms,accent,coreMaterial,core,fade:type==='stalker'?g.children.map(o=>o.material):null};return g;
 }
-export function animateEnemy(enemy,time,walking){
+export function stalkerOpacity(distance,stealth){if(!stealth)return 1;if(distance<=stealth.near)return 1;if(distance>=stealth.far)return .08;return 1-(distance-stealth.near)/(stealth.far-stealth.near)*.92;}
+export function animateEnemy(enemy,time,walking,playerDistance=0){
  const p=enemy.group.userData.parts;if(!p)return;
+ if(p.fade){const o=enemy.charge>0?1:stalkerOpacity(playerDistance,ENEMY_TYPES.stalker.stealth);for(const m of p.fade)m.opacity=o;}
  const stride=walking?Math.sin(time*(enemy.type==='assault'?11:7)+enemy.seed)*.38:0;
  p.legs.forEach((leg,i)=>leg.rotation.x=stride*(i?1:-1));
  p.arms.forEach((arm,i)=>arm.rotation.x=enemy.charge>0?-.18:stride*(i?-.4:.4));

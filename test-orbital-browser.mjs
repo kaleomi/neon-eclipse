@@ -22,11 +22,11 @@ async function newPage(context){const page=await context.newPage();page.setDefau
 const feet=page=>page.evaluate(()=>window.__orbitalProbe?.().feetY);
 try{
  const context=await browser.newContext({viewport:{width:1280,height:850}});
- await step('orbital boots with seventh chapter in menu',async()=>{
+ await step('orbital boots with eighth chapter in menu',async()=>{
   const {page,errors}=await newPage(context);
   await page.goto(`${base}/index.html?map=orbital`);await menuOpen(page);
   assert.equal(await page.getAttribute('body','data-map'),'orbital');
-  assert.equal(await page.locator('.menu-chapter-grid a[data-map]').count(),7,'seven chapter cards');
+  assert.equal(await page.locator('.menu-chapter-grid a[data-map]').count(),8,'seven chapter cards');
   assert.match(await page.locator('.menu-chapter-grid a[data-map="orbital"]').getAttribute('aria-current')||'',/page/);
   assert.match(await page.locator('.menu-chapter-grid a[data-map="orbital"]').innerText(),/轨道电梯基座/);
   assert.deepEqual(errors,[]);await page.close();

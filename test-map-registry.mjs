@@ -6,13 +6,13 @@ import {CHALLENGE_MAPS} from './chapter-achievements.js';
 import {STAR_MAPS} from './collectibles.js';
 import {SLOTS} from './save-hub.js';
 
-// Registry shape: seven ordered, frozen, unique entries with every field a consumer reads.
-assert.equal(MAP_REGISTRY.length,7);
-assert.deepEqual(MAP_IDS,['reactor','station','roof','tower','train','harbor','orbital']);
+// Registry shape: eight ordered, frozen, unique entries with every field a consumer reads.
+assert.equal(MAP_REGISTRY.length,8);
+assert.deepEqual(MAP_IDS,['reactor','station','roof','tower','train','harbor','orbital','datacenter']);
 assert.ok(Object.isFrozen(MAP_REGISTRY)&&MAP_REGISTRY.every(Object.isFrozen));
-assert.equal(new Set(MAP_IDS).size,7);
-assert.equal(new Set(MAP_REGISTRY.map(m=>m.saveKey)).size,7);
-assert.equal(new Set(MAP_REGISTRY.map(m=>m.code)).size,7);
+assert.equal(new Set(MAP_IDS).size,8);
+assert.equal(new Set(MAP_REGISTRY.map(m=>m.saveKey)).size,8);
+assert.equal(new Set(MAP_REGISTRY.map(m=>m.code)).size,8);
 MAP_REGISTRY.forEach((m,i)=>{
  assert.equal(m.order,i+1);
  for(const field of ['id','code','title','english','brief','features','color','radarLabel','saveKey'])assert.equal(typeof m[field],'string',`${m.id}.${field}`);
@@ -29,11 +29,11 @@ assert.equal(mapById('nope'),null);
 assert.equal(mapIndex('tower'),3);
 assert.equal(nextMap('train').id,'harbor');
 assert.equal(nextMap('harbor').id,'orbital');
-assert.equal(nextMap('orbital'),null);
-assert.equal(mapById('orbital').code,'O-07');
+assert.equal(nextMap('orbital').id,'datacenter');assert.equal(nextMap('datacenter'),null);
+assert.equal(mapById('orbital').code,'O-07');assert.equal(mapById('datacenter').code,'D-08');
 assert.equal(chapterNumber('reactor'),'01');
 assert.equal(chapterNumber('harbor'),'06');
-assert.equal(chapterNumber('orbital'),'07');
+assert.equal(chapterNumber('orbital'),'07');assert.equal(chapterNumber('datacenter'),'08');
 assert.equal(pick({harbor:1},'harbor',0),1);
 assert.equal(pick({harbor:1},'reactor',0),0);
 
@@ -56,7 +56,7 @@ assert.deepEqual(MENU_CHAPTERS.map(c=>[c.map,c.number,c.sector,c.english,c.color
 assert.equal(chapterInfo('roof').brief,'登上天穹枢纽，让信号重返城市。');
 assert.equal(chapterInfo('unknown').map,'reactor');
 assert.equal(nextChapter('harbor').map,'orbital');
-assert.equal(nextChapter('orbital'),null);
+assert.equal(nextChapter('orbital').map,'datacenter');assert.equal(nextChapter('datacenter'),null);
 assert.equal(chapterURL('tower','journey','continue'),'?map=tower&mode=journey&menu=continue');
 assert.deepEqual(CHALLENGE_MAPS,MAP_IDS,'challenge maps mirror registry order');
 assert.deepEqual([...STAR_MAPS].sort(),[...MAP_IDS].sort(),'every registered map has a star site');

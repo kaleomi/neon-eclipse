@@ -66,7 +66,7 @@ try{
   await page.click('#menu-context-restart');await page.click('#menu-confirm-ok');await playing(page);
   await page.keyboard.press('Escape');await menuOpen(page);
   assert.equal(await page.evaluate(k=>localStorage.getItem(k),SENTINEL),'keep');
-  assert.ok(await page.evaluate(()=>localStorage.getItem('neon-eclipse.journey.v5')!==null),'journey slot written after new game');
+  assert.ok(await page.evaluate(()=>localStorage.getItem('neon-eclipse.journey.v6')!==null),'journey slot written after new game');
   assert.deepEqual(errors,[]);
   await page.close();
  });

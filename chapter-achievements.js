@@ -1,5 +1,5 @@
 export const ACHIEVEMENT_KEY='neon-eclipse.chapter-achievements.v1';
-export const CHALLENGE_MAPS=['reactor','station','roof','tower','train','harbor','orbital'];
+export const CHALLENGE_MAPS=['reactor','station','roof','tower','train','harbor','orbital','datacenter'];
 export const ACHIEVEMENTS=[
  {id:'blade',name:'一刃破军',rule:'单章从头一命通关，未发射任何枪械弹药，并至少用刀击破一个目标。'},
  {id:'untouched',name:'毫发无伤',rule:'单章从头一命通关，实际承伤为零；补血不能抵消承伤记录。'},

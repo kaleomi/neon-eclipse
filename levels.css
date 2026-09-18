@@ -11,4 +11,5 @@
 
 .harbor-stamp:before{content:"◈ STORM HARBOR"}.harbor-stamp strong{font-size:28px}
 
+.datacenter-stamp:before{content:"◈ SUNKEN DATA CENTER"}.datacenter-stamp strong{font-size:26px}.hazard-notice.water-notice{top:calc(18% + 92px);color:#8fe0ff;border-color:#3a8ea8}.hazard-notice.water-notice[data-phase="warning"]{color:#ffd48a;border-color:#c9a25a}.hazard-notice.water-notice[data-phase="live"]{color:#ff9aa8;border-color:#c95a6a}
 .orbital-stamp:before{content:"◈ ORBITAL TETHER BASE"}.orbital-stamp strong{font-size:26px}.hazard-notice.orbital-band{top:calc(18% + 92px);color:#ffd48a;border-color:#c9a25a}.hazard-notice.orbital-band[data-band="1"]{color:#a9f0ff;border-color:#62c8ff}.hazard-notice.orbital-band[data-band="2"]{color:#dcc8ff;border-color:#b198ff}.level-menu{grid-template-columns:repeat(4,minmax(0,1fr));max-width:620px}@media(max-width:700px){.level-menu{grid-template-columns:repeat(2,1fr)}.orbital-stamp{display:none}}

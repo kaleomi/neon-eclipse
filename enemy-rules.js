@@ -13,6 +13,10 @@ export const ENEMY_TYPES={
   hint:'血量低、成群贴近 · 霰弹或近战清理，别被围住',attack:{color:'orange',charge:.45,speed:16,damage:3,angles:[0],bursts:1}},
  sniper:{name:'狙击守卫',color:0xb98cff,hp:58,hpPerLevel:6,speed:1.7,turn:2,scale:1.02,radius:.65,near:22,far:34,range:62,cooldown:3.6,behavior:'ranged',
   hint:'紫色锁定线 1.6 秒 · 切断视线或换高度段',attack:{color:'purple',charge:1.6,speed:30,damage:16,angles:[0],bursts:1,showAim:true}},
+ stalker:{name:'潜行者',color:0x7fd7c8,hp:46,hpPerLevel:5,speed:3.9,turn:4.5,scale:.95,radius:.55,near:3.5,far:9,range:14,cooldown:1.6,behavior:'assault',stealth:{far:18,near:7},
+  hint:'远处近乎透明 · 7 米内显形，听脚步与涟漪',attack:{color:'orange',charge:.45,speed:17,damage:6,angles:[0],bursts:1}},
+ shield:{name:'护盾兵',color:0x9fc4ff,hp:120,hpPerLevel:10,speed:1.9,turn:1.6,scale:1.1,radius:.8,near:7,far:11,range:26,cooldown:2.8,behavior:'assault',frontShield:true,
+  hint:'正面护盾免疫 · 绕到侧后方或打背部核心',attack:{color:'amber',charge:.8,speed:14,damage:8,angles:[-.08,.08],bursts:1}},
  warden:{name:'THE WARDEN',color:0xff668d,hp:1000,hpPerLevel:0,speed:1.75,turn:.95,scale:1.9,radius:1.235,near:10,far:15,range:44,cooldown:2.5,
   hint:'等待过载窗口 · 攻击青色胸口核心'}
 };
@@ -44,6 +48,10 @@ export function resolveEnemyDamage(enemy,baseDamage,zone,attacker){
   if(exposed&&zone==='core'){multiplier=2.5;weak=true;}
   else if(!exposed){multiplier=.55;armored=true;}
  } else if(enemy.type==='harborElite'){const result=harborEliteDamage(enemy,zone,facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.55);multiplier=result.multiplier;armored=result.armored;weak=result.weak;
+ } else if(enemy.type==='shield'){
+  // Frontal shield is an absolute block (readable: shots spark off); the rear core is the payoff.
+  if(zone==='core'){multiplier=2;weak=true;}
+  else if(facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.35){multiplier=0;armored=true;}
  } else if(enemy.type==='heavy'){
   if(zone==='core'){multiplier=2;weak=true;}
   else if(facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.55){multiplier=.3;armored=true;}

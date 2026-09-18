@@ -11,12 +11,13 @@ const base = {state: 'ready', mode: 'campaign', map: 'reactor', checkpoint: null
 const checkpoint = {stageIndex: 1, health: 80, selected: 0, x: 0, z: 29, yaw: 0, pitch: 0, time: 42, kills: 3, rounds: [20, 6, 10], reserves: [100, 30, 60], collected: []};
 const active = {version: 4, chapter: 2, status: 'active', checkpoint: {...checkpoint}, results: [{time: 60, kills: 10}, {time: 70, kills: 11}]};
 const between = {...active, status: 'between', checkpoint: null, results: [...active.results, {time: 80, kills: 12}]};
-const complete = {...between, chapter: 6, status: 'complete', results: Array.from({length: 7}, () => ({time: 60, kills: 10}))};
+const complete = {...between, chapter: 7, status: 'complete', results: Array.from({length: 8}, () => ({time: 60, kills: 10}))};
 assert.deepEqual(MENU_CHAPTERS.map(c => [c.map, c.name]), CHAPTERS.map(c => [c.map, c.name]));
 assert.equal(chapterInfo('roof').number, '03');
 assert.equal(nextChapter('reactor').map, 'station');
 assert.equal(nextChapter('harbor').map, 'orbital');
-assert.equal(nextChapter('orbital'), null, 'never offer a nonexistent eighth chapter');
+assert.equal(nextChapter('orbital').map, 'datacenter');
+assert.equal(nextChapter('datacenter'), null, 'never offer a nonexistent ninth chapter');
 assert.equal(chapterURL('roof', 'journey'), '?map=roof&mode=journey&menu=chapter');
 assert.equal(chapterURL('roof', 'campaign', 'continue'), '?map=roof&menu=continue');
 assert.throws(() => chapterURL('https://invalid.example'));
@@ -45,7 +46,8 @@ assert.equal(primaryAction({...base, mode: 'journey', journey: active, pending: 
 assert.equal(primaryAction({...base, mode: 'journey', journey: complete, state: 'won'}).kind, 'home');
 assert.equal(primaryAction({...base, state: 'won'}).kind, 'next-single');
 assert.equal(primaryAction({...base, map: 'harbor', state: 'won'}).kind, 'next-single');
-assert.equal(primaryAction({...base, map: 'orbital', state: 'won'}).kind, 'home');
+assert.equal(primaryAction({...base, map: 'orbital', state: 'won'}).kind, 'next-single');
+assert.equal(primaryAction({...base, map: 'datacenter', state: 'won'}).kind, 'home');
 assert.equal(primaryAction({...base, state: 'won', mode: 'journey', journey: between, checkpoint}, true).kind, 'continue-single', 'explicit standalone selection stays standalone');
 const data = new Map(); let writes = 0;
 const storage = {getItem: key => data.get(key) ?? null, setItem() { writes++; }, removeItem() { writes++; }};

@@ -1,11 +1,12 @@
 import {ORBITAL_STAGES,ORBITAL_SUPPLIES} from './orbital-data.js';
+import {DATACENTER_STAGES,DATACENTER_SUPPLIES} from './datacenter-data.js';
 import {HARBOR_STAGES,HARBOR_SUPPLIES} from './harbor-data.js';
 import {TRAIN_STAGES,TRAIN_SUPPLIES} from './train-data.js';
 import {TOWER_STAGES,TOWER_SUPPLIES} from './tower-data.js';
 import {ROOF_STAGES,ROOF_SUPPLIES} from './roof-data.js';
-import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,IS_ORBITAL} from './level.js';
+import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,IS_ORBITAL,IS_DATACENTER} from './level.js';
 import {STATION_STAGES,STATION_SUPPLIES} from './station-data.js';
-export const STAGES=IS_ORBITAL?ORBITAL_STAGES:IS_HARBOR?HARBOR_STAGES:IS_TRAIN?TRAIN_STAGES:IS_TOWER?TOWER_STAGES:IS_ROOF?ROOF_STAGES:IS_STATION?STATION_STAGES:[
+export const STAGES=IS_DATACENTER?DATACENTER_STAGES:IS_ORBITAL?ORBITAL_STAGES:IS_HARBOR?HARBOR_STAGES:IS_TRAIN?TRAIN_STAGES:IS_TOWER?TOWER_STAGES:IS_ROOF?ROOF_STAGES:IS_STATION?STATION_STAGES:[
  {id:'coolant',title:'启动西侧冷却装置',short:'冷却装置',zone:'WEST COOLANT',x:-28,z:0,duration:2,count:5,level:1,action:'启动冷却',message:'冷却回路已恢复。前往东侧仓储区取得访问权限。'},
  {id:'access',title:'获取东侧访问权限',short:'访问权限',zone:'EAST STORAGE',x:28,z:0,duration:2.5,count:6,level:2,action:'启动权限上传',defenseDuration:25,defenseRadius:12,defenseCount:3,message:'访问权限已取得。前往中央控制台解除反应堆封锁。'},
  {id:'reactor',title:'解除反应堆封锁',short:'反应堆控制台',zone:'REACTOR CONTROL',x:0,z:-11,duration:3,count:7,level:3,action:'解除封锁',message:'反应堆已解锁。警告：THE WARDEN 正在激活！'},
@@ -18,7 +19,7 @@ export const REACTOR_SUPPLIES=[
  {id:'med-east',type:'health',x:33,z:-16},{id:'ammo-core',type:'ammo',x:6,z:-23},
  {id:'med-south',type:'health',x:-6,z:26},{id:'ammo-south',type:'ammo',x:6,z:26}
 ];
-export const SUPPLIES=IS_ORBITAL?ORBITAL_SUPPLIES:IS_HARBOR?HARBOR_SUPPLIES:IS_TRAIN?TRAIN_SUPPLIES:IS_TOWER?TOWER_SUPPLIES:IS_ROOF?ROOF_SUPPLIES:IS_STATION?STATION_SUPPLIES:REACTOR_SUPPLIES;
+export const SUPPLIES=IS_DATACENTER?DATACENTER_SUPPLIES:IS_ORBITAL?ORBITAL_SUPPLIES:IS_HARBOR?HARBOR_SUPPLIES:IS_TRAIN?TRAIN_SUPPLIES:IS_TOWER?TOWER_SUPPLIES:IS_ROOF?ROOF_SUPPLIES:IS_STATION?STATION_SUPPLIES:REACTOR_SUPPLIES;
 export function createMission(){
  const state={index:0,progress:0,time:0,complete:false,defending:false,node:0,wave:0};
  function reset(index=0){Object.assign(state,{index:Number.isInteger(index)&&index>=0&&index<STAGES.length?index:0,progress:0,time:0,complete:false,defending:false,node:0,wave:0});}

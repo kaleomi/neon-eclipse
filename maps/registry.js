@@ -31,7 +31,11 @@ export const MAP_REGISTRY=Object.freeze([
  {id:'orbital',order:7,code:'O-07',title:'轨道电梯基座',english:'ORBITAL TETHER BASE',brief:'登上轨道电梯基座，切断天空的锚索。',features:'三段重力 · 蜂群与狙击 · TETHER 锚定核心',color:'#9fd2ff',
   radarLabel:'O-07 / 轨道电梯基座',saveKey:'neon-eclipse.orbital.v1',boss:'tether',
   traits:{multiLevel:true,movingFrame:false,water:false,weather:null},
-  modules:{data:'./orbital-data.js',world:'./orbital-world.js',navigation:'./orbital-navigation.js'}}
+  modules:{data:'./orbital-data.js',world:'./orbital-world.js',navigation:'./orbital-navigation.js'}},
+ {id:'datacenter',order:8,code:'D-08',title:'沉没数据中心',english:'SUNKEN DATA CENTER',brief:'潜入半淹没的机房，趁排水窗口击破 ABYSS。',features:'定时涨水 · 双排水泵 · 潜行者与盾卫 · ABYSS 水冷核心',color:'#6fe6ff',
+  radarLabel:'D-08 / 沉没数据中心',saveKey:'neon-eclipse.datacenter.v1',boss:'abyss',
+  traits:{multiLevel:true,movingFrame:false,water:true,weather:null},
+  modules:{data:'./datacenter-data.js',world:'./datacenter-world.js',navigation:'./datacenter-navigation.js'}}
 ].map(Object.freeze));
 export const MAP_IDS=Object.freeze(MAP_REGISTRY.map(m=>m.id));
 export const DEFAULT_MAP_ID=MAP_REGISTRY[0].id;

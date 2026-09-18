@@ -57,7 +57,7 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
      if(enemy.boss)recordBossAttack(enemy.bossState);
     }
    }
-   animateEnemy(enemy,time,pos.distanceToSquared(old)>.00001);
+   animateEnemy(enemy,time,pos.distanceToSquared(old)>.00001,dist);
   }
   return gate;
  }

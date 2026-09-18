@@ -1,0 +1,152 @@
+import * as T from 'three';
+import {HELICOPTER,HELICOPTER_SITE,createHelicopter,startHelicopter,stepHelicopter,helicopterSpeed} from './helicopter-rules.js';
+import {createHelicopterTrial,startHelicopterTrial,stepHelicopterTrial,helicopterLesson,helicopterReadiness,HELICOPTER_LESSONS} from './helicopter-trial.js';
+import {createHelicopterModel,createHelicopterSite,makeHelicopterLabel} from './helicopter-world.js';
+import {createHelicopterAudio} from './helicopter-audio.js';
+
+const $=s=>document.querySelector(s),overlay=$('#heli-overlay'),keys=new Set(),audio=createHelicopterAudio();
+let craft=createHelicopter(),trial=createHelicopterTrial(),mode='ready',cameraMode='follow',resetArmed=false,dirty=true,last=performance.now(),lastDraw=-Infinity,noticeUntil=0;
+let renderer;
+try{renderer=new T.WebGLRenderer({antialias:false,powerPreference:'low-power'});}
+catch(error){document.body.dataset.heliMode='error';$('#heli-overlay-title').textContent='无法创建 3D 画面';$('#heli-overlay-copy').textContent='此原型需要 WebGL 2。请检查浏览器硬件加速；没有读取或修改任何存档。';throw error;}
+renderer.setPixelRatio(Math.min(devicePixelRatio,1));renderer.setSize(innerWidth,innerHeight,false);
+renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.23;
+const canvas=renderer.domElement;canvas.tabIndex=0;canvas.setAttribute('aria-label','H-01 直升机试飞画面；Shift 上升，C 或 Ctrl 下降，WASD 姿态，Q E 偏航');$('#heli-scene').append(canvas);
+const scene=new T.Scene();scene.background=new T.Color(0x829f97);scene.fog=new T.Fog(0x829f97,120,330);
+scene.add(new T.HemisphereLight(0xe4f1df,0x314541,2.8));const sun=new T.DirectionalLight(0xffe2b6,3.3);sun.position.set(-45,70,30);scene.add(sun);
+const camera=new T.PerspectiveCamera(52,innerWidth/innerHeight,.1,500);
+const model=createHelicopterModel(),site=createHelicopterSite({makeLabel:makeHelicopterLabel});scene.add(model.root,site.root);
+const cameraTarget=new T.Vector3(),cameraPosition=new T.Vector3();
+const map=$('#heli-map'),ctx=map.getContext('2d');
+const directions=['N','NE','E','SE','S','SW','W','NW'];
+const held=(...codes)=>codes.some(c=>keys.has(c));
+const controls=()=>({forward:Number(held('KeyW','ArrowUp'))-Number(held('KeyS','ArrowDown')),right:Number(held('KeyD','ArrowRight'))-Number(held('KeyA','ArrowLeft')),
+  lift:Number(held('ShiftLeft','ShiftRight'))-Number(held('ControlLeft','ControlRight','KeyC')),yaw:Number(held('KeyE'))-Number(held('KeyQ')),brake:held('Space')});
+function clearInput(){keys.clear();}
+function notify(text){$('#heli-notice').textContent=text;noticeUntil=performance.now()+4500;$('#heli-notice').classList.add('visible');}
+function publish(){
+  const d=document.body.dataset;d.heliMode=mode;d.heliStatus=craft.status;d.heliTrial=trial.status;d.heliStage=String(trial.stage);d.heliGrounded=String(craft.grounded);d.heliLandings=String(craft.landings);
+  for(const f of ['x','y','z','vx','vy','vz','yaw','pitch','roll','rpm','elapsed'])d['heli'+f[0].toUpperCase()+f.slice(1)]=craft[f].toFixed(5);
+  d.heliHold=trial.hold.toFixed(4);d.heliCamera=cameraMode;d.heliAudio=audio.snapshot().state;
+}
+function syncButtons(){
+  const active=mode==='active';$('#heli-pause').disabled=!active;$('#heli-camera').disabled=!active;$('#heli-reset').disabled=!active;$('#heli-sound').disabled=!active;
+  $('#heli-resume').disabled=mode==='error';$('#heli-overlay-reset').hidden=mode==='ready'||mode==='error'||mode==='crashed';
+  $('#heli-sound').setAttribute('aria-pressed',String(audio.snapshot().enabled));$('#heli-sound').textContent='旋翼音：'+(audio.snapshot().enabled?'开':'关');
+}
+function showPause(title,copy){
+  overlay.hidden=false;$('#heli-overlay-title').textContent=title;$('#heli-overlay-copy').textContent=copy;
+  $('#heli-resume').innerHTML=(mode==='crashed'?'重新试飞':'继续试飞')+' <span>↗</span>';
+  $('#heli-overlay-reset').textContent='回到 A 坪，重新练习';syncButtons();$('#heli-resume').focus();dirty=true;
+}
+function pause(reason='已暂停，飞行状态保持不变。'){
+  if(mode!=='active')return;mode='paused';clearInput();audio.pause();resetArmed=false;
+  showPause('试飞已暂停',reason+' 继续后不会补算离开页面期间的时间。');publish();
+}
+function reset(){
+  clearInput();audio.pause();craft=createHelicopter();trial=createHelicopterTrial();cameraMode='follow';mode='ready';resetArmed=false;last=performance.now();
+  $('#heli-overlay-title').innerHTML='旋翼之上<span>H-01 试飞计划</span>';$('#heli-overlay-copy').textContent='已回到 A 起降坪。此次练习仅存在本页内存，不影响任何原游戏进度。';
+  $('#heli-resume').innerHTML='开始试飞 <span>↗</span>';overlay.hidden=false;syncButtons();publish();updateHUD();dirty=true;$('#heli-resume').focus();
+}
+function resume(){
+  if(mode==='error')return;
+  if(mode==='crashed')reset();
+  resetArmed=false;if(!startHelicopter(craft))return;startHelicopterTrial(trial);mode='active';clearInput();overlay.hidden=true;last=performance.now();
+  audio.resume();syncButtons();canvas.focus();publish();dirty=true;
+}
+function requestReset(){
+  if(resetArmed){reset();return;}
+  if(mode==='active')pause();if(mode==='ready'){reset();return;}
+  resetArmed=true;showPause('确认回到 A 坪？','将放弃本局练习，重置直升机的位置、旋翼和步骤。没有存档或成绩会被覆盖。');
+  $('#heli-overlay-reset').hidden=false;$('#heli-overlay-reset').textContent='确认回到 A 坪';$('#heli-overlay-reset').focus();
+}
+function crash(){
+  mode='crashed';trial.status='failed';clearInput();audio.pause();showPause('试飞中止',craft.reason+'。建议先升至安全高度再平移；落地前松开姿态键，用空格降低速度。');publish();
+}
+function updateCamera(dt=1){
+  const yaw=craft.yaw,c=Math.cos(yaw),n=Math.sin(yaw),s=mode==='ready'?1:Math.min(1,1-Math.exp(-5*dt));
+  if(cameraMode==='top'){
+    cameraPosition.set(craft.x,craft.y+46,craft.z+8);cameraTarget.set(craft.x,craft.y,craft.z);
+  }else{
+    cameraPosition.set(craft.x+18*c-25*n,craft.y+15,craft.z+18*n+25*c);
+    const offset=mode==='ready'&&innerWidth>760?6:0;
+    cameraTarget.set(craft.x-offset*.82,craft.y+1.5,craft.z+offset*.58-3);
+  }
+  camera.position.lerp(cameraPosition,s||1);camera.lookAt(cameraTarget);
+}
+function updateMap(goal){
+  if(!ctx)return;const size=180,pad=13,scale=(size-pad*2)/(HELICOPTER_SITE.bounds*2);
+  const p=(x,z)=>[size/2+x*scale,size/2+z*scale];ctx.clearRect(0,0,size,size);ctx.strokeStyle='#6e998b40';ctx.lineWidth=1;
+  for(let i=1;i<6;i++){const a=pad+i*(size-2*pad)/6;ctx.beginPath();ctx.moveTo(a,pad);ctx.lineTo(a,size-pad);ctx.moveTo(pad,a);ctx.lineTo(size-pad,a);ctx.stroke();}
+  ctx.strokeRect(pad,pad,size-pad*2,size-pad*2);
+  for(const b of HELICOPTER_SITE.obstacles){const [x,z]=p(b.minX,b.minZ);ctx.fillStyle='#b4906e8a';ctx.fillRect(x,z,(b.maxX-b.minX)*scale,(b.maxZ-b.minZ)*scale);}
+  const [a,b]=HELICOPTER_SITE.pads;ctx.setLineDash([3,4]);ctx.strokeStyle='#c5d7b94a';ctx.beginPath();ctx.moveTo(...p(a.x,a.z));ctx.lineTo(...p(b.x,b.z));ctx.stroke();ctx.setLineDash([]);
+  for(const site of HELICOPTER_SITE.pads){const [x,z]=p(site.x,site.z);ctx.strokeStyle='#ebc489';ctx.beginPath();ctx.arc(x,z,site.radius*scale,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#d6dfc9';ctx.font='9px monospace';ctx.textAlign='center';ctx.fillText(site.id,x,z+3);}
+  if(goal){const [x,z]=p(goal.x,goal.z);ctx.strokeStyle='#91e1ca';ctx.beginPath();ctx.arc(x,z,goal.radius*scale+3,0,Math.PI*2);ctx.stroke();}
+  const [x,z]=p(craft.x,craft.z);ctx.save();ctx.translate(x,z);ctx.rotate(craft.yaw);ctx.fillStyle='#abf6d6';ctx.beginPath();ctx.moveTo(0,-6);ctx.lineTo(4,5);ctx.lineTo(0,3);ctx.lineTo(-4,5);ctx.closePath();ctx.fill();ctx.restore();
+  ctx.textAlign='left';ctx.font='8px monospace';ctx.fillStyle='#a6c8b4';ctx.fillText('N ↑',14,9);
+}
+function updateHUD(){
+  const goal=helicopterLesson(trial),ready=helicopterReadiness(trial,craft),speed=helicopterSpeed(craft),angle=(craft.yaw*180/Math.PI+360)%360;
+  $('#heli-step').textContent=trial.status==='complete'?'04 / 04':String(Math.min(4,trial.stage+1)).padStart(2,'0')+' / 04';
+  $('#heli-lesson-title').textContent=trial.status==='complete'?'试飞完成':goal?.title||'自由试飞';
+  $('#heli-lesson-hint').textContent=trial.status==='complete'?'四项练习完成。可继续自由试飞，或回 A 坪再练；本局结果不写入任何成绩。':goal?.hint||'';
+  document.querySelectorAll('[data-lesson]').forEach((el,i)=>{el.classList.toggle('current',i===trial.stage);el.classList.toggle('done',i<trial.stage);});
+  const fraction=goal?Math.min(1,trial.hold/goal.seconds):1;$('#heli-hold-fill').style.width=(fraction*100)+'%';$('.hold-track').setAttribute('aria-valuenow',String(Math.round(fraction*100)));
+  $('#heli-hold-label').textContent=trial.status==='complete'?'本局完成 · 没有写入成绩':mode==='ready'?'等待旋翼建立转速':ready.ready?`保持稳定 ${trial.hold.toFixed(1)} / ${goal.seconds.toFixed(1)} 秒`:'进入目标范围、高度并保持稳定';
+  for(const [id,value,title] of [['heli-in-range',ready.inside,'范围'],['heli-at-height',ready.height,'高度'],['heli-stable',ready.stable,'稳定']]){const el=$('#'+id);el.textContent=title+(value?' ✓':' ○');el.classList.toggle('ready',value);}
+  $('#heli-altitude').textContent=craft.y.toFixed(1);$('#heli-vspeed').textContent=(craft.vy>0?'+':'')+craft.vy.toFixed(1);$('#heli-speed').textContent=speed.toFixed(1);
+  $('#heli-rpm').textContent=Math.round(craft.rpm*100)+'%';$('#heli-rpm-meter').value=craft.rpm*100;
+  $('#heli-bearing').innerHTML=String(Math.round(angle)%360).padStart(3,'0')+'° <span>'+directions[Math.round(angle/45)%8]+'</span>';
+  $('#heli-camera-label').textContent=cameraMode==='top'?'俯视视角 · V 返回跟随':'跟随视角 · V 切换俯视';
+  $('#heli-time').textContent=String(Math.floor(trial.elapsed/60)).padStart(2,'0')+':'+String(Math.floor(trial.elapsed%60)).padStart(2,'0');
+  $('#heli-flight-state').textContent=mode==='crashed'?'试飞中止':mode==='paused'?'已暂停':mode==='ready'?'等待试飞':craft.rpm<.85?'旋翼建立转速':craft.grounded?'起降坪待命':'飞行中 · 自稳开启';
+  const warning=$('#heli-warning');let text='垂直速度自稳 · 近地缓降辅助',danger=false;
+  if(craft.y>53){text='接近 65 m 空域上限（含旋翼包络）';danger=true;}
+  else if(craft.y<5&&!craft.grounded&&(speed>2.2||Math.abs(craft.roll)>.2||Math.abs(craft.pitch)>.2||craft.vy< -1.6)){text='着陆风险：松开姿态键，用空格稳定';danger=true;}
+  else if(craft.y<4&&!craft.grounded)text='近地缓降辅助 · 保持水平再着陆';
+  if(mode==='crashed'){text=craft.reason;danger=true;}warning.textContent=text;warning.classList.toggle('danger',danger);
+  updateMap(goal);
+}
+audio.subscribe(()=>publish());
+$('#heli-resume').addEventListener('click',resume);$('#heli-pause').addEventListener('click',()=>pause());
+$('#heli-reset').addEventListener('click',requestReset);$('#heli-overlay-reset').addEventListener('click',requestReset);
+function cameraToggle(){if(mode!=='active')return;cameraMode=cameraMode==='follow'?'top':'follow';dirty=true;publish();canvas.focus();}
+$('#heli-camera').addEventListener('click',cameraToggle);
+async function soundToggle(){
+  if(mode!=='active')return;const desired=!audio.snapshot().enabled;const ok=await audio.setEnabled(desired);syncButtons();publish();if(mode==='active')canvas.focus();if(desired&&!ok&&mode==='active')notify('浏览器音频暂不可用；不影响试飞。');
+}
+$('#heli-sound').addEventListener('click',soundToggle);
+const flightKeys=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight','ControlLeft','ControlRight','KeyC','KeyQ','KeyE','Space']);
+window.addEventListener('keydown',e=>{
+  if(e.isComposing||e.altKey||e.metaKey)return;
+  if(e.code==='Escape'){e.preventDefault();if(e.repeat)return;if(mode==='active')pause();else if(mode==='paused')resume();return;}
+  if(mode!=='active')return;
+  if(e.code==='Space'&&e.target instanceof HTMLElement&&e.target.closest('button'))return;
+  if(flightKeys.has(e.code)||['KeyR','KeyV','KeyM'].includes(e.code))e.preventDefault();if(e.repeat)return;
+  if(e.code==='KeyR'){requestReset();return;}if(e.code==='KeyV'){cameraToggle();return;}if(e.code==='KeyM'){soundToggle();return;}
+  if(flightKeys.has(e.code))keys.add(e.code);
+});
+window.addEventListener('keyup',e=>keys.delete(e.code));
+window.addEventListener('blur',()=>pause('失去焦点，已自动暂停。'));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause('离开页面，已自动暂停。');});
+window.addEventListener('pagehide',()=>{pause('离开页面，已自动暂停。');audio.pause();});
+overlay.addEventListener('keydown',e=>{
+  if(e.key!=='Tab')return;const all=[...overlay.querySelectorAll('button')].filter(b=>!b.disabled&&!b.hidden),first=all[0],end=all.at(-1);
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();end?.focus();}else if(!e.shiftKey&&document.activeElement===end){e.preventDefault();first?.focus();}
+});
+canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();pause('图形上下文丢失，请刷新此独立页面。');mode='error';clearInput();audio.pause();syncButtons();publish();$('#heli-resume').textContent='请刷新此独立页面';notify('图形上下文已丢失。此页没有存档需要恢复。');});
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false);dirty=true;});
+function frame(now){
+  requestAnimationFrame(frame);const dt=Math.max(0,Math.min(HELICOPTER.maxFrame,(now-last)/1000));last=now;
+  if(mode==='active'){
+    const before=trial.stage;
+    stepHelicopter(craft,controls(),dt,HELICOPTER_SITE,(s,h)=>stepHelicopterTrial(trial,s,h));audio.update(craft);
+    if(craft.status==='crashed')crash();else if(trial.stage!==before)notify(trial.status==='complete'?'试飞练习完成。此结果只在本页显示。':'下一步 · '+helicopterLesson(trial).title);
+    publish();
+  }
+  if(noticeUntil&&now>noticeUntil){noticeUntil=0;$('#heli-notice').classList.remove('visible');}
+  if(!dirty&&(mode!=='active'||now-lastDraw<1000/30))return;
+  lastDraw=now;model.update(craft);site.update(craft,helicopterLesson(trial));updateCamera(dt||1);updateHUD();renderer.render(scene,camera);dirty=false;
+}
+$('#heli-resume').innerHTML='开始试飞 <span>↗</span>';syncButtons();publish();model.update(craft);site.update(craft,helicopterLesson(trial));updateCamera(1);updateHUD();$('#heli-resume').focus();requestAnimationFrame(frame);

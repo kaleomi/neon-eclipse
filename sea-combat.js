@@ -25,17 +25,17 @@ function emit(state,owner,ship,target){
  if(owner==='player'){state.shots++;state.playerFlash=.12;}else{state.enemyShots++;state.enemyFlash=.12;}return true;
 }
 function predict(ship,seconds){const f=forward(ship.yaw);return {x:ship.x+f.x*ship.speed*seconds,z:ship.z+f.z*ship.speed*seconds};}
-export function stepSeaCombat(task,player,previousPlayer,previousEnemy,dt,{fire=false,paused=false,enemyMayStart=true,targets=null}={}){
+export function stepSeaCombat(task,player,previousPlayer,previousEnemy,dt,{fire=false,paused=false,enemyMayStart=true,targets=null,aimPoint=null,playerOnly=false}={}){
  const s=task.combat;if(!s?.enabled||paused||task.status!=='active'||!Number.isFinite(dt)||dt<=0)return;
  const h=Math.min(dt,.25);if(!targets)s.provoked=false;
  for(const key of ['playerCooldown','enemyCooldown','playerFlash','enemyFlash','hitFlash','enemyHitFlash'])s[key]=Math.max(0,s[key]-h);
  s.effects=s.effects.filter(e=>(e.life-=h)>0);
- if(s.enemySunk){s.sunkTime+=h;return;}
+ if(s.enemySunk&&!playerOnly){s.sunkTime+=h;return;}
  const survivors=[];
  for(const p of s.projectiles){
   const a={x:p.x,z:p.z},b={x:p.x+p.vx*h,z:p.z+p.vz*h},target=p.owner==='player'?task.enemy:player,previous=p.owner==='player'?previousEnemy:previousPlayer;
-  let hit=sweptBoatHit(a,b,previous,target),hitTask=task;
-  if(p.owner==='player'&&targets){hit=null;for(const other of targets){if(other.task.combat.enemySunk||other.task.combat.enemyHull<=0)continue;const t=sweptBoatHit(a,b,other.previous,other.task.enemy);if(t!==null&&(hit===null||t<hit)){hit=t;hitTask=other.task;}}}
+  let hit=null,hitTask=task;
+  if(p.owner==='player'&&targets){for(const other of targets){if(other.task.combat.enemySunk||other.task.combat.enemyHull<=0)continue;const t=sweptBoatHit(a,b,other.previous,other.task.enemy);if(t!==null&&(hit===null||t<hit)){hit=t;hitTask=other.task;}}}else hit=sweptBoatHit(a,b,previous,target);
   const wall=waterImpact(a,b);
   if(wall!==null&&(hit===null||wall<=hit)){s.blocked++;splash(s,a.x+(b.x-a.x)*wall,a.z+(b.z-a.z)*wall,'water');continue;}
   if(hit!==null){
@@ -46,13 +46,15 @@ export function stepSeaCombat(task,player,previousPlayer,previousEnemy,dt,{fire=
   if(p.life>0&&p.travel<220)survivors.push(p);else splash(s,p.x,p.z,'water');
  }
  s.projectiles=survivors;
- if(s.enemyHull<=0){s.enemySunk=true;task.enemy.speed=0;s.warning=null;s.projectiles=[];splash(s,task.enemy.x,task.enemy.z,'sunk');return;}
+ if(s.enemyHull<=0&&!playerOnly){s.enemySunk=true;task.enemy.speed=0;s.warning=null;s.projectiles=[];splash(s,task.enemy.x,task.enemy.z,'sunk');return;}
  if(task.hull<=0){clearSeaCombat(s);return;}
- // A visible range-limited deck turret is aim-assisted; rounds still fly, can miss and are blocked by land.
- if(fire&&s.playerCooldown===0&&gunTargetStatus(player,task.enemy,s)==='ready'){
-  const target=predict(task.enemy,clamp(dist(player,task.enemy)/SEA_GUN.playerSpeed,0,2));
+ // Explicit aim is manual, including empty sea; omitted aim preserves legacy rule callers.
+ const manual=aimPoint!==null,validAim=manual&&Number.isFinite(aimPoint?.x)&&Number.isFinite(aimPoint?.z)&&dist(player,aimPoint)>=1&&dist(player,aimPoint)<=SEA_GUN.playerRange+1e-6;
+ if(fire&&s.playerCooldown===0&&(manual?validAim:!playerOnly&&gunTargetStatus(player,task.enemy,s)==='ready')){
+  const target=manual?aimPoint:predict(task.enemy,clamp(dist(player,task.enemy)/SEA_GUN.playerSpeed,0,2));
   if(emit(s,'player',player,target))s.playerCooldown=SEA_GUN.playerCooldown;
  }
+ if(playerOnly)return;
  const range=dist(player,task.enemy),canAttack=!task.escaped&&range>=SEA_GUN.enemyMinRange&&range<=SEA_GUN.enemyRange&&waterImpact(task.enemy,player)===null;
  if(s.warning){
   if(!canAttack){s.warning=null;s.enemyCooldown=Math.max(s.enemyCooldown,2);return;}

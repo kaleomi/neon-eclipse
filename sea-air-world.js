@@ -53,6 +53,7 @@ export function createYachtModel(scene,{hostile=false}={}){
  block(root,3,.15,.25,0,1.42,4.98,navy);
  root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});
  if(hostile){block(root,3.6,.16,1,0,2.78,0,mat(0xe77d5f));block(root,1.5,.22,.35,0,3.82,.4,mat(0xff5a43,{emissive:0xff3218,emissiveIntensity:2}));}
- const wake=new T.Mesh(new T.PlaneGeometry(4,15),new T.MeshBasicMaterial({color:0xb9e3df,transparent:true,opacity:.1,depthWrite:false}));wake.rotation.x=-Math.PI/2;scene.add(wake);
- return {root,wake,update(s,time){root.position.set(s.x,.08+Math.sin(time*1.2)*.08,s.z);root.rotation.set(Math.sin(time*.9)*.013,-s.yaw,Math.sin(time*.7)*.018+s.steer*s.speed*.003,'YXZ');const wakeLength=6+Math.abs(s.speed)*.75;wake.scale.y=wakeLength/15;wake.position.set(s.x-Math.sin(s.yaw)*(6+wakeLength/2),.08,s.z+Math.cos(s.yaw)*(6+wakeLength/2));wake.rotation.z=s.yaw;wake.material.opacity=Math.min(.32,Math.abs(s.speed)*.014);}};
+ // Preserve the old visibility handle for chase-world, but remove the untextured rectangular wake mesh.
+ const wake=new T.Group();
+ return {root,wake,update(s,time){root.position.set(s.x,.08+Math.sin(time*1.2)*.08,s.z);root.rotation.set(Math.sin(time*.9)*.013,-s.yaw,Math.sin(time*.7)*.018+s.steer*s.speed*.003,'YXZ');}};
 }

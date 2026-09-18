@@ -1,3 +1,4 @@
+import {createNavalAim} from './naval-aim.js';
 // Execute current entry functions with UI/storage doubles, never load a renderer or a real save.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -17,7 +18,7 @@ function entry(name){
 function fixture(){
  const elements=new Map(),events=new Map();let serial=0;
  const element=s=>{if(!elements.has(s))elements.set(s,{hidden:false,textContent:'',focus(){},classList:{add(){},remove(){}}});return elements.get(s);};
- const c={console,Set,performance:{now:()=>1000},$:element,keys:new Set(),active:false,started:true,kind:null,drag:false,fire:false,rocketKey:false,recovery:0,accumulator:0,missionIntent:0,
+ const c={createNavalAim,navalAim:createNavalAim(),console,Set,performance:{now:()=>1000},$:element,keys:new Set(),active:false,started:true,kind:null,drag:false,fire:false,rocketKey:false,recovery:0,accumulator:0,missionIntent:0,
   overlay:element('overlay'),canvas:{focus(){}},document:{exitPointerLock(){}},window:{addEventListener:(k,f)=>events.set(k,f)},
   vehicleAudio:{pause(){},resume(){},unlock(){},reset(){}},expeditionUI:{detach(){}},flightUI:{reset(){}},updateHUD(){},updateCamera(){},notify(){},
   joint:{status:'idle'},chase:{status:'idle'},sortie:{status:'idle'},escort:{status:'idle'},rover:{speed:0},plane:{speed:0,yaw:0},yacht:{speed:0},

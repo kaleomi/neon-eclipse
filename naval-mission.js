@@ -1,23 +1,23 @@
 import {createSeaChase,stepPursuer,boatsTouch,clearWaterLine,CHASE_GATES,CHASE_EVAC,CHASE} from './chase-rules.js';
 import {NAVAL_PROFILES,normalizeNaval} from './naval-settings.js';
-import {stepSeaCombat,clearSeaCombat,gunTargetStatus,waterImpact,SEA_GUN} from './sea-combat.js';
+import {createSeaCombat,stepSeaCombat,clearSeaCombat,gunTargetStatus,waterImpact,SEA_GUN} from './sea-combat.js';
 import {clamp,routeStep} from './maritime-rules.js';
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 export function createNavalMission(player,difficulty='normal'){
  const task=createSeaChase(player,{combat:true}),profile=NAVAL_PROFILES[normalizeNaval(difficulty)],members=[{...task,id:0,role:'pursuer',label:'追击艇'}];
  if(profile.count>1){const second=createSeaChase(player,{combat:true});Object.assign(second.enemy,{x:485,z:-60,yaw:-Math.PI/2});members.push({...second,id:1,role:'interceptor',label:'拦截艇'});}
  members.forEach((ship,i)=>{Object.assign(ship.ai,{role:ship.role,maxSpeed:i?profile.interceptSpeed:profile.speed,headStart:profile.headStart});ship.combat.tuning=profile;ship.combat.enemyCooldown=4+i*2;});
- task.remaining=profile.timeLimit;task.naval={profile,members,selected:0,manualTarget:false,weaponCooldown:0,fireGate:0,nextShooter:0,volleys:0};return task;
+ task.remaining=profile.timeLimit;task.naval={profile,members,selected:0,manualTarget:false,playerCombat:createSeaCombat(true),weaponCooldown:0,fireGate:0,nextShooter:0,volleys:0};return task;
 }
 export function aliveNaval(task){return task.naval.members.filter(ship=>!ship.combat.enemySunk);}
 export function selectedNavalTarget(task){return task.naval.members[task.naval.selected];}
 export function cycleNavalTarget(task){const n=task.naval;if(!n||task.status!=='active')return;const live=aliveNaval(task);if(!live.length)return;const at=live.findIndex(ship=>ship.id===n.selected);n.selected=live[(at+1)%live.length].id;n.manualTarget=true;}
 export function navalSummary(task){
- const n=task.naval,members=n.members,alive=aliveNaval(task),target=selectedNavalTarget(task);
- return {target,alive:alive.length,total:members.length,sunk:alive.length===0,shots:members.reduce((sum,m)=>sum+m.combat.shots,0),hits:members.reduce((sum,m)=>sum+m.combat.hits,0),enemyShots:members.reduce((sum,m)=>sum+m.combat.enemyShots,0),enemyHits:members.reduce((sum,m)=>sum+m.combat.enemyHits,0),projectiles:members.reduce((sum,m)=>sum+m.combat.projectiles.length,0),warning:members.find(m=>m.combat.warning),hitFlash:Math.max(...members.map(m=>m.combat.hitFlash)),playerFlash:Math.max(...members.map(m=>m.combat.playerFlash))};
+ const n=task.naval,members=n.members,alive=aliveNaval(task),target=selectedNavalTarget(task),battery=n.playerCombat;
+ return {target,alive:alive.length,total:members.length,sunk:alive.length===0,shots:members.reduce((sum,m)=>sum+m.combat.shots,battery?.shots||0),hits:members.reduce((sum,m)=>sum+m.combat.hits,battery?.hits||0),enemyShots:members.reduce((sum,m)=>sum+m.combat.enemyShots,0),enemyHits:members.reduce((sum,m)=>sum+m.combat.enemyHits,0),projectiles:members.reduce((sum,m)=>sum+m.combat.projectiles.length,battery?.projectiles.length||0),warning:members.find(m=>m.combat.warning),hitFlash:Math.max(...members.map(m=>m.combat.hitFlash)),playerFlash:Math.max(battery?.playerFlash||0,...members.map(m=>m.combat.playerFlash))};
 }
-function endTask(task,status,reason){task.status=status;task.reason=reason;for(const ship of task.naval.members){ship.status=status;clearSeaCombat(ship.combat);}}
-export function stepNavalMission(task,player,from,dt,{fire=false,paused=false,aboard=true}={}){
+function endTask(task,status,reason){task.status=status;task.reason=reason;if(task.naval.playerCombat)clearSeaCombat(task.naval.playerCombat);for(const ship of task.naval.members){ship.status=status;clearSeaCombat(ship.combat);}}
+export function stepNavalMission(task,player,from,dt,{fire=false,paused=false,aboard=true,aimPoint=null}={}){
  if(paused||task.status!=='active'||!Number.isFinite(dt)||dt<=0)return;
  const h=Math.min(dt,.25),n=task.naval,p=n.profile,members=n.members;task.elapsed+=h;task.remaining=Math.max(0,p.timeLimit-task.elapsed);task.contactCooldown=Math.max(0,task.contactCooldown-h);n.weaponCooldown=Math.max(0,n.weaponCooldown-h);n.fireGate=Math.max(0,n.fireGate-h);
  if(!aboard){endTask(task,'lost','已离开任务游艇');return;}
@@ -44,10 +44,15 @@ export function stepNavalMission(task,player,from,dt,{fire=false,paused=false,ab
  if(!activeWarning&&n.fireGate===0){for(let offset=0;offset<members.length;offset++){const ship=members[(n.nextShooter+offset)%members.length],range=distance(player,ship.enemy);if(!ship.combat.enemySunk&&!ship.escaped&&ship.combat.enemyCooldown<=h&&range>=SEA_GUN.enemyMinRange&&range<=SEA_GUN.enemyRange&&waterImpact(ship.enemy,player)===null){permitted=ship.id;break;}}}
  for(const ship of members){
   const hadWarning=!!ship.combat.warning,oldShots=ship.combat.shots;ship.hull=task.hull;ship.combat.playerCooldown=n.weaponCooldown+h;
-  stepSeaCombat(ship,player,from,before[ship.id],h,{fire:fire&&ship.id===n.selected&&n.weaponCooldown===0,enemyMayStart:ship.id===permitted,targets:members.map(m=>({task:m,previous:before[m.id]}))});
+  stepSeaCombat(ship,player,from,before[ship.id],h,{fire:fire&&aimPoint===null&&ship.id===n.selected&&n.weaponCooldown===0,enemyMayStart:ship.id===permitted,targets:members.map(m=>({task:m,previous:before[m.id]}))});
   task.hull=ship.hull;if(ship.combat.shots>oldShots)n.weaponCooldown=SEA_GUN.playerCooldown;
   if(hadWarning&&!ship.combat.warning){n.fireGate=p.fireGap;n.nextShooter=(ship.id+1)%members.length;n.volleys++;}
  }
+ // Manual shells belong to the player's battery, never to the Q-selected enemy.
+ const battery=n.playerCombat,batteryTask={status:task.status,combat:battery,hull:task.hull};
+ battery.playerCooldown=n.weaponCooldown+h;const oldPlayerShots=battery.shots;
+ stepSeaCombat(batteryTask,player,from,null,h,{fire:fire&&aimPoint!==null&&n.weaponCooldown===0,aimPoint,playerOnly:true,enemyMayStart:false,targets:members.map(m=>({task:m,previous:before[m.id]}))});
+ if(battery.shots>oldPlayerShots)n.weaponCooldown=SEA_GUN.playerCooldown;
  for(const ship of members){
   if(ship.combat.enemyHull<=0&&!ship.combat.enemySunk){ship.combat.enemySunk=true;ship.enemy.speed=0;clearSeaCombat(ship.combat);}
   if(ship.combat.enemySunk){ship.escaped=true;ship.escapeTime=p.loseSeconds;ship.ai.mode='disabled';continue;}

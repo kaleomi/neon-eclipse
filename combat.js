@@ -1,17 +1,12 @@
 // Weapon handling and damage rules are pure and covered by test-combat.mjs.
-export const WEAPONS=[
- {name:'VANGUARD',cap:30,reserve:150,delay:.11,damage:26,pellets:1,spread:.009,range:70,reload:1.4,automatic:true,kick:.016,headMultiplier:1.75,falloffStart:35,minimumDamage:.8},
- {name:'BREACHER',cap:8,reserve:48,delay:.32,damage:19,pellets:8,spread:.09,range:28,reload:.55,perShell:true,automatic:true,kick:.055,headMultiplier:1.25,falloffStart:7,minimumDamage:.35},
- {name:'GHOST',cap:15,reserve:90,delay:.24,damage:43,pellets:1,spread:.005,range:65,reload:1.05,automatic:false,kick:.028,headMultiplier:2,falloffStart:30,minimumDamage:.75},
- {name:'ARC BLADE',cap:Infinity,reserve:Infinity,delay:.45,damage:95,pellets:1,spread:0,range:3.5,reload:0,automatic:false,kick:0,headMultiplier:1,falloffStart:3.5,minimumDamage:1}
-];
+export {WEAPONS} from './weapons/registry.js';
 export function damageAtDistance(weapon,distance,head=false){
  if(distance>weapon.range)return 0;
  const fraction=Math.max(0,Math.min(1,(distance-weapon.falloffStart)/Math.max(.001,weapon.range-weapon.falloffStart)));
  return weapon.damage*(1-fraction*(1-weapon.minimumDamage))*(head?weapon.headMultiplier:1);
 }
 export function shotSpread(weapon,ads,heat,moving){
- return weapon.spread*(1-.65*ads)*(1+heat*.7+(moving?.55:0));
+ return weapon.spread*(1-.65*ads)*(1+heat*.7+(moving?(weapon.movementPenalty??.55):0));
 }
 export function createHandling(){
  const state={ads:0,heat:0,pitch:0,yaw:0,switchRemaining:0};

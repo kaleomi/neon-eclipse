@@ -1,8 +1,9 @@
+import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {OVERSEER_MAX_HP,createOverseer,overseerAngles,OVERSEER_POSITION,OVERSEER_NODES} from './overseer-rules.js';
 export function createOverseerWorld(scene,obstacles){
- const battle=createBossBattleRecord();
+ const battle=createBossBattleRecord(),haloTarget={};
  const rules=createOverseer(),root=new T.Group();scene.add(root);let stage=-1;
  const metal=new T.MeshStandardMaterial({color:0x34465b,metalness:.7,roughness:.35});
  const shield=new T.MeshBasicMaterial({color:0xffbd64,wireframe:true});
@@ -30,20 +31,21 @@ export function createOverseerWorld(scene,obstacles){
   title.textContent='枢纽监察者 · 阶段 '+s.tier+' / '+(s.tier===2?'交叉电弧':'定向电弧')+' · '+Math.ceil(s.hp)+' / '+OVERSEER_MAX_HP;
   healthFill.style.width=(Math.max(0,s.hp)/OVERSEER_MAX_HP*100)+'%';
   hint.textContent=(s.phase==='exposed'?'核心暴露 '+s.timer.toFixed(1)+'s · 立即攻击青色核心':'核心无敌！先打金色供电节点（剩余 '+s.nodes.filter(h=>h>0).length+'/2）')+'\n'+(shieldFeedback>0?'护盾抵挡：射击无效！请转火金色节点。 ': '')+(s.attack==='warning'?(s.tier===2?'交叉电弧预警！移向黄带之间的空隙或跳跃':'电弧预警！横移出黄带或跳跃'):s.attack==='live'?'电弧释放！离开红带':s.tier===2?'半血过载：四向交叉电弧 · 暴露时停止攻击':'击破两个节点 → 核心暴露 8 秒');
+  const mark=haloMarkText(haloTarget);if(mark)hint.textContent+=' · '+mark;
   panel.style.whiteSpace='pre-line';panel.style.borderColor=s.phase==='exposed'?'#71ffff':'#ffc85a';
   panel.dataset.exposed=String(s.phase==='exposed');
  }
- function setStage(index){if(stage===index)return;stage=index;rules.reset(index===3);if(index===3)battle.start();sync();}
- function clear(){battle.clear();stage=-1;shieldFeedback=0;rules.reset();markers.forEach(el=>el.hidden=true);sync(false);}
+ function setStage(index){if(stage===index)return;delete haloTarget.haloMark;stage=index;rules.reset(index===3);if(index===3)battle.start();sync();}
+ function clear(){delete haloTarget.haloMark;battle.clear();stage=-1;shieldFeedback=0;rules.reset();markers.forEach(el=>el.hidden=true);sync(false);}
  function update(dt,player,feetY,playing){
   if(!rules.blocking||!playing){sync(playing);return 0;}
-  battle.tick(dt);
+  stepHaloMark(haloTarget,dt);battle.tick(dt);
   const origin=new T.Vector3(OVERSEER_POSITION.x,.45,OVERSEER_POSITION.z),target=new T.Vector3(player.x,.45,player.z),delta=target.sub(origin);ray.set(origin,delta.clone().normalize());ray.far=delta.length();
   const blocked=ray.intersectObjects(obstacles.map(o=>o.mesh),false).length>0;
   shieldFeedback=Math.max(0,shieldFeedback-dt);
-  const damage=rules.tick(playing?dt:0,{x:player.x,z:player.z,feetY,blocked});sync(playing);return damage;
+  const damage=rules.tick(playing?dt:0,{x:player.x,z:player.z,feetY,blocked});if(rules.state.phase!=='exposed')delete haloTarget.haloMark;sync(playing);return damage;
  }
- function hit(object,amount){const shielded=rules.blocking&&rules.state.phase==='shield'&&object.userData.overseer==='core';if(shielded)shieldFeedback=1.5;const was=rules.blocking,previous=rules.state.phase,dealt=rules.damage(object.userData.overseer,amount);battle.hit(dealt,object.userData.overseer==='core',previous!=='exposed'&&rules.state.phase==='exposed');sync();return {shielded,damage:dealt,killed:was&&!rules.blocking,weak:dealt>0&&object.userData.overseer==='core'};}
+ function hit(object,amount,{halo=false}={}){const shielded=rules.blocking&&rules.state.phase==='shield'&&object.userData.overseer==='core';if(shielded)shieldFeedback=1.5;const was=rules.blocking,previous=rules.state.phase,dealt=rules.damage(object.userData.overseer,amount*(object.userData.overseer==='core'?haloDamageMultiplier(haloTarget):1));const marked=halo&&dealt>0&&object.userData.overseer==='core'&&registerHaloWeakHit(haloTarget);battle.hit(dealt,object.userData.overseer==='core',previous!=='exposed'&&rules.state.phase==='exposed');sync();return {shielded,marked,damage:dealt,killed:was&&!rules.blocking,weak:dealt>0&&object.userData.overseer==='core'};}
  function updateMarkers(camera,playing){
   camera.updateMatrixWorld();
   markers.forEach((el,i)=>{

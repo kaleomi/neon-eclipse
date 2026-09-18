@@ -1,0 +1,4 @@
+.loadout-card[data-weapon="railspike"] .accent{fill:#ffc18b}.loadout-card[data-weapon="railspike"].active{box-shadow:inset 3px 0 #ffc18b;background:linear-gradient(110deg,#553421e8,#102834e8)}.loadout-card[data-weapon="railspike"].active b{color:#ffdec1}
+.right-panel:has([data-weapon="railspike"]) .loadout-card{height:36px;margin-block:3px}
+.rail-charge-status{position:absolute;left:50%;top:calc(50% + 86px);transform:translateX(-50%);width:230px;color:#ffdec1;font:11px monospace;text-align:center;text-shadow:0 2px 4px #000;pointer-events:none}.rail-charge-status>div{margin-top:7px;height:3px;background:#553b2b}.rail-charge-status i{display:block;height:100%;background:#ffc18b;box-shadow:0 0 8px #ffb77b}.rail-charge-status[hidden]{display:none}
+@media(max-height:760px){.right-panel:has([data-weapon="railspike"]) .loadout-card{height:29px;margin-block:2px}.right-panel:has([data-weapon="railspike"]) .loadout-card small{font-size:7px!important}}

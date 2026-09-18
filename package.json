@@ -24,7 +24,9 @@
     "test:records": "node test-flight-records.mjs",
     "test:records:browser": "node test-flight-records-browser.mjs",
     "test:guidance:browser": "node test-scan-guidance-browser.mjs",
-    "test:joint:browser": "node test-joint-browser.mjs"
+    "test:joint:browser": "node test-joint-browser.mjs",
+    "test:checkpoint:browser": "node test-joint-checkpoint-browser.mjs",
+    "test:checkpoint:failure": "node test-checkpoint-failure-browser.mjs"
   },
   "keywords": [],
   "author": "",

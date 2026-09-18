@@ -1,3 +1,4 @@
+import {validTempestState,validHaloState,validRailspikeState} from './weapons/runtime.js';
 import {HARBOR_ENTRIES} from './harbor-data.js';
 import {TRAIN_ENTRIES} from './train-data.js';
 import {TOWER_ENTRIES} from './tower-data.js';
@@ -13,6 +14,9 @@ const integer=(v,min,max)=>Number.isInteger(v)&&number(v,min,max);
 export function validCheckpoint(s,supplies=SUPPLIES){
  if(!s||typeof s!=='object'||!integer(s.stageIndex,0,4)||!number(s.health,1,100)||!integer(s.selected,0,3))return false;
  if(!number(s.x,-38,38)||!number(s.z,-38,38)||!number(s.yaw,-100000,100000)||!number(s.pitch,-1.45,1.45)||!number(s.time,0,86400)||!integer(s.kills,0,10000))return false;
+ if(!validRailspikeState(s.railspike)||s.railspike?.equipped&&(s.selected!==0||s.tempest?.equipped||s.halo?.equipped))return false;
+ if(!validHaloState(s.halo)||s.halo?.equipped&&(s.selected!==0||s.tempest?.equipped))return false;
+ if(!validTempestState(s.tempest)||s.tempest?.equipped&&s.selected!==0)return false;
  if(s.trainTime!==undefined&&!number(s.trainTime,0,86400))return false;
  if(s.transportTrip!==undefined&&typeof s.transportTrip!=='boolean')return false;
  if(s.towerLiftTime!==undefined&&!number(s.towerLiftTime,0,86400))return false;

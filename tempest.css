@@ -1,0 +1,8 @@
+/* Five current weapons; this is not yet the planned limited-carry loadout system. */
+.right-panel:has([data-weapon="tempest"]) .loadout-card{height:47px;margin-block:6px}
+.loadout-card[data-weapon="tempest"] .accent{fill:#bce59c}
+.loadout-card[data-weapon="tempest"].active{box-shadow:inset 3px 0 #bce59c;background:linear-gradient(110deg,#203e3de8,#102834e8)}
+.loadout-card[data-weapon="tempest"].active b{color:#d5f4bc}
+.loadout-card[data-weapon="tempest"] small{letter-spacing:0}
+@media(max-height:760px){.right-panel:has([data-weapon="tempest"]) .loadout-card{height:39px;margin-block:4px}}
+body[data-hud-density="compact"] .right-panel .loadout-card:not(.active){height:32px}

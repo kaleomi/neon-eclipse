@@ -12,3 +12,20 @@
 @media(max-height:740px) and (min-width:561px){#sea-weapon-panel{top:auto;right:auto;left:50%;bottom:95px;transform:translateX(-50%);width:300px}}@media(max-height:750px) and (max-width:560px){#sea-weapon-panel{top:382px;padding:8px 12px}body[data-chase-status=active] .drive-instruments{bottom:78px;width:132px;padding:6px}body[data-chase-status=active] .drive-instruments .gear-row,body[data-chase-status=active] .drive-instruments .speed-scale,body[data-chase-status=active] .drive-instruments .drive-stats{display:none}body[data-chase-status=active] .speed-line>strong{font-size:34px}}
 
 #naval-settings{margin:12px 0}#naval-settings label{display:block;font-size:12px;color:#e3d3af;margin:8px 0}#naval-difficulty-select{font:inherit;font-size:13px;width:100%;padding:10px;background:#112b33;color:#e6f2e7;border:1px solid #779b94}#naval-settings #naval-difficulty-copy{font-size:10px;line-height:1.6;margin:8px 0}#naval-active-difficulty{display:block;margin-top:7px;color:#c9dfd2!important;font-size:10px!important}#chase-panel{padding:14px 17px}#chase-panel>div{margin-top:10px}#sea-target-label{font-size:11px}select:focus-visible{outline:2px solid #c8ffe9;outline-offset:3px}@media(max-width:560px){#chase-panel{padding:10px 12px}#naval-active-difficulty{margin-top:4px}#chase-panel>div{margin-top:6px}#chase-tracking{line-height:1.5}}
+
+/* P3 vehicle armament and wear panel; independent of chase and flight HUD blocks. */
+#vehicle-weapon-panel{position:fixed;right:40px;top:125px;width:300px;padding:14px 17px;background:#122b35e8;border:1px solid #9ccbb766;pointer-events:none}#vehicle-weapon-panel>small{color:#b9e6cf;font:10px Consolas,monospace;letter-spacing:.08em}#vehicle-weapon-panel>div{display:flex;justify-content:space-between;margin-top:10px;font-size:10px;color:#b5c7bb}#vehicle-weapon-panel b{display:block;color:#f0ead6;font:19px/1.6 Consolas,monospace}#vw-hull-meter{width:100%;height:8px;margin:10px 0 4px}#vehicle-weapon-panel p{font-size:11px;line-height:1.6;color:#d3e4d8;margin:4px 0 0}#vw-hint{color:#c9c5ac}#vehicle-weapon-panel[data-tier=smoking]{border-color:#e6b883}#vehicle-weapon-panel[data-tier=disabled]{border-color:#ff795e;background:#382a25ed}#vehicle-weapon-panel[data-gunner=true]{border-color:#c8ffe9;box-shadow:0 0 18px #7fdcb955}body[data-chase-status=active] #vehicle-weapon-panel,body[data-joint-status=active] #vehicle-weapon-panel{display:none}.armament-brief{border-color:#9ccbb766}@media(max-width:1000px){#vehicle-weapon-panel{right:22px;top:115px;width:270px}}@media(max-width:560px){#vehicle-weapon-panel{top:245px;left:22px;right:22px;width:auto;padding:10px 12px}#vehicle-weapon-panel b{font-size:16px}#vehicle-weapon-panel p{font-size:10px}}
+#escort-panel{position:fixed;right:40px;top:372px;width:300px;padding:14px 17px;background:#122b35e8;border:1px solid #f0b86066;pointer-events:none}
+#escort-panel>small{color:#f3cf8f;font:10px Consolas,monospace;letter-spacing:.08em}
+#escort-panel>small+small{float:right;color:#d3e4d8}
+#escort-panel>div{display:flex;justify-content:space-between;margin-top:10px;font-size:10px;color:#b5c7bb}
+#escort-panel b{display:block;color:#f0ead6;font:19px/1.6 Consolas,monospace}
+#escort-panel meter{width:100%;height:8px;margin-top:6px}
+#escort-panel p{font-size:11px;line-height:1.6;color:#d3e4d8;margin:6px 0 0}
+#escort-panel[data-warning=true]{border-color:#ff6a3c;box-shadow:0 0 18px #ff4a2c66;background:#3a2622ed}
+.escort-brief{border-color:#f0b86066}
+.escort-brief label{display:block;font-size:12px;color:#e3d3af;margin:8px 0}
+.escort-brief select{margin-left:6px;font:12px Consolas,monospace;background:#0f2028;color:#f0ead6;border:1px solid #f0b86066;padding:3px 6px}
+.escort-difficulty-copy{font-size:10px;line-height:1.6;margin:4px 0 8px;color:#b5c7bb}
+@media (max-width:1100px){#escort-panel{right:22px;top:352px;width:280px}}
+@media (max-width:720px){#escort-panel{top:auto;bottom:120px;right:22px;left:22px;width:auto;padding:10px 12px}#escort-panel b{font-size:16px}}

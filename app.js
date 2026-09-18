@@ -1,5 +1,12 @@
+import {createRailCharge,selectRailImpacts} from './weapons/railspike-rules.js';
+import {railspikeCheckpoint,supplementRailspikeSupply} from './weapons/runtime.js';
+import {createRailPanels} from './rail-panels.js';
+import {createHaloBurst,registerHaloWeakHit,stepHaloMark} from './weapons/halo-rules.js';
+import {haloCheckpoint,supplementHaloSupply} from './weapons/runtime.js';
+import {createRuntimeWeapons,canSprintWithWeapon,tempestCheckpoint,restoreRuntimeAmmo,supplementTempestSupply,legacySelected} from './weapons/runtime.js';
 import {currentDifficulty,incomingDamage,outgoingDamage,attackCooldown} from './combat-difficulty.js';
 import {createMeleeSweep} from './melee-sweep.js';
+import {createMeleeStrike,MELEE_STRIKE} from './melee-strike.js';
 import {createAchievementUI} from './achievement-ui.js';
 import {createPresentation} from './presentation.js';
 import {createGameAudio} from './audio/game-audio.js';
@@ -18,7 +25,7 @@ import {createTowerNavigation} from './tower-navigation.js';
 import {createBossRecordUI} from './boss-record-ui.js';
 import {createRoofEnemyNavigation} from './roof-enemy-navigation.js';
 import {createTransportWorld} from './transport-world.js';
-import {sprintPose,crossedMeleeContact} from './action-poses.js';
+import {sprintPose} from './action-poses.js';
 import {createLookInput} from './look-input.js';
 import {createOverseerWorld} from './overseer-world.js';
 import {createPlayerMotion} from './player-motion.js';
@@ -47,14 +54,15 @@ import { createCampaignStore, STAGE_ENTRIES } from './campaign.js';
 import { createCampaignUI } from './campaign-ui.js';
 
 const fieldRecord=createFieldRecord();
-const telemetry=createTelemetry();let telemetryAttempt=null,telemetryShots=[0,0,0,0];
+const telemetry=createTelemetry();let telemetryAttempt=null,telemetryShots=[0,0,0,0,0,0,0];
 window.neonTelemetry=telemetry;
-const meleeSweep=createMeleeSweep();
+const meleeSweep=createMeleeSweep(),meleeStrike=createMeleeStrike(),haloBurst=createHaloBurst(),railCharge=createRailCharge();let railCue=0;
+function cancelRail(){railCharge.cancel();railCue=0;}
 let gameMenu=null,navigating=false;
 const $ = s => document.querySelector(s);
 const overlay = document.createElement('section');
 overlay.className = 'mission-overlay';
-overlay.innerHTML = `<div class="mission-card"><span id="session-eyebrow" class="eyebrow">NEON ECLIPSE / SECTOR K-19</span><h2 id="session-title">突破<span>暗影封锁</span></h2><p id="brief">启动西侧冷却装置，取得东侧权限，解除反应堆封锁。击败 Warden 后返回南部撤离。橙色突击、紫色远程、金色重装：识别敌人，选择打法。</p><div class="controls"><span><b>W A S D</b>移动</span><span><b>鼠标</b>瞄准 / 左键射击</span><span><b>1 — 4</b>切换武器</span><span><b>R / SHIFT</b>换弹 / 冲刺</span><span><b>SPACE / ESC</b>跳跃 / 暂停</span><span><b>右键 / E</b>瞄准 / 按住交互</span></div><button id="deploy">开始行动 ↗</button><small id="lock-note">SPACE 跳跃 · 步枪按住连射 · E 交互 · 红色加号补给恢复生命，子弹标识补给补充弹药</small></div>`;
+overlay.innerHTML = `<div class="mission-card"><span id="session-eyebrow" class="eyebrow">NEON ECLIPSE / SECTOR K-19</span><h2 id="session-title">突破<span>暗影封锁</span></h2><p id="brief">启动西侧冷却装置，取得东侧权限，解除反应堆封锁。击败 Warden 后返回南部撤离。橙色突击、紫色远程、金色重装：识别敌人，选择打法。</p><div class="controls"><span><b>W A S D</b>移动</span><span><b>鼠标</b>瞄准 / 左键射击</span><span><b>1 — 6</b>切换武器</span><span><b>R / SHIFT</b>换弹 / 冲刺</span><span><b>SPACE / ESC</b>跳跃 / 暂停</span><span><b>右键 / E</b>瞄准 / 按住交互</span></div><button id="deploy">开始行动 ↗</button><small id="lock-note">SPACE 跳跃 · 步枪按住连射 · E 交互 · 红色加号补给恢复生命，子弹标识补给补充弹药</small></div>`;
 document.body.append(overlay);createLevelMenu();
 if(IS_STATION){$('#session-title').innerHTML='地下<span>运输站</span>';$('#brief').textContent='从维护通道恢复供电，清理站台，穿过停靠列车，在调度室切换道岔，登上末班列车撤离。六张地图的检查点独立保存。';$('#session-eyebrow').textContent='NEON ECLIPSE / U-02';$('.topstat').textContent='CHAPTER 02 / UNDERGROUND TRANSIT';}
 if(IS_ROOF){$('#session-title').innerHTML='天穹<span>通讯枢纽</span>';$('#brief').textContent='进入露天天线阵列，依次接通双中继、接管天线并上传信号。躲开放电区，最后返回南部升降平台撤离。';$('#session-eyebrow').textContent='NEON ECLIPSE / A-03';$('.topstat').textContent='CHAPTER 03 / SKYLINK ARRAY';}
@@ -132,6 +140,7 @@ playerCeilings.push({x:0,z:-16,w:6.5,d:6.5,bottom:0,top:9});
 return createArt(scene,renderer,reactor,obstacles);
 }
 const art=IS_HARBOR?createHarborWorld(scene,renderer,obstacles):IS_TRAIN?createTrainWorld(scene,renderer,obstacles):IS_TOWER?createTowerWorld(scene,renderer,obstacles):IS_ROOF?createRoofWorld(scene,renderer,obstacles):IS_STATION?createStationWorld(scene,renderer,obstacles):buildReactor();
+if(MAP_ID==='reactor')createRailPanels(scene,obstacles);
 const presentation=createPresentation({renderer,scene,sun,art,camera,qualityButton,record:fieldRecord});
 const overseer=IS_ROOF?createOverseerWorld(scene,obstacles):null;
 const transport=IS_ROOF?createTransportWorld(scene,art.ceilings,obstacles):null;
@@ -152,7 +161,7 @@ const enemyProjectiles=createEnemyProjectiles(scene,obstacles,(damage,source)=>{
 });
 const viewModel=createWeapons(camera);
 const {gun,flash}=viewModel;
-const weapons=WEAPONS;
+const weapons=createRuntimeWeapons();
 let meleeRemaining=0,meleePending=false,sprintBlend=0;
 let runMode=IS_JOURNEY?'journey':'campaign',replayEntry=null;
 let state='ready',wave=1,health=100,kills=0,selected=0,cooldown=0,reload=0,recoil=0;
@@ -178,7 +187,7 @@ function hud(){
  $('#player-hud .health').dataset.low=String(health<=25);$('#player-hud .ammo').dataset.weapon=selected===3?'melee':'firearm';
  $('#ammo').textContent=Number.isFinite(rounds[selected])?rounds[selected]:'∞';
  $('.ammo i').textContent=selected===3?' / —':` / ${reserves[selected]}`;
- $('.ammo span').textContent=selected===3?'近战':'弹药';
+ $('.ammo span').textContent=selected===3?'近战':selected===4?'TEMPEST / 机动冲锋':selected===5?'HALO / 三连点射':selected===6?'RAILSPIKE / 蓄力穿透':'弹药';
  $('.boss-note').textContent=mission.current.title;
  viewModel.select(selected);
  document.querySelectorAll('.loadout-card').forEach((el,i)=>el.classList.toggle('active',i===selected));
@@ -201,9 +210,10 @@ function spawnEncounter(stage){
  hud();
 }
 function reset(stageIndex=0,snapshot=null){
+ haloBurst.cancel();cancelRail();
  fieldRecord.begin(stageIndex);achievementUI.begin({map:MAP_ID,stage:stageIndex,snapshot:!!snapshot,replay:runMode==='replay'});
- telemetryAttempt=createTelemetryAttempt({map:MAP_ID,mode:runMode,difficulty:currentDifficulty().id,stage:stageIndex,snapshot:!!snapshot});telemetryShots=[0,0,0,0];
- bossRecordUI?.clear();lookInput.reset();transport?.reset(snapshot?.transportTime||0,snapshot?.transportTrip===true);meleePending=false;sprintBlend=0;
+ telemetryAttempt=createTelemetryAttempt({map:MAP_ID,mode:runMode,difficulty:currentDifficulty().id,stage:stageIndex,snapshot:!!snapshot});telemetryShots=[0,0,0,0,0,0,0];
+ bossRecordUI?.clear();lookInput.reset();transport?.reset(snapshot?.transportTime||0,snapshot?.transportTrip===true);meleePending=false;meleeStrike.cancel();sprintBlend=0;
  overseer?.clear();art.clear();enemyProjectiles.clear();handling.reset();combatUI.clear();enemyUI.clear();mission.reset(stageIndex);missionWorld.reset();fireBuffer=0;enemyFireGate=0;moving=false;sprinting=false;aiming=false;firing=false;keys.clear();
  enemies.forEach(e=>disposeGroup(e.group));enemies.length=0; effects.forEach(e=>{scene.remove(e.mesh);e.mesh.geometry.dispose();e.mesh.material.dispose();});effects.length=0;
  jumpRequested=false;health=100;kills=0;wave=1;selected=0;cooldown=0;reload=0;recoil=0;elapsed=0;meleeRemaining=0;
@@ -211,15 +221,15 @@ function reset(stageIndex=0,snapshot=null){
  if(art.setStage?.(mission.state.index)){navigation.invalidate();roofEnemyNavigation?.invalidate?.();}art.restoreMotion?.(snapshot);
  const entry=STAGE_ENTRIES[stageIndex];let restoredFeet=entry.feetY||0;camera.position.set(entry.x,restoredFeet+1.7,entry.z);yaw=0;pitch=0;
  if(snapshot){
-  health=snapshot.health;rounds=[...snapshot.rounds,Infinity];reserves=[...snapshot.reserves,Infinity];selected=snapshot.selected;
+  health=snapshot.health;({rounds,reserves,selected}=restoreRuntimeAmmo(snapshot));
   if(playerMotion.canOccupy(snapshot.x,snapshot.z,snapshot.feetY||0)){camera.position.set(snapshot.x,1.7,snapshot.z);restoredFeet=snapshot.feetY||0;}
   yaw=snapshot.yaw;pitch=snapshot.pitch;kills=snapshot.kills;mission.state.time=snapshot.time;missionWorld.restore(snapshot.collected);
  }
  playerMotion.reset(camera.position,restoredFeet);camera.rotation.set(pitch,yaw,0);spawnEncounter(mission.current);campaignUI.announce(mission.current,runMode==='replay');
 
 }
-function end(win){if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
- if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';gameAudio.play(win?'mission.won':'mission.lost');if(!win)gameAudio.play('player.death');document.exitPointerLock?.();overlay.hidden=false;
+function end(win){haloBurst.cancel();cancelRail();if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
+ if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';document.body.dataset.playState=state;gameAudio.play(win?'mission.won':'mission.lost');if(!win)gameAudio.play('player.death');document.exitPointerLock?.();overlay.hidden=false;
  $('#session-title').innerHTML=win?(runMode==='replay'?'阶段<span>训练完成</span>':'行动<span>撤离成功</span>'):'信号<span>连接中断</span>';
  const seconds=Math.floor(mission.state.time);
  $('#brief').textContent=`${win?(runMode==='replay'?'本阶段训练完成，主行动检查点未改变。':(IS_HARBOR?'小队已登船，离开风暴港口。':IS_TRAIN?'列车控制权已移交，接应队伍已登车。':IS_TOWER?'中枢已隔离，小队已从大厅撤离。':IS_ROOF?'信号已送出，小队已返回升降平台。':IS_STATION?'已登上末班列车，运输站行动完成。':'反应堆已移交，撤离完成。')):'可从阶段入口检查点重试，或重新开始行动。'} 击破 ${kills} 个目标 · 用时 ${Math.floor(seconds/60)}分${seconds%60}秒 · 阶段 ${runMode==='replay'?replayEntry.stageIndex+1:Math.min(5,mission.state.index+1)}/5。`;
@@ -227,11 +237,11 @@ function end(win){if(!win){fieldRecord.die(camera.position);achievementUI.attemp
  if(win&&runMode==='journey'){pendingJourneyResult={time:mission.state.time,kills};if(journey.finish(MAP_ID,pendingJourneyResult))pendingJourneyResult=null;else $('#brief').textContent='章节已完成，但战役存档写入失败。请重试保存后再继续。';}
  if(win&&runMode==='journey'&&journey.data?.status==='complete'){$('#session-title').innerHTML='港口撤离<span>战役完成</span>';$('#brief').textContent='反应堆、地下运输站、天穹通讯枢纽、多层中枢塔、疾驰货运列车、风暴港口：六章行动全部完成。共击破 '+journey.data.results.reduce((n,r)=>n+r.kills,0)+' 个目标。可继续单章训练，或重新开始战役。';}
  $('#deploy').textContent='开始新行动 ↗';firing=false;fireBuffer=0;aiming=false;keys.clear();campaignUI.refresh(state,runMode);refreshJourney();}
-function pause(){lookInput.reset();if(state!=='playing')return;bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';gameAudio.play('ui.pause');gameAudio.pause();firing=false;fireBuffer=0;aiming=false;keys.clear();overlay.hidden=false;
+function pause(){lookInput.reset();if(state!=='playing')return;cancelRail();bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';document.body.dataset.playState=state;gameAudio.play('ui.pause');gameAudio.pause();firing=false;fireBuffer=0;aiming=false;keys.clear();overlay.hidden=false;
  $('#session-title').innerHTML='行动<span>已暂停</span>';$('#brief').textContent='战场已冻结。当前目标：'+mission.current.title+'。';$('#deploy').textContent='继续当前战斗 ↗';campaignUI.refresh(state,runMode);refreshJourney();}
-function bossLoadout(){return {health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3)};}
+function bossLoadout(){return {health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),...tempestCheckpoint(rounds,reserves,selected),...haloCheckpoint(rounds,reserves,selected),...railspikeCheckpoint(rounds,reserves,selected)};}
 function checkpoint(){
- return {stageIndex:mission.state.index,health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),selected,x:camera.position.x,z:camera.position.z,yaw,pitch,time:mission.state.time,kills,feetY:playerMotion.state.y,collected:missionWorld.collected,...(IS_TRAIN?{trainTime:art.trainTime}:{}),...(IS_TOWER?{towerLiftTime:art.liftTime}:{}),...(transport?{transportTime:transport.time,transportTrip:transport.tripCompleted}:{})};
+ return {stageIndex:mission.state.index,health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),selected:legacySelected(selected),...tempestCheckpoint(rounds,reserves,selected),...haloCheckpoint(rounds,reserves,selected),...railspikeCheckpoint(rounds,reserves,selected),x:camera.position.x,z:camera.position.z,yaw,pitch,time:mission.state.time,kills,feetY:playerMotion.state.y,collected:missionWorld.collected,...(IS_TRAIN?{trainTime:art.trainTime}:{}),...(IS_TOWER?{towerLiftTime:art.liftTime}:{}),...(transport?{transportTime:transport.time,transportTrip:transport.tripCompleted}:{})};
 }
 function saveCheckpoint(){if(runMode==='campaign')campaign.save(checkpoint());if(runMode==='journey'&&!journey.save(MAP_ID,checkpoint()))notify('战役检查点写入失败 // 请勿关闭页面');}
 function refreshJourney(){
@@ -279,7 +289,7 @@ function startSingleChapter(){
 async function enterPlay(){
  try{await gameAudio.unlock();}catch{}
  gameAudio.resume();gameAudio.play('ui.resume');
- lookInput.reset();state='playing';overlay.hidden=true;
+ lookInput.reset();state='playing';document.body.dataset.playState=state;overlay.hidden=true;
  try{await renderer.domElement.requestPointerLock();}catch{notify('鼠标锁定不可用：按住左键拖动瞄准，方向键也可转向');}
 }
 function continueCampaign(){
@@ -317,30 +327,31 @@ document.addEventListener('keydown',e=>{
  if(e.code==='Escape'){pause();document.exitPointerLock?.();}
  if(state!=='playing')return;keys.add(e.code);
  if(e.code==='Space'&&!e.repeat)jumpRequested=true;
- if(/^Digit[1-4]$/.test(e.code)&&!e.repeat)changeWeapon(Number(e.code.slice(-1))-1);
+ if(/^Digit[1-7]$/.test(e.code)&&!e.repeat)changeWeapon(Number(e.code.slice(-1))-1);
  if(e.code==='KeyR')startReload();
 });
 document.addEventListener('keyup',e=>keys.delete(e.code));
 document.addEventListener('mousedown',e=>{if(state!=='playing')return;if(e.button===0){firing=true;fireBuffer=.18;}if(e.button===2)aiming=true;});
-document.addEventListener('mouseup',e=>{if(e.button===0){firing=false;lookInput.end();}if(e.button===2)aiming=false;});
+document.addEventListener('mouseup',e=>{if(e.button===0){firing=false;if(selected===6)cancelRail();lookInput.end();}if(e.button===2)aiming=false;});
 document.addEventListener('contextmenu',e=>e.preventDefault());
 function changeWeapon(index){
- if(index===selected)return;
- selected=index;meleeRemaining=0;meleePending=false;reload=0;fireBuffer=0;firing=false;recoil=0;handling.switchWeapon();hud();
+ if(!Number.isInteger(index)||index<0||index>=weapons.length||index===selected)return;
+ haloBurst.cancel();cancelRail();selected=index;meleeRemaining=0;meleePending=false;meleeStrike.cancel();reload=0;fireBuffer=0;firing=false;recoil=0;handling.switchWeapon();combatUI.switching();hud();
 }
 function startReload(){
+ if(selected===6){cancelRail();firing=false;fireBuffer=0;}
  const w=weapons[selected];if(reload||selected===3||rounds[selected]===w.cap)return;
  if(!reserves[selected]){notify('备用弹药耗尽 · 切换武器');return;}
- reload=w.reload;fireBuffer=0;gameAudio.play('reload.start');hud();
+ haloBurst.cancel();cancelRail();reload=w.reload;fireBuffer=0;gameAudio.play(selected===4?'reload.tempest':'reload.start');hud();
 }
 function blocked(x,z,r){return obstacles.some(o=>Math.abs(x-o.x)<o.w/2+r&&Math.abs(z-o.z)<o.d/2+r);}
 function move(pos,dx,dz,r){if(!blocked(pos.x+dx,pos.z,r))pos.x+=dx;if(!blocked(pos.x,pos.z+dz,r))pos.z+=dz;}
 function trace(from,to,color=0xffbd75){
  const mesh=new THREE.Line(new THREE.BufferGeometry().setFromPoints([from,to]),new THREE.LineBasicMaterial({color,transparent:true,opacity:.9}));scene.add(mesh);effects.push({mesh,life:.09});
 }
-function shoot(meleeImpact=false){
- if(!meleeImpact&&(cooldown>0||handling.state.switchRemaining>0))return false;
- if(selected===3&&!meleeImpact){cooldown=weapons[3].delay;meleeRemaining=.42;meleePending=true;overseer?.battle.shot(3);return true;}
+function shoot(meleeImpact=false,meleeContact=null,haloRound=false){
+ if(!meleeImpact&&((cooldown>0&&!haloRound)||handling.state.switchRemaining>0))return false;
+ if(selected===3&&!meleeImpact){cooldown=weapons[3].delay;meleeRemaining=MELEE_STRIKE.duration;meleePending=true;meleeStrike.begin();overseer?.battle.shot(3);return true;}
  if(reload>0){if(weapons[selected].perShell&&rounds[selected]>0)reload=0;else return false;}
  if(rounds[selected]<=0){startReload();cooldown=.2;fireBuffer=0;return false;}
  const w=weapons[selected];if(selected!==3)overseer?.battle.shot(selected);rounds[selected]--;if(selected!==3){fieldRecord.shot();achievementUI.attempt.shot(selected);}telemetryShots[selected]++;if(!meleeImpact)cooldown=w.delay;recoil=1;
@@ -350,29 +361,36 @@ function shoot(meleeImpact=false){
  const spread=shotSpread(w,handling.state.ads,handling.state.heat,moving);
  const meshes=enemies.flatMap(e=>e.group.children).concat(obstacles.map(o=>o.mesh),overseer?.targets||[]);
  for(let p=0;p<w.pellets;p++){
-  let impact;
+  let impact,railResult;
   if(selected===3){
-   impact=meleeSweep.resolve(camera,meshes,object=>object.userData.overseer!==undefined||enemies.some(enemy=>enemy.hp>0&&object.parent===enemy.group),w.range,obstacles);
+   impact=meleeContact;
   }else{
    ray.setFromCamera(new THREE.Vector2((Math.random()-.5)*spread,(Math.random()-.5)*spread),camera);ray.far=w.range;
-   impact=ray.intersectObjects(meshes,false)[0];
+   const intersections=ray.intersectObjects(meshes,false);
+   if(selected===6)railResult=selectRailImpacts(intersections,object=>enemies.find(e=>e.hp>0&&e.group===object.parent)||(object.userData.overseer!==undefined?'overseer:'+object.userData.overseer:null));
+   impact=intersections[0];
   }
+  for(const contact of (railResult?railResult.hits:[impact])){
+  impact=contact;
   const target=impact&&enemies.find(e=>e.group===impact.object.parent);
   if(impact)art.burst(impact.point,target?0xff9459:0x74f8ed,selected===1?4:10);
   if(impact&&impact.object.userData.overseer!==undefined){
-   const result=overseer.hit(impact.object,outgoingDamage(damageAtDistance(w,impact.distance,false)));if(result.shielded)notify('核心无敌！先击破两座金色供电节点，再攻击青色核心');totalDamage+=result.damage;coreHit ||= result.weak;armoredHit ||= result.damage===0;
+   const result=overseer.hit(impact.object,outgoingDamage(damageAtDistance(w,impact.distance,false)*(impact.railFactor??1)),{halo:selected===5});if(result.marked)gameAudio.play('halo.mark');if(result.shielded)notify('核心无敌！先击破两座金色供电节点，再攻击青色核心');totalDamage+=result.damage;coreHit ||= result.weak;armoredHit ||= result.damage===0;
    if(result.killed){overseer.battle.finish('won',bossLoadout());kills++;killed++;killedBoss=true;notify('枢纽监察者已击破 // 清理守卫，建立上传链路');}
   }
   if(target&&target.hp>0){
    const isHead=selected!==3&&impact.object.userData.hitZone==='head';
-   const baseDamage=outgoingDamage(damageAtDistance(w,impact.distance,isHead));
+   const baseDamage=outgoingDamage(damageAtDistance(w,impact.distance,isHead)*(impact.railFactor??1));
    const resolved=resolveEnemyDamage(target,baseDamage,impact.object.userData.hitZone,camera.position);
    if(target.type==='harborElite'&&target.eliteState?.ventRemaining>0&&impact.object.userData.hitZone==='core')fieldRecord.coreHit(target);
    totalDamage+=Math.min(target.hp,resolved.damage);target.hp-=resolved.damage;if(target.hp<=0&&target.type==='harborElite'&&target.eliteState?.ventRemaining>0&&impact.object.userData.hitZone==='core')achievementUI.attempt.counter();
+   if(selected===5&&resolved.damage>0&&target.hp>0&&(resolved.weak&&impact.object.userData.hitZone==='core'||isHead&&!resolved.armored)&&registerHaloWeakHit(target))gameAudio.play('halo.mark');
    armoredHit ||= resolved.armored;coreHit ||= resolved.weak;headshot ||= (isHead&&!resolved.armored)||resolved.weak;
   }
-  const endpoint=impact?impact.point:ray.ray.at(w.range,new THREE.Vector3());
-  if(selected!==3)trace(gun.localToWorld(flash.position.clone()),endpoint);
+  }
+  const terminal=railResult?railResult.stop:impact;
+  const endpoint=terminal?terminal.point:ray.ray.at(w.range,new THREE.Vector3());
+  if(selected!==3)trace(gun.localToWorld(flash.position.clone()),endpoint,selected===6?0xffd1a0:0xffbd75);
  }
  for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0){
   if(enemies[i].boss)killedBoss=true;else if(enemies[i].type==='harborElite'||enemies[i].elite)killedElite=true;
@@ -387,6 +405,7 @@ function shoot(meleeImpact=false){
  handling.shot(w,Math.random());flash.visible=selected!==3;hud();return true;
 }
 function update(dt){
+ for(const enemy of enemies)stepHaloMark(enemy,dt);
  fieldRecord.tick(dt,mission.state.index);
  const previousPlayer=camera.position.clone();
  elapsed+=dt;cooldown=Math.max(0,cooldown-dt);recoil=Math.max(0,recoil-dt*7);enemyFireGate=Math.max(0,enemyFireGate-dt);
@@ -396,7 +415,7 @@ function update(dt){
 
  if(keys.has('ArrowLeft'))yaw+=dt*1.6;if(keys.has('ArrowRight'))yaw-=dt*1.6;
  let mx=Number(keys.has('KeyD'))-Number(keys.has('KeyA')),mz=Number(keys.has('KeyS'))-Number(keys.has('KeyW'));
- moving=mx!==0||mz!==0;sprinting=(keys.has('ShiftLeft')||keys.has('ShiftRight'))&&moving&&!aiming&&!firing&&reload<=0;
+ moving=mx!==0||mz!==0;sprinting=(keys.has('ShiftLeft')||keys.has('ShiftRight'))&&canSprintWithWeapon(weapons[selected],{moving,aiming,firing,reload});
  handling.update(dt,aiming&&reload<=0&&selected!==3);
  const ads=handling.state.ads,len=Math.hypot(mx,mz)||1,speed=(sprinting?8:5)*(1-ads*.4);
  mx=mx/len*dt*speed;mz=mz/len*dt*speed;
@@ -412,14 +431,33 @@ function update(dt){
  gun.position.set(.29-ads*.24,-.28-lower+(moving?Math.sin(elapsed*9)*.006:0),-.68+recoil*.065);
  gun.rotation.set(recoil*.06+reloadArc*.22,.16*(1-ads)+(moving?Math.sin(elapsed*5)*.007:0),selected===3?-recoil*.9:-reloadArc*.55-(sprinting?.15:0));
  const pose=meleePose(meleeRemaining);if(selected===3){gun.position.x+=pose.x;gun.position.y+=pose.y;gun.position.z+=pose.z;gun.rotation.set(pose.pitch,0,pose.roll);}
- sprintBlend+=(Number(sprinting&&selected!==3)-sprintBlend)*(1-Math.exp(-dt*12));
+ sprintBlend+=((sprinting&&selected!==3?(reload>0&&weapons[selected].sprintReload?.55:1):0)-sprintBlend)*(1-Math.exp(-dt*12));
  const runPose=sprintPose(elapsed,sprintBlend,playerMotion.state.grounded);
  gun.position.x+=runPose.x;gun.position.y+=runPose.y;gun.position.z+=runPose.z;gun.rotation.x+=runPose.pitch;gun.rotation.y+=runPose.yaw;gun.rotation.z+=runPose.roll;
- viewModel.animate(selected,recoil,reload>0?1-reload/weapons[selected].reload:0);
+ viewModel.animate(selected,recoil,reload>0?1-reload/weapons[selected].reload:0,railCharge.progress);
  gun.scale.setScalar(1);flash.visible=recoil>.6&&selected!==3;
- if(meleePending&&crossedMeleeContact(previousMelee,meleeRemaining)){meleePending=false;if(selected===3)shoot(true);}
+ if(meleePending&&selected===3){
+  const contact=meleeStrike.step(previousMelee,meleeRemaining,()=>{
+   scene.updateMatrixWorld(true);
+   const meshes=enemies.flatMap(e=>e.group.children).concat(obstacles.map(o=>o.mesh),overseer?.targets||[]);
+   return meleeSweep.resolve(camera,meshes,object=>object.userData.overseer!==undefined||enemies.some(enemy=>enemy.hp>0&&object.parent===enemy.group),weapons[3].range,obstacles);
+  });
+  if(contact){meleePending=false;shoot(true,contact.impact);}
+ }
  const wantsShot=weapons[selected].automatic?firing||fireBuffer>0:fireBuffer>0;
- if(wantsShot&&shoot())fireBuffer=0;
+ if(selected===6){
+  railCharge.tick(dt,firing,cooldown<=0&&handling.state.switchRemaining<=0&&reload<=0&&rounds[6]>0,()=>shoot());
+  const cue=Math.ceil(railCharge.progress*4);if(cue>railCue)gameAudio.play('rail.charge');railCue=cue;
+  if(firing&&rounds[6]===0&&reload<=0&&!railCharge.latched)startReload();
+  fireBuffer=0;
+ }else if(selected===5){
+  const continuing=haloBurst.active;haloBurst.tick(dt,()=>shoot(false,null,true));
+  if(continuing)fireBuffer=0;
+  else if(wantsShot&&cooldown<=0&&handling.state.switchRemaining<=0&&reload<=0){
+   if(haloBurst.begin(rounds[5])){haloBurst.tick(0,()=>shoot(false,null,true));fireBuffer=0;}
+   else {startReload();fireBuffer=0;}
+  }
+ }else if(wantsShot&&shoot())fireBuffer=0;
  enemyFireGate=enemyDirector.update(dt,elapsed,enemyFireGate);
  enemyProjectiles.update(dt,camera.position,previousPlayer);
  const bossDamage=incomingDamage(overseer?.update(dt,camera.position,playerMotion.state.y,true)||0);
@@ -428,21 +466,21 @@ function update(dt){
  const hazard=art.hazardDamage?.(dt,{x:camera.position.x,z:camera.position.z,feetY:playerMotion.state.y});if(hazard){fieldRecord.hurt(Math.min(health,hazard.damage));achievementUI.attempt.hurt(Math.min(health,hazard.damage));health=Math.max(0,health-hazard.damage);mission.interrupt();combatUI.damaged(new THREE.Vector3(hazard.x,0,hazard.z));damageTime=.3;gameAudio.play('player.hazard');hud();}
  if(health<=0){end(false);return;}
  missionWorld.collect(camera.position,type=>{
-  const supply=applySupply(type,health,reserves,weapons);if(!supply.changed)return false;
-  health=supply.health;reserves=supply.reserves;notify(type==='health'?'医疗补给 // 恢复最多 35 点生命':'弹药补给 // 备用弹药已增加');gameAudio.play(type==='health'?'pickup.health':'pickup.ammo');hud();return true;
+  const supply=supplementRailspikeSupply(type,supplementHaloSupply(type,supplementTempestSupply(type,applySupply(type,health,reserves,weapons),reserves),reserves),reserves);if(!supply.changed)return false;
+  health=supply.health;reserves=supply.reserves;notify(type==='health'?'医疗补给 // 恢复最多 35 点生命':'弹药补给 // 备用弹药已增加');gameAudio.play(type==='health'?'supply.health':'supply.ammo');hud();return true;
  });
  starWorld.update(dt,elapsed,camera.position,true);
  const interaction=interactionStatus();
  const event=mission.tick(dt,{player:camera.position,held:keys.has('KeyE'),clear:enemies.length===0&&!overseer?.blocking,canInteract:interaction.allowed,transportReady:transport?.tripCompleted===true});
  if(event){
   if(event.type==='node'){keys.delete('KeyE');firing=false;fireBuffer=0;notify(event.message);gameAudio.play('objective.node');hud();}
-  else if(event.type==='reinforcement'){spawnEncounter(event.stage);notify(event.message);gameAudio.play('objective.reinforcement');hud();}
+  else if(event.type==='reinforcement'){spawnEncounter(event.stage);notify(event.message);gameAudio.play('reinforcement');hud();}
   else if(event.type==='defense'){
    keys.delete('KeyE');firing=false;fireBuffer=0;
    spawnEncounter({...event.stage,count:event.stage.defenseCount,spawns:event.stage.defenseSpawns||event.stage.spawns,roles:event.stage.defenseRoles||event.stage.roles});
-   notify((event.stage.defenseLabel||'权限上传')+'开始 // 留在 '+event.stage.defenseRadius+' 米内防守 '+event.stage.defenseDuration+' 秒 · 可移动射击');gameAudio.play('objective.defense');hud();
+   notify((event.stage.defenseLabel||'权限上传')+'开始 // 留在 '+event.stage.defenseRadius+' 米内防守 '+event.stage.defenseDuration+' 秒 · 可移动射击');gameAudio.play('objective.defense.start');hud();
   }else{
-   enemyProjectiles.clear();keys.delete('KeyE');firing=false;fireBuffer=0;enemyFireGate=0;
+   haloBurst.cancel();cancelRail();enemyProjectiles.clear();keys.delete('KeyE');firing=false;fireBuffer=0;enemyFireGate=0;
    notify(event.finished.message);gameAudio.play(event.complete?'objective.extract':'objective.complete');
    if(event.complete||runMode==='replay'){end(true);return;}
    spawnEncounter(event.next);saveCheckpoint();campaignUI.announce(event.next);hud();
@@ -489,7 +527,7 @@ function frame(now){
  enemyUI.update(state==='playing'?dt:0,state==='playing',camera,enemies,obstacles);
  harborCombatUI?.update(state==='playing',mission,enemies,camera.position);
  campaignUI.update(state==='playing'?dt:0,state==='playing',runMode);
- combatUI.update(state==='playing'?dt:0,{playing:state==='playing',spread:shotSpread(weapons[selected],handling.state.ads,handling.state.heat,moving),heat:handling.state.heat,reloading:reload,reloadDuration:weapons[selected].reload,perShell:weapons[selected].perShell,switching:handling.state.switchRemaining,melee:selected===3,ammo:rounds[selected],reserve:reserves[selected],capacity:weapons[selected].cap,health,player:camera.position,yaw});
+ combatUI.update(state==='playing'?dt:0,{playing:state==='playing',spread:shotSpread(weapons[selected],handling.state.ads,handling.state.heat,moving),heat:handling.state.heat,reloading:reload,reloadDuration:weapons[selected].reload,perShell:weapons[selected].perShell,sprintReload:weapons[selected].sprintReload,burstPending:selected===5?haloBurst.remaining:0,railSelected:selected===6,railProgress:railCharge.progress,switching:handling.state.switchRemaining,melee:selected===3,ammo:rounds[selected],reserve:reserves[selected],capacity:weapons[selected].cap,health,player:camera.position,yaw});
  radar.update(dt,state==='playing',camera.position,yaw,enemies,enemyProjectiles.positions(),mission.current,missionWorld.available);
  const missionInteraction=state==='playing'?interactionStatus():{busy:false,visible:false};
  missionUI.update({playing:state==='playing',mission,camera,yaw,target:objectiveTarget(),remaining:enemies.length+(overseer?.blocking?1:0),canInteract:missionInteraction.visible,busy:missionInteraction.busy,blockedReason:missionInteraction.reason,markerLabel:mission.current.requiresTrip&&!transport?.tripCompleted?'乘车前往远端检修终端':null});

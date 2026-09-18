@@ -4,7 +4,7 @@ export function createBossBattleRecord(){
  function clear(){data=fresh();}
  function start(){clear();data.status='active';}
  function tick(dt){if(data.status==='active'&&Number.isFinite(dt)&&dt>0)data.seconds+=dt;}
- function shot(index){if(data.status!=='active')return;if(Number.isInteger(index)&&index>=0&&index<3)data.shots[index]++;else if(index===3)data.melee++;}
+ function shot(index){if(data.status!=='active')return;if(Number.isInteger(index)&&index>=0&&index<3)data.shots[index]++;else if(index===3)data.melee++;else if(index===4)data.tempestShots=(data.tempestShots||0)+1;else if(index===5)data.haloShots=(data.haloShots||0)+1;else if(index===6)data.railspikeShots=(data.railspikeShots||0)+1;}
  function hit(damage,core,opened=false){if(data.status!=='active')return;if(Number.isFinite(damage)&&damage>0)data[core?'coreDamage':'nodeDamage']+=damage;if(opened)data.windows++;}
  function hurt(amount){if(data.status==='active'&&Number.isFinite(amount)&&amount>0)data.arcDamage+=amount;}
  function finish(status,loadout){if(data.status!=='active'||!['won','lost'].includes(status))return;data.status=status;data.loadout=loadout?JSON.parse(JSON.stringify(loadout)):null;}
@@ -17,6 +17,12 @@ export function formatBossBattleRecord(data){
  `核心暴露 ${data.windows} 轮 · 核心伤害 ${Math.round(data.coreDamage)} · 节点伤害 ${Math.round(data.nodeDamage)}`,
  `战斗期间开火：步枪 ${data.shots[0]} 发 / 霰弹 ${data.shots[1]} 发 / 手枪 ${data.shots[2]} 发 · 近战挥击 ${data.melee} 次`,
  `Boss 电弧实际扣血 ${Math.round(data.arcDamage)}（不含守卫与环境伤害）`];
+ if(data.railspikeShots!==undefined)lines.push(`RAILSPIKE 磁轨开火 ${data.railspikeShots} 发`);
+ if(data.loadout?.railspike)lines.push(`RAILSPIKE 剩余弹药 ${data.loadout.railspike.rounds+data.loadout.railspike.reserve}`);
+ if(data.haloShots!==undefined)lines.push(`HALO 精准步枪开火 ${data.haloShots} 发`);
+ if(data.loadout?.halo)lines.push(`HALO 剩余弹药 ${data.loadout.halo.rounds+data.loadout.halo.reserve}`);
+ if(data.tempestShots!==undefined)lines.push(`TEMPEST 冲锋枪开火 ${data.tempestShots} 发`);
+ if(data.loadout?.tempest)lines.push(`冲锋枪剩余弹药 ${data.loadout.tempest.rounds+data.loadout.tempest.reserve}`);
  if(data.loadout){const l=data.loadout;lines.push(`记录时生命 ${Math.ceil(l.health)} · 剩余弹药（弹匣+备用）：${l.rounds.map((r,i)=>r+l.reserves[i]).join(' / ')}`);}
  lines.push('仅本次尝试；暂停不计时。开火数包含对守卫、节点及未命中的射击。');
  return lines.join('\n');

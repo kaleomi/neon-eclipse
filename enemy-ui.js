@@ -1,3 +1,4 @@
+import {haloMarkText} from './weapons/halo-rules.js';
 import * as THREE from './node_modules/three/build/three.module.js';
 import {ENEMY_TYPES,BOSS_PHASES,facingDot} from './enemy-rules.js';
 export function bossLabel(enemy){
@@ -33,9 +34,11 @@ export function createEnemyUI(){
   inspector.hidden=!target;document.body.classList.toggle('boss-targeted',Boolean(target?.boss));
   if(target){
    const p=ENEMY_TYPES[target.type];inspector.querySelector('b').textContent=p.name+' / '+Math.max(0,Math.ceil(target.hp));
+   inspector.dataset.haloMarked=String(Boolean(haloMarkText(target)));
    inspector.style.setProperty('--enemy-accent','#'+p.color.toString(16).padStart(6,'0'));
    inspector.querySelector('i').style.width=Math.max(0,target.hp/target.maxHp*100)+'%';
    inspector.querySelector('span').textContent=target.boss?target.bossState.openRemaining>0?'青色胸口核心 ×2.5':'装甲减伤 · 等待过载':target.type==='heavy'?facingDot(target.group.position,target.group.rotation.y,camera.position)>.55?'正面护甲：仅承受 30% 伤害':'侧后方无正面减伤 · 背部核心 ×2':p.hint;
+   const mark=haloMarkText(target);if(mark)inspector.querySelector('span').textContent+=' · '+mark;
   }
  }
  return {update,hit,clear};

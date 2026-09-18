@@ -9,6 +9,12 @@
 //   green  (overseer arc) : buzzing FM
 export const SFX={
  // ---- player weapons ----
+ 'rail.charge':{tones:[{type:'sine',f:620,fEnd:980,gain:.055,a:.008,d:.035,r:.015}],bus:'sfx',cooldown:.07},
+ 'fire.railspike':{tones:[{type:'sawtooth',f:160,fEnd:42,gain:.26,a:.001,d:.1,r:.07},{type:'sine',f:1800,fEnd:400,gain:.16,a:.001,d:.06,r:.05}],noise:[{color:'white',gain:.5,a:.001,d:.035,r:.06,filter:{type:'highpass',f:1200,q:.8}}],bus:'sfx',cooldown:.1},
+ 'fire.halo':{tones:[{type:'triangle',f:760,fEnd:190,gain:.22,a:.001,d:.055,r:.035}],noise:[{color:'white',gain:.34,a:.001,d:.035,r:.02,filter:{type:'bandpass',f:2700,q:1.2}}],bus:'sfx',vary:.025,cooldown:.015},
+ 'halo.mark':{tones:[{type:'sine',f:880,gain:.075,a:.002,d:.07,r:.06},{type:'sine',f:1320,gain:.065,a:.002,d:.09,r:.07,delay:.06}],bus:'sfx',cooldown:.1},
+ 'fire.tempest':{tones:[{type:'square',f:280,fEnd:110,gain:.16,a:.001,d:.025,r:.018}],noise:[{color:'white',gain:.32,a:.001,d:.025,r:.02,filter:{type:'highpass',f:1800,q:.8}}],bus:'sfx',vary:.07,cooldown:.015},
+ 'reload.tempest':{tones:[{type:'triangle',f:640,fEnd:320,gain:.08,a:.001,d:.045,r:.03},{type:'square',f:180,gain:.055,a:.001,d:.035,r:.03,delay:.06}],bus:'sfx',cooldown:.1},
  'fire.vanguard':{tones:[{type:'square',f:190,fEnd:70,gain:.28,a:.001,d:.055,r:.03}],noise:[{color:'white',gain:.55,a:.001,d:.05,r:.03,filter:{type:'lowpass',f:3800,fEnd:900,q:.8}}],bus:'sfx',vary:.06,cooldown:.03},
  'fire.breacher':{tones:[{type:'sawtooth',f:95,fEnd:38,gain:.42,a:.001,d:.12,r:.08}],noise:[{color:'brown',gain:.9,a:.001,d:.11,r:.09,filter:{type:'lowpass',f:2600,fEnd:400,q:.7}},{color:'white',gain:.35,a:.001,d:.03,r:.02,filter:{type:'highpass',f:2000,q:.5}}],bus:'sfx',vary:.05,cooldown:.05},
  'fire.ghost':{tones:[{type:'triangle',f:420,fEnd:180,gain:.18,a:.001,d:.04,r:.03}],noise:[{color:'pink',gain:.32,a:.001,d:.035,r:.03,filter:{type:'bandpass',f:1800,fEnd:900,q:1.4}}],bus:'sfx',vary:.05,cooldown:.03},
@@ -91,4 +97,4 @@ export const SFX={
 };
 export const SFX_NAMES=Object.freeze(Object.keys(SFX));
 export const TELEGRAPH_BY_COLOR=Object.freeze({orange:'telegraph.orange',purple:'telegraph.purple',amber:'telegraph.amber',pink:'telegraph.pink',gold:'telegraph.gold',green:'telegraph.green'});
-export const WEAPON_FIRE=Object.freeze(['fire.vanguard','fire.breacher','fire.ghost','melee.swing']);
+export const WEAPON_FIRE=Object.freeze(['fire.vanguard','fire.breacher','fire.ghost','melee.swing','fire.tempest','fire.halo','fire.railspike']);

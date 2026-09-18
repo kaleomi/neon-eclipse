@@ -1,3 +1,4 @@
+import {haloDamageMultiplier} from './weapons/halo-rules.js';
 import {harborEliteDamage} from './harbor-elite.js';
 // Pure combat rules: silhouettes/colors identify roles, never hidden invulnerability.
 export const ENEMY_TYPES={
@@ -43,7 +44,7 @@ export function resolveEnemyDamage(enemy,baseDamage,zone,attacker){
   if(zone==='core'){multiplier=2;weak=true;}
   else if(facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.55){multiplier=.3;armored=true;}
  }
- return {damage:baseDamage*multiplier,armored,weak};
+ return {damage:baseDamage*multiplier*haloDamageMultiplier(enemy),armored,weak};
 }
 export function createBossState(){return {phase:0,attacks:0,openQueued:false,openRemaining:0,transitionRemaining:1.2};}
 export function recordBossAttack(state){state.attacks++;if(state.attacks>=BOSS_PHASES[state.phase].attacks)state.openQueued=true;}

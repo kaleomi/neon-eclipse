@@ -1,0 +1,5 @@
+.loadout-card[data-weapon="halo"] .accent{fill:#c7b8ff}.loadout-card[data-weapon="halo"].active{box-shadow:inset 3px 0 #c7b8ff;background:linear-gradient(110deg,#312e52e8,#102834e8)}.loadout-card[data-weapon="halo"].active b{color:#e0d3ff}
+.right-panel:has([data-weapon="halo"]) .loadout-card{height:41px;margin-block:5px}
+.halo-burst-status{position:absolute;left:50%;top:calc(50% + 88px);transform:translateX(-50%);color:#dacaff;font:11px monospace;letter-spacing:.08em;text-shadow:0 2px 4px #000;pointer-events:none}.halo-burst-status[hidden]{display:none}
+@media(max-height:760px){.right-panel:has([data-weapon="halo"]) .loadout-card{height:34px;margin-block:3px}.right-panel:has([data-weapon="halo"]) .loadout-card small{font-size:7px!important}}
+body[data-hud-density="compact"] .right-panel:has([data-weapon="halo"]) .loadout-card:not(.active){height:29px}

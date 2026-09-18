@@ -33,7 +33,8 @@ export function createTurretModel(body){
  const muzzle=new T.Mesh(new T.CylinderGeometry(.09,.09,.22,10),brass);muzzle.rotation.x=Math.PI/2;muzzle.position.z=-1.42;pitchGroup.add(muzzle);
  const box=new T.Mesh(new T.BoxGeometry(.34,.22,.36),brass);box.position.set(.3,.05,-.05);pitchGroup.add(box);
  const flash=new T.Mesh(new T.SphereGeometry(.22,8,6),new T.MeshBasicMaterial({color:0xfff1b5,transparent:true,opacity:.9}));flash.position.z=-1.6;flash.visible=false;pitchGroup.add(flash);
- return {pivot,update(weapon,roverYaw){yawGroup.rotation.y=-(weapon.aimYaw-roverYaw);pitchGroup.rotation.x=-weapon.aimPitch;flash.visible=weapon.flash>0;flash.scale.setScalar(.8+weapon.flash*6);}};
+ // The barrel points along local -Z: positive X rotation raises its muzzle, matching aimDirection.
+ return {pivot,update(weapon,roverYaw){yawGroup.rotation.y=-(weapon.aimYaw-roverYaw);pitchGroup.rotation.x=weapon.aimPitch;flash.visible=weapon.flash>0;flash.scale.setScalar(.8+weapon.flash*6);}};
 }
 export function createFireEffects(scene,{tracers=32,blasts=8,rockets=4}={}){
  const tracerMat=new T.LineBasicMaterial({color:0xfff0a8,transparent:true,opacity:.95}),hitTracerMat=new T.LineBasicMaterial({color:0xff8b5c,transparent:true,opacity:1});

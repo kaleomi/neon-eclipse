@@ -1,0 +1,2 @@
+.swarm-coordination-status{position:fixed;top:115px;left:50%;transform:translateX(-50%);max-width:45vw;padding:7px 12px;background:#081d2ee8;border-left:2px solid #63cfff;color:#b6eaff;font:11px monospace;pointer-events:none;z-index:11;text-align:center}.swarm-coordination-status[hidden]{display:none}.swarm-coordination-status[data-lit="true"]{border-color:#b7f4ff;color:#effaff}
+@media(max-height:760px){.swarm-coordination-status{top:95px;font-size:10px}}

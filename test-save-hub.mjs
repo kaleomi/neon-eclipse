@@ -11,13 +11,13 @@ const fakeRecords=(rows=[])=>({rows,read:async()=>({ok:true,records:[...rows]}),
 const now=()=>Date.UTC(2026,8,17,12,0,0);
 
 // 1. Slot registry matches the keys owner modules actually use.
-for(const key of [JOURNEY_KEY,STAR_KEY,ACHIEVEMENT_KEY,DIFFICULTY_KEY,FLIGHT_INVERT_KEY,'neon-eclipse.campaign.v1','neon-eclipse.harbor.v1','neon-eclipse.orbital.v1','neon-eclipse.datacenter.v1','neon-eclipse.naval-difficulty.v1','neon-eclipse.presentation.v1'])assert.ok(SLOT_KEYS.includes(key),`slot registry missing ${key}`);
+for(const key of [JOURNEY_KEY,STAR_KEY,ACHIEVEMENT_KEY,DIFFICULTY_KEY,FLIGHT_INVERT_KEY,'neon-eclipse.campaign.v1','neon-eclipse.harbor.v1','neon-eclipse.orbital.v1','neon-eclipse.datacenter.v1','neon-eclipse.polar.v1','neon-eclipse.naval-difficulty.v1','neon-eclipse.presentation.v1'])assert.ok(SLOT_KEYS.includes(key),`slot registry missing ${key}`);
 assert.equal(new Set(SLOT_KEYS).size,SLOTS.length);
 assert.ok(!SLOT_KEYS.includes(BACKUP_KEY));
 
 // 2. Health inspection distinguishes empty / ok / unknown / corrupt without touching data.
 {
- const s=memory({[JOURNEY_KEY]:JSON.stringify({version:6,chapters:[]}),[STAR_KEY]:'{not json',[DIFFICULTY_KEY]:'hard','neon-eclipse.campaign.v1':JSON.stringify({version:9,unlocked:0})});
+ const s=memory({[JOURNEY_KEY]:JSON.stringify({version:7,chapters:[]}),[STAR_KEY]:'{not json',[DIFFICULTY_KEY]:'hard','neon-eclipse.campaign.v1':JSON.stringify({version:9,unlocked:0})});
  const hub=createSaveHub({storage:s,now});
  const h=Object.fromEntries(hub.health().map(r=>[r.key,r.status]));
  assert.equal(h[JOURNEY_KEY],'ok');assert.equal(h[STAR_KEY],'corrupt');assert.equal(h[DIFFICULTY_KEY],'ok');assert.equal(h['neon-eclipse.campaign.v1'],'unknown');assert.equal(h[ACHIEVEMENT_KEY],'empty');

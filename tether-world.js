@@ -48,5 +48,5 @@ export function createTetherWorld(scene,obstacles){
    if(!el.hidden){el.style.left=((p.x+1)*innerWidth/2)+'px';el.style.top=((1-p.y)*innerHeight/2)+'px';el.textContent='▼ 稳定器 '+(i+1)+' / '+GRAVITY_BANDS[i].name.split(' / ')[0]+' · '+Math.ceil(rules.state.stabilizers[i])+' HP';}
   });
  }
- clear();return {setStage,clear,update,hit,updateMarkers,battle,origin:new T.Vector3(TETHER_POSITION.x,0,TETHER_POSITION.z),get blocking(){return rules.blocking;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[]),...nodes.filter(n=>n.visible)]:[];}};
+ clear();return {setStage,clear,update,hit,updateMarkers,battle,origin:new T.Vector3(TETHER_POSITION.x,0,TETHER_POSITION.z),get blocking(){return rules.blocking;},get state(){return rules.state;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[]),...nodes.filter(n=>n.visible)]:[];}};
 }

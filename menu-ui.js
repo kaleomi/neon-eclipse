@@ -33,7 +33,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     <main class="menu-views">
       <section class="menu-view menu-home" data-view="home" aria-label="主菜单">
         <div class="menu-home-copy">
-          <p class="menu-eyebrow"><span></span> 八章行动 · 一个未熄灭的信号</p>
+          <p class="menu-eyebrow"><span></span> 九章行动 · 一个未熄灭的信号</p>
           <h1>NEON<br><span>ECLIPSE</span><i>暗影突围</i></h1>
           <p class="menu-home-intro">穿越封锁线，让信号重返黎明。</p>
           <nav class="menu-home-actions" aria-label="游戏主菜单">
@@ -183,7 +183,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   function requestNewGame() {
     const start = () => perform(actions.newGame);
     if (journey.data || getSession().pending || hasJourneyRecord()) {
-      confirm('开始新的战役？', '这会替换当前八章战役进度。各关独立检查点、隐藏星星和已获得的荣誉不会重置。', start, '开始新游戏');
+      confirm('开始新的战役？', '这会替换当前九章战役进度。各关独立检查点、隐藏星星和已获得的荣誉不会重置。', start, '开始新游戏');
     } else start();
   }
   function hasJourneyRecord() {
@@ -246,7 +246,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     if (advancing) {
       kicker = '第 ' + (s.mode === 'journey' ? String(s.journey.chapter + 1).padStart(2, '0') : current.number) + ' 章已完成 / NEXT CHAPTER';
       description = '下一站：' + target.name + '。' + target.brief + ' 进入后生命与弹药重新整备。';
-    } else if (complete) { kicker = 'MISSION ACCOMPLISHED'; title = '八章战役完成'; description = '信号已送达，小队成功撤离。你的战役成绩、收藏和荣誉已保留。'; }
+    } else if (complete) { kicker = 'MISSION ACCOMPLISHED'; title = '九章战役完成'; description = '信号已送达，小队成功撤离。你的战役成绩、收藏和荣誉已保留。'; }
     else if (s.pending) { kicker = 'SAVE REQUIRED / 结果待保存'; title = '先保存，再继续'; description = '本章已完成，但战役结果尚未成功写入。请点击下方按钮重试；保存成功前不会进入下一关。'; }
     else if (paused) { kicker = 'OPERATION PAUSED / 行动暂停'; title = '行动已暂停'; description = '当前关卡：' + current.name + '。当前目标：' + s.stageTitle + '。'; }
     else if (lost) { kicker = 'SIGNAL LOST / 行动中断'; title = '重新集结，再次出发'; description = '从最近的阶段入口继续。读档重试不计本轮一命挑战，星星与已有荣誉保留。'; }

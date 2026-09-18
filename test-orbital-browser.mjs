@@ -26,7 +26,7 @@ try{
   const {page,errors}=await newPage(context);
   await page.goto(`${base}/index.html?map=orbital`);await menuOpen(page);
   assert.equal(await page.getAttribute('body','data-map'),'orbital');
-  assert.equal(await page.locator('.menu-chapter-grid a[data-map]').count(),8,'seven chapter cards');
+  assert.equal(await page.locator('.menu-chapter-grid a[data-map]').count(),9,'nine chapter cards');
   assert.match(await page.locator('.menu-chapter-grid a[data-map="orbital"]').getAttribute('aria-current')||'',/page/);
   assert.match(await page.locator('.menu-chapter-grid a[data-map="orbital"]').innerText(),/轨道电梯基座/);
   assert.deepEqual(errors,[]);await page.close();

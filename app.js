@@ -1,3 +1,8 @@
+import {createEmpSystem} from './emp-system.js';
+import {createEmpUI} from './emp-ui.js';
+import {createEngineerDirector} from './engineer-director.js';
+import {chooseSentrySite} from './sentry-rules.js';
+import {chooseSwarmSite,swarmFormation} from './swarm-rules.js';
 import {chooseVoltChain} from './weapons/volt-rules.js';
 import {voltAnchor,voltClearPath,createVoltArc} from './volt-world.js';
 import {voltCheckpoint,supplementVoltSupply} from './weapons/runtime.js';
@@ -32,6 +37,10 @@ import {sprintPose} from './action-poses.js';
 import {createLookInput} from './look-input.js';
 import {createOverseerWorld} from './overseer-world.js';
 import {createTetherWorld} from './tether-world.js';
+import {createGlacierWorld} from './glacier-world.js';
+import {createChapterCues,chapterSnapshot} from './chapter-cues.js';
+import {createPolarWorld} from './polar-world.js';
+import {createPolarNavigation} from './polar-navigation.js';
 import {createAbyssWorld} from './abyss-world.js';
 import {createDatacenterWorld} from './datacenter-world.js';
 import {createDatacenterNavigation} from './datacenter-navigation.js';
@@ -42,7 +51,7 @@ import {createJourneyStore,CHAPTERS} from './journey.js';
 import {createGameMenu} from './menu-ui.js';
 import {chapterURL} from './menu-state.js';
 import {createRoofWorld} from './roof-world.js';
-import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,IS_ORBITAL,IS_DATACENTER,IS_JOURNEY,MAP_ID,createLevelMenu} from './level.js';
+import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,IS_ORBITAL,IS_DATACENTER,IS_POLAR,IS_JOURNEY,MAP_ID,createLevelMenu} from './level.js';
 import {createStationWorld} from './station-world.js';
 import * as THREE from './node_modules/three/build/three.module.js';
 import { createArt } from './art.js';
@@ -56,7 +65,7 @@ import { createRadar } from './radar.js';
 import { createEnemyProjectiles } from './projectiles.js';
 import { WEAPONS, createHandling, damageAtDistance, shotSpread, advanceReload, meleePose } from './combat.js';
 import { createCombatUI } from './combat-ui.js';
-import { STAGES, createMission, applySupply, chooseEncounterSpawns } from './mission.js';
+import { STAGES, SUPPLIES, createMission, applySupply, chooseEncounterSpawns } from './mission.js';
 import { createMissionWorld } from './mission-world.js';
 import { createMissionUI } from './mission-ui.js';
 import { createCampaignStore, STAGE_ENTRIES } from './campaign.js';
@@ -67,6 +76,8 @@ const telemetry=createTelemetry();let telemetryAttempt=null,telemetryShots=[0,0,
 window.neonTelemetry=telemetry;
 // Test-only probe (chapter 07 browser test): read feet height / boss state and place the player. No game-state writes beyond position.
 if(IS_DATACENTER)window.__datacenterProbe=()=>({feetY:playerMotion.state.y,x:camera.position.x,z:camera.position.z,stage:mission.state.index,level:art.level,phase:art.phase,pumps:art.pumps,speedScale:art.moveScale(playerMotion.state.y),shorted:art.shorted(selected,playerMotion.state.y),toast:toast.textContent,bossBlocking:Boolean(overseer?.blocking),place(x,z,feetY=0,facing=0){camera.position.set(x,feetY+1.7,z);playerMotion.reset(camera.position,feetY);yaw=facing;},advanceWater(seconds){art.advance(seconds);}});
+// Test-only probe (chapter 09 browser test): storm clock / warmth / boss state; place the player; advance the clock. Only on ?map=polar.
+if(IS_POLAR)window.__polarProbe=()=>({feetY:playerMotion.state.y,x:camera.position.x,z:camera.position.z,stage:mission.state.index,phase:art.phase,intensity:art.intensity,thermal:art.thermal,warmth:art.warmth,visibility:art.visibility,fogDensity:scene.fog.density,health,toast:toast.textContent,bossBlocking:Boolean(overseer?.blocking),bossPhase:overseer?.state?.phase??null,bossPosition:overseer?.position??null,place(x,z,feetY=0,facing=0){camera.position.set(x,feetY+1.7,z);playerMotion.reset(camera.position,feetY);yaw=facing;},advanceStorm(seconds){art.advance(seconds);},setWarmth(v){art.setWarmth(v);},heal(){health=100;hud();},placeBoss(x,z){overseer?.place?.(x,z);},advanceBoss(seconds){overseer?.advance?.(seconds,{x:camera.position.x,z:camera.position.z},playerMotion.state.y);}});
 if(IS_ORBITAL)window.__orbitalProbe=()=>({feetY:playerMotion.state.y,stage:mission.state.index,bossBlocking:Boolean(overseer?.blocking),place(x,z,feetY=0,facing=0){camera.position.set(x,feetY+1.7,z);playerMotion.reset(camera.position,feetY);yaw=facing;}});
 const meleeSweep=createMeleeSweep(),meleeStrike=createMeleeStrike(),haloBurst=createHaloBurst(),railCharge=createRailCharge();let railCue=0;
 function cancelRail(){railCharge.cancel();railCue=0;}
@@ -74,7 +85,7 @@ let gameMenu=null,navigating=false;
 const $ = s => document.querySelector(s);
 const overlay = document.createElement('section');
 overlay.className = 'mission-overlay';
-overlay.innerHTML = `<div class="mission-card"><span id="session-eyebrow" class="eyebrow">NEON ECLIPSE / SECTOR K-19</span><h2 id="session-title">突破<span>暗影封锁</span></h2><p id="brief">启动西侧冷却装置，取得东侧权限，解除反应堆封锁。击败 Warden 后返回南部撤离。橙色突击、紫色远程、金色重装：识别敌人，选择打法。</p><div class="controls"><span><b>W A S D</b>移动</span><span><b>鼠标</b>瞄准 / 左键射击</span><span><b>1 — 6</b>切换武器</span><span><b>R / SHIFT</b>换弹 / 冲刺</span><span><b>SPACE / ESC</b>跳跃 / 暂停</span><span><b>右键 / E</b>瞄准 / 按住交互</span></div><button id="deploy">开始行动 ↗</button><small id="lock-note">SPACE 跳跃 · 步枪按住连射 · E 交互 · 红色加号补给恢复生命，子弹标识补给补充弹药</small></div>`;
+overlay.innerHTML = `<div class="mission-card"><span id="session-eyebrow" class="eyebrow">NEON ECLIPSE / SECTOR K-19</span><h2 id="session-title">突破<span>暗影封锁</span></h2><p id="brief">启动西侧冷却装置，取得东侧权限，解除反应堆封锁。击败 Warden 后返回南部撤离。橙色突击、紫色远程、金色重装：识别敌人，选择打法。</p><div class="controls"><span><b>W A S D</b>移动</span><span><b>鼠标</b>瞄准 / 左键射击</span><span><b>1 — 6</b>切换武器</span><span><b>R / SHIFT</b>换弹 / 冲刺</span><span><b>SPACE / ESC</b>跳跃 / 暂停</span><span><b>右键 / E</b>瞄准 / 按住交互</span></div><button id="deploy">开始行动 ↗</button><small id="lock-note">G 按住预览 / 松开投掷无伤害 EMP · SPACE 跳跃 · 步枪按住连射 · E 交互 · 红色加号补给恢复生命，子弹标识补给补充弹药</small></div>`;
 document.body.append(overlay);createLevelMenu();
 if(IS_STATION){$('#session-title').innerHTML='地下<span>运输站</span>';$('#brief').textContent='从维护通道恢复供电，清理站台，穿过停靠列车，在调度室切换道岔，登上末班列车撤离。六张地图的检查点独立保存。';$('#session-eyebrow').textContent='NEON ECLIPSE / U-02';$('.topstat').textContent='CHAPTER 02 / UNDERGROUND TRANSIT';}
 if(IS_ROOF){$('#session-title').innerHTML='天穹<span>通讯枢纽</span>';$('#brief').textContent='进入露天天线阵列，依次接通双中继、接管天线并上传信号。躲开放电区，最后返回南部升降平台撤离。';$('#session-eyebrow').textContent='NEON ECLIPSE / A-03';$('.topstat').textContent='CHAPTER 03 / SKYLINK ARRAY';}
@@ -82,6 +93,7 @@ if(IS_TOWER){$('#session-title').innerHTML='多层<span>中枢塔</span>';$('#br
 if(IS_TRAIN){$('#session-title').innerHTML='疾驰<span>货运列车</span>';$('#brief').textContent='穿越高速列车车厢，登上车顶关闭干扰器，守住控制链路，最后进入驾驶舱完成接应。跌落会返回当前阶段入口。';$('#session-eyebrow').textContent='NEON ECLIPSE / T-05';$('.topstat').textContent='CHAPTER 05 / RUNAWAY FREIGHT';}
 if(IS_HARBOR){$('#session-title').innerHTML='风暴<span>港口</span>';$('#brief').textContent='穿越集装箱堆场，登上吊机高架，守住码头信标，最后登船撤离。落水会返回当前阶段入口，星星探索不影响主线。';$('#session-eyebrow').textContent='NEON ECLIPSE / H-06';$('.topstat').textContent='CHAPTER 06 / STORM HARBOR';}
 if(IS_ORBITAL){$('#session-title').innerHTML='轨道<span>电梯基座</span>';$('#brief').textContent='基座分三段重力：越高越轻，跳得更高、后坐更大。解除门禁，登上四米环与九米环，守住锚索校准，击破 TETHER 三段稳定器后攻击核心，返回升降平台撤离。';$('#session-eyebrow').textContent='NEON ECLIPSE / O-07';$('.topstat').textContent='CHAPTER 07 / ORBITAL TETHER BASE';}
+if(IS_POLAR){$('#session-title').innerHTML='极地<span>雷达阵列</span>';$('#brief').textContent='雪原每四十秒一场暴风雪：能见度十米、敌人靠热成像。体温持续流失，暖房与塔顶加热板回温。接通三座雷达塔，把重炮机甲 GLACIER 引上中央薄冰压碎冰面击沉，返回暖房撤离。';$('#session-eyebrow').textContent='NEON ECLIPSE / P-09';$('.topstat').textContent='CHAPTER 09 / POLAR RADAR ARRAY';}
 if(IS_DATACENTER){$('#session-title').innerHTML='沉没<span>数据中心</span>';$('#brief').textContent='机房定时涨水：水中移速减半、能量武器短路，基座顶始终干燥。解除进气闸，启动并守住两台排水泵，在排水窗口击破 ABYSS 核心，返回进气闸撤离。';$('#session-eyebrow').textContent='NEON ECLIPSE / D-08';$('.topstat').textContent='CHAPTER 08 / SUNKEN DATA CENTER';}
 const handling=createHandling();
 const combatUI=createCombatUI();
@@ -120,6 +132,7 @@ if(IS_TOWER){stamp.innerHTML='<strong>CONTROL SPIRE</strong><span>C-04 / VERTICA
 if(IS_TRAIN){stamp.innerHTML='<strong>RUNAWAY FREIGHT</strong><span>T-05 / MOVING TRAIN<br>尾车 · 货舱 · 车顶 · 机车接管</span>';stamp.classList.add('train-stamp');}
 if(IS_HARBOR){stamp.innerHTML='<strong>STORM HARBOR</strong><span>H-06 / NIGHT EXTRACTION<br>堆场 · 吊机 · 码头 · 登船撤离</span>';stamp.classList.add('harbor-stamp');}
 if(IS_ORBITAL){stamp.innerHTML='<strong>ORBITAL TETHER</strong><span>O-07 / GRAVITY BANDS<br>门禁 · 四米环 · 九米锚索 · TETHER</span>';stamp.classList.add('orbital-stamp');}
+if(IS_POLAR){stamp.innerHTML='<strong>POLAR ARRAY</strong><span>P-09 / WHITEOUT CYCLE<br>三塔 · 暖房 · 薄冰 · GLACIER</span>';stamp.classList.add('polar-stamp');}
 if(IS_DATACENTER){stamp.innerHTML='<strong>SUNKEN DATA</strong><span>D-08 / TIDAL FLOODING<br>进气闸 · 双泵 · ABYSS · 撤离</span>';stamp.classList.add('datacenter-stamp');}
 const steel = new THREE.MeshStandardMaterial({ color: 0x253944, roughness: .55, metalness: .65 });
 const dark = new THREE.MeshStandardMaterial({ color: 0x0b1720, roughness: .6, metalness: .7 });
@@ -155,18 +168,18 @@ for(const x of [-37,37]) for(const z of [-34,34]) { box(1,6,1,x,3,z,dark); box(1
 playerCeilings.push({x:0,z:-16,w:6.5,d:6.5,bottom:0,top:9});
 return createArt(scene,renderer,reactor,obstacles);
 }
-const art=IS_DATACENTER?createDatacenterWorld(scene,renderer,obstacles):IS_ORBITAL?createOrbitalWorld(scene,renderer,obstacles):IS_HARBOR?createHarborWorld(scene,renderer,obstacles):IS_TRAIN?createTrainWorld(scene,renderer,obstacles):IS_TOWER?createTowerWorld(scene,renderer,obstacles):IS_ROOF?createRoofWorld(scene,renderer,obstacles):IS_STATION?createStationWorld(scene,renderer,obstacles):buildReactor();
+const art=IS_POLAR?createPolarWorld(scene,renderer,obstacles):IS_DATACENTER?createDatacenterWorld(scene,renderer,obstacles):IS_ORBITAL?createOrbitalWorld(scene,renderer,obstacles):IS_HARBOR?createHarborWorld(scene,renderer,obstacles):IS_TRAIN?createTrainWorld(scene,renderer,obstacles):IS_TOWER?createTowerWorld(scene,renderer,obstacles):IS_ROOF?createRoofWorld(scene,renderer,obstacles):IS_STATION?createStationWorld(scene,renderer,obstacles):buildReactor();
 if(MAP_ID==='reactor')createRailPanels(scene,obstacles);
 const presentation=createPresentation({renderer,scene,sun,art,camera,qualityButton,record:fieldRecord});
-const overseer=IS_DATACENTER?createAbyssWorld(scene,obstacles,art):IS_ORBITAL?createTetherWorld(scene,obstacles):IS_ROOF?createOverseerWorld(scene,obstacles):null;
+const overseer=IS_POLAR?createGlacierWorld(scene,obstacles,art):IS_DATACENTER?createAbyssWorld(scene,obstacles,art):IS_ORBITAL?createTetherWorld(scene,obstacles):IS_ROOF?createOverseerWorld(scene,obstacles):null;
 const transport=IS_ROOF?createTransportWorld(scene,art.ceilings,obstacles):null;
-const bossRecordUI=IS_ROOF||IS_ORBITAL||IS_DATACENTER?createBossRecordUI(document.querySelector('.mission-card')):null;
+const bossRecordUI=IS_ROOF||IS_ORBITAL||IS_DATACENTER||IS_POLAR?createBossRecordUI(document.querySelector('.mission-card')):null;
 createHiddenWorld(scene,MAP_ID,obstacles);
 const missionWorld=createMissionWorld(scene,obstacles);
 const starWorld=createStarWorld(scene,MAP_ID,notify);
 const navigation=createNavigator(obstacles);
-const roofEnemyNavigation=IS_DATACENTER?createDatacenterNavigation(obstacles):IS_ORBITAL?createOrbitalNavigation(obstacles):IS_HARBOR?createHarborNavigation(obstacles):IS_TRAIN?createTrainNavigation(obstacles):IS_TOWER?createTowerNavigation(obstacles):IS_ROOF?createRoofEnemyNavigation(obstacles,navigation):null;
-const playerMotion=createPlayerMotion(obstacles,art.ceilings||playerCeilings,IS_DATACENTER||IS_ORBITAL||IS_HARBOR?{x:37.1,z:37.1}:IS_TRAIN?{x:14,z:37.1}:IS_TOWER?{x:29,z:23}:IS_ROOF?{x:37.1,z:37.1}:IS_STATION?{x:31.1,z:37.1}:{x:39.1,z:39.1},{gravityAt:art.gravityAt||null});
+const roofEnemyNavigation=IS_POLAR?createPolarNavigation(obstacles):IS_DATACENTER?createDatacenterNavigation(obstacles):IS_ORBITAL?createOrbitalNavigation(obstacles):IS_HARBOR?createHarborNavigation(obstacles):IS_TRAIN?createTrainNavigation(obstacles):IS_TOWER?createTowerNavigation(obstacles):IS_ROOF?createRoofEnemyNavigation(obstacles,navigation):null;
+const playerMotion=createPlayerMotion(obstacles,art.ceilings||playerCeilings,IS_POLAR||IS_DATACENTER||IS_ORBITAL||IS_HARBOR?{x:37.1,z:37.1}:IS_TRAIN?{x:14,z:37.1}:IS_TOWER?{x:29,z:23}:IS_ROOF?{x:37.1,z:37.1}:IS_STATION?{x:31.1,z:37.1}:{x:39.1,z:39.1},{gravityAt:art.gravityAt||null});
 let jumpRequested=false,pendingJourneyResult=null;
 const radar=createRadar(obstacles);
 const enemyProjectiles=createEnemyProjectiles(scene,obstacles,(damage,source)=>{
@@ -188,10 +201,12 @@ const interactionRay=new THREE.Raycaster();
 const lookInput=createLookInput();
 let rounds=[], reserves=[];
 const gameAudio=createGameAudio({storage:localStorage});window.neonAudio=gameAudio;
+// Chapter 07/08/09 audio cues (Phase 2 debt): diff world/boss state each frame, play catalog sfx. Pure module, no world changes.
+const chapterCues=createChapterCues((name,opts)=>gameAudio.play(name,opts));
 let streakTime=0;const streakBanner=document.createElement('div');streakBanner.className='streak-banner';document.body.append(streakBanner);
 function showStreak(step){if(!step)return;streakBanner.textContent=step>=10?'连续击破 ×10 // 清场':step>=5?'连续击破 ×5 // 压制':'连续击破 ×3';streakBanner.dataset.step=String(step);streakBanner.dataset.show='true';streakTime=1.6;}
 function lineOfSight(origin){ray.set(camera.position,origin.clone().sub(camera.position).normalize());ray.far=camera.position.distanceTo(origin);return !obstacles.some(o=>ray.intersectObject(o.mesh,false).length);}
-const enemyDirector=createEnemyDirector({scaleCooldown:attackCooldown,onEliteWindow:()=>fieldRecord.window(),enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
+const enemyDirector=createEnemyDirector({scaleCooldown:attackCooldown,onEliteWindow:()=>fieldRecord.window(),thermalVision:IS_POLAR?()=>art.thermal:null,enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
  if(event.changed){notify('Warden 阶段切换 // '+BOSS_PHASES[enemy.bossState.phase].name);gameAudio.play('boss.phase');}
  else if(event.opened){notify('Warden 过载 // 青色胸口核心暴露，集中攻击！');gameAudio.play('boss.window.open');}
  else if(event.closed)gameAudio.play('boss.window.close');
@@ -208,7 +223,24 @@ function hud(){
  viewModel.select(selected);
  document.querySelectorAll('.loadout-card').forEach((el,i)=>el.classList.toggle('active',i===selected));
 }
-function disposeGroup(group){group.traverse(o=>{if(o.geometry)o.geometry.dispose();});group.userData.ownedMaterials?.forEach(m=>m.dispose());scene.remove(group);}
+function disposeGroup(group){if(group.userData.sentry){for(let i=obstacles.length-1;i>=0;i--)if(obstacles[i].owner===group)obstacles.splice(i,1);navigation.invalidate();}group.traverse(o=>{if(o.geometry)o.geometry.dispose();});group.userData.ownedMaterials?.forEach(m=>m.dispose());scene.remove(group);}
+function addSentry(p){
+ if(enemies.some(e=>e.hp>0&&e.type==='sentry'))return false;
+ const group=createEnemyModel('sentry'),profile=ENEMY_TYPES.sentry;group.position.set(p.x,p.y,p.z);group.rotation.y=Math.atan2(camera.position.x-p.x,camera.position.z-p.z);scene.add(group);
+ enemies.push({group,type:'sentry',hp:profile.hp,maxHp:profile.hp,boss:false,speed:0,attack:1.5,radius:profile.radius,charge:0,seed:0,sentryHome:group.rotation.y,sentryScan:0});
+ obstacles.push({x:p.x,z:p.z,w:1.2,d:1.2,h:.45,bottom:0,top:.45,mesh:group.userData.parts.base,owner:group});navigation.invalidate();return true;
+}
+const empUI=createEmpUI();
+const emp=createEmpSystem({scene,camera,enemies,obstacles,projectiles:enemyProjectiles,onEvent:(event,count)=>{
+ if(event==='throw'){notify('EMP 已投出 // 1.2s 引信 · 6m 球形范围 · 不影响纯刀');gameAudio.play('rail.charge');}
+ else {notify('EMP 脉冲 // '+count+' 个机械目标失能 3s · Boss 与工程兵免疫');gameAudio.play('volt.chain');}
+}});
+function empReady(){return state==='playing'&&!firing&&reload<=0&&handling.state.switchRemaining<=0&&meleeRemaining<=0&&haloBurst.remaining===0&&railCharge.progress===0;}
+const engineerDirector=createEngineerDirector({scene,enemies,player:camera,obstacles,projectiles:enemyProjectiles,protectedPoints:()=>[...SUPPLIES,mission.current].filter(Boolean),deploy:addSentry,canStart:()=>MAP_ID==='reactor'&&mission.state.defending&&enemyFireGate<=0&&!enemyProjectiles.charging&&!enemyProjectiles.hasThreatTag('sentry'),onEvent:(event,e)=>{
+ if(event==='started'){enemyFireGate=Math.max(enemyFireGate,2.7);notify('工程兵正在部署炮塔 // 琥珀施工框 2.5s · 命中工程兵可打断');gameAudio.telegraph('amber',{x:e.group.position.x,z:e.group.position.z});}
+ else if(event==='deployed'){enemyFireGate=Math.max(enemyFireGate,.8);notify('工程兵部署完成 // 炮塔扫描上线，绕后攻击绿核');hud();}
+ else if(event==='interrupted')notify('炮塔部署已打断 // 工程兵 3 秒后可重试');
+}});
 function spawnEncounter(stage){
  if(art.setStage?.(mission.state.index)){navigation.invalidate();roofEnemyNavigation?.invalidate?.();}
  overseer?.setStage(mission.state.index);
@@ -223,9 +255,24 @@ function spawnEncounter(stage){
   scene.add(group);const hp=profile.hp+wave*profile.hpPerLevel;
   enemies.push({flankRoute:stage.harborFlanks?.[i]?.map(p=>({...p}))||[],group,type,hp,maxHp:hp,boss,bossState:boss?createBossState():null,speed:profile.speed*(1+wave*.025),attack:1+Math.random(),radius:profile.radius,charge:0,seed:i*1.37+wave});
  }
+ if(MAP_ID==='reactor'&&stage.sentry&&!mission.state.defending&&!enemies.some(e=>e.type==='sentry')){
+  const p=chooseSentrySite(stage,camera.position,obstacles,enemies,SUPPLIES);
+  if(p){addSentry(p);notify('哨兵炮塔上线 // 绿色扇区 · 锁定后横移，绕后攻击绿色核心');}
+ }
+ if(MAP_ID==='reactor'&&stage.swarm&&!enemies.some(e=>e.type==='swarmDrone')){
+  const center=chooseSwarmSite(stage,camera.position,obstacles,enemies);
+  if(center){const pack={center:{...center}},profile=ENEMY_TYPES.swarmDrone;
+   for(const [slot,p] of swarmFormation(center).entries()){const group=createEnemyModel('swarmDrone');group.scale.setScalar(profile.scale);group.position.set(p.x,p.y,p.z);scene.add(group);
+    enemies.push({group,type:'swarmDrone',hp:profile.hp,maxHp:profile.hp,boss:false,speed:profile.speed,attack:2+slot*.15,radius:profile.radius,charge:0,seed:slot,swarm:pack,swarmSlot:slot});
+   }
+   notify('蜂群编队进入空域 // 蓝色蜂鸣后锁定旧位置 · 霰弹 / VOLT 可清群');
+  }
+ }
  hud();
 }
 function reset(stageIndex=0,snapshot=null){
+ emp.reset(snapshot?.emp);
+ engineerDirector.clear();enemyDirector.clear?.();
  haloBurst.cancel();cancelRail();
  fieldRecord.begin(stageIndex);achievementUI.begin({map:MAP_ID,stage:stageIndex,snapshot:!!snapshot,replay:runMode==='replay'});
  telemetryAttempt=createTelemetryAttempt({map:MAP_ID,mode:runMode,difficulty:currentDifficulty().id,stage:stageIndex,snapshot:!!snapshot});telemetryShots=[0,0,0,0,0,0,0,0];
@@ -244,20 +291,20 @@ function reset(stageIndex=0,snapshot=null){
  playerMotion.reset(camera.position,restoredFeet);camera.rotation.set(pitch,yaw,0);spawnEncounter(mission.current);campaignUI.announce(mission.current,runMode==='replay');
 
 }
-function end(win){haloBurst.cancel();cancelRail();if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
+function end(win){emp.clear();engineerDirector.clear();enemyDirector.clear?.();haloBurst.cancel();cancelRail();if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
  if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';document.body.dataset.playState=state;gameAudio.play(win?'mission.won':'mission.lost');if(!win)gameAudio.play('player.death');document.exitPointerLock?.();overlay.hidden=false;
  $('#session-title').innerHTML=win?(runMode==='replay'?'阶段<span>训练完成</span>':'行动<span>撤离成功</span>'):'信号<span>连接中断</span>';
  const seconds=Math.floor(mission.state.time);
- $('#brief').textContent=`${win?(runMode==='replay'?'本阶段训练完成，主行动检查点未改变。':(IS_DATACENTER?'ABYSS 已停机，小队离开沉没数据中心。':IS_ORBITAL?'TETHER 已沉寂，小队离开轨道电梯基座。':IS_HARBOR?'小队已登船，离开风暴港口。':IS_TRAIN?'列车控制权已移交，接应队伍已登车。':IS_TOWER?'中枢已隔离，小队已从大厅撤离。':IS_ROOF?'信号已送出，小队已返回升降平台。':IS_STATION?'已登上末班列车，运输站行动完成。':'反应堆已移交，撤离完成。')):'可从阶段入口检查点重试，或重新开始行动。'} 击破 ${kills} 个目标 · 用时 ${Math.floor(seconds/60)}分${seconds%60}秒 · 阶段 ${runMode==='replay'?replayEntry.stageIndex+1:Math.min(5,mission.state.index+1)}/5。`;
+ $('#brief').textContent=`${win?(runMode==='replay'?'本阶段训练完成，主行动检查点未改变。':(IS_POLAR?'GLACIER 已沉入冰湖，小队离开极地雷达阵列。':IS_DATACENTER?'ABYSS 已停机，小队离开沉没数据中心。':IS_ORBITAL?'TETHER 已沉寂，小队离开轨道电梯基座。':IS_HARBOR?'小队已登船，离开风暴港口。':IS_TRAIN?'列车控制权已移交，接应队伍已登车。':IS_TOWER?'中枢已隔离，小队已从大厅撤离。':IS_ROOF?'信号已送出，小队已返回升降平台。':IS_STATION?'已登上末班列车，运输站行动完成。':'反应堆已移交，撤离完成。')):'可从阶段入口检查点重试，或重新开始行动。'} 击破 ${kills} 个目标 · 用时 ${Math.floor(seconds/60)}分${seconds%60}秒 · 阶段 ${runMode==='replay'?replayEntry.stageIndex+1:Math.min(5,mission.state.index+1)}/5。`;
  if(win&&runMode==='campaign')campaign.complete();
  if(win&&runMode==='journey'){pendingJourneyResult={time:mission.state.time,kills};if(journey.finish(MAP_ID,pendingJourneyResult))pendingJourneyResult=null;else $('#brief').textContent='章节已完成，但战役存档写入失败。请重试保存后再继续。';}
  if(win&&runMode==='journey'&&journey.data?.status==='complete'){$('#session-title').innerHTML='港口撤离<span>战役完成</span>';$('#brief').textContent='反应堆、地下运输站、天穹通讯枢纽、多层中枢塔、疾驰货运列车、风暴港口：六章行动全部完成。共击破 '+journey.data.results.reduce((n,r)=>n+r.kills,0)+' 个目标。可继续单章训练，或重新开始战役。';}
  $('#deploy').textContent='开始新行动 ↗';firing=false;fireBuffer=0;aiming=false;keys.clear();campaignUI.refresh(state,runMode);refreshJourney();}
-function pause(){lookInput.reset();if(state!=='playing')return;cancelRail();bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';document.body.dataset.playState=state;gameAudio.play('ui.pause');gameAudio.pause();firing=false;fireBuffer=0;aiming=false;keys.clear();overlay.hidden=false;
+function pause(){emp.cancelAim();lookInput.reset();if(state!=='playing')return;cancelRail();bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';document.body.dataset.playState=state;gameAudio.play('ui.pause');gameAudio.pause();firing=false;fireBuffer=0;aiming=false;keys.clear();overlay.hidden=false;
  $('#session-title').innerHTML='行动<span>已暂停</span>';$('#brief').textContent='战场已冻结。当前目标：'+mission.current.title+'。';$('#deploy').textContent='继续当前战斗 ↗';campaignUI.refresh(state,runMode);refreshJourney();}
 function bossLoadout(){return {health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),...tempestCheckpoint(rounds,reserves,selected),...haloCheckpoint(rounds,reserves,selected),...railspikeCheckpoint(rounds,reserves,selected),...voltCheckpoint(rounds,reserves,selected)};}
 function checkpoint(){
- return {stageIndex:mission.state.index,health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),selected:legacySelected(selected),...tempestCheckpoint(rounds,reserves,selected),...haloCheckpoint(rounds,reserves,selected),...railspikeCheckpoint(rounds,reserves,selected),...voltCheckpoint(rounds,reserves,selected),x:camera.position.x,z:camera.position.z,yaw,pitch,time:mission.state.time,kills,feetY:playerMotion.state.y,collected:missionWorld.collected,...(IS_TRAIN?{trainTime:art.trainTime}:{}),...(IS_TOWER?{towerLiftTime:art.liftTime}:{}),...(IS_DATACENTER?{waterTime:art.time}:{}),...(transport?{transportTime:transport.time,transportTrip:transport.tripCompleted}:{})};
+ return {stageIndex:mission.state.index,health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),selected:legacySelected(selected),...tempestCheckpoint(rounds,reserves,selected),...haloCheckpoint(rounds,reserves,selected),...railspikeCheckpoint(rounds,reserves,selected),...voltCheckpoint(rounds,reserves,selected),...emp.checkpoint(),x:camera.position.x,z:camera.position.z,yaw,pitch,time:mission.state.time,kills,feetY:playerMotion.state.y,collected:missionWorld.collected,...(IS_TRAIN?{trainTime:art.trainTime}:{}),...(IS_TOWER?{towerLiftTime:art.liftTime}:{}),...(IS_DATACENTER?{waterTime:art.time}:{}),...(IS_POLAR?{stormTime:art.time,warmth:art.warmth}:{}),...(transport?{transportTime:transport.time,transportTrip:transport.tripCompleted}:{})};
 }
 function saveCheckpoint(){if(runMode==='campaign')campaign.save(checkpoint());if(runMode==='journey'&&!journey.save(MAP_ID,checkpoint()))notify('战役检查点写入失败 // 请勿关闭页面');}
 function refreshJourney(){
@@ -342,19 +389,22 @@ document.addEventListener('keydown',e=>{
  if(e.code==='KeyQ'&&!e.repeat){toggleQuality();return;}
  if(e.code==='Escape'){pause();document.exitPointerLock?.();}
  if(state!=='playing')return;keys.add(e.code);
+ if(e.code==='KeyG'){e.preventDefault();if(!e.repeat&&empReady()&&!emp.begin())notify(emp.charges?'EMP 引信正在运行':'EMP 已耗尽 · 本章不补充');return;}
  if(e.code==='Space'&&!e.repeat)jumpRequested=true;
  if(/^Digit[1-8]$/.test(e.code)&&!e.repeat)changeWeapon(Number(e.code.slice(-1))-1);
  if(e.code==='KeyR')startReload();
 });
-document.addEventListener('keyup',e=>keys.delete(e.code));
-document.addEventListener('mousedown',e=>{if(state!=='playing')return;if(e.button===0){firing=true;fireBuffer=.18;}if(e.button===2)aiming=true;});
+document.addEventListener('keyup',e=>{keys.delete(e.code);if(e.code==='KeyG'){if(empReady()){camera.rotation.set(pitch,yaw,0);emp.release();}else emp.cancelAim();}});
+document.addEventListener('mousedown',e=>{if(state!=='playing')return;if(e.button===0){emp.cancelAim();firing=true;fireBuffer=.18;}if(e.button===2)aiming=true;});
 document.addEventListener('mouseup',e=>{if(e.button===0){firing=false;if(selected===6)cancelRail();lookInput.end();}if(e.button===2)aiming=false;});
 document.addEventListener('contextmenu',e=>e.preventDefault());
 function changeWeapon(index){
+ emp.cancelAim();
  if(!Number.isInteger(index)||index<0||index>=weapons.length||index===selected)return;
  haloBurst.cancel();cancelRail();selected=index;meleeRemaining=0;meleePending=false;meleeStrike.cancel();reload=0;fireBuffer=0;firing=false;recoil=0;handling.switchWeapon();combatUI.switching();hud();
 }
 function startReload(){
+ emp.cancelAim();
  if(selected===6){cancelRail();firing=false;fireBuffer=0;}
  const w=weapons[selected];if(reload||selected===3||rounds[selected]===w.cap)return;
  if(!reserves[selected]){notify('备用弹药耗尽 · 切换武器');return;}
@@ -420,6 +470,7 @@ function shoot(meleeImpact=false,meleeContact=null,haloRound=false){
   }
  }
  for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0){
+  if(enemies[i].type==='swarmDrone'||enemies[i].type==='sentry'||enemies[i].type==='engineer')enemyProjectiles.cancelOwner(enemies[i].group);
   if(enemies[i].boss)killedBoss=true;else if(enemies[i].type==='harborElite'||enemies[i].elite)killedElite=true;
   art.burst(enemies[i].group.position.clone().add(new THREE.Vector3(0,1.2,0)),0xffad68,32);disposeGroup(enemies[i].group);enemies.splice(i,1);kills++;killed++;
  }
@@ -485,13 +536,17 @@ function update(dt){
    else {startReload();fireBuffer=0;}
   }
  }else if(wantsShot&&shoot())fireBuffer=0;
+ emp.update(dt);
+ engineerDirector.update(dt);
  enemyFireGate=enemyDirector.update(dt,elapsed,enemyFireGate);
  enemyProjectiles.update(dt,camera.position,previousPlayer);
  const bossDamage=incomingDamage(overseer?.update(dt,camera.position,playerMotion.state.y,true,playerMotion.state.grounded,enemies.filter(e=>e.type==='stalker').length)||0);
  if(overseer?.takeSummons){const spots=overseer.takeSummons(camera.position);if(spots.length){spawnEncounter({...mission.current,count:spots.length,spawns:spots.map(p=>[p.x,p.z]),roles:['stalker'],feetY:0});notify('ABYSS 唤出潜行者 // 涨水期间从水中接近');gameAudio.play('reinforcement');}}
  if(bossDamage){overseer.battle.hurt(Math.min(health,bossDamage));fieldRecord.hurt(Math.min(health,bossDamage));achievementUI.attempt.hurt(Math.min(health,bossDamage));health=Math.max(0,health-bossDamage);mission.interrupt();combatUI.damaged(overseer.origin||new THREE.Vector3(0,0,-21));damageTime=.3;gameAudio.hurt(health);hud();}
  art.setBossActive?.(Boolean(overseer?.blocking));
- const hazard=art.hazardDamage?.(dt,{x:camera.position.x,z:camera.position.z,feetY:playerMotion.state.y});if(hazard){fieldRecord.hurt(Math.min(health,hazard.damage));achievementUI.attempt.hurt(Math.min(health,hazard.damage));health=Math.max(0,health-hazard.damage);mission.interrupt();combatUI.damaged(new THREE.Vector3(hazard.x,0,hazard.z));damageTime=.3;gameAudio.play('player.hazard');hud();}
+ const hazard=art.hazardDamage?.(dt,{x:camera.position.x,z:camera.position.z,feetY:playerMotion.state.y});
+ if(IS_ORBITAL||IS_DATACENTER||IS_POLAR)chapterCues.update(chapterSnapshot({map:MAP_ID,art,overseer,feetY:playerMotion.state.y,padLive:Boolean(hazard&&IS_ORBITAL)}));
+ if(hazard){fieldRecord.hurt(Math.min(health,hazard.damage));achievementUI.attempt.hurt(Math.min(health,hazard.damage));health=Math.max(0,health-hazard.damage);mission.interrupt();combatUI.damaged(new THREE.Vector3(hazard.x,0,hazard.z));damageTime=.3;gameAudio.play('player.hazard');hud();}
  if(health<=0){end(false);return;}
  missionWorld.collect(camera.position,type=>{
   const supply=supplementVoltSupply(type,supplementRailspikeSupply(type,supplementHaloSupply(type,supplementTempestSupply(type,applySupply(type,health,reserves,weapons),reserves),reserves),reserves),reserves);if(!supply.changed)return false;
@@ -511,7 +566,7 @@ function update(dt){
    haloBurst.cancel();cancelRail();enemyProjectiles.clear();keys.delete('KeyE');firing=false;fireBuffer=0;enemyFireGate=0;
    notify(event.finished.message);gameAudio.play(event.complete?'objective.extract':'objective.complete');
    if(event.complete||runMode==='replay'){end(true);return;}
-   spawnEncounter(event.next);saveCheckpoint();campaignUI.announce(event.next);hud();
+   emp.clear();engineerDirector.clear();spawnEncounter(event.next);saveCheckpoint();campaignUI.announce(event.next);hud();
   }
  }
 
@@ -552,6 +607,7 @@ function frame(now){
  if(state!=='playing')overseer?.update(0,camera.position,playerMotion.state.y,false);
  transport?.sync(camera.position,state==='playing');
  overseer?.updateMarkers(camera,state==='playing');
+ empUI.update(state==='playing',emp);
  enemyUI.update(state==='playing'?dt:0,state==='playing',camera,enemies,obstacles);
  harborCombatUI?.update(state==='playing',mission,enemies,camera.position);
  campaignUI.update(state==='playing'?dt:0,state==='playing',runMode);

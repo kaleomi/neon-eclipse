@@ -35,7 +35,11 @@ export const MAP_REGISTRY=Object.freeze([
  {id:'datacenter',order:8,code:'D-08',title:'沉没数据中心',english:'SUNKEN DATA CENTER',brief:'潜入半淹没的机房，趁排水窗口击破 ABYSS。',features:'定时涨水 · 双排水泵 · 潜行者与盾卫 · ABYSS 水冷核心',color:'#6fe6ff',
   radarLabel:'D-08 / 沉没数据中心',saveKey:'neon-eclipse.datacenter.v1',boss:'abyss',
   traits:{multiLevel:true,movingFrame:false,water:true,weather:null},
-  modules:{data:'./datacenter-data.js',world:'./datacenter-world.js',navigation:'./datacenter-navigation.js'}}
+  modules:{data:'./datacenter-data.js',world:'./datacenter-world.js',navigation:'./datacenter-navigation.js'}},
+ {id:'polar',order:9,code:'P-09',title:'极地雷达阵列',english:'POLAR RADAR ARRAY',brief:'穿越暴风雪接通三座雷达塔，把 GLACIER 引上薄冰击沉。',features:'暴风雪周期 · 体温与暖房 · 猎犬机 · GLACIER 薄冰击沉',color:'#bfe3ff',
+  radarLabel:'P-09 / 极地雷达阵列',saveKey:'neon-eclipse.polar.v1',boss:'glacier',
+  traits:{multiLevel:true,movingFrame:false,water:false,weather:'snow'},
+  modules:{data:'./polar-data.js',world:'./polar-world.js',navigation:'./polar-navigation.js'}}
 ].map(Object.freeze));
 export const MAP_IDS=Object.freeze(MAP_REGISTRY.map(m=>m.id));
 export const DEFAULT_MAP_ID=MAP_REGISTRY[0].id;

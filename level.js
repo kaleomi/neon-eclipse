@@ -13,6 +13,7 @@ export const IS_ROOF=MAP_ID==='roof';
 export const IS_TOWER=MAP_ID==='tower';
 export const IS_ORBITAL=MAP_ID==='orbital';
 export const IS_DATACENTER=MAP_ID==='datacenter';
+export const IS_POLAR=MAP_ID==='polar';
 export function createLevelMenu(){
  const nav=document.createElement('nav');nav.className='level-menu';nav.setAttribute('aria-label','地图选择');
  nav.innerHTML=MAP_REGISTRY.map(m=>`<a href="?map=${m.id}" data-map="${m.id}"><small>${chapterNumber(m.id)} / ${m.code}</small>${m.title}</a>`).join('')+'<p>地图卡片进入单章模式 · 战役进度另外保存</p>';

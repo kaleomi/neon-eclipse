@@ -26,7 +26,7 @@ try{
   const {page,errors}=await newPage(context);
   await page.goto(`${base}/index.html?map=datacenter`);await menuOpen(page);
   assert.equal(await page.getAttribute('body','data-map'),'datacenter');
-  assert.equal(await page.locator('.menu-chapter-grid a[data-map]').count(),8,'eight chapter cards');
+  assert.equal(await page.locator('.menu-chapter-grid a[data-map]').count(),9,'nine chapter cards');
   assert.match(await page.locator('.menu-chapter-grid a[data-map="datacenter"]').getAttribute('aria-current')||'',/page/);
   assert.match(await page.locator('.menu-chapter-grid a[data-map="datacenter"]').innerText(),/沉没数据中心/);
   assert.deepEqual(errors,[]);await page.close();
@@ -92,7 +92,7 @@ try{
   await page.evaluate(v=>{localStorage.clear();localStorage.setItem('neon-eclipse.journey.v5',JSON.stringify(v));},old);
   await page.reload();await menuOpen(page);
   assert.equal(await page.evaluate(()=>localStorage.getItem('neon-eclipse.journey.v5')!==null),true,'v5 key preserved');
-  assert.equal(await page.evaluate(()=>localStorage.getItem('neon-eclipse.journey.v6')),null,'read-only until the player acts');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('neon-eclipse.journey.v7')),null,'read-only until the player acts');
   assert.match(await page.locator('#menu-continue').innerText(),/08|沉没数据中心/);
   assert.deepEqual(errors,[]);await ctx.close();
  });

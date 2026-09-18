@@ -12,7 +12,8 @@ const oneOf=values=>text=>values.includes(text)?'ok':'unknown';
 const chapterSlot=(key,map,title)=>({key,group:'chapter',map,title,validate:versioned([1],v=>Number.isInteger(v.unlocked))});
 // Slot order is also the order shown in the UI. Keys mirror the owner modules exactly.
 export const SLOTS=Object.freeze([
- {key:'neon-eclipse.journey.v6',group:'journey',title:'连续战役（当前）',validate:versioned([6])},
+ {key:'neon-eclipse.journey.v7',group:'journey',title:'连续战役（当前）',validate:versioned([7])},
+ {key:'neon-eclipse.journey.v6',group:'journey',title:'连续战役（八章旧档）',legacy:true,validate:versioned([6])},
  {key:'neon-eclipse.journey.v5',group:'journey',title:'连续战役（七章旧档）',legacy:true,validate:versioned([5])},
  {key:'neon-eclipse.journey.v4',group:'journey',title:'连续战役（六章旧档）',legacy:true,validate:versioned([4])},
  {key:'neon-eclipse.journey.v3',group:'journey',title:'连续战役（五章旧档）',legacy:true,validate:versioned([3])},
@@ -26,7 +27,8 @@ export const SLOTS=Object.freeze([
  chapterSlot('neon-eclipse.harbor.v1','harbor','第 6 章 风暴港口'),
  chapterSlot('neon-eclipse.orbital.v1','orbital','第 7 章 轨道电梯基座'),
  chapterSlot('neon-eclipse.datacenter.v1','datacenter','第 8 章 沉没数据中心'),
- {key:'neon-eclipse.stars.v1',group:'collection',title:'隐藏星星',validate:versioned([1,2,3,4,5],v=>Array.isArray(v.stars))},
+ chapterSlot('neon-eclipse.polar.v1','polar','第 9 章 极地雷达阵列'),
+ {key:'neon-eclipse.stars.v1',group:'collection',title:'隐藏星星',validate:versioned([1,2,3,4,5,6],v=>Array.isArray(v.stars))},
  {key:'neon-eclipse.chapter-achievements.v1',group:'collection',title:'单章成就',validate:versioned([1],v=>Array.isArray(v.awards))},
  {key:'neon-eclipse.achievement-notices.v1',group:'collection',title:'成就提示状态',validate:text=>parse(text).ok?'ok':'corrupt'},
  {key:'neon-eclipse.combat-difficulty.v1',group:'settings',title:'主线战斗难度',validate:oneOf(['easy','normal','hard'])},

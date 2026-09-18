@@ -6,7 +6,7 @@ export function bossLabel(enemy){
 }
 export function createEnemyUI(){
  const root=document.createElement('section');root.id='enemy-combat-hud';root.hidden=true;
- root.innerHTML='<div class="enemy-inspector"><b></b><div class="target-life"><i></i></div><span></span></div><div class="boss-mechanic"><strong></strong><span></span></div><div class="armor-feedback"></div>';
+ root.innerHTML='<div class="swarm-coordination-status" hidden></div><div class="enemy-inspector"><b></b><div class="target-life"><i></i></div><span></span></div><div class="boss-mechanic"><strong></strong><span></span></div><div class="armor-feedback"></div>';
  document.body.append(root);
  const inspector=root.querySelector('.enemy-inspector'),bossPanel=root.querySelector('.boss-mechanic'),impact=root.querySelector('.armor-feedback');
  const ray=new THREE.Raycaster();let timer=0,impactLife=0,target=null;
@@ -23,6 +23,8 @@ export function createEnemyUI(){
    bossPanel.querySelector('span').textContent=state.openRemaining>0?'瞄准青色胸口核心 · 核心伤害 ×2.5':state.transitionRemaining>0?'武器切换预警 · 趁机换弹和移动':phase.hint+' · '+phase.attacks+' 次攻击后暴露';
    bossPanel.dataset.exposed=String(state.openRemaining>0);
   }
+  const receivers=enemies.filter(e=>e.swarmIntel),relay=root.querySelector('.swarm-coordination-status'),lit=receivers.some(e=>e.swarmIntel.lit);
+  relay.hidden=!receivers.length;relay.dataset.lit=String(lit);relay.textContent=lit?'蜂群照明共享 → '+receivers.length+' 名远程 · 横移断照明 / 击落断共享':'远程搜索旧位置 · '+Math.max(0,...receivers.map(e=>e.swarmIntel.remaining)).toFixed(1)+'s · 无隔墙射击';
   timer-=dt;
   if(timer<=0){
    timer=.12;camera.updateMatrixWorld();enemies.forEach(e=>e.group.updateMatrixWorld(true));
@@ -38,6 +40,10 @@ export function createEnemyUI(){
    inspector.style.setProperty('--enemy-accent','#'+p.color.toString(16).padStart(6,'0'));
    inspector.querySelector('i').style.width=Math.max(0,target.hp/target.maxHp*100)+'%';
    inspector.querySelector('span').textContent=target.boss?target.bossState.openRemaining>0?'青色胸口核心 ×2.5':'装甲减伤 · 等待过载':target.type==='heavy'?facingDot(target.group.position,target.group.rotation.y,camera.position)>.55?'正面护甲：仅承受 30% 伤害':'侧后方无正面减伤 · 背部核心 ×2':p.hint;
+   if(target.type==='engineer')inspector.querySelector('span').textContent=target.engineerBuilding?'部署炮塔 '+target.engineerRemaining.toFixed(1)+'s · 命中工程兵可打断':target.engineerSpent?'部署配额已用尽 · 已建炮塔需独立摧毁':(target.engineerStatus?target.engineerStatus+' · ':'')+p.hint;
+   if(target.type==='sentry')inspector.querySelector('span').textContent=(target.sentryPhase==='locked'?'锁定 / 三连扫射 · 立即横移或入掩体':'扫描扇区外可绕行 · 正面承伤 35%')+' · 背部绿核 ×2';
+   if(target.swarmIntel)inspector.querySelector('span').textContent+=' · 蜂群共享旧位 '+target.swarmIntel.remaining.toFixed(1)+'s';
+   if(target.empRemaining>0)inspector.querySelector('span').textContent='EMP 失能 '+target.empRemaining.toFixed(1)+'s · 仍可受伤，已发弹丸仍需躲避';
    const mark=haloMarkText(target);if(mark)inspector.querySelector('span').textContent+=' · '+mark;
   }
  }

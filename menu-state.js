@@ -5,7 +5,7 @@ import {mapById} from './maps/registry.js';
 export const HOME_MENU_ITEMS = Object.freeze([
   {id: 'menu-new', label: '新游戏', hint: '从第一章开始完整战役', icon: 'play'},
   {id: 'menu-continue', label: '继续游戏', hint: '暂无可继续的进度', icon: 'resume'},
-  {id: 'menu-levels', label: '选择关卡', hint: '八个战场，独立探索', icon: 'levels'},
+  {id: 'menu-levels', label: '选择关卡', hint: '九个战场，独立探索', icon: 'levels'},
   {id: 'menu-achievements', label: '成就', hint: '单章挑战 · 星星收藏', icon: 'star'},
   {id: 'menu-settings', label: '设置', hint: '画面、界面与操作', icon: 'settings'}
 ].map(Object.freeze));

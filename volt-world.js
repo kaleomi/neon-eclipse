@@ -1,5 +1,5 @@
 import * as T from './node_modules/three/build/three.module.js';
-export function voltAnchor(enemy){const p=enemy.group.getWorldPosition(new T.Vector3()),scale=enemy.group.getWorldScale(new T.Vector3());p.y+=1.15*scale.y;return p;}
+export function voltAnchor(enemy){const p=enemy.group.getWorldPosition(new T.Vector3()),scale=enemy.group.getWorldScale(new T.Vector3());p.y+=(enemy.group.userData.combatAnchorY??1.15)*scale.y;return p;}
 // Both directions also block a segment whose endpoint is inside a single-sided solid.
 export function voltClearPath(from,to,meshes){
  const delta=new T.Vector3().subVectors(to,from),length=delta.length();if(length<1e-6)return true;

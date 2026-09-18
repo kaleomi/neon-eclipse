@@ -1,21 +1,24 @@
+import {validEmpState} from './emp-rules.js';
 import {validTempestState,validHaloState,validRailspikeState,validVoltState} from './weapons/runtime.js';
 import {ORBITAL_ENTRIES} from './orbital-data.js';
+import {POLAR_ENTRIES} from './polar-data.js';
 import {DATACENTER_ENTRIES} from './datacenter-data.js';
 import {HARBOR_ENTRIES} from './harbor-data.js';
 import {TRAIN_ENTRIES} from './train-data.js';
 import {TOWER_ENTRIES} from './tower-data.js';
 import {ROOF_ENTRIES} from './roof-data.js';
-import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,IS_ORBITAL,IS_DATACENTER} from './level.js';
+import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,IS_ORBITAL,IS_DATACENTER,IS_POLAR} from './level.js';
 import {STATION_ENTRIES} from './station-data.js';
 import {STAGES,SUPPLIES} from './mission.js';
 import {WEAPONS} from './combat.js';
-export const SAVE_KEY=IS_DATACENTER?'neon-eclipse.datacenter.v1':IS_ORBITAL?'neon-eclipse.orbital.v1':IS_HARBOR?'neon-eclipse.harbor.v1':IS_TRAIN?'neon-eclipse.train.v1':IS_TOWER?'neon-eclipse.tower.v1':IS_ROOF?'neon-eclipse.roof.v1':IS_STATION?'neon-eclipse.station.v1':'neon-eclipse.campaign.v1';
-export const STAGE_ENTRIES=IS_DATACENTER?DATACENTER_ENTRIES:IS_ORBITAL?ORBITAL_ENTRIES:IS_HARBOR?HARBOR_ENTRIES:IS_TRAIN?TRAIN_ENTRIES:IS_TOWER?TOWER_ENTRIES:IS_ROOF?ROOF_ENTRIES:IS_STATION?STATION_ENTRIES:[{x:0,z:29},{x:-28,z:2.4},{x:28,z:2.4},{x:0,z:-8.6},{x:0,z:22}];
+export const SAVE_KEY=IS_POLAR?'neon-eclipse.polar.v1':IS_DATACENTER?'neon-eclipse.datacenter.v1':IS_ORBITAL?'neon-eclipse.orbital.v1':IS_HARBOR?'neon-eclipse.harbor.v1':IS_TRAIN?'neon-eclipse.train.v1':IS_TOWER?'neon-eclipse.tower.v1':IS_ROOF?'neon-eclipse.roof.v1':IS_STATION?'neon-eclipse.station.v1':'neon-eclipse.campaign.v1';
+export const STAGE_ENTRIES=IS_POLAR?POLAR_ENTRIES:IS_DATACENTER?DATACENTER_ENTRIES:IS_ORBITAL?ORBITAL_ENTRIES:IS_HARBOR?HARBOR_ENTRIES:IS_TRAIN?TRAIN_ENTRIES:IS_TOWER?TOWER_ENTRIES:IS_ROOF?ROOF_ENTRIES:IS_STATION?STATION_ENTRIES:[{x:0,z:29},{x:-28,z:2.4},{x:28,z:2.4},{x:0,z:-8.6},{x:0,z:22}];
 const number=(v,min,max)=>Number.isFinite(v)&&v>=min&&v<=max;
 const integer=(v,min,max)=>Number.isInteger(v)&&number(v,min,max);
 export function validCheckpoint(s,supplies=SUPPLIES){
  if(!s||typeof s!=='object'||!integer(s.stageIndex,0,4)||!number(s.health,1,100)||!integer(s.selected,0,3))return false;
  if(!number(s.x,-38,38)||!number(s.z,-38,38)||!number(s.yaw,-100000,100000)||!number(s.pitch,-1.45,1.45)||!number(s.time,0,86400)||!integer(s.kills,0,10000))return false;
+ if(!validEmpState(s.emp))return false;
  if(!validVoltState(s.volt)||s.volt?.equipped&&(s.selected!==0||s.tempest?.equipped||s.halo?.equipped||s.railspike?.equipped))return false;
  if(!validRailspikeState(s.railspike)||s.railspike?.equipped&&(s.selected!==0||s.tempest?.equipped||s.halo?.equipped))return false;
  if(!validHaloState(s.halo)||s.halo?.equipped&&(s.selected!==0||s.tempest?.equipped))return false;
@@ -24,6 +27,8 @@ export function validCheckpoint(s,supplies=SUPPLIES){
  if(s.transportTrip!==undefined&&typeof s.transportTrip!=='boolean')return false;
  if(s.towerLiftTime!==undefined&&!number(s.towerLiftTime,0,86400))return false;
  if(s.waterTime!==undefined&&!number(s.waterTime,0,86400))return false;
+ if(s.stormTime!==undefined&&!number(s.stormTime,0,86400))return false;
+ if(s.warmth!==undefined&&!number(s.warmth,0,100))return false;
  if(s.transportTime!==undefined&&!number(s.transportTime,0,86400))return false;
  if(s.feetY!==undefined&&!number(s.feetY,0,12))return false;
  if(!Array.isArray(s.rounds)||s.rounds.length!==3||!Array.isArray(s.reserves)||s.reserves.length!==3)return false;

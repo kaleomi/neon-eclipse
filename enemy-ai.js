@@ -1,14 +1,32 @@
+import {createSentryDirector} from './sentry-director.js';
+import {createSwarmCoordination} from './swarm-coordination.js';
+import {voltClearPath} from './volt-world.js';
+import {createSwarmDirector} from './swarm-director.js';
 import {stepHarborElite,queueHarborVent} from './harbor-elite.js';
 import {sameEnemyLayer,enemyMuzzleHeight} from './roof-enemy-navigation.js';
 import * as THREE from './node_modules/three/build/three.module.js';
 import {ENEMY_TYPES,BOSS_PHASES,turnTowards,facingDot,movementIntent,stepBossState,recordBossAttack,enemyBehavior} from './enemy-rules.js';
 import {animateEnemy} from './enemy-model.js';
+const THERMAL_RANGE=26;
 
-export function createEnemyDirector({enemies,player,navigation,vertical=null,move,obstacles,projectiles,onBossEvent,onEliteWindow=()=>{},scaleCooldown=seconds=>seconds}){
+export function createEnemyDirector({enemies,player,navigation,vertical=null,move,obstacles,projectiles,onBossEvent,onEliteWindow=()=>{},scaleCooldown=seconds=>seconds,thermalVision=null}){
+ const coordination=createSwarmCoordination({position:e=>e.group.position,visible:(from,to)=>voltClearPath(from,to,obstacles.map(o=>o.mesh))});
+ const budget=()=>(projectiles.countThreatTag?.('swarmDrone')||0)+(projectiles.countThreatTag?.('swarmCoordinated')||0);
+ const canStart=()=>!projectiles.charging&&!projectiles.hasThreatTag?.('sentry')&&budget()<2;
+ const sentry=createSentryDirector({enemies,player,obstacles,projectiles,scaleCooldown,canQueue:()=>!projectiles.charging&&budget()===0});
+ const swarm=createSwarmDirector({enemies,player,navigation,obstacles,projectiles,scaleCooldown,canQueue:canStart,onDesignate:(source,point)=>coordination.publish(source,point,enemies)});
  const moveEnemy=vertical?vertical.move:move;
- const ray=new THREE.Raycaster(),meshes=obstacles.map(o=>o.mesh);
+ const ray=new THREE.Raycaster();
  function update(dt,time,gate){
+  const meshes=obstacles.map(o=>o.mesh);
+  // Chapter 09 blizzard: while thermal vision is on, soft cover (snow banks) no longer hides the player inside THERMAL range.
+  const thermal=thermalVision?.()===true,solidMeshes=thermal?obstacles.filter(o=>!o.bank&&!o.ledge).map(o=>o.mesh):meshes;
+  coordination.update(dt,enemies,player.position);
+  gate=sentry.update(dt,time,gate);
+  gate=swarm.update(dt,time,gate);
   for(const enemy of enemies){
+   if(enemy.type==='swarmDrone'||enemy.type==='sentry'||enemy.empRemaining>0||enemy.empBlocked)continue;
+   if(enemy.engineerBuilding){animateEnemy(enemy,time,false);enemy.group.userData.parts.arms.forEach(a=>a.rotation.x=-.75);enemy.group.userData.parts.accent.emissiveIntensity=2+Math.sin(time*12)*.4;continue;}
    const profile=ENEMY_TYPES[enemy.type],pos=enemy.group.position,old=pos.clone();
    const dx=player.position.x-pos.x,dz=player.position.z-pos.z,dist=Math.hypot(dx,dz)||.001;
    enemy.charge=Math.max(0,(enemy.charge||0)-dt);enemy.attack-=dt;
@@ -20,17 +38,21 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
    }
    if(enemy.type==='harborElite'){const event=stepHarborElite(enemy,dt,!projectiles.hasPending(enemy.group));if(event.opened){enemy.fieldWindowUsed=false;onEliteWindow(enemy);}}
    const locked=enemy.type==='harborElite'&&enemy.eliteState?.ventRemaining>0||enemy.boss&&(enemy.bossState.openRemaining>0||enemy.bossState.transitionRemaining>0||enemy.bossState.openQueued);
-   if(enemy.charge===0&&!locked)enemy.group.rotation.y=turnTowards(enemy.group.rotation.y,Math.atan2(dx,dz),profile.turn*dt);
+
    const origin=pos.clone().add(new THREE.Vector3(0,enemy.boss?2.6:enemy.type==='heavy'?1.65:1.6,0));
    const target=player.position.clone().add(new THREE.Vector3(0,-.35,0)),line=target.clone().sub(origin);
    ray.set(origin,line.clone().normalize());ray.far=line.length();
-   const visible=dist<profile.range+10&&ray.intersectObjects(meshes,false).length===0;
+   const visible=dist<profile.range+10&&ray.intersectObjects(thermal&&dist<THERMAL_RANGE?solidMeshes:meshes,false).length===0;
+   const coordinated=enemy.group.userData.swarmCoordinated===true;
+   if(coordinated&&visible)enemy.lastVisualPoint=player.position.clone();
+   const searchTarget=coordinated&&!visible?(enemy.swarmIntel?.point||enemy.lastVisualPoint||pos):player.position;
+   if(enemy.charge===0&&!locked)enemy.group.rotation.y=turnTowards(enemy.group.rotation.y,Math.atan2(searchTarget.x-pos.x,searchTarget.z-pos.z),profile.turn*dt);
    if(enemy.charge===0&&!locked){
-    enemy.flankTime=(enemy.flankTime||0)+dt;while(enemy.flankRoute?.length&&Math.hypot(pos.x-enemy.flankRoute[0].x,pos.z-enemy.flankRoute[0].z)<1.1)enemy.flankRoute.shift();if(enemy.flankTime>16)enemy.flankRoute=[];const flank=enemy.flankRoute?.[0],navTarget=flank?new THREE.Vector3(flank.x,pos.y+1.7,flank.z):player.position;
+    enemy.flankTime=(enemy.flankTime||0)+dt;while(enemy.flankRoute?.length&&Math.hypot(pos.x-enemy.flankRoute[0].x,pos.z-enemy.flankRoute[0].z)<1.1)enemy.flankRoute.shift();if(enemy.flankTime>16)enemy.flankRoute=[];const flank=enemy.flankRoute?.[0],navTarget=flank?new THREE.Vector3(flank.x,pos.y+1.7,flank.z):searchTarget;
     let climbing=!enemy.boss?vertical?.route(pos,navTarget,enemy.radius):null;if(flank)climbing={...(climbing||navigation.direction(pos,navTarget)),onDeck:false};
-    const intent=climbing&&!climbing.onDeck?'approach':movementIntent(enemy.type,dist,visible);let direction=null;
+    const intent=coordinated&&!visible&&Math.hypot(searchTarget.x-pos.x,searchTarget.z-pos.z)<1?'hold':climbing&&!climbing.onDeck?'approach':movementIntent(enemy.type,dist,visible);let direction=null;
     const side=(Math.floor(time/3+enemy.seed)%2?1:-1);
-    if(intent==='approach')direction=climbing||navigation.direction(pos,player.position);
+    if(intent==='approach')direction=climbing||navigation.direction(pos,searchTarget);
     else if(intent==='retreat')direction={x:-dx,z:-dz};
     else if(intent==='strafe')direction={x:-dz*side,z:dx*side};
     if(direction){
@@ -45,14 +67,14 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
     }
    }
    const aligned=facingDot(pos,enemy.group.rotation.y,player.position)>(enemyBehavior(enemy.type)==='ranged'?.95:.83);
-   if(enemy.attack<=0&&enemy.charge===0&&!locked&&dist<profile.range&&visible&&aligned&&gate<=0){
+   if(enemy.attack<=0&&enemy.charge===0&&!locked&&dist<profile.range&&visible&&aligned&&gate<=0&&(!coordinated||canStart())){
     const phase=enemy.boss?BOSS_PHASES[enemy.bossState.phase]:null,attack=phase?phase.attack:profile.attack;
     // Freeze position and aim during telegraph; all bolts retain this captured target.
     origin.set(pos.x,enemyMuzzleHeight(enemy),pos.z);
     if(projectiles.queue(origin,target,enemy.boss,enemy.group,attack)){
      enemy.charge=attack.charge+(attack.bursts-1)*(attack.burstDelay||.3)+.05;
      enemy.attack=scaleCooldown((phase?phase.cooldown:profile.cooldown)+Math.random()*.25);
-     gate=enemy.boss?.55:enemyBehavior(enemy.type)==='ranged'?.45:.28;
+     gate=enemy.boss?.55:coordinated?attack.charge+.12:enemyBehavior(enemy.type)==='ranged'?.45:.28;
      if(enemy.type==='harborElite')queueHarborVent(enemy);
      if(enemy.boss)recordBossAttack(enemy.bossState);
     }
@@ -61,5 +83,5 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
   }
   return gate;
  }
- return {update};
+ return {update,get coordination(){return coordination.state;},clear(){swarm.clear();coordination.clear();}};
 }

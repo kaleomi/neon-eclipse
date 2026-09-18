@@ -8,7 +8,7 @@ export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact,hook
  const coreGeometry=new THREE.SphereGeometry(.11,8,6),trailGeometry=new THREE.CylinderGeometry(.05,.015,1,6);
  const haloGeometry=new THREE.SphereGeometry(.22,8,6),ringGeometry=new THREE.TorusGeometry(.27,.035,6,24);
  const white=new THREE.MeshBasicMaterial({color:0xffecc6});
- const materials=Object.fromEntries(Object.entries({orange:0xff4824,pink:0xff36a8,purple:0xbc7cff,amber:0xffc34e}).map(([key,color])=>[key,new THREE.MeshBasicMaterial({color,transparent:true,opacity:.8,depthWrite:false,blending:THREE.AdditiveBlending})]));
+ const materials=Object.fromEntries(Object.entries({green:0x6affb6,blue:0x63cfff,orange:0xff4824,pink:0xff36a8,purple:0xbc7cff,amber:0xffc34e}).map(([key,color])=>[key,new THREE.MeshBasicMaterial({color,transparent:true,opacity:.8,depthWrite:false,blending:THREE.AdditiveBlending})]));
  const up=new THREE.Vector3(0,1,0),zero=new THREE.Vector3();
  function removePending(index){const p=pending[index];scene.remove(p.ring);if(p.line){scene.remove(p.line);p.line.geometry.dispose();p.line.material.dispose();}pending.splice(index,1);}
  function queue(origin,target,boss=false,owner=null,pattern=null){
@@ -69,5 +69,5 @@ export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact,hook
   if(includeActive)for(let i=active.length-1;i>=0;i--)if(active[i].owner===owner)remove(i);
  }
  function clear(){for(let i=active.length-1;i>=0;i--)remove(i);for(let i=pending.length-1;i>=0;i--)removePending(i);}
- return {queue,update,clear,cancelOwner,hasPending:owner=>pending.some(p=>p.owner===owner),positions:()=>active.map(b=>b.mesh.position),get count(){return active.length;},get charging(){return pending.length;}};
+ return {queue,update,clear,cancelOwner,countThreatTag:tag=>pending.filter(p=>p.owner?.userData?.[tag]).length+active.filter(p=>p.owner?.userData?.[tag]).length,hasActive:owner=>active.some(p=>p.owner===owner),hasThreatTag:tag=>pending.some(p=>p.owner?.userData?.[tag])||active.some(p=>p.owner?.userData?.[tag]),hasPending:owner=>pending.some(p=>p.owner===owner),positions:()=>active.map(b=>b.mesh.position),get count(){return active.length;},get charging(){return pending.length;}};
 }

@@ -1,3 +1,5 @@
+import {createSentryModel} from './sentry-model.js';
+import {createSwarmModel,animateSwarm} from './swarm-model.js';
 import * as THREE from './node_modules/three/build/three.module.js';
 import {ENEMY_TYPES} from './enemy-rules.js';
 const steel=new THREE.MeshStandardMaterial({color:0x66808c,roughness:.5,metalness:.3});
@@ -6,6 +8,8 @@ function box(g,w,h,d,x,y,z,material,zone='body'){
  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.userData.hitZone=zone;g.add(m);return m;
 }
 export function createEnemyModel(type){
+ if(type==='sentry')return createSentryModel();
+ if(type==='swarmDrone')return createSwarmModel();
  const profile=ENEMY_TYPES[type],g=new THREE.Group(),heavy=type==='heavy'||type==='harborElite'||type==='shield',boss=type==='warden';
  const accent=new THREE.MeshStandardMaterial({color:profile.color,emissive:profile.color,emissiveIntensity:1.1});
  const coreMaterial=accent.clone();g.userData.ownedMaterials=[accent,coreMaterial];
@@ -20,6 +24,7 @@ export function createEnemyModel(type){
   box(g,.34,.065,.68,side*.64,1.82,0,accent);
  }
  box(g,.55,.8,.25,0,1.2,-.38,dark);
+ if(type==='engineer'){g.name='FIELD_ENGINEER';box(g,1.05,.85,.42,0,1.38,-.58,steel);for(const side of [-1,1]){box(g,.15,.72,.46,side*.4,1.4,-.62,accent);box(g,.16,.42,.16,side*.42,2.08,-.58,dark);}box(g,.85,.12,.78,0,2.2,0,accent,'head');box(g,.22,.22,.85,.65,.92,.45,steel);}
  let core=null;
  if(heavy){
   coreMaterial.color.setHex(0x85ffe0);coreMaterial.emissive.setHex(0x26dcae);coreMaterial.emissiveIntensity=1.6;
@@ -32,6 +37,13 @@ export function createEnemyModel(type){
   // Tower shield: a wide translucent plate in front, rear core exposed. Frontal hits read as 'armor'.
   const plate=box(g,1.5,2.1,.12,0,1.15,.72,new THREE.MeshStandardMaterial({color:0x9fc4ff,emissive:0x2d5fa8,emissiveIntensity:.9,transparent:true,opacity:.75}),'armor');g.userData.ownedMaterials.push(plate.material);
   box(g,1.55,.08,.16,0,2.22,.72,accent,'armor');
+ }
+ if(type==='hound'){
+  // Hound: low quadruped frame, red eye lamp. The humanoid frame is dropped entirely so hits and the silhouette match.
+  for(const m of g.children.slice())g.remove(m);legs.length=0;arms.length=0;
+  box(g,.9,.5,1.3,0,.75,0,dark);box(g,.4,.3,.5,0,.9,.75,steel,'head');box(g,.16,.08,.05,0,.95,1.01,accent,'head');
+  for(const [x,z] of [[-.35,.45],[.35,.45],[-.35,-.45],[.35,-.45]]){const l=box(g,.16,.5,.16,x,.25,z,steel);legs.push(l);}
+  box(g,.1,.4,.1,0,1.2,-.3,dark);box(g,.12,.12,.12,0,1.42,-.3,accent);
  }
  if(type==='stalker'){
   // Stalker: slim frame, fins, no bright plates. Materials go transparent with distance in animateEnemy.
@@ -63,7 +75,7 @@ export function createEnemyModel(type){
 }
 export function stalkerOpacity(distance,stealth){if(!stealth)return 1;if(distance<=stealth.near)return 1;if(distance>=stealth.far)return .08;return 1-(distance-stealth.near)/(stealth.far-stealth.near)*.92;}
 export function animateEnemy(enemy,time,walking,playerDistance=0){
- const p=enemy.group.userData.parts;if(!p)return;
+ const p=enemy.group.userData.parts;if(!p||p.sentry)return;if(p.swarm){animateSwarm(enemy,time);return;}
  if(p.fade){const o=enemy.charge>0?1:stalkerOpacity(playerDistance,ENEMY_TYPES.stalker.stealth);for(const m of p.fade)m.opacity=o;}
  const stride=walking?Math.sin(time*(enemy.type==='assault'?11:7)+enemy.seed)*.38:0;
  p.legs.forEach((leg,i)=>leg.rotation.x=stride*(i?1:-1));

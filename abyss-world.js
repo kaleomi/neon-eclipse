@@ -39,5 +39,5 @@ export function createAbyssWorld(scene,obstacles,water){
  function takeSummons(player){const n=summonRequest;summonRequest=0;if(!n)return [];return [...STALKER_POOLS].sort((a,b)=>Math.hypot(b.x-player.x,b.z-player.z)-Math.hypot(a.x-player.x,a.z-player.z)).slice(0,n).map(p=>({x:p.x,z:p.z,y:0}));}
  function hit(object,amount,{halo=false}={}){const shielded=rules.blocking&&rules.state.phase==='shield';if(shielded)shieldFeedback=1.5;const was=rules.blocking,dealt=rules.damage('core',amount*haloDamageMultiplier(haloTarget));const marked=halo&&dealt>0&&registerHaloWeakHit(haloTarget);battle.hit(dealt,true,false);sync();return {shielded,marked,damage:dealt,killed:was&&!rules.blocking,weak:dealt>0,message:'冷却液护罩！等待排水后核心露出再攻击',killMessage:'ABYSS 已停机 // 水位归零，返回进气闸撤离'};}
  function updateMarkers(){}
- clear();return {setStage,clear,update,hit,updateMarkers,takeSummons,battle,origin:new T.Vector3(ABYSS_POSITION.x,0,ABYSS_POSITION.z),get blocking(){return rules.blocking;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[])]:[];}};
+ clear();return {setStage,clear,update,hit,updateMarkers,takeSummons,battle,origin:new T.Vector3(ABYSS_POSITION.x,0,ABYSS_POSITION.z),get blocking(){return rules.blocking;},get state(){return rules.state;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[])]:[];}};
 }

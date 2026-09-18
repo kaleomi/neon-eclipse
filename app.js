@@ -271,6 +271,7 @@ function spawnEncounter(stage){
  hud();
 }
 function reset(stageIndex=0,snapshot=null){
+ chapterCues.reset();gameAudio.reset();
  emp.reset(snapshot?.emp);
  engineerDirector.clear();enemyDirector.clear?.();
  haloBurst.cancel();cancelRail();

@@ -14,7 +14,7 @@ export function createStreak({window=4}={}){
 export function createGameAudio({storage,bus=createAudioBus({storage}),music=true}={}){
  const sfx=createSfxPlayer(bus);
  const director=music?createMusicDirector(bus):null;
- const streak=createStreak();
+ const streak=createStreak(),pendingStreak=new Set();
  let heartbeat=0,listener={x:0,z:0,yaw:0},hidden=false;
  function play(name,opts){return sfx.play(name,{...opts,listener:opts?.position?listener:undefined});}
  function bindLifecycle(){
@@ -30,7 +30,7 @@ export function createGameAudio({storage,bus=createAudioBus({storage}),music=tru
   weaponFire:index=>play(WEAPON_FIRE[index]||'fire.vanguard'),
   telegraph:(color,position,occluded)=>play(TELEGRAPH_BY_COLOR[color]||'telegraph.orange',{position,occluded}),
   hit({killed,headshot,armored,core,elite,boss}){
-   if(killed){const step=streak.kill();play(boss?'kill.boss':elite?'kill.elite':'kill');if(step)setTimeout(()=>play('streak'),120);return step;}
+   if(killed){const step=streak.kill();play(boss?'kill.boss':elite?'kill.elite':'kill');if(step){const timer=setTimeout(()=>{pendingStreak.delete(timer);play('streak');},120);pendingStreak.add(timer);}return step;}
    play(core?'hit.core':headshot?'hit.head':armored?'hit.armor':'hit.body');return 0;
   },
   hurt(health){play(health<=25?'player.hurt.low':'player.hurt');},
@@ -43,6 +43,6 @@ export function createGameAudio({storage,bus=createAudioBus({storage}),music=tru
    if(director){director.update(dt,facts);}
    if(facts.playState==='playing'&&facts.health>0&&facts.health<=25){heartbeat-=dt;if(heartbeat<=0){play('player.heartbeat');heartbeat=facts.health<=12?.7:1.05;}}else heartbeat=0;
   },
-  reset(){streak.reset();heartbeat=0;}
+  reset(){for(const timer of pendingStreak)clearTimeout(timer);pendingStreak.clear();streak.reset();heartbeat=0;}
  };
 }

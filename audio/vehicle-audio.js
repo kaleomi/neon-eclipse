@@ -34,9 +34,9 @@ export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
   const whineOsc=mk('sine',2000),whineGain=gainNode(0);whineOsc.connect(whineGain).connect(out);whineOsc.start();
   // Wind / wave / water: filtered noise beds.
   const windSrc=noise('white'),windFilter=lp(1200),windGain=gainNode(0);windSrc.connect(windFilter).connect(windGain).connect(out);
-  const waveSrc=noise('brown'),waveFilter=lp(500),waveGain=gainNode(0);waveSrc.connect(waveFilter).connect(waveGain).connect(out);
-  // Slow LFO on waves.
-  const lfo=mk('sine',.35),lfoGain=gainNode(.5);lfo.connect(lfoGain).connect(waveGain.gain);lfo.start();
+  const waveSrc=noise('brown'),waveFilter=lp(500),waveMod=gainNode(1),waveGain=gainNode(0);waveSrc.connect(waveFilter).connect(waveMod).connect(waveGain).connect(out);
+  // Modulate upstream of the final envelope: additive AudioParam input must never bypass a zero waveGain.
+  const lfo=mk('sine',.35),lfoGain=gainNode(.5);lfo.connect(lfoGain).connect(waveMod.gain);lfo.start();
   nodes={engOsc,subOsc,engFilter,engGain,whineOsc,whineGain,windFilter,windGain,waveGain};
   return true;
  }
@@ -79,7 +79,11 @@ export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
  // One-shot events derived from monotonic gameplay counters (see vehicleAudioEvents). Keeps vehicle-app.js to a single call.
  let counters=null;
  function events(next){const out=vehicleAudioEvents(counters,next);counters={...next};for(const e of out)sfx.play(e.name,e.opts);return out;}
- return {bus,sfx,update,events,play:(n,o)=>sfx.play(n,o),pause(){bus.hold('paused');},resume(){bus.release('paused');},unlock:()=>bus.unlock(),resetEvents(){counters=null;}};
+ function reset(){
+  counters=null;lastKind=null;lastImpacts=0;stallTimer=0;kind=null;
+  if(nodes)silence(bus.context.currentTime);// Preserve pause/hidden holds and persisted volume settings.
+ }
+ return {bus,sfx,update,events,reset,play:(n,o)=>sfx.play(n,o),pause(){bus.hold('paused');},resume(){bus.release('paused');},unlock:()=>bus.unlock(),resetEvents(){counters=null;}};
 }
 // Pure: diff two counter snapshots into sfx events. `prev` null = first frame (records baseline, plays nothing).
 // counters: {roofShots,planeShots,rocketShots,roofHits,planeHits,seaShots,seaHits,seaSplashes,repairs,rearms,landings,checkpoints,hullHits,waves,houndKills,paused}

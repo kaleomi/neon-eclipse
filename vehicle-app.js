@@ -79,6 +79,7 @@ function clearInput(){keys.clear();drag=false;fire=false;rocketKey=false;recover
 function pause(){if(!active)return;active=false;vehicleAudio.pause();clearInput();overlay.hidden=false;document.exitPointerLock?.();$('#drive-overlay-title').textContent='联合试验已暂停';$('#drive-overlay-copy').textContent='载具、波浪与路线计时已冻结。继续会回到原位置；试验调度会回收全部载具并重置三条路线。';$('#resume-drive').textContent='继续试验 →';$('#resume-drive').focus();updateHUD();}
 function resume(){if(joint.status==='won'||joint.status==='lost'||chase.status==='won'||chase.status==='lost'||sortie.status==='won'||sortie.status==='lost'||escort.status==='won'||escort.status==='lost'){notify('请选择重试任务，或返回自由试驾。');return;}active=true;started=true;vehicleAudio.resume();vehicleAudio.unlock();clearInput();overlay.hidden=true;last=performance.now();recoveryArmed=false;armedStation=null;$('#recover-drive').textContent='回收全部载具并重置路线';canvas.focus();updateHUD();}
 function recover(station='garage'){
+ vehicleAudio.reset();// New task/restore must not inherit old audio counters or warning timers.
  ++missionIntent;// A newer dispatch/mode selection cancels an older async mission launch.
  expeditionUI?.detach();// Switching mode or restoring a legacy checkpoint never carries campaign score ownership.
  joint=createJointMission();jointArmed=false;

@@ -8,7 +8,7 @@ import {createJointMission,stepJointMission,finishJointFlight,jointBoardAllowed,
 import {buildJointWorld} from './joint-world.js';
 import {createLighthouseMission,stepLighthouseMission,lighthouseGoal,lighthouseBoardAllowed,lighthouseExitAllowed,lighthouseSummary,restoreLighthouseCheckpoint,lighthouseCheckpointLabel,LIGHTHOUSE_STAGES,LIGHTHOUSE_LABELS,LIGHTHOUSE_PROFILES,normalizeLighthouse} from './lighthouse-mission.js';
 import {stepHelicopter,helicopterSpeed} from './helicopter-rules.js';
-import {FIELD_HELI_SITE,HELI_PADS,createFieldHelicopter,parkHelicopter,canBoardHelicopter,helicopterExit,helicopterInput,helicopterStatusLabel,HELICOPTER_HINT,fieldGround,helicopterBlocks} from './helicopter-field.js';
+import {FIELD_HELI_SITE,HELI_PADS,createFieldHelicopter,parkHelicopter,canBoardHelicopter,helicopterExit,helicopterInput,helicopterStatusLabel,HELICOPTER_HINT,fieldGround,helicopterBlocks,vehicleHeliObstacles,helicopterPlaneBox} from './helicopter-field.js';
 import {createHelicopterModel} from './helicopter-world.js';
 import {buildHelipads} from './helipad-world.js';
 import {buildLighthouseWorld} from './lighthouse-world.js';
@@ -243,9 +243,9 @@ function updatePhysics(dt){
   if(stepRearm(roofGun,rover,dt,REPAIR_STATIONS.rover))notify('车顶机枪已补弹');
  }
  else if(kind==='plane'){
-  const before=plane.crashed,rx=Math.abs(Math.cos(rover.yaw))*1.3+Math.abs(Math.sin(rover.yaw))*2.4,rz=Math.abs(Math.sin(rover.yaw))*1.3+Math.abs(Math.cos(rover.yaw))*2.4;const vehicleObstacle={minX:rover.x-rx,maxX:rover.x+rx,minZ:rover.z-rz,maxZ:rover.z+rz,h:2.5};
+  const before=plane.crashed,rx=Math.abs(Math.cos(rover.yaw))*1.3+Math.abs(Math.sin(rover.yaw))*2.4,rz=Math.abs(Math.sin(rover.yaw))*1.3+Math.abs(Math.cos(rover.yaw))*2.4;const vehicleObstacle={minX:rover.x-rx,maxX:rover.x+rx,minZ:rover.z-rz,maxZ:rover.z+rz,h:2.5},heliBox=helicopterPlaneBox(heli);
   const manualRudder=Number(held('KeyD','KeyZ'))-Number(held('KeyA','KeyQ')),manualRoll=Number(held('ArrowRight'))-Number(held('ArrowLeft'));
-  const rudderDelta=stepPlane(plane,{heading:flightHeading,throttle:Number(held('ShiftLeft','ShiftRight'))-Number(held('ControlLeft','ControlRight')),elevator:flightElevator(Number(held('KeyW'))-Number(held('KeyS')),isFlightInverted())+Number(held('ArrowDown'))-Number(held('ArrowUp')),roll:manualRoll,rudderAssist:manualRudder,brake:held('Space')},dt,[...planeBoxes,vehicleObstacle]);
+  const rudderDelta=stepPlane(plane,{heading:flightHeading,throttle:Number(held('ShiftLeft','ShiftRight'))-Number(held('ControlLeft','ControlRight')),elevator:flightElevator(Number(held('KeyW'))-Number(held('KeyS')),isFlightInverted())+Number(held('ArrowDown'))-Number(held('ArrowUp')),roll:manualRoll,rudderAssist:manualRudder,brake:held('Space')},dt,heliBox?[...planeBoxes,vehicleObstacle,heliBox]:[...planeBoxes,vehicleObstacle]);
   if(manualRoll)flightHeading=plane.yaw;else flightHeading=wrapHeading(flightHeading+(rudderDelta||0));
   orbit=wrapHeading(flightHeading-plane.yaw);
   if(sortie.status==='active'){
@@ -261,7 +261,7 @@ function updatePhysics(dt){
   if(chase.status==='active'){const previousHull=chase.hull,previousAlive=navalSummary(chase).alive,previousGate=chase.index;stepNavalMission(chase,yacht,from,dt,{fire:fire||held('KeyF'),aimPoint:navalAimPoint(navalAim,yacht)});if(chase.status==='active'&&chase.index>previousGate&&chase.index<=CHASE_GATES.length){if(!expeditionUI?.saveCheckpoint('naval',chase))navalCheckpointUI.save(chase);audioCheckpoints++;}if(chase.hull<previousHull){audioHullHits++;notify('船体受损 · 耐久 '+Math.ceil(chase.hull)+'%');}if(navalSummary(chase).alive<previousAlive)notify('敌艇已击毁 · 剩余 '+navalSummary(chase).alive+' 艘。仍需完成航点并撤离。');if(chase.status!=='active'){finishChase();return;}}
  }
  else if(kind==='helicopter'){
-  const before=heli.status,landings=heli.landings;stepHelicopter(heli,helicopterInput(held),dt,HELI_SITE);heli.speed=helicopterSpeed(heli);
+  const before=heli.status,landings=heli.landings;stepHelicopter(heli,helicopterInput(held),dt,{...HELI_SITE,obstacles:[...HELI_SITE.obstacles,...vehicleHeliObstacles(plane,rover)]});heli.speed=helicopterSpeed(heli);
   if(heli.landings>landings)audioLandings++;
   if(heli.status==='crashed'&&before!=='crashed'){if(lighthouse.status!=='active'&&!frontierActive()){pause();$('#drive-overlay-title').textContent='直升机受损 · 试验中止';$('#drive-overlay-copy').textContent=heli.reason+'。请使用试验调度回收；空中不能离机。';notify('直升机受损，请回收后重试。');}}
  }

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {FIELD_HELI_SITE,HELI_PADS,createFieldHelicopter,parkHelicopter,canBoardHelicopter,helicopterExit,helicopterInput,helicopterStatusLabel,fieldGround,helicopterDoorPoints,helicopterBlocks,helicopterBodyPoints,HELI_BODY,HELI_DOOR} from './helicopter-field.js';
+import {FIELD_HELI_SITE,HELI_PADS,createFieldHelicopter,parkHelicopter,canBoardHelicopter,helicopterExit,helicopterInput,helicopterStatusLabel,fieldGround,helicopterDoorPoints,helicopterBlocks,helicopterBodyPoints,HELI_BODY,HELI_DOOR,vehicleHeliObstacles,helicopterPlaneBox} from './helicopter-field.js';
+import {createPlane,stepPlane,planeClear} from './flight-rules.js';
 import {stepHelicopter,helicopterContact,createHelicopter,startHelicopter,HELICOPTER_SITE} from './helicopter-rules.js';
 import {LIGHTHOUSE_ISLAND,isFootSurface,FIELD_BUILDINGS,FIELD} from './maritime-rules.js';
 import {CollisionGrid} from './vehicle-rules.js';
@@ -52,4 +53,20 @@ assert.equal(HELICOPTER_SITE.bounds,110,'isolated prototype site untouched');
  assert(Math.abs(n0.x)<1e-9&&n0.z<0,'nose ahead along -Z at yaw 0');assert(n1.x>0&&Math.abs(n1.z)<1e-9,'nose ahead along +X at yaw π/2');
  assert(HELI_DOOR.offset>HELI_BODY.fuselageRadius,'doors are outside the fuselage radius');
 }
-console.log('PASS: helicopter in the vehicle field — ground adapter (island/dock/water), pad spawn, door boarding gates, island takeoff/landing at height, water crash, tower/building/ceiling contact, park reset, key map, parked-body footprint for walkers/rover (doors free, airborne free, hulk solid); isolated site regression');
+// Vehicle ↔ helicopter: a grounded plane / rover become flight-model obstacles; a hovering craft touching them crashes; a flying plane does not count.
+{
+ const plane={x:-300,z:0,y:1.3,onGround:true,crashed:false},rover={x:100,z:100};
+ const obs=vehicleHeliObstacles(plane,rover,()=>0);assert.deepEqual(obs.map(o=>o.id),['plane','rover']);
+ assert.deepEqual(vehicleHeliObstacles({...plane,onGround:false},null,()=>0),[],'airborne plane and missing rover give nothing');
+ const site={...FIELD_HELI_SITE,obstacles:[...FIELD_HELI_SITE.obstacles,...obs]};
+ const s=createHelicopter({x:-300,y:3,z:0});s.grounded=false;s.powered=true;s.rpm=1;s.status='running';
+ assert.equal(helicopterContact(s,site),'plane','hovering into the parked plane is a contact');
+ const high={...s,y:30};assert.equal(helicopterContact(high,site),null,'well above the plane is clear');
+ const far={...s,x:-250};assert.equal(helicopterContact(far,site),null,'beside the plane is clear');
+ // Aeroplane taxiing into a grounded helicopter is blocked by the plane rules box; an airborne helicopter leaves no box.
+ const heli=createFieldHelicopter(HELI_PADS.shore);const box=helicopterPlaneBox(heli);assert(box&&box.h>=5,'grounded helicopter yields a box');
+ assert.equal(helicopterPlaneBox({...heli,grounded:false}),null);
+ const p=createPlane();Object.assign(p,{x:heli.x,z:heli.z,y:1.3,onGround:true});assert(!planeClear(p,[box]),'plane cannot occupy the helicopter footprint');
+ Object.assign(p,{x:heli.x+30});assert(planeClear(p,[box]),'30 m away is clear');
+}
+console.log('PASS: helicopter in the vehicle field — ground adapter (island/dock/water), pad spawn, door boarding gates, island takeoff/landing at height, water crash, tower/building/ceiling contact, park reset, key map, parked-body footprint for walkers/rover (doors free, airborne free, hulk solid), plane/rover as flight obstacles and helicopter as a taxi obstacle; isolated site regression');

@@ -45,6 +45,18 @@ export function helicopterBlocks(s,x,z,r=.4){
  if(!s||!s.grounded||Math.hypot(x-s.x,z-s.z)>HELI_BODY.reach+r)return false;
  return helicopterBodyPoints(s).some(p=>Math.hypot(x-p.x,z-p.z)<p.r+r);
 }
+// Dynamic obstacles for the flight model: the parked aeroplane and the rover are solid to a helicopter on approach.
+// Boxes follow helicopter-rules obstacle shape {id,minX,maxX,minZ,maxZ,minY,maxY}. Only a grounded plane counts (a flying one is its own risk).
+export function vehicleHeliObstacles(plane,rover,ground=fieldGround){
+ const out=[];
+ if(plane&&plane.onGround&&!plane.crashed){const g=ground(plane.x,plane.z);out.push({id:'plane',minX:plane.x-6,maxX:plane.x+6,minZ:plane.z-6,maxZ:plane.z+6,minY:g,maxY:g+4});}
+ if(rover){const g=ground(rover.x,rover.z);out.push({id:'rover',minX:rover.x-2.6,maxX:rover.x+2.6,minZ:rover.z-2.6,maxZ:rover.z+2.6,minY:g,maxY:g+2.4});}
+ return out;
+}
+// The grounded helicopter as a plane-rules box {minX,maxX,minZ,maxZ,h} so a taxiing aeroplane cannot roll through it.
+export function helicopterPlaneBox(s){
+ if(!s||!s.grounded)return null;return {minX:s.x-HELI_BODY.reach*.7,maxX:s.x+HELI_BODY.reach*.7,minZ:s.z-HELI_BODY.reach*.7,maxZ:s.z+HELI_BODY.reach*.7,h:s.y+HELICOPTER.height};
+}
 // Key mapping: W/S pitch, A/D yaw, arrows strafe, Shift/Ctrl collective, Space brake-hover. Mouse look only orbits the camera.
 export function helicopterInput(held){
  return {forward:Number(held('KeyW'))-Number(held('KeyS')),right:Number(held('ArrowRight'))-Number(held('ArrowLeft')),

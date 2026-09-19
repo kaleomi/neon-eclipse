@@ -41,8 +41,10 @@ export function createLightSwitch({x,z,y=0,rules=LIGHTS}={}){
   get hint(){return state.lit?'按住 E 切断区域照明 // 黑暗中远程守卫射程缩短，潜行者与猎犬更快':'按住 E 恢复区域照明 // 远程守卫射程恢复，潜行者与猎犬减速';}};
 }
 // Combat modifiers consumed by the enemy director. `zoneTest(enemy)` is any predicate; missing pieces mean "no change".
-export function environmentModifiers(enemy,{vent=null,lights=null}={}){
+// `weather` is a pre-resolved modifier object ({range,speed}) from weather-rules.js; it never touches telegraphs or DPS.
+export function environmentModifiers(enemy,{vent=null,lights=null,weather=null}={}){
  const out={speed:1,range:1,canTelegraph:true,ventDps:0};
+ if(weather){if(Number.isFinite(weather.range))out.range*=weather.range;if(Number.isFinite(weather.speed))out.speed*=weather.speed;}
  if(vent&&vent.state.active>0&&vent.inZone(enemy.group.position,enemy.group.position.y)){out.speed*=vent.rules.slow;out.canTelegraph=false;out.ventDps=vent.rules.dps;}
  if(lights&&!lights.lit){if(lights.rules.rangedTypes.includes(enemy.type))out.range*=lights.rules.darkRangeScale;if(lights.rules.darkTypes.includes(enemy.type))out.speed*=lights.rules.darkSpeedScale;}
  return out;

@@ -1,0 +1,29 @@
+/* Batch 5 presentation: weather/kill/cinematic. Overlay only; never covers the crosshair during play. */
+.presentation-fx{display:grid;gap:6px;margin-top:10px}
+.presentation-fx-row{display:flex;gap:10px;align-items:center;font:600 13px/1.3 'Noto Sans CJK SC','Microsoft YaHei',sans-serif;color:#cfeef4}
+.presentation-fx-row small{display:block;font-weight:400;font-size:11px;color:#7fa9b3}
+.presentation-fx-weather{margin:4px 0 0;font:12px/1.4 'Noto Sans CJK SC','Microsoft YaHei',sans-serif;color:#9fd8e2}
+body[data-slowmo=true] .center-reticle{filter:drop-shadow(0 0 8px #fff8) brightness(1.5)}
+body[data-slowmo=true]::after{content:'';position:fixed;inset:0;z-index:5;pointer-events:none;box-shadow:inset 0 0 120px #0b2a34cc;transition:opacity .2s}
+.kill-ghost{pointer-events:none}
+.chapter-intro{position:fixed;inset:0;z-index:7;display:grid;grid-template-rows:auto 1fr auto;padding:9vh 8vw 8vh;pointer-events:none;color:#e6fbff;background:linear-gradient(180deg,#02080cbb,#02080c22 30%,#02080c22 70%,#02080ccc);animation:intro-fade .6s ease-out}
+.chapter-intro-head{display:grid;gap:4px}
+.chapter-intro-code{font:700 14px/1 'Arial Black',sans-serif;letter-spacing:.3em;color:var(--intro-color,#8ed8ff)}
+.chapter-intro-title{margin:0;font:900 44px/1.1 'Noto Sans CJK SC','Microsoft YaHei',sans-serif;text-shadow:0 0 18px #0af6}
+.chapter-intro-english{font:600 13px/1 'Arial Black',sans-serif;letter-spacing:.24em;color:#8fb8c2}
+.chapter-intro-lines{list-style:none;margin:0;padding:0;align-self:end;display:grid;gap:10px;max-width:640px}
+.chapter-intro-lines li{font:500 20px/1.4 'Noto Sans CJK SC','Microsoft YaHei',sans-serif;opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.chapter-intro-lines li[data-show=true]{opacity:1;transform:none}
+.chapter-intro-card{margin-top:22px;justify-self:start;padding:10px 18px;border-left:4px solid var(--intro-color,#8ed8ff);background:#06222cdd;display:grid;gap:4px;animation:intro-fade .4s ease-out}
+.chapter-intro-card span{font:700 11px/1 'Arial Black',sans-serif;letter-spacing:.22em;color:#8fb8c2}
+.chapter-intro-card strong{font:800 20px/1.2 'Noto Sans CJK SC','Microsoft YaHei',sans-serif}
+.chapter-intro-skip{position:fixed;right:4vw;bottom:5vh;pointer-events:auto;padding:8px 14px;border:1px solid #8ed8ff88;border-radius:4px;background:#06222ccc;color:#cfeef4;font:600 13px/1 'Noto Sans CJK SC','Microsoft YaHei',sans-serif;cursor:pointer}
+.chapter-intro-skip kbd{margin-left:6px;padding:1px 5px;border:1px solid #8ed8ff66;border-radius:3px;font-size:11px}
+body[data-cinematic=true] > :is(.topbar,.compass,.left-panel,.right-panel,footer,.mission-tracker,.tactical-radar,.center-reticle,.hitmarker){visibility:hidden!important}
+@keyframes intro-fade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.chapter-intro,.chapter-intro-card{animation:none}.chapter-intro-lines li{transition:none}}
+.menu-briefing{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0}
+.menu-briefing section{padding:10px 12px;border:1px solid #8ed8ff33;border-left:3px solid #8ed8ff;background:#06222c99}
+.menu-briefing h4{margin:0 0 4px;font:700 11px/1 'Arial Black',sans-serif;letter-spacing:.2em;color:#8fb8c2}
+.menu-briefing p{margin:0;font:500 13px/1.4 'Noto Sans CJK SC','Microsoft YaHei',sans-serif;color:#dff6fa}
+.menu-briefing small{display:block;margin-top:4px;font-size:11px;color:#9fd8e2}

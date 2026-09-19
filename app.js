@@ -97,6 +97,13 @@ import { createRadar } from './radar.js';
 import { createEnemyProjectiles } from './projectiles.js';
 import {createAttackBudget} from './attack-budget.js';
 import {createInteractionWorld} from './interaction-world.js';
+import {resolveWeather,weatherModifiers} from './weather-rules.js';
+import {createWeatherWorld} from './weather-world.js';
+import {KILL_FX,createSlowmo,killKind,loadFxSettings,saveFxSettings} from './kill-fx-rules.js';
+import {createKillFxWorld} from './kill-fx-world.js';
+import {shouldPlayIntro} from './cinematic-rules.js';
+import {createChapterIntro} from './cinematic-world.js';
+import {bindPresentationFx} from './presentation-fx-ui.js';
 import {INTERACTION_LAYOUTS} from './interaction-layouts.js';
 import {VENT} from './interaction-rules.js';
 import { WEAPONS, createHandling, damageAtDistance, shotSpread, advanceReload, meleePose } from './combat.js';
@@ -155,7 +162,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75)); renderer.setSize(inner
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping;
 $('#game').append(renderer.domElement);
 const qualityButton=document.createElement('button');qualityButton.id='quality';qualityButton.type='button';qualityButton.textContent='画质：精细 / 按 Q 切换';qualityButton.setAttribute('aria-pressed','false');$('.mission-card').append(qualityButton);
-function toggleQuality(){presentation.toggleQuality();}
+function toggleQuality(){presentation.toggleQuality();weather.reapply();weather.setQuality(document.body.dataset.renderQuality!=='0');}
 qualityButton.addEventListener('click',toggleQuality);
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x071217); scene.fog = new THREE.FogExp2(0x071217, .014);
 const camera = new THREE.PerspectiveCamera(74, innerWidth / innerHeight, .08, 160);
@@ -209,6 +216,16 @@ const art=IS_POLAR?createPolarWorld(scene,renderer,obstacles):IS_DATACENTER?crea
 const fieldLayout=FIELD_LAYOUTS[MAP_ID];
 const railPanels=fieldLayout?createRailPanels(scene,obstacles,fieldLayout.panels):[];
 const presentation=createPresentation({renderer,scene,sun,art,camera,qualityButton,record:fieldRecord});
+const fxSettings=loadFxSettings(localStorage);const saveFx=()=>saveFxSettings(localStorage,fxSettings);
+// Weather is applied after createPresentation (which rewrites sun intensity); quality toggles call weather.reapply().
+const weatherState=resolveWeather(MAP_ID,location.search),weather=createWeatherWorld(scene,{lights:sceneLights,weather:weatherState,camera});
+const weatherEnv=weatherModifiers(weatherState);document.body.dataset.weather=weather.params.id;document.body.dataset.weatherIntensity=weather.params.intensity.toFixed(2);
+weather.setQuality(document.body.dataset.renderQuality!=='0');
+// Automation (navigator.webdriver) keeps deterministic timing/scene graphs unless a test opts in with ?fx=1.
+const fxAllowed=!navigator.webdriver||new URLSearchParams(location.search).get('fx')==='1';
+const slowmo=createSlowmo({enabled:()=>fxAllowed&&fxSettings.slowmo&&!p4?.active}),killFx=createKillFxWorld(scene,{enabled:()=>fxAllowed&&fxSettings.dissolve});
+let chapterIntro=null;
+function killPresentation(enemy){const kind=killKind(enemy);killFx.spawn(enemy.group,kind);if(slowmo.trigger(kind))document.body.dataset.slowmo='true';}
 const overseer=IS_POLAR?createGlacierWorld(scene,obstacles,art):IS_DATACENTER?createAbyssWorld(scene,obstacles,art):IS_ORBITAL?createTetherWorld(scene,obstacles):IS_ROOF?createOverseerWorld(scene,obstacles):IS_STATION?createSwitchyardWorld(scene,obstacles,{onEvent:event=>{
  const sounds={'started':'boss.phase','switch.armed':'objective.node','train.warning':'rail.charge','train.moving':'enemy.fire','window.opened':'boss.window.open','window.closed':'boss.window.close','blast.warning':'rail.charge','blast.impact':'bolt.wall','defeated':'objective.complete'};
  if(sounds[event])gameAudio.play(sounds[event]);
@@ -286,14 +303,14 @@ const mortarMarkers=createMortarMarkers(scene);
 function environmentHurt(damage,point,sound='player.hazard'){if(damage<=0||execution.invulnerable)return;damage=Math.min(health,p4Incoming(damage));ordnance.cancelCharge();fieldRecord.hurt(damage);achievementUI.attempt.hurt(damage);health=Math.max(0,health-damage);mission.interrupt();combatUI.damaged(point);damageTime=.3;gameAudio.play(sound);gameAudio.hurt(health);hud();}
 function rusherBlast({enemy,x,y,z,radius,damage}){const point=new THREE.Vector3(x,y+.9,z);art.burst(point,0xff3b3b,36);gameAudio.play('vehicle.impact',{position:{x,z}});const cover=obstacles.slice();
  if(blastVisible(point,camera.position,cover))environmentHurt(rusherBlastDamage(camera.position.distanceTo(point),{radius,damage}),point);
- for(const e of enemies){if(e===enemy||e.hp<=0||e.boss)continue;const anchor=voltAnchor(e),dealt=rusherBlastDamage(anchor.distanceTo(point),{radius,damage:RUSHER.selfKillDamage});if(dealt>0&&blastVisible(point,anchor,cover.filter(o=>o.owner!==e.group))){e.hp-=dealt;if(e.hp<=0){enemyProjectiles.cancelOwner(e.group);art.burst(anchor,0xffad68,24);weaponDrops.drop(e);disposeGroup(e.group);enemies.splice(enemies.indexOf(e),1);kills++;}}}
+ for(const e of enemies){if(e===enemy||e.hp<=0||e.boss)continue;const anchor=voltAnchor(e),dealt=rusherBlastDamage(anchor.distanceTo(point),{radius,damage:RUSHER.selfKillDamage});if(dealt>0&&blastVisible(point,anchor,cover.filter(o=>o.owner!==e.group))){e.hp-=dealt;if(e.hp<=0){enemyProjectiles.cancelOwner(e.group);art.burst(anchor,0xffad68,24);killPresentation(e);weaponDrops.drop(e);disposeGroup(e.group);enemies.splice(enemies.indexOf(e),1);kills++;}}}
  notify('自爆奔袭者起爆 // 波及 '+radius+'m');}
 function mortarEvent(m){if(m.type==='telegraph'){mortarMarkers.telegraph({x:m.x,z:m.z,radius:m.radius,seconds:m.seconds,owner:m.owner,y:playerMotion.state.y});gameAudio.telegraph('orange',{x:m.x,z:m.z},false);return;}
  const point=new THREE.Vector3(m.x,playerMotion.state.y,m.z);art.burst(point.clone().add(new THREE.Vector3(0,.6,0)),0xff6a3d,40);gameAudio.play('vehicle.impact',{position:{x:m.x,z:m.z}});
  const feet=new THREE.Vector3(camera.position.x,playerMotion.state.y,camera.position.z);if(Math.abs(feet.y-point.y)<2.2)environmentHurt(mortarStrike(point,feet,{radius:m.radius,damage:m.damage}),point);}
 attackBudget.register('projectiles',()=>enemyProjectiles.attackers);attackBudget.register('boss',()=>overseer?.boss?.threatening?1:0);
 const interactions=createInteractionWorld(scene,obstacles,INTERACTION_LAYOUTS[MAP_ID],{lights:sceneLights,onTopologyChange:()=>navigation.invalidate(),onEvent:e=>{if(e.type==='vent'){notify('冷却剂喷射 // 区域内敌人减速且无法预警，'+e.seconds+' 秒');gameAudio.play('vehicle.impact',{position:{x:e.x,z:e.z}});}else{notify(e.type==='dark'?'区域照明切断 // 远程守卫射程缩短，潜行者与猎犬加速':'区域照明恢复');gameAudio.play('hit.armor',{position:{x:e.x,z:e.z}});}}});
-const enemyDirector=createEnemyDirector({attackBudget,environment:interactions?{vent:interactions.vent,lights:interactions.light}:null,onRusherBlast:rusherBlast,onMortar:mortarEvent,scaleCooldown:p4Cooldown,onEliteWindow:()=>fieldRecord.window(),thermalVision:IS_POLAR?()=>art.thermal:null,enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
+const enemyDirector=createEnemyDirector({attackBudget,environment:{vent:interactions?.vent||null,lights:interactions?.light||null,weather:weatherEnv},onRusherBlast:rusherBlast,onMortar:mortarEvent,scaleCooldown:p4Cooldown,onEliteWindow:()=>fieldRecord.window(),thermalVision:IS_POLAR?()=>art.thermal:null,enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
  if(event.changed){notify('Warden 阶段切换 // '+BOSS_PHASES[enemy.bossState.phase].name);gameAudio.play('boss.phase');}
  else if(event.opened){notify('Warden 过载 // 青色胸口核心暴露，集中攻击！');gameAudio.play('boss.window.open');}
  else if(event.closed)gameAudio.play('boss.window.close');
@@ -379,6 +396,7 @@ function reset(stageIndex=0,snapshot=null){
  p4?.begin?.({map:MAP_ID,difficulty:currentDifficulty().id,stage:stageIndex,snapshot:!!snapshot,replay:runMode==='replay',inheritedKills:snapshot?.kills||0});telemetryShots=[0,0,0,0,0,0,0,0];
  bossRecordUI?.clear();lookInput.reset();transport?.reset(snapshot?.transportTime||0,snapshot?.transportTrip===true);meleePending=false;meleeStrike.cancel();parry.reset();sprintBlend=0;
  overseer?.clear();art.clear();enemyProjectiles.clear();handling.reset();combatUI.clear();enemyUI.clear();mission.reset(stageIndex);missionWorld.reset();fireBuffer=0;enemyFireGate=0;moving=false;sprinting=false;aiming=false;firing=false;keys.clear();
+ killFx.clear();slowmo.reset();chapterIntro?.cancel();delete document.body.dataset.slowmo;
  enemies.forEach(e=>disposeGroup(e.group));enemies.length=0; effects.forEach(e=>{scene.remove(e.mesh);e.mesh.geometry.dispose();e.mesh.material.dispose();});effects.length=0;
  jumpRequested=false;health=100;kills=0;wave=1;selected=0;cooldown=0;reload=0;recoil=0;elapsed=0;meleeRemaining=0;
  rounds=weapons.map(w=>w.cap);reserves=weapons.map(w=>w.reserve);
@@ -402,7 +420,7 @@ function end(win){if(p4?.gameEnd(win))return;ordnance.clear();mortarMarkers.clea
  if(win&&runMode==='journey'){pendingJourneyResult={time:mission.state.time,kills};if(journey.finish(MAP_ID,pendingJourneyResult))pendingJourneyResult=null;else $('#brief').textContent='章节已完成，但战役存档写入失败。请重试保存后再继续。';}
  if(win&&runMode==='journey'&&journey.data?.status==='complete'){$('#session-title').innerHTML='港口撤离<span>战役完成</span>';$('#brief').textContent='反应堆、地下运输站、天穹通讯枢纽、多层中枢塔、疾驰货运列车、风暴港口：六章行动全部完成。共击破 '+journey.data.results.reduce((n,r)=>n+r.kills,0)+' 个目标。可继续单章训练，或重新开始战役。';}
  $('#deploy').textContent='开始新行动 ↗';firing=false;fireBuffer=0;aiming=false;keys.clear();campaignUI.refresh(state,runMode);refreshJourney();}
-function pause(){execution.cancel();ordnance.cancelCharge();emp.cancelAim();lookInput.reset();if(state!=='playing')return;parry.cancel();cancelRail();bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';overseer?.update(0,camera.position,playerMotion.state.y,false);document.body.dataset.playState=state;gameAudio.play('ui.pause');gameAudio.pause();firing=false;fireBuffer=0;aiming=false;keys.clear();overlay.hidden=false;
+function pause(){if(chapterIntro?.active){chapterIntro.cancel();camera.rotation.set(pitch,yaw,0);gun.visible=true;}execution.cancel();ordnance.cancelCharge();emp.cancelAim();lookInput.reset();if(state!=='playing')return;parry.cancel();cancelRail();bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';overseer?.update(0,camera.position,playerMotion.state.y,false);document.body.dataset.playState=state;gameAudio.play('ui.pause');gameAudio.pause();firing=false;fireBuffer=0;aiming=false;keys.clear();overlay.hidden=false;
  $('#session-title').innerHTML='行动<span>已暂停</span>';$('#brief').textContent='战场已冻结。当前目标：'+mission.current.title+'。';$('#deploy').textContent='继续当前战斗 ↗';campaignUI.refresh(state,runMode);refreshJourney();}
 function bossLoadout(){return {health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),...tempestCheckpoint(rounds,reserves,selected),...haloCheckpoint(rounds,reserves,selected),...railspikeCheckpoint(rounds,reserves,selected),...voltCheckpoint(rounds,reserves,selected)};}
 function checkpoint(){
@@ -424,7 +442,7 @@ function startJourney(){
  if(!journey.start()){gameMenu?.error('无法保存新战役。请允许浏览器存储后重试，或在选择关卡中体验单章模式。');return false;}
  pendingJourneyResult=null;
  if(MAP_ID!=='reactor')return openMenuChapter('reactor','journey');
- runMode='journey';reset();
+ runMode='journey';reset();requestIntro(0,null);
  if(!journey.save(MAP_ID,checkpoint())){state='ready';refreshJourney();gameMenu?.error('新战役入口已创建，但检查点写入失败。请重试继续游戏。');return false;}
  return enterPlay();
 }
@@ -443,27 +461,31 @@ function continueJourney(){
  }
  const chapter=CHAPTERS[d.chapter];
  if(MAP_ID!==chapter.map)return openMenuChapter(chapter.map,'journey','continue');
- runMode='journey';reset(d.checkpoint?.stageIndex||0,d.checkpoint);
+ runMode='journey';reset(d.checkpoint?.stageIndex||0,d.checkpoint);requestIntro(d.checkpoint?.stageIndex||0,d.checkpoint);
  if(!d.checkpoint&&!journey.save(MAP_ID,checkpoint())){state='ready';refreshJourney();gameMenu?.error('无法保存本章入口检查点，请允许浏览器存储后重试。');return false;}
  return enterPlay();
 }
 function startSingleChapter(){
  if(navigating)return false;
  if(pendingJourneyResult){gameMenu?.error('本章结果尚未保存，请先返回结算重试保存。');return false;}
- runMode='campaign';reset();saveCheckpoint();return enterPlay();
+ runMode='campaign';reset();requestIntro(0,null);saveCheckpoint();return enterPlay();
 }
 async function enterPlay(){
  loadoutWorld.hide();fieldKit.hide();
  try{await gameAudio.unlock();}catch{}
  gameAudio.resume();gameAudio.play('ui.resume');
  lookInput.reset();state='playing';document.body.dataset.playState=state;overlay.hidden=true;
+ if(introRequested){introRequested=false;beginChapterIntro();}
  try{await renderer.domElement.requestPointerLock();}catch{notify('鼠标锁定不可用：按住左键拖动瞄准，方向键也可转向');}
 }
+let introRequested=false;
+function requestIntro(stageIndex,checkpoint){introRequested=!p4Requested()&&shouldPlayIntro({stageIndex,checkpoint,setting:fxSettings.intro,webdriver:Boolean(navigator.webdriver),search:location.search});return introRequested;}
+function beginChapterIntro(){if(!chapterIntro)chapterIntro=createChapterIntro({camera,mapId:MAP_ID,onFinish:()=>{camera.rotation.set(pitch,yaw,0);lookInput.reset();keys.clear();firing=false;gun.visible=true;}});chapterIntro.begin({objective:mission.current.title});gun.visible=false;}
 function continueCampaign(){
  if(navigating)return false;
  if(pendingJourneyResult){gameMenu?.error('本章结果尚未保存，请先返回结算重试保存。');return false;}
  const saved=campaign.checkpoint;runMode='campaign';
- if(saved){reset(saved.stageIndex,saved);notify('已读取阶段入口检查点');}else{reset();saveCheckpoint();}
+ if(saved){reset(saved.stageIndex,saved);notify('已读取阶段入口检查点');}else{reset();requestIntro(0,null);saveCheckpoint();}
  return enterPlay();
 }
 function retryStage(){
@@ -480,7 +502,7 @@ $('#deploy').addEventListener('click',()=>gameMenu?.activatePrimary());
 document.addEventListener('pointerlockchange',()=>{lookInput.reset();if(document.pointerLockElement!==renderer.domElement)pause();});
 window.addEventListener('blur',()=>{pause();if(document.pointerLockElement)document.exitPointerLock();});
 document.addEventListener('mousemove',e=>{
- if(state!=='playing')return;
+ if(state!=='playing'||chapterIntro?.active)return;
  const delta=lookInput.sample(e,document.pointerLockElement===renderer.domElement);if(!delta)return;
  const sensitivity=.0022*combatUI.sensitivity*(1-handling.state.ads*.35);
  yaw-=delta.x*sensitivity;pitch=THREE.MathUtils.clamp(pitch-delta.y*sensitivity,-1.35,1.35);
@@ -500,7 +522,9 @@ document.addEventListener('keydown',e=>{
  if(state==='playing'&&['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
  if(e.code==='KeyQ'&&!e.repeat){toggleQuality();return;}
  if(e.code==='Escape'){pause();document.exitPointerLock?.();}
- if(state!=='playing')return;keys.add(e.code);
+ if(state!=='playing')return;
+ if(chapterIntro?.active){if(e.code==='Space'||e.code==='Enter'){e.preventDefault();chapterIntro.skip();}return;}
+ keys.add(e.code);
  if(e.code==='KeyF'&&!e.repeat){if(!ordnance.pick())weaponDrops.pick();return;}
  if(e.code==='KeyG'){e.preventDefault();if(!e.repeat&&!parry.busy&&empReady()&&!emp.begin())notify(emp.charges?'投掷物引信正在运行':'当前投掷物已耗尽 · 本章不补充');return;}
  if(p4?.params.headshotsOnly&&e.code==='KeyV'){notify('弱点协议：处决关闭，请攻击头部、弱点或机关');return;}
@@ -515,7 +539,7 @@ document.addEventListener('keydown',e=>{
  if(e.code==='KeyR')startReload();
 });
 document.addEventListener('keyup',e=>{keys.delete(e.code);if(e.code==='KeyH')ordnance.cancelCharge();if(e.code==='KeyG'){if(empReady()){camera.rotation.set(pitch,yaw,0);emp.release();}else emp.cancelAim();}});
-document.addEventListener('mousedown',e=>{if(state!=='playing')return;if(e.button===0){emp.cancelAim();firing=true;fireBuffer=.18;}if(e.button===2){
+document.addEventListener('mousedown',e=>{if(state!=='playing')return;if(chapterIntro?.active){if(e.button===0)chapterIntro.skip();return;}if(e.button===0){emp.cancelAim();firing=true;fireBuffer=.18;}if(e.button===2){
  if(selected===3&&loadout.state.melee===11){aiming=false;return;}
  if(selected===3){aiming=false;emp.cancelAim();if(parry.press({ready:!ordnance.busy&&!execution.active&&!fieldKit.busy&&cooldown<=0&&handling.state.switchRemaining<=0&&meleeRemaining<=0&&reload<=0})){fireBuffer=0;firing=false;gameAudio.play('weapon.switch');}}
  else aiming=true;
@@ -548,7 +572,7 @@ function executionTarget(){
  const e=contact&&enemies.find(e=>e.group===contact.object.parent);return executable(e)?e:null;
 }
 function finishExecution(e){
- if(!executable(e)||!enemies.includes(e))return;const restored=Math.min(EXECUTION.heal,100-health);health+=restored;notify('处决成功 // 生命 +'+restored);const damage=e.hp;e.hp=0;enemyProjectiles.cancelOwner(e.group);art.burst(e.group.position.clone().add(new THREE.Vector3(0,1,0)),0x6cf4e8,12);weaponDrops.drop(e);disposeGroup(e.group);enemies.splice(enemies.indexOf(e),1);kills++;achievementUI.attempt.hit(3,1);combatUI.registerHit(damage,false,1,3);hitTime=.25;hit.dataset.kind='kill';showStreak(gameAudio.hit({killed:true,headshot:false,armored:false,core:false,elite:false,boss:false}));hud();
+ if(!executable(e)||!enemies.includes(e))return;const restored=Math.min(EXECUTION.heal,100-health);health+=restored;notify('处决成功 // 生命 +'+restored);const damage=e.hp;e.hp=0;enemyProjectiles.cancelOwner(e.group);art.burst(e.group.position.clone().add(new THREE.Vector3(0,1,0)),0x6cf4e8,12);killPresentation(e);weaponDrops.drop(e);disposeGroup(e.group);enemies.splice(enemies.indexOf(e),1);kills++;achievementUI.attempt.hit(3,1);combatUI.registerHit(damage,false,1,3);hitTime=.25;hit.dataset.kind='kill';showStreak(gameAudio.hit({killed:true,headshot:false,armored:false,core:false,elite:false,boss:false}));hud();
 }
 function applyBarrelBlast(point,source,cover){
  // Resolve all visibility before this pulse changes any cover or actor collection.
@@ -557,7 +581,7 @@ function applyBarrelBlast(point,source,cover){
  const panels=railPanels.map(mesh=>({mesh,damage:blastVisible(point,mesh.position,cover,mesh)?blastDamage(point,mesh.position):0}));
  for(const {e,damage} of affected){if(damage<=0)continue;const dealt=Math.min(e.hp,resolveEnemyDamage(e,source.player?p4Outgoing(damage,'body'):damage,'body',point).damage);if(dealt<=0)continue;e.hp-=dealt;
   if(source.player){achievementUI.attempt.environmentHit(dealt);p4?.nonGhost?.();p4?.hit(dealt,false,e.hp<=0?1:0,source.p4Direct?8:-1);}
-  if(e.hp<=0){enemyProjectiles.cancelOwner(e.group);weaponDrops.drop(e);disposeGroup(e.group);enemies.splice(enemies.indexOf(e),1);kills++;}
+  if(e.hp<=0){enemyProjectiles.cancelOwner(e.group);killPresentation(e);weaponDrops.drop(e);disposeGroup(e.group);enemies.splice(enemies.indexOf(e),1);kills++;}
  }
  if(self>0&&!execution.invulnerable){const damage=Math.min(health,p4Incoming(self));ordnance.cancelCharge();fieldRecord.hurt(damage);achievementUI.attempt.hurt(damage);health-=damage;mission.interrupt();combatUI.damaged(point);damageTime=.3;gameAudio.hurt(health);}
  for(const {mesh,damage} of panels)destructibles?.hit(mesh,damage);
@@ -572,7 +596,7 @@ function applyParryHit(impact,bolt){
  if(target.hp<=0){
   enemyProjectiles.cancelOwner(target.group);
   art.burst(target.group.position.clone().add(new THREE.Vector3(0,1.2,0)),0xffad68,32);
-  weaponDrops.drop(target);disposeGroup(target.group);enemies.splice(enemies.indexOf(target),1);kills++;killed=1;
+  killPresentation(target);weaponDrops.drop(target);disposeGroup(target.group);enemies.splice(enemies.indexOf(target),1);kills++;killed=1;
  }
  achievementUI.attempt.hit(3,killed);
  hitTime=killed?.25:.16;hit.dataset.kind=killed?'kill':resolved.armored?'armor':'body';
@@ -587,7 +611,7 @@ function ordnanceContact(index,contact,origin){
   if(index===10&&!target.boss){const pierced=damage*haloDamageMultiplier(target);if(resolved.damage<pierced){resolved.damage=pierced;resolved.armored=false;}}
   dealt=Math.min(target.hp,resolved.damage);target.hp-=dealt;core=resolved.weak;armored=resolved.armored;
   if(index===11&&dealt>0){if(target.boss){if(interruptBreakerBoss(target,enemyProjectiles))notify('BREAKER 打断Boss蓄力 · 本阶段配额已用');}else{const direction=target.group.position.clone().sub(origin);direction.y=0;if(direction.lengthSq()>1e-8){direction.normalize();if(target.type!=='sentry'&&target.group.position.y<.2)for(let n=0;n<20;n++)move(target.group.position,direction.x*.075,direction.z*.075,target.radius||.6);}target.attack=Math.max(target.attack||0,.9);}}
-  if(target.hp<=0){enemyProjectiles.cancelOwner(target.group);weaponDrops.drop(target);disposeGroup(target.group);enemies.splice(enemies.indexOf(target),1);kills++;killed++;}
+  if(target.hp<=0){enemyProjectiles.cancelOwner(target.group);killPresentation(target);weaponDrops.drop(target);disposeGroup(target.group);enemies.splice(enemies.indexOf(target),1);kills++;killed++;}
  }else{destructibles?.hit(contact.object,damage);energyNodes?.hit(contact.object,damage);barrels?.hit(contact.object,damage,{player:true,weapon:index});}
  if(dealt>0){achievementUI.attempt.hit(index,killed);hitTime=killed?.25:.16;hit.dataset.kind=killed?'kill':core?'core':armored?'armor':'body';combatUI.registerHit(dealt,false,killed,index);enemyUI.hit(armored,core);gameAudio.hit({killed:killed>0,headshot:false,armored,core,elite:!!target?.elite,boss:!!target?.boss});}art.burst(contact.point,profile.color,12);hud();
 }
@@ -675,7 +699,7 @@ function shoot(meleeImpact=false,meleeContact=null,haloRound=false){
  for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0){
   if(enemies[i].type==='swarmDrone'||enemies[i].type==='sentry'||enemies[i].type==='engineer')enemyProjectiles.cancelOwner(enemies[i].group);
   if(enemies[i].boss)killedBoss=true;else if(enemies[i].type==='harborElite'||enemies[i].elite)killedElite=true;
-  art.burst(enemies[i].group.position.clone().add(new THREE.Vector3(0,1.2,0)),0xffad68,32);weaponDrops.drop(enemies[i]);disposeGroup(enemies[i].group);enemies.splice(i,1);kills++;killed++;
+  art.burst(enemies[i].group.position.clone().add(new THREE.Vector3(0,1.2,0)),0xffad68,32);killPresentation(enemies[i]);weaponDrops.drop(enemies[i]);disposeGroup(enemies[i].group);enemies.splice(i,1);kills++;killed++;
  }
  achievementUI.attempt.hit(selected,killed);
  if(totalDamage>0){
@@ -685,7 +709,10 @@ function shoot(meleeImpact=false,meleeContact=null,haloRound=false){
  }
  handling.shot(w,Math.random(),art.recoilScale?.(playerMotion.state.y)??1);flash.visible=selected!==3;hud();return true;
 }
+let frameTimeScale=1;
 function update(dt){
+ if(chapterIntro?.active)return;
+ dt*=frameTimeScale;
  if(p4?.active&&p4.fixed?.(dt,update))return;
  executionStagger.update(enemies,dt);
  destructibles?.step(dt);barrels?.step(dt,camera);
@@ -751,7 +778,7 @@ function update(dt){
  if(!p4?.range)enemyFireGate=enemyDirector.update(dt,elapsed,enemyFireGate);
  if(interactions){const hint=interactions.prompt(camera.position,playerMotion.state.y);if(hint&&toastTime<=0.05&&!mission.state.defending){notify(hint);toastTime=.6;}interactions.update(dt,{player:camera.position,feetY:playerMotion.state.y,held:keys.has('KeyE'),busy:moving||firing||reload>0||handling.state.switchRemaining>0||meleeRemaining>0||emp.aiming||!playerMotion.state.grounded});
   if(interactions.vent.state.active>0){if(interactions.vent.inZone(camera.position,playerMotion.state.y))environmentHurt(VENT.dps*dt,new THREE.Vector3(interactions.vent.zone.x,camera.position.y,interactions.vent.zone.z));for(const e of enemies){if(e.hp<=0||e.boss||!interactions.vent.inZone(e.group.position,e.group.position.y))continue;e.hp-=VENT.dps*dt;if(e.hp<=0){e.hp=0;achievementUI.attempt.environmentHit(1);}}
-   for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&!enemies[i].boss&&interactions.vent.inZone(enemies[i].group.position,enemies[i].group.position.y)){enemyProjectiles.cancelOwner(enemies[i].group);weaponDrops.drop(enemies[i]);disposeGroup(enemies[i].group);enemies.splice(i,1);kills++;}}}
+   for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&!enemies[i].boss&&interactions.vent.inZone(enemies[i].group.position,enemies[i].group.position.y)){enemyProjectiles.cancelOwner(enemies[i].group);killPresentation(enemies[i]);weaponDrops.drop(enemies[i]);disposeGroup(enemies[i].group);enemies.splice(i,1);kills++;}}}
  for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&enemies[i].type==='rusher'){enemyProjectiles.cancelOwner(enemies[i].group);disposeGroup(enemies[i].group);enemies.splice(i,1);}
  enemyProjectiles.update(dt,camera.position,previousPlayer);
  overseer?.prepareMission?.(mission.state,enemies.length===0);
@@ -808,6 +835,7 @@ function interactionStatus(){
  return {allowed:!busy&&facing&&visible&&!reason,busy,visible:facing&&visible,reason};
 }
 rounds=weapons.map(w=>w.cap);reserves=weapons.map(w=>w.reserve);camera.position.set(ARENA.start.x,1.7,ARENA.start.z);hud();
+if(!p4Requested())bindPresentationFx(document.querySelector('.presentation-controls'),fxSettings,saveFx,{weather:weather.params});
 gameMenu=p4Requested()?{update(){},refresh(){},error(){}}:createGameMenu({overlay,journey,campaign,
  getSession:()=>({state,mode:runMode,map:MAP_ID,stage:mission.state.index,stageTitle:mission.current.title,time:mission.state.time,kills,
   checkpoint:runMode==='replay'?replayEntry:runMode==='journey'?journey.data?.checkpoint:campaign.checkpoint,
@@ -846,7 +874,9 @@ let last=performance.now(),fpsTime=0,frames=0;
 function frame(now){
  const p4RealDt=Math.max(0,(now-last)/1000);p4?.prepareFrame?.(p4RealDt);
  const dt=Math.max(0,Math.min((now-last)/1000,.05));last=now;
- gun.visible=state==='playing';
+ frameTimeScale=state==='playing'?slowmo.step(dt):1;if(!slowmo.active&&document.body.dataset.slowmo)delete document.body.dataset.slowmo;
+ const introActive=Boolean(chapterIntro?.active);if(introActive)chapterIntro.step(dt);
+ gun.visible=state==='playing'&&!introActive;
  if(state==='playing')update(dt);
  else starWorld.update(0,elapsed,camera.position,false);
  p4?.frame(p4RealDt);
@@ -858,7 +888,7 @@ function frame(now){
  parryUI.update(state==='playing'&&loadout.state.melee===3,selected,parry.state);
  destructibles?.updateMarkers(camera,state==='playing');
  energyNodes?.step(state==='playing'?dt:0,camera,state==='playing');
- executionHintTime-=dt;if(executionHintTime<=0){executionHintTime=.12;executionHint=state==='playing'&&loadout.state.melee===3&&selected===3&&!execution.active&&!fieldKit.busy&&!ordnance.busy&&!parry.busy&&!meleePending&&cooldown<=0&&reload<=0&&handling.state.switchRemaining<=0&&executionTarget()?'V 处决就绪':'';}fieldKit.render(state==='playing',execution.active?(execution.invulnerable?'处决 · 保护窗口':'处决 · 保护已结束'):executionHint,loadout.allows(8));ordnance.render(state==='playing');ammoHud();
+ executionHintTime-=dt;if(executionHintTime<=0){executionHintTime=.12;executionHint=state==='playing'&&loadout.state.melee===3&&selected===3&&!execution.active&&!fieldKit.busy&&!ordnance.busy&&!parry.busy&&!meleePending&&cooldown<=0&&reload<=0&&handling.state.switchRemaining<=0&&executionTarget()?'V 处决就绪':'';}fieldKit.render(state==='playing'&&!introActive,execution.active?(execution.invulnerable?'处决 · 保护窗口':'处决 · 保护已结束'):executionHint,loadout.allows(8));ordnance.render(state==='playing'&&!introActive);if(introActive)gun.visible=false;ammoHud();
  enemyUI.update(state==='playing'?dt:0,state==='playing',camera,enemies,obstacles);
  harborCombatUI?.update(state==='playing',mission,enemies,camera.position);
  campaignUI.update(state==='playing'?dt:0,state==='playing',runMode);
@@ -869,6 +899,7 @@ function frame(now){
  missionWorld.update(elapsed,mission.state.index,mission.state.defending,mission.state.node,camera);
  if(reactor)reactor.rotation.y=Math.sin(now*.0002)*.04;
  art.update(state==='playing'||state==='ready'?dt:0,state==='ready'?now*.001:elapsed);
+ weather.update(state==='playing'&&!introActive?dt*frameTimeScale:0);killFx.update(state==='playing'?dt*frameTimeScale:0);
  p4?.lateFrame?.();
  const heading=((Math.round(-yaw*180/Math.PI)%360)+360)%360;compass.firstChild.textContent=String(heading).padStart(3,'0')+'° / '+['N','NE','E','SE','S','SW','W','NW'][Math.round(heading/45)%8];
  for(let i=effects.length-1;i>=0;i--){effects[i].life-=dt;if(effects[i].life<=0){const m=effects[i].mesh;scene.remove(m);m.geometry.dispose();m.material.dispose();effects.splice(i,1);}}

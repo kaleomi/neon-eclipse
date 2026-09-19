@@ -7,6 +7,7 @@ import {createFlightRecordStore} from './flight-records-store.js';
 import {vehicleEntryDecision} from './vehicle-entry.js';
 import {HOME_MENU_ITEMS, MENU_CHAPTERS, chapterInfo, chapterURL, readSingleSlots, continueTarget, primaryAction, formatPlayTime} from './menu-state.js';
 import {menuIcon, eclipseMark, chapterArtwork} from './menu-art.js';
+import {briefing} from './cinematic-rules.js';
 
 export function createGameMenu({overlay, journey, campaign, getSession, actions}) {
   const card = overlay.querySelector('.mission-card');
@@ -72,7 +73,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
         <div class="menu-page-bottom"><span>设置在当前界面直接生效</span><button type="button" data-back class="menu-secondary">完成设置 ${menuIcon('check')}</button></div>
       </section>
       <section class="menu-view menu-context" data-view="context" aria-labelledby="menu-context-title" hidden>
-        <div class="menu-context-copy"><p id="menu-context-kicker" class="menu-eyebrow"></p><h2 id="menu-context-title" tabindex="-1"></h2><p id="menu-context-description"></p><div id="menu-result-stats" class="menu-result-stats"></div><ol id="menu-chapter-track" class="menu-chapter-track" aria-label="战役章节进度"></ol></div>
+        <div class="menu-context-copy"><p id="menu-context-kicker" class="menu-eyebrow"></p><h2 id="menu-context-title" tabindex="-1"></h2><p id="menu-context-description"></p><div id="menu-result-stats" class="menu-result-stats"></div><div id="menu-briefing" class="menu-briefing" hidden></div><ol id="menu-chapter-track" class="menu-chapter-track" aria-label="战役章节进度"></ol></div>
         <div class="menu-context-preview"><div id="menu-context-art"></div><div class="menu-preview-label"><span id="menu-preview-tag"></span><strong id="menu-preview-name"></strong><small id="menu-preview-features"></small></div></div>
         <div class="menu-context-action"><div id="menu-primary-slot"></div><p id="menu-primary-note"></p><div class="menu-context-links">
           <button type="button" id="menu-context-restart" class="menu-text-button" hidden>从头重玩本关</button>
@@ -260,6 +261,11 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     if (complete) { time = s.journey.results.reduce((sum, item) => sum + item.time, 0); kills = s.journey.results.reduce((sum, item) => sum + item.kills, 0); }
     const stats = $('#menu-result-stats'); stats.hidden = !finished && !paused && !lost;
     stats.innerHTML = `<div><span>${complete ? '总行动用时' : '行动用时'}</span><strong>${formatPlayTime(time)}</strong></div><div><span>击破目标</span><strong>${Math.max(0, kills || 0)}<small>个</small></strong></div><div><span>${paused || lost ? '当前阶段' : '行动状态'}</span><strong class="menu-status-value">${paused || lost ? String(s.stage + 1).padStart(2, '0') + ' / 05' : complete ? '06 / 06' : training ? '训练完成' : '已完成'}</strong></div>`;
+    const brief = $('#menu-briefing'), briefData = advancing ? briefing({mode: s.mode, journey: s.journey, current, next: target, result: result || {time: s.time, kills: s.kills}}) : null;
+    brief.hidden = !briefData;
+    if (briefData) {
+      brief.innerHTML = `${briefData.report ? `<section data-briefing="report"><h4>${briefData.report.title}</h4><p>${briefData.report.text}</p></section>` : ''}<section data-briefing="threat"><h4>${briefData.threat.title}</h4><p>${briefData.threat.text}</p>${briefData.threat.boss ? `<small>BOSS · ${briefData.threat.boss}${briefData.threat.weather ? ' · 天气 ' + briefData.threat.weather : ''}</small>` : ''}</section>${briefData.totals ? `<section data-briefing="totals"><h4>战役累计</h4><p>${briefData.totals.chapters} 章 · ${formatPlayTime(briefData.totals.time)} · 击破 ${briefData.totals.kills}</p></section>` : ''}`;
+    }
     const track = $('#menu-chapter-track'); track.hidden = s.mode !== 'journey' || training;
     track.replaceChildren();
     MENU_CHAPTERS.forEach(chapter => {

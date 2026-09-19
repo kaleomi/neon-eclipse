@@ -90,6 +90,11 @@
 - 新模块 `interaction-rules.js` / `interaction-world.js` / `interaction-layouts.js`：每章两座可按住 E 的基座——排气阀（1.5s 启动、5s 半径 3.2m 云：敌人半速且不能预警、6 HP/s、12s 充压）与照明开关（0.6s 切换：黑暗中远程射程 ×0.65、潜行者/猎犬 ×1.25，可恢复）。九章各有主题命名与经约束校验的摆位。
 - 451/451 check、105/105 rules、41/41 integration；`test-interactions-browser` 九章真实页面原生 E 通过，诊断 0。摆位/忙碌/灯光基准三类首版失败已记录并修正。详见 `docs/mcp-p1-environment.md`。下一批：P2 天气 / 击杀表现 / 过场。
 
+### P2 交付：天气预设 / 击杀表现 / 章节过场（2026-09-19）
+
+- 新模块 `weather-rules.js` / `weather-world.js`（晴/雨/雾/沙尘/夜/雪 + 强度，URL `?weather=` 覆盖；雾使敌人开火距离 ×0.7，速度/预警/碰撞不变，港口与极地视觉仍由原世界模块负责）、`kill-fx-rules.js` / `kill-fx-world.js`（击杀白色幽灵 0.1s 闪白 + 0.3s 溶解；精英/Boss 0.3s ×0.35 慢动作；设置页三项开关持久化）、`cinematic-rules.js` / `cinematic-world.js`（10s 可跳过开场飞掠 + 三行 + 目标卡）与 `menu-ui.js` 数据驱动"进入下一关"简报。连杀提示沿用既有 `streak-banner`。
+- 461/461 check、106/106 rules、42/42 integration；`test-presentation-browser` 真实页面通过，smoke/interactions/boss-polish/datacenter/polar 串行复跑退出 0，诊断 0。自动化下默认关闭开场/幽灵/慢动作（`?intro=1` / `?fx=1` 开启）。六类首版失败已记录并修正。详见 `docs/mcp-p2-presentation.md`。下一批：第 5–8 关深度 / 直升机与载具演进。
+
 ### 状态与范围
 
 | 方向 | 已实现 / 已接线 | 当前边界 |

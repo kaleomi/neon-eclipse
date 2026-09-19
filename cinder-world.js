@@ -1,6 +1,6 @@
 import * as T from './node_modules/three/build/three.module.js';
 // Substepped sphere-radius ray sweep; impact reflects velocity, never detonates early.
-export function launchCinder(position,direction){return {position:position.clone(),velocity:direction.clone().normalize().multiplyScalar(14).add(new T.Vector3(0,3,0)),remaining:1.2,bounces:0};}
+export function launchCinder(position,direction,{speed=14,fuse=1.2}={}){return {position:position.clone(),velocity:direction.clone().normalize().multiplyScalar(speed).add(new T.Vector3(0,3,0)),remaining:fuse,bounces:0};}
 export function advanceCinder(s,dt,obstacles){
  if(!Number.isFinite(dt)||dt<=0||s.remaining<=0)return;
  const meshes=obstacles.map(o=>o.mesh||o).filter(Boolean);meshes.forEach(m=>m.updateWorldMatrix(true,false));

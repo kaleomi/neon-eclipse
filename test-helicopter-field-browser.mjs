@@ -12,7 +12,7 @@ const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshade
 const context=await browser.newContext({viewport:{width:1280,height:800}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
 await page.route('**/vehicle-app.js',async route=>{
  const body=await (await route.fetch()).text();
- const hook=`\nwindow.__heliFixture={async walkToPad(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;},heli:()=>({x:heli.x,y:heli.y,z:heli.z,status:heli.status,powered:heli.powered,grounded:heli.grounded,rpm:heli.rpm}),player:()=>({...player})};`;
+ const hook=`\nwindow.__heliFixture={async walkToPad(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;},player:()=>({x:player.x,z:player.z,yaw:player.yaw}),faceHeli(){player.yaw=Math.atan2(heli.x-player.x,-(heli.z-player.z));},heli:()=>({x:heli.x,y:heli.y,z:heli.z,status:heli.status,powered:heli.powered,grounded:heli.grounded,rpm:heli.rpm}),player:()=>({...player})};`;
  route.fulfill({body:body+hook,headers:{'content-type':'text/javascript'}});
 });
 await page.goto(url);await page.waitForSelector('#vehicle-scene canvas');
@@ -47,6 +47,9 @@ await page.waitForFunction(()=>window.__heliFixture.heli().rpm<.08,{},{timeout:4
 const cold=await page.evaluate(()=>window.__heliFixture.heli());await page.keyboard.press('KeyE');
 try{await page.waitForFunction(()=>document.body.dataset.vehicleKind==='walking',{},{timeout:15000});}catch(e){throw new Error('exit failed: '+JSON.stringify(cold)+' hint='+await page.locator('#drive-message').textContent().catch(()=>'?')+' '+errors.join('|'));}
 await page.screenshot({path:`${shots}/heli-exit.png`});
+// The parked airframe is solid to the walker: facing the cabin from the door and holding W stops well short of the centre line.
+await page.evaluate(()=>window.__heliFixture.faceHeli());await page.keyboard.down('KeyW');await page.waitForTimeout(1500);await page.keyboard.up('KeyW');
+{const p=await page.evaluate(()=>window.__heliFixture.player()),h=await page.evaluate(()=>window.__heliFixture.heli());const d=Math.hypot(p.x-h.x,p.z-h.z);assert(d>1.4&&d<3.6,'walker blocked by the fuselage, not inside it: distance '+d.toFixed(2));}
 // Recovery from the pause overlay parks the helicopter back on the shore pad.
 await page.keyboard.press('Escape');await page.click('#recover-drive');await page.click('#recover-drive');await page.click('#resume-drive');await page.waitForFunction(()=>document.body.dataset.driveActive==='true');
 const parked=await page.evaluate(()=>window.__heliFixture.heli());assert(Math.hypot(parked.x-196,parked.z-120)<.5&&parked.status==='ready'&&!parked.powered,'recovered to shore pad '+JSON.stringify(parked));
@@ -57,4 +60,4 @@ const island=await page.evaluate(()=>window.__heliFixture.heli());assert(Math.hy
 assert.equal(await page.getAttribute('body','data-lighthouse-stage'),'board');
 assert.deepEqual(errors,[],'no page errors');
 await browser.close();
-console.log('PASS: helicopter field browser — shore pad spawn, door boarding, cold-engine gate, I engine toggle, Shift lift-off, Ctrl landing, shutdown/exit, recovery park, lighthouse island pad. Screenshots: '+shots);
+console.log('PASS: helicopter field browser — shore pad spawn, door boarding, cold-engine gate, I engine toggle, Shift lift-off, Ctrl landing, shutdown/exit, native W walk blocked by the parked fuselage, recovery park, lighthouse island pad. Screenshots: '+shots);

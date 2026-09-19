@@ -15,13 +15,18 @@ export function planeEngine(throttle,speed,onGround){
  const t=Math.max(0,Math.min(1,throttle)),s=Math.min(1,Math.abs(speed)/50);
  return {freq:90+t*260,gain:.08+t*.28,whine:1800+t*2600,wind:onGround?s*.05:.06+s*.3};
 }
+// Rotorcraft: rpm 0..1 drives blade-slap rate and turbine pitch; collective adds load; speed adds wind. Pure.
+export function helicopterRotor(rpm,collective,speed,crashed=false){
+ const r=crashed?0:Math.max(0,Math.min(1,rpm)),load=Math.max(0,Math.min(1,Math.abs(collective))),s=Math.min(1,Math.abs(speed)/30);
+ return {slap:2.5+r*15.5,freq:48+r*70+load*8,gain:r*(.14+load*.08),whine:900+r*1900,whineGain:r*.05,wind:.02+s*.16*r};
+}
 export function yachtEngine(speed,throttle){
  const s=Math.min(1,Math.abs(speed)/13),load=Math.max(0,Math.min(1,Math.abs(throttle)));
  return {freq:28+s*40+load*10,gain:.1+s*.18+load*.05,wave:.06+s*.14};
 }
 export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
  const sfx=createSfxPlayer(bus);
- let nodes=null,kind=null,stallTimer=0,lastImpacts=0,lastKind=null;
+ let nodes=null,kind=null,stallTimer=0,lastImpacts=0,lastKind=null,lastBed=null;// lastBed: read-only mapped params for tests / HUD debug
  function build(){
   const ctx=bus.context,out=bus.input('sfx');if(!ctx||!out||nodes)return !!nodes;
   const mk=(type,f)=>{const o=ctx.createOscillator();o.type=type;o.frequency.value=f;return o;};
@@ -38,12 +43,14 @@ export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
   const waveSrc=noise('brown'),waveFilter=lp(500),waveMod=gainNode(1),waveGain=gainNode(0);waveSrc.connect(waveFilter).connect(waveMod).connect(waveGain).connect(out);
   // Modulate upstream of the final envelope: additive AudioParam input must never bypass a zero waveGain.
   const lfo=mk('sine',.35),lfoGain=gainNode(.5);lfo.connect(lfoGain).connect(waveMod.gain);lfo.start();
-  nodes={engOsc,subOsc,engFilter,engGain,whineOsc,whineGain,windFilter,windGain,waveGain};
+  // Rotor slap: separate amplitude LFO on the engine bed so the thump rate can follow rpm without touching the wave LFO.
+  const slapLfo=mk('sine',8),slapDepth=gainNode(0);slapLfo.connect(slapDepth).connect(engGain.gain);slapLfo.start();
+  nodes={engOsc,subOsc,engFilter,engGain,whineOsc,whineGain,windFilter,windGain,waveGain,slapLfo,slapDepth};
   return true;
  }
  function set(param,value,t,tc=.08){param.setTargetAtTime(value,t,tc);}
- function silence(t){if(!nodes)return;set(nodes.engGain.gain,0,t);set(nodes.whineGain.gain,0,t);set(nodes.windGain.gain,0,t);set(nodes.waveGain.gain,0,t);}
- // state: {kind:'rover'|'plane'|'yacht'|null, speed, throttle, onGround, stall, crashed, impacts, active}
+ function silence(t){if(!nodes)return;set(nodes.engGain.gain,0,t);set(nodes.whineGain.gain,0,t);set(nodes.windGain.gain,0,t);set(nodes.waveGain.gain,0,t);set(nodes.slapDepth.gain,0,t);}
+ // state: {kind:'rover'|'plane'|'yacht'|'helicopter'|null, speed, throttle, onGround, stall, crashed, impacts, active, rpm, collective}
  function update(dt,state){
   if(!bus.ready||!build())return;
   const t=bus.context.currentTime;
@@ -51,9 +58,10 @@ export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
   if(state.kind!==lastKind){if(lastKind!==null||state.kind!==null)sfx.play(state.kind?'vehicle.enter':'vehicle.exit');lastKind=state.kind;lastImpacts=state.impacts||0;}
   if((state.impacts||0)>lastImpacts){sfx.play('vehicle.impact',{gain:Math.min(1,.5+Math.abs(state.speed||0)/20)});lastImpacts=state.impacts;}
   kind=state.kind;
+  if(kind!=='helicopter')set(nodes.slapDepth.gain,0,t);
   if(kind==='rover'){
    const e=roverEngine(state.speed||0,state.throttle||0);
-   set(nodes.engOsc.frequency,e.freq,t);set(nodes.subOsc.frequency,e.freq/2,t);set(nodes.engFilter.frequency,e.cutoff,t);set(nodes.engGain.gain,e.gain,t);
+   set(nodes.engOsc.frequency,e.freq,t);set(nodes.subOsc.frequency,e.freq/2,t);set(nodes.engFilter.frequency,e.cutoff,t);set(nodes.engGain.gain,e.gain,t);lastBed={kind,...e};
    set(nodes.whineGain.gain,0,t);set(nodes.windGain.gain,Math.min(.12,Math.abs(state.speed||0)/29*.12),t);set(nodes.waveGain.gain,0,t);
   }else if(kind==='plane'){
    const e=planeEngine(state.crashed?0:(state.throttle||0),state.speed||0,state.onGround);
@@ -61,12 +69,18 @@ export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
    set(nodes.whineOsc.frequency,e.whine,t,.25);set(nodes.whineGain.gain,e.gain*.12,t,.25);set(nodes.windFilter.frequency,600+Math.abs(state.speed||0)*40,t);set(nodes.windGain.gain,e.wind,t);set(nodes.waveGain.gain,0,t);
    if(state.stall&&!state.onGround){stallTimer-=dt;if(stallTimer<=0){sfx.play('vehicle.stall');stallTimer=.6;}}else stallTimer=0;
    if(state.touchdown)sfx.play('vehicle.touchdown');
+  }else if(kind==='helicopter'){
+   const e=helicopterRotor(state.rpm||0,state.collective||0,state.speed||0,!!state.crashed);
+   set(nodes.engOsc.frequency,e.freq,t,.15);set(nodes.subOsc.frequency,e.freq/2,t,.15);set(nodes.engFilter.frequency,300+e.freq*5,t);set(nodes.engGain.gain,e.gain,t,.15);
+   set(nodes.slapLfo.frequency,e.slap,t,.1);set(nodes.slapDepth.gain,e.gain*.6,t,.15);lastBed={kind,...e};
+   set(nodes.whineOsc.frequency,e.whine,t,.2);set(nodes.whineGain.gain,e.whineGain,t,.2);set(nodes.windFilter.frequency,500+Math.abs(state.speed||0)*30,t);set(nodes.windGain.gain,e.wind,t);set(nodes.waveGain.gain,0,t);
+   if(state.touchdown)sfx.play('vehicle.touchdown');
   }else if(kind==='yacht'){
    const e=yachtEngine(state.speed||0,state.throttle||0);
    set(nodes.engOsc.frequency,e.freq,t,.2);set(nodes.subOsc.frequency,e.freq/2,t,.2);set(nodes.engFilter.frequency,350+e.freq*3,t);set(nodes.engGain.gain,e.gain,t,.2);
    set(nodes.whineGain.gain,0,t);set(nodes.windGain.gain,Math.min(.08,Math.abs(state.speed||0)/13*.08),t);set(nodes.waveGain.gain,e.wave,t,.3);
   }else{
-   silence(t);
+   silence(t);lastBed={kind:null};
    set(nodes.waveGain.gain,state.nearWater?.05:0,t,.5);
   }
  }
@@ -84,21 +98,23 @@ export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
   counters=null;lastKind=null;lastImpacts=0;stallTimer=0;kind=null;
   if(nodes)silence(bus.context.currentTime);// Preserve pause/hidden holds and persisted volume settings.
  }
- return {bus,sfx,update,events,reset,play:(n,o)=>sfx.play(n,o),pause(){bus.hold('paused');},resume(){bus.release('paused');},unlock:()=>bus.unlock(),resetEvents(){counters=null;}};
+ return {bus,sfx,update,events,reset,bed:()=>lastBed,play:(n,o)=>sfx.play(n,o),pause(){bus.hold('paused');},resume(){bus.release('paused');},unlock:()=>bus.unlock(),resetEvents(){counters=null;}};
 }
 // Pure: diff two counter snapshots into sfx events. `prev` null = first frame (records baseline, plays nothing).
 // counters: {roofShots,planeShots,rocketShots,roofHits,planeHits,seaShots,seaHits,seaSplashes,repairs,rearms,landings,checkpoints,hullHits,waves,houndKills,paused}
 export const VEHICLE_EVENT_SFX=Object.freeze({
  roofShots:'fire.vanguard',planeShots:'fire.tempest',rocketShots:'cannon.fire',roofHits:'hit.body',planeHits:'hit.body',
  seaShots:'cannon.fire',seaHits:'cannon.hit',seaSplashes:'cannon.splash',repairs:'supply.health',rearms:'supply.ammo',
- landings:'vehicle.touchdown',checkpoints:'vehicle.checkpoint',hullHits:'vehicle.impact',waves:'telegraph.orange',houndKills:'kill'
+ landings:'vehicle.touchdown',checkpoints:'vehicle.checkpoint',hullHits:'vehicle.impact',waves:'telegraph.orange',houndKills:'kill',
+ // Frontier (expedition 6–8): on-foot rifle, hostile kills and player health hits share the existing catalogue entries.
+ rifleShots:'fire.vanguard',rifleKills:'kill',frontierKills:'kill',frontierHits:'vehicle.impact'
 });
 export function vehicleAudioEvents(prev,next){
  if(!prev||!next)return [];
  const out=[];
  for(const key of Object.keys(VEHICLE_EVENT_SFX)){
   const a=Number(prev[key])||0,b=Number(next[key])||0;
-  if(b>a)out.push({name:VEHICLE_EVENT_SFX[key],opts:key==='hullHits'?{gain:.9}:undefined,count:b-a});
+  if(b>a)out.push({name:VEHICLE_EVENT_SFX[key],opts:key==='hullHits'||key==='frontierHits'?{gain:.9}:undefined,count:b-a});
  }
  return out;
 }

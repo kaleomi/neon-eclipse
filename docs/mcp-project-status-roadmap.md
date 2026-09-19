@@ -98,6 +98,12 @@
 - 新模块 `interaction-rules.js` / `interaction-world.js` / `interaction-layouts.js`：每章两座可按住 E 的基座——排气阀（1.5s 启动、5s 半径 3.2m 云：敌人半速且不能预警、6 HP/s、12s 充压）与照明开关（0.6s 切换：黑暗中远程射程 ×0.65、潜行者/猎犬 ×1.25，可恢复）。九章各有主题命名与经约束校验的摆位。
 - 451/451 check、105/105 rules、41/41 integration；`test-interactions-browser` 九章真实页面原生 E 通过，诊断 0。摆位/忙碌/灯光基准三类首版失败已记录并修正。详见 `docs/mcp-p1-environment.md`。下一批：P2 天气 / 击杀表现 / 过场。
 
+### P3 增量：停放直升机实体碰撞与旋翼音频（2026-09-19）
+
+- 停放（含坠毁）机体对步行者与越野车成为实体（机身 9 点 + 滑橇），舱门站立点保留、空中不挡；`vehicle-app.js` 步行/越野车世界接入。
+- 旋翼音频接入既有载具音频总线：`helicopterRotor` 纯映射 + 桨叶拍频幅度调制，冷机静音、启动上升、熄火回落；先遣队步枪射击 / 击杀 / 受击接入一次性事件。
+- 诊断 0；check 498/498、integration 43/43；rules 4 项失败来自另一会话未提交的 FPS 武器改动。helicopter-field / expedition / vehicle-audio 浏览器专项串行通过（以 HEAD 版 `vehicle.html` 运行，工作区对方 UI 改动会隐藏控件）。详见 `docs/mcp-p3-helicopter-body-audio.md`。
+
 ### 第二关浏览器基线：naval / sea-combat 夹具跟进手动舰炮（2026-09-19）
 
 - 两项自 `4ddd5ea`（手动舰炮，F 不再自动锁定）起持续失败，已在 `939bd1c` 复现确认非先遣队批次引入。夹具改为按真实“右键拖动瞄准 + F”路径转向目标；`vehicle-app.js` 只追加只读 `navalAimYaw/X/Z` dataset，海战规则未改。

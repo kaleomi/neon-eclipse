@@ -33,6 +33,18 @@ export function helicopterExit(s,footWorld){
  const door=helicopterDoorPoints(s).find(d=>footWorld.free(d.x,d.z,.4));
  return door?{ok:true,x:door.x,z:door.z}:{ok:false,reason:'两侧舱门都没有可站立的地面。'};
 }
+// Parked airframe footprint for walkers and ground vehicles: fuselage (nose → cabin → tail boom) plus the two skids.
+// Only a grounded craft blocks; in the air it is above everyone, and a crashed hulk keeps blocking where it lies.
+export const HELI_BODY=Object.freeze({fuselage:Object.freeze([[0,4.2],[0,2.8],[0,1.4],[0,0],[0,-1.6],[0,-3.1],[0,-4.6],[0,-5.9],[0,-7.2]]),fuselageRadius:1.5,skidOffset:1.3,skidRadius:.7,reach:9});
+export function helicopterBodyPoints(s){
+ const c=Math.cos(s.yaw),n=Math.sin(s.yaw);const at=(a,b)=>({x:s.x+c*a+n*b,z:s.z+n*a-c*b});
+ return [...HELI_BODY.fuselage.map(([a,b])=>({...at(a,b),r:HELI_BODY.fuselageRadius})),
+  ...[-1,1].flatMap(side=>[2.2,-1.8].map(b=>({...at(side*HELI_BODY.skidOffset,b),r:HELI_BODY.skidRadius})))];
+}
+export function helicopterBlocks(s,x,z,r=.4){
+ if(!s||!s.grounded||Math.hypot(x-s.x,z-s.z)>HELI_BODY.reach+r)return false;
+ return helicopterBodyPoints(s).some(p=>Math.hypot(x-p.x,z-p.z)<p.r+r);
+}
 // Key mapping: W/S pitch, A/D yaw, arrows strafe, Shift/Ctrl collective, Space brake-hover. Mouse look only orbits the camera.
 export function helicopterInput(held){
  return {forward:Number(held('KeyW'))-Number(held('KeyS')),right:Number(held('ArrowRight'))-Number(held('ArrowLeft')),

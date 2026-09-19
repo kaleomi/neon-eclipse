@@ -11,6 +11,7 @@ try{
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader','--autoplay-policy=no-user-gesture-required']});
  const context=await browser.newContext({viewport:{width:1280,height:900}}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());page.setDefaultTimeout(45000);
+ await page.route('**/vehicle-app.js',async route=>{const body=await (await route.fetch()).text();route.fulfill({body:body+`\nwindow.__heliAudioFixture={async walkToDoor(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;}};`,headers:{'content-type':'text/javascript'}});});
  await page.goto(`${server.base}/vehicle.html`);
  await page.waitForFunction(()=>!!document.querySelector('canvas')&&!!window.neonVehicleAudio);
  await step('vehicle audio facade present, no AudioContext before a gesture',async()=>{
@@ -34,6 +35,21 @@ try{
   await page.mouse.up();await page.waitForTimeout(300);
   const played1=await page.evaluate(()=>window.neonVehicleAudio.sfx.stats().played);
   assert.ok(played1>played0,'shots produced sfx events: '+played0+' -> '+played1);
+ });
+ await step('helicopter: cold rotor is a silent bed, I spool-up raises slap rate and gain, shutdown decays',async()=>{
+  // Leave the gunner seat and the rover, walk (teleport fixture) to the parked helicopter's door and board with E.
+  await page.keyboard.down('Space');await page.waitForFunction(()=>Number(document.querySelector('#drive-speed').textContent)<1,null,{timeout:15000});await page.keyboard.up('Space');
+  await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.gunner==='false');
+  await page.keyboard.press('KeyE');await page.waitForFunction(()=>document.body.dataset.vehicleKind==='walking',null,{timeout:15000});
+  await page.evaluate(()=>window.__heliAudioFixture.walkToDoor());await page.waitForTimeout(200);
+  await page.keyboard.press('KeyE');await page.waitForFunction(()=>document.body.dataset.vehicleKind==='helicopter',null,{timeout:10000});
+  await page.waitForTimeout(300);const cold=await page.evaluate(()=>window.neonVehicleAudio.bed());
+  assert.ok(cold&&cold.kind==='helicopter'&&cold.gain===0,'cold rotor bed is silent: '+JSON.stringify(cold));
+  await page.keyboard.press('KeyI');await page.waitForFunction(()=>document.body.dataset.heliPowered==='true');
+  await page.waitForFunction(()=>{const b=window.neonVehicleAudio.bed();return b&&b.kind==='helicopter'&&b.gain>.05;},null,{timeout:20000});
+  const warm=await page.evaluate(()=>window.neonVehicleAudio.bed());assert.ok(warm.slap>cold.slap&&warm.whineGain>0,'spool-up audible: '+JSON.stringify(warm));
+  await page.keyboard.press('KeyI');await page.waitForFunction(()=>document.body.dataset.heliPowered==='false');
+  await page.waitForFunction(g=>{const b=window.neonVehicleAudio.bed();return b&&b.gain<g;},warm.gain,{timeout:20000});
  });
  await step('pause suspends the vehicle bus, resume releases it',async()=>{
   await page.keyboard.press('Escape');await page.waitForFunction(()=>document.body.dataset.driveActive==='false');

@@ -8,7 +8,7 @@ import {createJointMission,stepJointMission,finishJointFlight,jointBoardAllowed,
 import {buildJointWorld} from './joint-world.js';
 import {createLighthouseMission,stepLighthouseMission,lighthouseGoal,lighthouseBoardAllowed,lighthouseExitAllowed,lighthouseSummary,restoreLighthouseCheckpoint,lighthouseCheckpointLabel,LIGHTHOUSE_STAGES,LIGHTHOUSE_LABELS,LIGHTHOUSE_PROFILES,normalizeLighthouse} from './lighthouse-mission.js';
 import {stepHelicopter,helicopterSpeed} from './helicopter-rules.js';
-import {FIELD_HELI_SITE,HELI_PADS,createFieldHelicopter,parkHelicopter,canBoardHelicopter,helicopterExit,helicopterInput,helicopterStatusLabel,HELICOPTER_HINT,fieldGround} from './helicopter-field.js';
+import {FIELD_HELI_SITE,HELI_PADS,createFieldHelicopter,parkHelicopter,canBoardHelicopter,helicopterExit,helicopterInput,helicopterStatusLabel,HELICOPTER_HINT,fieldGround,helicopterBlocks} from './helicopter-field.js';
 import {createHelicopterModel} from './helicopter-world.js';
 import {buildHelipads} from './helipad-world.js';
 import {buildLighthouseWorld} from './lighthouse-world.js';
@@ -53,7 +53,7 @@ const EXPEDITION_RESULT_NOTE=' 本轮属于先遣队，请在上方先遣队面�
 const range=createRange(),roofGun=createWeaponState('roof'),planeGun=createWeaponState('plane'),wear={rover:createDurability('rover'),yacht:createDurability('yacht')};
 let gunner=false,fire=false,rocketKey=false;
 // Phase 2 debt: vehicle audio (engine beds + one-shot events from gameplay counters). Fails soft without WebAudio.
-const vehicleAudio=createVehicleAudio({storage:localStorage});window.neonVehicleAudio=vehicleAudio;let audioLandings=0,audioCheckpoints=0,audioHullHits=0,audioWaves=0,audioRearms=0;
+const vehicleAudio=createVehicleAudio({storage:localStorage});window.neonVehicleAudio=vehicleAudio;let audioLandings=0,audioCheckpoints=0,audioHullHits=0,audioWaves=0,audioRearms=0,audioFrontierKills=0;
 let escort=createEscort(),escortArmed=false;const ESCORT_KEY='neon-eclipse.escort-difficulty.v1';
 function readEscortDifficulty(){try{return normalizeEscort(localStorage.getItem(ESCORT_KEY));}catch{return 'normal';}}
 const escortRange={targets:[],shots:0,hits:0,kills:0};// roof gun target list while escorting: range targets + live hounds
@@ -88,8 +88,8 @@ const flightUI=bindFlightMissionUI({getMission:()=>sortie,getPlane:()=>plane,sta
 expeditionUI=bindExpeditionUI({root:$('.drive-panel'),launch:launchExpeditionMission,onLeave:()=>{recover();resume();}});
 const planeBoxes=[...TEST_OBSTACLES.map(b=>({minX:b.x-b.w/2,maxX:b.x+b.w/2,minZ:b.z-b.d/2,maxZ:b.z+b.d/2,h:b.h})),...TEST_POLES.map(([x,z])=>({minX:x-.25,maxX:x+.25,minZ:z-.25,maxZ:z+.25,h:12})),...FIELD_BUILDINGS,{...DOCK,h:.85},...SITE_VEHICLE_BOXES];
 const HELI_SITE={...FIELD_HELI_SITE,obstacles:[...FIELD_HELI_SITE.obstacles,...SITE_HELI_OBSTACLES]};
-const roverWorld={...baseLand,free:(x,z,r)=>{if(!baseLand.free(x,z,r))return false;if(truckBlocks(escort,x,z,r))return false;if(!plane.onGround)return true;const f=forward(plane.yaw),side=right(plane.yaw);return [[0,0],[0,3.8],[0,-3.8],[-5.5,0],[5.5,0]].every(([a,b])=>Math.hypot(x-plane.x-side.x*a-f.x*b,z-plane.z-side.z*a-f.z*b)>r+1.2);}};
-const walkingWorld={free:(x,z,r)=>footWorld.free(x,z,r)&&!bodyBlocksPlayer(x,z,plane,yacht)&&stepAllowed(player,{x,z},siteHeight)};
+const roverWorld={...baseLand,free:(x,z,r)=>{if(!baseLand.free(x,z,r))return false;if(truckBlocks(escort,x,z,r))return false;if(helicopterBlocks(heli,x,z,r+.6))return false;if(!plane.onGround)return true;const f=forward(plane.yaw),side=right(plane.yaw);return [[0,0],[0,3.8],[0,-3.8],[-5.5,0],[5.5,0]].every(([a,b])=>Math.hypot(x-plane.x-side.x*a-f.x*b,z-plane.z-side.z*a-f.z*b)>r+1.2);}};
+const walkingWorld={free:(x,z,r)=>footWorld.free(x,z,r)&&!bodyBlocksPlayer(x,z,plane,yacht)&&!helicopterBlocks(heli,x,z,r)&&stepAllowed(player,{x,z},siteHeight)};
 const safeExitWorld={geometry,free:(x,z,r)=>{const f=forward(rover.yaw);return walkingWorld.free(x,z,r)&&[-1.25,0,1.25].every(d=>Math.hypot(x-rover.x-f.x*d,z-rover.z-f.z*d)>1.23+r);}};
 let player={x:TEST_SPAWN.x-3.3,z:TEST_SPAWN.z+1.3,yaw:Math.atan2(3.3,1.3)},trial=createDriveTrial(),airTrial=createDriveTrial(),seaTrial=createDriveTrial();
 const raycaster=new T.Raycaster(),desired=new T.Vector3(),focus=new T.Vector3(),direction=new T.Vector3();
@@ -278,8 +278,9 @@ function updatePhysics(dt){
  if(plane.landings>planeLandingsBefore)audioLandings++;
  if(!active)return;
  if(frontierActive()){
-  const healthBefore=frontier.health,stageBefore=frontier.stage,gateBefore=frontier.gate;
+  const healthBefore=frontier.health,stageBefore=frontier.stage,gateBefore=frontier.gate,aliveBefore=aliveHostiles(frontier).length+(frontier.mech?.alive?1:0);
   const changed=stepFrontierMission(frontier,{kind,player,rover,yacht,plane,heli,action:held('KeyF'),boxes:planeBoxes,ground:groundAt},dt);
+  {const aliveAfter=aliveHostiles(frontier).length+(frontier.mech?.alive?1:0);if(aliveAfter<aliveBefore)audioFrontierKills+=aliveBefore-aliveAfter;}
   if(frontier.health<healthBefore){audioHullHits++;notify('受到 '+frontier.lastHit+' 攻击 · 生命 '+Math.ceil(frontier.health)+'%');}
   if(changed){if(frontier.status!=='active'){finishFrontier();return;}audioCheckpoints++;if(frontier.stage!==stageBefore){expeditionUI?.saveCheckpoint(frontier.id,frontier);notify('阶段 · '+FRONTIER_LABELS[frontier.id][frontier.stage]);}else if(frontier.gate!==gateBefore)notify(frontier.lastMessage||'');}
  }
@@ -396,7 +397,7 @@ function updateWeaponHUD(){
 }
 function frame(now){const dt=Math.max(0,Math.min((now-last)/1000,.1));last=now;if(active){time+=dt;accumulator+=dt;while(accumulator>=1/120&&active){updatePhysics(1/120);accumulator=Math.max(0,accumulator-1/120);}
   const s=entity(),fleet=chase.naval?navalSummary(chase):null;
-  vehicleAudio.update(dt,{kind:kind==='helicopter'?'plane':kind,speed:s.speed||0,throttle:kind==='plane'?plane.throttle:kind==='helicopter'?heli.collective*heli.rpm:kind?(Number(held('KeyW','ArrowUp'))-Number(held('KeyS','ArrowDown'))):0,onGround:kind==='helicopter'?heli.grounded:plane.onGround,stall:kind==='helicopter'?false:plane.stall,crashed:kind==='helicopter'?heli.status==='crashed':plane.crashed,impacts:kind?s.impacts:0,active:true,nearWater:!kind&&Math.hypot(player.x-yacht.x,player.z-yacht.z)<40});
-  vehicleAudio.events({roofShots:roofGun.shots,planeShots:planeGun.shots,rocketShots:planeGun.rocketShots,roofHits:roofGun.hits,planeHits:planeGun.hits,seaShots:fleet?.shots||0,seaHits:fleet?.hits||0,repairs:wear.rover.repairs+wear.yacht.repairs,rearms:audioRearms,landings:audioLandings,checkpoints:audioCheckpoints,hullHits:audioHullHits,waves:audioWaves,houndKills:escort.killed||0});if(messageTime>0){messageTime-=dt;if(messageTime<=0)message.classList.remove('visible');}}
+  vehicleAudio.update(dt,{kind,speed:s.speed||0,rpm:heli.rpm,collective:heli.collective,throttle:kind==='plane'?plane.throttle:kind==='helicopter'?heli.collective*heli.rpm:kind?(Number(held('KeyW','ArrowUp'))-Number(held('KeyS','ArrowDown'))):0,onGround:kind==='helicopter'?heli.grounded:plane.onGround,stall:kind==='helicopter'?false:plane.stall,crashed:kind==='helicopter'?heli.status==='crashed':plane.crashed,impacts:kind?s.impacts:0,active:true,nearWater:!kind&&Math.hypot(player.x-yacht.x,player.z-yacht.z)<40});
+  vehicleAudio.events({roofShots:roofGun.shots,planeShots:planeGun.shots,rocketShots:planeGun.rocketShots,roofHits:roofGun.hits,planeHits:planeGun.hits,seaShots:fleet?.shots||0,seaHits:fleet?.hits||0,repairs:wear.rover.repairs+wear.yacht.repairs,rearms:audioRearms,landings:audioLandings,checkpoints:audioCheckpoints,hullHits:audioHullHits,waves:audioWaves,houndKills:escort.killed||0,rifleShots:rifle.shots,frontierKills:audioFrontierKills});if(messageTime>0){messageTime-=dt;if(messageTime<=0)message.classList.remove('visible');}}
  heliModel.update(heli);helipads.update(lighthouse,time);frontierWorld.update(frontier,time);jointWorld.update(joint,time);lighthouseWorld.update(lighthouse,time);escortWorld.update(escort,time);rangeWorld.update(time);turretModel.update(roofGun,rover.yaw);fireEffects.update([roofGun,planeGun,rifle]);damageSmoke.update([{tier:durabilityTier(wear.rover),x:rover.x,y:terrainHeight(rover.x,rover.z)+1.9,z:rover.z},{tier:durabilityTier(wear.yacht),x:yacht.x,y:2.2,z:yacht.z}],time);roverModel.update(rover,time);planeModel.update(plane,time);yachtModel.update(yacht,time);environment.update(trial.index,time);flightWorld.update(sortie,time);reconWorld.update(sortie,time,camera);seaAir.update(time,sortie.status==='idle'?airTrial.index:sortie.route.index,chase.status==='idle'?seaTrial.index:WATER_GATES.length,sortie.type!=='recon'||sortie.status==='idle');const members=chase.naval?.members,summary=chase.naval?navalSummary(chase):null;chaseWorld.update(members?.[0]||chase,time);seaCombatWorld.update(members?.[0]||chase,yacht,time,navalAimPoint(navalAim,yacht),summary?.playerFlash,chase.naval?.playerCombat);interceptorWorld.update(members?.[1]||emptyNaval,time);interceptorCombat.update(members?.[1]||emptyNaval,yacht,time);updateCamera(1-Math.exp(-9*dt));guidance.update({camera,goal:sortie.status==='active'?flightGoal(sortie):escort.status==='active'?{...escortGoal(escort),y:3}:joint.status==='active'?jointGoal(joint,{rover,yacht,plane,player,kind}):lighthouse.status==='active'?lighthouseGoal(lighthouse,{yacht,player,kind}):chase.status==='active'?(CHASE_GATES[chase.index]||CHASE_EVAC):kind==='plane'?FLIGHT_GATES[airTrial.index]:kind==='yacht'?WATER_GATES[seaTrial.index]:kind==='rover'?DRIVE_GATES[trial.index]:{x:rover.x,y:3,z:rover.z,name:'越野车 · E 上车'},position:kind==='plane'?plane:kind==='yacht'?yacht:kind==='rover'?rover:player,visible:active,recon:sortie.status==='active'&&sortie.type==='recon'&&['takeoff','route'].includes(sortie.phase),mission:sortie});hudTimer+=dt;if(hudTimer>.08){updateHUD();hudTimer=0;}renderer.render(scene,camera);requestAnimationFrame(frame);}
 updateCamera(1);updateHUD();$('#resume-drive').focus();requestAnimationFrame(frame);

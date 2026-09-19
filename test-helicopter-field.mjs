@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {FIELD_HELI_SITE,HELI_PADS,createFieldHelicopter,parkHelicopter,canBoardHelicopter,helicopterExit,helicopterInput,helicopterStatusLabel,fieldGround,helicopterDoorPoints} from './helicopter-field.js';
+import {FIELD_HELI_SITE,HELI_PADS,createFieldHelicopter,parkHelicopter,canBoardHelicopter,helicopterExit,helicopterInput,helicopterStatusLabel,fieldGround,helicopterDoorPoints,helicopterBlocks,helicopterBodyPoints,HELI_BODY,HELI_DOOR} from './helicopter-field.js';
 import {stepHelicopter,helicopterContact,createHelicopter,startHelicopter,HELICOPTER_SITE} from './helicopter-rules.js';
 import {LIGHTHOUSE_ISLAND,isFootSurface,FIELD_BUILDINGS,FIELD} from './maritime-rules.js';
 import {CollisionGrid} from './vehicle-rules.js';
@@ -36,4 +36,20 @@ parkHelicopter(h,HELI_PADS.shore);assert.equal(h.status,'ready');assert.equal(h.
 const held=(...c)=>c.some(k=>['KeyW','KeyD','ShiftLeft','ArrowLeft'].includes(k));
 assert.deepEqual(helicopterInput(held),{forward:1,right:-1,yaw:1,lift:1,brake:false});
 assert.equal(HELICOPTER_SITE.bounds,110,'isolated prototype site untouched');
-console.log('PASS: helicopter in the vehicle field — ground adapter (island/dock/water), pad spawn, door boarding gates, island takeoff/landing at height, water crash, tower/building/ceiling contact, park reset, key map; isolated site regression');
+// Parked airframe blocks walkers / rover on the ground plane; airborne and far-away craft do not; doors stay reachable.
+{
+ const s=createFieldHelicopter(HELI_PADS.shore,Math.PI/3);
+ assert(helicopterBlocks(s,s.x,s.z,.4),'cabin centre is solid');
+ const nose=helicopterBodyPoints(s)[0];assert(helicopterBlocks(s,nose.x,nose.z,.4),'nose is solid');
+ assert(!helicopterBlocks(s,s.x+HELI_BODY.reach+2,s.z,.4),'outside the footprint is free');
+ for(const d of helicopterDoorPoints(s))assert(!helicopterBlocks(s,d.x,d.z,.4),'door standing points stay free '+JSON.stringify(d));
+ assert(helicopterBlocks(s,s.x,s.z,1.6),'rover-sized probe is blocked too');
+ const airborne={...s,grounded:false,y:s.y+12};assert(!helicopterBlocks(airborne,s.x,s.z,.4),'airborne craft never blocks the ground');
+ const crashed={...s,status:'crashed',grounded:true};assert(helicopterBlocks(crashed,s.x,s.z,.4),'a crashed hulk keeps blocking');
+ assert(!helicopterBlocks(null,0,0,.4));
+ // Body points rotate with yaw: the nose sits ahead of the cabin along -Z for yaw 0 and along +X for yaw π/2 (same frame as door points).
+ const n0=helicopterBodyPoints({x:0,z:0,yaw:0})[0],n1=helicopterBodyPoints({x:0,z:0,yaw:Math.PI/2})[0];
+ assert(Math.abs(n0.x)<1e-9&&n0.z<0,'nose ahead along -Z at yaw 0');assert(n1.x>0&&Math.abs(n1.z)<1e-9,'nose ahead along +X at yaw π/2');
+ assert(HELI_DOOR.offset>HELI_BODY.fuselageRadius,'doors are outside the fuselage radius');
+}
+console.log('PASS: helicopter in the vehicle field — ground adapter (island/dock/water), pad spawn, door boarding gates, island takeoff/landing at height, water crash, tower/building/ceiling contact, park reset, key map, parked-body footprint for walkers/rover (doors free, airborne free, hulk solid); isolated site regression');

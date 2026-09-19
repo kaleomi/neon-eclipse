@@ -5,7 +5,7 @@ import {SFX,SFX_NAMES,TELEGRAPH_BY_COLOR,WEAPON_FIRE} from './audio/sfx-catalog.
 import {spatialize,createSfxPlayer,MAX_VOICES} from './audio/sfx-player.js';
 import {resolveMusicState,createIntensity,LAYER_TARGETS,MUSIC_STATES,LAYER_NAMES,createMusicDirector} from './audio/music-director.js';
 import {createStreak,STREAK_STEPS,createGameAudio} from './audio/game-audio.js';
-import {roverEngine,planeEngine,yachtEngine,vehicleAudioEvents,VEHICLE_EVENT_SFX,createVehicleAudio} from './audio/vehicle-audio.js';
+import {roverEngine,planeEngine,yachtEngine,helicopterRotor,vehicleAudioEvents,VEHICLE_EVENT_SFX,createVehicleAudio} from './audio/vehicle-audio.js';
 import {WEAPONS} from './combat.js';
 
 const memory=(init={})=>{const m=new Map(Object.entries(init));return {getItem:k=>m.has(k)?m.get(k):null,setItem:(k,v)=>{m.set(k,String(v));},removeItem:k=>{m.delete(k);}};};
@@ -204,6 +204,13 @@ function fakeContext(){
  assert.ok(planeEngine(2,0,true).freq===planeEngine(1,0,true).freq,'throttle clamped');
  const y0=yachtEngine(0,0),y1=yachtEngine(13,1);
  assert.ok(y1.freq>y0.freq&&y1.wave>y0.wave&&y1.gain>y0.gain);
+ // Rotorcraft: cold rotor is silent, spool-up raises slap rate / turbine pitch / gain, collective adds load, crash mutes, inputs clamp.
+ const h0=helicopterRotor(0,0,0),h1=helicopterRotor(.5,0,0),h2=helicopterRotor(1,1,30);
+ assert.equal(h0.gain,0);assert.equal(h0.whineGain,0);
+ assert.ok(h1.slap>h0.slap&&h2.slap>h1.slap&&h2.whine>h1.whine&&h2.gain>h1.gain&&h2.wind>h1.wind);
+ assert.ok(helicopterRotor(1,1,0).gain>helicopterRotor(1,0,0).gain,'collective load audible');
+ assert.equal(helicopterRotor(1,1,30,true).gain,0,'crashed airframe is silent');
+ assert.deepEqual(helicopterRotor(4,-3,0),helicopterRotor(1,1,0),'rpm/collective clamped');
 }
 // 10. Vehicle one-shot events: counter diffs -> catalog names; first frame is a silent baseline; all names exist in the catalog.
 {
@@ -213,6 +220,7 @@ function fakeContext(){
  const ev=vehicleAudioEvents(a,b);assert.deepEqual(ev.map(e=>e.name).sort(),['cannon.fire','fire.vanguard','supply.health'].sort());
  assert.equal(ev.find(e=>e.name==='fire.vanguard').count,2);
  assert.deepEqual(vehicleAudioEvents(b,a),[],'counters going down (reset) never fire');
+ const fr=vehicleAudioEvents({rifleShots:0,frontierKills:0,frontierHits:0},{rifleShots:2,frontierKills:1,frontierHits:1});assert.deepEqual(fr.map(e=>e.name).sort(),['fire.vanguard','kill','vehicle.impact'],'frontier rifle/kill/hit events map to catalogue names');assert.deepEqual(fr.find(e=>e.name==='vehicle.impact').opts,{gain:.9});
  const va=createVehicleAudio({storage:memory()});// no AudioContext in Node: update must be a no-op, events must still diff
  va.update(.016,{kind:'rover',speed:3,throttle:1,active:true});
  assert.deepEqual(va.events({roofShots:1}),[]);assert.equal(va.events({roofShots:2}).length,1);va.resetEvents();assert.deepEqual(va.events({roofShots:9}),[]);

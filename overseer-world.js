@@ -1,4 +1,4 @@
-import {createBossChargeInterrupt} from './boss-charge-interrupt.js';
+import {createBossAdapter} from './boss-adapter.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
 import * as T from './node_modules/three/build/three.module.js';
@@ -37,7 +37,7 @@ export function createOverseerWorld(scene,obstacles){
   panel.dataset.exposed=String(s.phase==='exposed');
  }
  function setStage(index){if(stage===index)return;breaker.reset();delete haloTarget.haloMark;stage=index;rules.reset(index===3);if(index===3)battle.start();sync();}
- const breaker=createBossChargeInterrupt(rules,'overseer');
+ const boss=createBossAdapter(rules,'overseer',{name:'OVERSEER 监察者',maxHp:OVERSEER_MAX_HP}),breaker={interrupt:boss.interruptCharge,reset:boss.resetInterrupt};
  function interruptCharge(){const ok=breaker.interrupt();if(ok)sync(true);return ok;}
  function clear(){breaker.reset();delete haloTarget.haloMark;battle.clear();stage=-1;shieldFeedback=0;rules.reset();markers.forEach(el=>el.hidden=true);sync(false);}
  function update(dt,player,feetY,playing){
@@ -57,5 +57,5 @@ export function createOverseerWorld(scene,obstacles){
    if(!el.hidden){el.style.left=((p.x+1)*innerWidth/2)+'px';el.style.top=((1-p.y)*innerHeight/2)+'px';el.textContent='▼ 射击金色节点 '+(i+1)+' · '+Math.ceil(rules.state.nodes[i])+' HP';}
   });
  }
- clear();return {interruptCharge,setStage,clear,update,hit,updateMarkers,battle,get blocking(){return rules.blocking;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[]),...nodes.filter(n=>n.visible)]:[];}};
+ clear();return {interruptCharge,boss,setStage,clear,update,hit,updateMarkers,battle,get blocking(){return rules.blocking;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[]),...nodes.filter(n=>n.visible)]:[];}};
 }

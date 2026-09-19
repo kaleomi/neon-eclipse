@@ -79,6 +79,12 @@
 - 冲锋自爆机（2.2m 武装、1s 引信、3.5m 遮挡爆炸、EMP 可冻结）接入中枢塔/港口各一名；重炮机甲（2s 橙圈迫击炮、6m 内后撤、装甲 ×0.2、两次膝部开核心 5s ×2.5）接入数据中心防守波。两者进入 EMP 允许表。
 - 最终 440/440 check、103/103 rules、39/39 integration，`test-squad-browser` 反应堆真实页面通过，诊断 0。首版包抄偏移破坏港口计时、引爆后未移除、最小射程断言等失败已记录并修正。详见 `docs/mcp-p1-enemy-ecology.md`。下一批：Boss 框架统一与全局攻击预算。
 
+### P1 追加交付：Boss 框架统一读取层与全局攻击预算（2026-09-19）
+
+- 新模块 `boss-adapter.js` 为三种形态、八个场地 Boss 规则提供统一 status/telegraph/exposed/snapshot 与打断入口；七个世界模块改经适配器并暴露 `boss`。不改任何 Boss 机关/血量/阶段。
+- 新模块 `attack-budget.js`：弹丸攻击者、重炮机甲迫击炮、场地 Boss 预警共享“同时 3 个预警”预算；Boss 预警占一槽，普通攻击者随之降为两个。
+- 445/445 check、104/104 rules、40/40 integration；`test-attack-budget-browser`（roof 真实刷怪）与 `test-ordnance-browser`（九章 Boss 打断）通过，诊断 0。首版浏览器摆位被掩体遮挡的失败已记录。详见 `docs/mcp-p1-boss-budget.md`。下一批：每章 ≥2 项环境交互。
+
 ### 状态与范围
 
 | 方向 | 已实现 / 已接线 | 当前边界 |

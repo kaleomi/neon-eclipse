@@ -95,6 +95,7 @@ import { createEnemyUI } from './enemy-ui.js';
 import { ARENA, createNavigator } from './arena.js';
 import { createRadar } from './radar.js';
 import { createEnemyProjectiles } from './projectiles.js';
+import {createAttackBudget} from './attack-budget.js';
 import { WEAPONS, createHandling, damageAtDistance, shotSpread, advanceReload, meleePose } from './combat.js';
 import { createCombatUI } from './combat-ui.js';
 import { STAGES, SUPPLIES, createMission, applySupply, chooseEncounterSpawns } from './mission.js';
@@ -230,13 +231,15 @@ const playerMotion=createPlayerMotion(obstacles,art.ceilings||playerCeilings,IS_
 let jumpRequested=false,pendingJourneyResult=null;
 const radar=createRadar(obstacles);
 const parry=createParry(),parryUI=createParryUI(),parryForward=new THREE.Vector3();
+// Global telegraph budget: projectile attackers + artillery mortars + arena Boss warning share three slots.
+const attackBudget=createAttackBudget({max:3});
 const enemyProjectiles=createEnemyProjectiles(scene,obstacles,(damage,source)=>{
  if(execution.invulnerable)return;damage=p4Incoming(damage);ordnance.cancelCharge();fieldRecord.hurt(Math.min(health,damage));achievementUI.attempt.hurt(Math.min(health,damage));health=Math.max(0,health-damage);mission.interrupt();combatUI.damaged(source);damageTime=.3;gameAudio.hurt(health);hud();
 },(position,color,count)=>{art.burst(position,color,count);if(color!==0xff5435)gameAudio.play('bolt.wall',{position:{x:position.x,z:position.z}});},{
  resolveTarget:(origin,target,boss,owner)=>emp.attackTarget(origin,target,boss,owner),allowPending:(origin,target,boss,owner)=>emp.allowPending(origin,target,boss,owner),
  onQueue:(origin,attack,boss)=>gameAudio.telegraph(attack.color,{x:origin.x,z:origin.z},boss?false:!lineOfSight(origin)),
  onEmit:(origin)=>gameAudio.play('enemy.fire',{position:{x:origin.x,z:origin.z}}),
- maxAttackers:3,
+ maxAttackers:3,budget:attackBudget,
  tryParry:(bolt,time)=>{const accepted=state==='playing'&&selected===3&&parry.intercept(bolt,time,camera.getWorldDirection(parryForward));if(accepted){gameAudio.play('hit.armor');p4?.parry?.();}return accepted;},
  getReflectTargets:()=>enemies.filter(e=>e.hp>0).flatMap(e=>e.group.children).concat(overseer?.targets||[]),
  onObstacleHit:(obstacle,bolt)=>{const damage=bolt.reflected?p4Outgoing(bolt.damage):p4Incoming(bolt.damage);destructibles?.hit(obstacle.mesh,damage);energyNodes?.hit(obstacle.mesh,damage);barrels?.hit(obstacle.mesh,damage,{player:bolt.reflected,weapon:bolt.reflected?3:null});},
@@ -284,7 +287,8 @@ function rusherBlast({enemy,x,y,z,radius,damage}){const point=new THREE.Vector3(
 function mortarEvent(m){if(m.type==='telegraph'){mortarMarkers.telegraph({x:m.x,z:m.z,radius:m.radius,seconds:m.seconds,owner:m.owner,y:playerMotion.state.y});gameAudio.telegraph('orange',{x:m.x,z:m.z},false);return;}
  const point=new THREE.Vector3(m.x,playerMotion.state.y,m.z);art.burst(point.clone().add(new THREE.Vector3(0,.6,0)),0xff6a3d,40);gameAudio.play('vehicle.impact',{position:{x:m.x,z:m.z}});
  const feet=new THREE.Vector3(camera.position.x,playerMotion.state.y,camera.position.z);if(Math.abs(feet.y-point.y)<2.2)environmentHurt(mortarStrike(point,feet,{radius:m.radius,damage:m.damage}),point);}
-const enemyDirector=createEnemyDirector({onRusherBlast:rusherBlast,onMortar:mortarEvent,scaleCooldown:p4Cooldown,onEliteWindow:()=>fieldRecord.window(),thermalVision:IS_POLAR?()=>art.thermal:null,enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
+attackBudget.register('projectiles',()=>enemyProjectiles.attackers);attackBudget.register('boss',()=>overseer?.boss?.threatening?1:0);
+const enemyDirector=createEnemyDirector({attackBudget,onRusherBlast:rusherBlast,onMortar:mortarEvent,scaleCooldown:p4Cooldown,onEliteWindow:()=>fieldRecord.window(),thermalVision:IS_POLAR?()=>art.thermal:null,enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
  if(event.changed){notify('Warden 阶段切换 // '+BOSS_PHASES[enemy.bossState.phase].name);gameAudio.play('boss.phase');}
  else if(event.opened){notify('Warden 过载 // 青色胸口核心暴露，集中攻击！');gameAudio.play('boss.window.open');}
  else if(event.closed)gameAudio.play('boss.window.close');

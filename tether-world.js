@@ -1,4 +1,4 @@
-import {createBossChargeInterrupt} from './boss-charge-interrupt.js';
+import {createBossAdapter} from './boss-adapter.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
 import * as T from './node_modules/three/build/three.module.js';
@@ -34,7 +34,7 @@ export function createTetherWorld(scene,obstacles){
   panel.style.borderColor=s.phase==='exposed'?'#71ffff':'#ffc85a';panel.dataset.exposed=String(s.phase==='exposed');
  }
  function setStage(index){if(stage===index)return;breaker.reset();delete haloTarget.haloMark;stage=index;rules.reset(index===3);if(index===3)battle.start(TETHER_NAME);sync();}
- const breaker=createBossChargeInterrupt(rules,'tether');
+ const boss=createBossAdapter(rules,'tether',{name:TETHER_NAME,maxHp:TETHER_MAX_HP}),breaker={interrupt:boss.interruptCharge,reset:boss.resetInterrupt};
  function interruptCharge(){const ok=breaker.interrupt();if(ok)sync(true);return ok;}
  function clear(){breaker.reset();delete haloTarget.haloMark;battle.clear();stage=-1;shieldFeedback=0;rules.reset();markers.forEach(el=>el.hidden=true);sync(false);}
  function update(dt,player,feetY,playing,grounded=true){
@@ -51,5 +51,5 @@ export function createTetherWorld(scene,obstacles){
    if(!el.hidden){el.style.left=((p.x+1)*innerWidth/2)+'px';el.style.top=((1-p.y)*innerHeight/2)+'px';el.textContent='▼ 稳定器 '+(i+1)+' / '+GRAVITY_BANDS[i].name.split(' / ')[0]+' · '+Math.ceil(rules.state.stabilizers[i])+' HP';}
   });
  }
- clear();return {interruptCharge,setStage,clear,update,hit,updateMarkers,battle,origin:new T.Vector3(TETHER_POSITION.x,0,TETHER_POSITION.z),get blocking(){return rules.blocking;},get state(){return rules.state;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[]),...nodes.filter(n=>n.visible)]:[];}};
+ clear();return {interruptCharge,boss,setStage,clear,update,hit,updateMarkers,battle,origin:new T.Vector3(TETHER_POSITION.x,0,TETHER_POSITION.z),get blocking(){return rules.blocking;},get state(){return rules.state;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[]),...nodes.filter(n=>n.visible)]:[];}};
 }

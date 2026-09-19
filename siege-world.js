@@ -1,4 +1,4 @@
-import {createBossChargeInterrupt} from './boss-charge-interrupt.js';
+import {createBossAdapter} from './boss-adapter.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
@@ -27,7 +27,7 @@ export function createSiegeWorld(scene,obstacles,config,{onEvent=()=>{},getPlaye
   for(const b of bases){const active=s.active&&(!sky||Math.abs(b.bottom-rules.floor)<.1),index=obstacles.indexOf(b);b.mesh.visible=active;if(active&&index<0)obstacles.push(b);if(!active&&index>=0)obstacles.splice(index,1);}
   root.updateMatrixWorld(true);ui.update(rules,playing,interaction,feedback,haloMarkText(haloTarget),feet);
  }
- const breaker=createBossChargeInterrupt(rules,'siege');
+ const boss=createBossAdapter(rules,'siege',{name:config.name,maxHp:config.hp}),breaker={interrupt:boss.interruptCharge,reset:boss.resetInterrupt};
  function interruptCharge(){const ok=breaker.interrupt();if(ok)sync(true);return ok;}
  function clear(){breaker.reset();stage=-1;rules.reset();battle.clear();delete haloTarget.haloMark;interaction={};feedback=0;clock=0;summonPending=summoned=false;sync(false);ui.markers.forEach(m=>m.hidden=true);}
  function setStage(index){if(stage===index)return;breaker.reset();stage=index;rules.reset();delete haloTarget.haloMark;interaction={};feedback=0;summonPending=summoned=false;sync(false);}
@@ -59,7 +59,7 @@ export function createSiegeWorld(scene,obstacles,config,{onEvent=()=>{},getPlaye
   return [{x:2,z:2,y:4.5},{x:0,z:-2,y:4.5}].filter(p=>Math.hypot(p.x-player.x,p.z-player.z)>=6);
  }
  function dispose(){clear();scene.remove(root);for(const o of owned){const i=obstacles.indexOf(o);if(i>=0)obstacles.splice(i,1);}root.traverse(m=>m.geometry?.dispose());materials.forEach(m=>m.dispose());ui.dispose();}
- clear();return {interruptCharge,setStage,prepareMission,clear,interact,update,hit,updateMarkers,dispose,battle,takeSummons,summonRole:'hound',summonMessage:'SKYHOOK 投放猎犬机 // 最多两台，落点在信号车顶',
+ clear();return {interruptCharge,boss,setStage,prepareMission,clear,interact,update,hit,updateMarkers,dispose,battle,takeSummons,summonRole:'hound',summonMessage:'SKYHOOK 投放猎犬机 // 最多两台，落点在信号车顶',
   canAdvance:m=>m.index!==3||!m.defending||(rules.state.phase==='defeated'&&!rules.blocking),get state(){return rules.state;},get arena(){return {...rules.arena};},get blocking(){return rules.blocking;},get floor(){return rules.floor;},
   get origin(){return new T.Vector3(config.core.x,rules.floor,config.core.z);},get targets(){return rules.alive?[model.core,...(model.cage.visible?[model.cage]:[]),...model.armor.filter(m=>config.id!=='skyhook'||m.userData.siegePhase===rules.arena.index)]:[];},
   get objective(){const p=(rules.state.phase==='exposed'||rules.arena.mode==='operation')?{...config.core,feetY:rules.floor}:config.controls[rules.arena.index];return new T.Vector3(p.x,p.feetY+1,p.z);},

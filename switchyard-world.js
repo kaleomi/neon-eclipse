@@ -1,4 +1,4 @@
-import {createBossChargeInterrupt} from './boss-charge-interrupt.js';
+import {createBossAdapter} from './boss-adapter.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
@@ -70,7 +70,7 @@ export function createSwitchyardWorld(scene,obstacles,{onEvent=()=>{}}={}){
    battle.start(SWITCHYARD.name,{damageLabel:'Boss 列车 / 地面放电'});rules.activate();sync(true);return true;
   }return false;
  }
- const breaker=createBossChargeInterrupt(rules,'blast');
+ const boss=createBossAdapter(rules,'blast',{name:SWITCHYARD.name,maxHp:SWITCHYARD.hp}),breaker={interrupt:boss.interruptCharge,reset:boss.resetInterrupt};
  function interruptCharge(){const ok=breaker.interrupt();if(ok)sync(true);return ok;}
  function clear(){breaker.reset();stage=-1;rules.reset();battle.clear();delete haloTarget.haloMark;interaction={};feedback=0;displayTime=0;ui.hide();sync(false);}
  function interact(dt,{camera,held,busy=false,feetY=0,grounded=true}={}){
@@ -110,7 +110,7 @@ export function createSwitchyardWorld(scene,obstacles,{onEvent=()=>{}}={}){
   });
  }
  function dispose(){clear();scene.remove(root);for(const o of owned){const i=obstacles.indexOf(o);if(i>=0)obstacles.splice(i,1);}root.traverse(m=>m.geometry?.dispose());materials.forEach(m=>m.dispose());ui.panel.remove();ui.markers.forEach(m=>m.remove());}
- clear();return {interruptCharge,setStage,prepareMission,canAdvance:m=>m.index!==3||!m.defending||(rules.state.phase==='defeated'&&!rules.blocking),clear,interact,update,hit,updateMarkers,dispose,battle,
+ clear();return {interruptCharge,boss,setStage,prepareMission,canAdvance:m=>m.index!==3||!m.defending||(rules.state.phase==='defeated'&&!rules.blocking),clear,interact,update,hit,updateMarkers,dispose,battle,
   origin:new T.Vector3(SWITCHYARD_CORE.x,0,SWITCHYARD_CORE.z),
   get state(){return rules.state;},get rail(){return {...rules.rail};},get blocking(){return rules.blocking;},
   get targets(){return rules.alive?[core,...(cage.visible?[cage]:[])]:[];},

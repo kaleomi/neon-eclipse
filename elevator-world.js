@@ -1,4 +1,4 @@
-import {createBossChargeInterrupt} from './boss-charge-interrupt.js';
+import {createBossAdapter} from './boss-adapter.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
@@ -41,7 +41,7 @@ export function createElevatorWorld(scene,obstacles,{onEvent=()=>{},getPlayerFee
   volume.mesh.position.y=(volume.top+volume.bottom)/2;root.updateMatrixWorld(true);
   ui.update(rules,lift,playing,feedback,interaction,haloMarkText(haloTarget));
  }
- const breaker=createBossChargeInterrupt(rules,'beam');
+ const boss=createBossAdapter(rules,'beam',{name:ELEVATOR.name,maxHp:ELEVATOR.hp}),breaker={interrupt:boss.interruptCharge,reset:boss.resetInterrupt};
  function interruptCharge(){const ok=breaker.interrupt();if(ok)sync(true);return ok;}
  function clear(){breaker.reset();rules.reset();battle.clear();lift.reset();delete haloTarget.haloMark;stage=-1;callHold=0;callId=-1;interaction={};feedback=0;displayTime=0;sync(false);}
  function setStage(index){if(stage===index)return;breaker.reset();stage=index;rules.reset();lift.reset(index>=4?6:0);delete haloTarget.haloMark;callHold=0;callId=-1;interaction={};feedback=0;sync(false);}
@@ -95,7 +95,7 @@ export function createElevatorWorld(scene,obstacles,{onEvent=()=>{},getPlayerFee
   });
  }
  function dispose(){clear();scene.remove(root);for(const o of owned){const i=obstacles.indexOf(o);if(i>=0)obstacles.splice(i,1);}root.traverse(m=>m.geometry?.dispose());materials.forEach(m=>m.dispose());ui.panel.remove();ui.markers.forEach(m=>m.remove());}
- clear();return {interruptCharge,clear,setStage,prepareMission,beforeMotion,interact,update,hit,updateMarkers,dispose,battle,
+ clear();return {interruptCharge,boss,clear,setStage,prepareMission,beforeMotion,interact,update,hit,updateMarkers,dispose,battle,
   canAdvance:m=>m.index!==3||!m.defending||(rules.state.phase==='defeated'&&!rules.blocking),
   get state(){return rules.state;},get arena(){return {...rules.arena};},get lift(){return {y:lift.y,target:lift.target,moving:lift.moving,blocked:lift.blocked};},
   get blocking(){return rules.blocking;},get origin(){return new T.Vector3(ELEVATOR_CORE.x,rules.floor,ELEVATOR_CORE.z);},

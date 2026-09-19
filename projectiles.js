@@ -8,6 +8,8 @@ export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact,hook
  const active=[],pending=[];
  const maxAttackers=Number.isInteger(hooks.maxAttackers)&&hooks.maxAttackers>0?hooks.maxAttackers:Infinity;
  const attackSlots=()=>new Set([...pending.map(p=>p.slot),...active.filter(b=>!b.reflected).map(b=>b.slot)]);
+ // Optional shared budget: external telegraphs (Boss, mortars) consume the same slots as projectile attackers.
+ const externalAttackers=()=>{const n=hooks.budget?.external?.('projectiles');return Number.isFinite(n)&&n>0?Math.floor(n):0;};
  const coreGeometry=new THREE.SphereGeometry(.11,8,6),trailGeometry=new THREE.CylinderGeometry(.05,.015,1,6);
  const haloGeometry=new THREE.SphereGeometry(.22,8,6),ringGeometry=new THREE.TorusGeometry(.27,.035,6,24);
  const white=new THREE.MeshBasicMaterial({color:0xffecc6});
@@ -16,7 +18,7 @@ export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact,hook
  function removePending(index){const p=pending[index];scene.remove(p.ring);if(p.line){scene.remove(p.line);p.line.geometry.dispose();p.line.material.dispose();}pending.splice(index,1);}
  function queue(origin,target,boss=false,owner=null,pattern=null){
   const resolved=hooks.resolveTarget?.(origin,target,boss,owner);if(resolved===null)return false;if(resolved)target=resolved;
-  const slot=owner||{},slots=attackSlots();if(!slots.has(slot)&&slots.size>=maxAttackers)return false;
+  const slot=owner||{},slots=attackSlots();if(!slots.has(slot)&&slots.size+externalAttackers()>=maxAttackers)return false;
   const attack={color:boss?'pink':'orange',charge:boss?.65:.45,speed:boss?15:18,damage:boss?10:6,angles:boss?[-.12,0,.12]:[0],bursts:1,burstDelay:.3,burstOffset:0,showAim:false,...pattern};
   const reserved=pending.reduce((n,p)=>n+(p.attack.bursts-p.emitted)*p.attack.angles.length,0);
   if(pending.length>=16||active.length+reserved+attack.bursts*attack.angles.length>96)return false;

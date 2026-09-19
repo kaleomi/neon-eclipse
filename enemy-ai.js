@@ -11,8 +11,9 @@ import {animateEnemy} from './enemy-model.js';
 import {createSquadCoordinator,rusherIntent,RUSHER,ARTILLERY,stepArtillery} from './squad.js';
 const THERMAL_RANGE=26;
 
-export function createEnemyDirector({enemies,player,navigation,vertical=null,move,obstacles,projectiles,onBossEvent,onEliteWindow=()=>{},scaleCooldown=seconds=>seconds,thermalVision=null,onRusherBlast=()=>{},onMortar=()=>{},squadEnabled=true}){
+export function createEnemyDirector({enemies,player,navigation,vertical=null,move,obstacles,projectiles,onBossEvent,onEliteWindow=()=>{},scaleCooldown=seconds=>seconds,thermalVision=null,onRusherBlast=()=>{},onMortar=()=>{},squadEnabled=true,attackBudget=null}){
  const squad=createSquadCoordinator({types:ENEMY_TYPES});const mortars=[];
+ attackBudget?.register('mortars',()=>mortars.length);
  const coordination=createSwarmCoordination({position:e=>e.group.position,visible:(from,to)=>voltClearPath(from,to,obstacles.map(o=>o.mesh))});
  const budget=()=>(projectiles.countThreatTag?.('swarmDrone')||0)+(projectiles.countThreatTag?.('swarmCoordinated')||0);
  const canStart=()=>!projectiles.charging&&!projectiles.hasThreatTag?.('sentry')&&budget()<2;
@@ -89,7 +90,7 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
     const phase=enemy.boss?BOSS_PHASES[enemy.bossState.phase]:null,attack=phase?phase.attack:profile.attack;
     // Freeze position and aim during telegraph; all bolts retain this captured target.
     origin.set(pos.x,enemyMuzzleHeight(enemy),pos.z);
-    if(enemy.type==='artilleryMech'){if(dist>=ARTILLERY.minRange&&projectiles.attackers<3){mortars.push({x:player.position.x,z:player.position.z,remaining:ARTILLERY.telegraph,owner:enemy.group});onMortar({type:'telegraph',x:player.position.x,z:player.position.z,radius:ARTILLERY.radius,seconds:ARTILLERY.telegraph,owner:enemy.group});enemy.charge=ARTILLERY.telegraph+.1;enemy.attack=scaleCooldown(profile.cooldown+Math.random()*.4);gate=.5;nextActor=(enemies.indexOf(enemy)+1)%Math.max(1,enemies.length);}}
+    if(enemy.type==='artilleryMech'){if(dist>=ARTILLERY.minRange&&(attackBudget?attackBudget.allow('mortars'):projectiles.attackers<3)){mortars.push({x:player.position.x,z:player.position.z,remaining:ARTILLERY.telegraph,owner:enemy.group});onMortar({type:'telegraph',x:player.position.x,z:player.position.z,radius:ARTILLERY.radius,seconds:ARTILLERY.telegraph,owner:enemy.group});enemy.charge=ARTILLERY.telegraph+.1;enemy.attack=scaleCooldown(profile.cooldown+Math.random()*.4);gate=.5;nextActor=(enemies.indexOf(enemy)+1)%Math.max(1,enemies.length);}}
     else if(projectiles.queue(origin,target,enemy.boss,enemy.group,attack)){
      nextActor=(enemies.indexOf(enemy)+1)%Math.max(1,enemies.length);
      enemy.charge=attack.charge+(attack.bursts-1)*(attack.burstDelay||.3)+.05;

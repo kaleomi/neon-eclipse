@@ -1,7 +1,7 @@
 // Owned attempts + serialized CAS commits. No optimistic progress or automatic conflict overwrite.
 import {emptyExpedition,validExpedition,canonicalExpedition,newExpeditionCampaign,newExpeditionId,
   nextExpeditionMission,expeditionDifficulty,expeditionRecordFromMission,advanceExpedition,EXPEDITION_RECORD_LIMIT,
-  expeditionCheckpointFromMission,saveExpeditionCheckpoint,expeditionCheckpointRank,canonicalExpeditionCheckpoint} from './expedition-model.js';
+  expeditionCheckpointFromMission,saveExpeditionCheckpoint,expeditionCheckpointRank,canonicalExpeditionCheckpoint,EXPEDITION_TOTAL,EXPEDITION_FINAL} from './expedition-model.js';
 
 export function createExpeditionSession({store,onChange=()=>{}}){
   let archive=null,revision=null,busy=false,jobs=[],attempt=null,error=null,message='正在读取先遣队档案…',inFlight=Promise.resolve();
@@ -39,7 +39,7 @@ export function createExpeditionSession({store,onChange=()=>{}}){
         if(!r.ok){error=r.code;message='本页仍有未保存操作，进度没有提前推进；请重试保存。冲突时需读取最新档案，不会自动覆盖。';busy=false;emit();return false;}
         archive=canonicalExpedition(job.archive);revision=r.revision;jobs.shift();
         message=job.kind==='new'?'新战役已保存；可从第一关开始。':job.kind==='checkpoint'?'先遣队安全节点已保存；从节点继续将单独标记，不计完整一命最好用时。':
-          archive.campaign.completed.length===4?'前四关已完成并保存；第 5–8 关尚未接入，未授予完整先遣队称号。':'本关通关记录与进度已保存，可以继续下一关。';
+          archive.campaign.completed.length===EXPEDITION_TOTAL?'前 '+EXPEDITION_TOTAL+' 关已完成并保存；第 '+(EXPEDITION_TOTAL+1)+'–'+EXPEDITION_FINAL+' 关尚未接入，未授予完整先遣队称号。':'本关通关记录与进度已保存，可以继续下一关。';
         emit();
       }
       busy=false;emit();return true;

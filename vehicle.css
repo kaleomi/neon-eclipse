@@ -15,17 +15,19 @@
 
 /* P3 vehicle armament and wear panel; independent of chase and flight HUD blocks. */
 #vehicle-weapon-panel{position:fixed;right:40px;top:125px;width:300px;padding:14px 17px;background:#122b35e8;border:1px solid #9ccbb766;pointer-events:none}#vehicle-weapon-panel>small{color:#b9e6cf;font:10px Consolas,monospace;letter-spacing:.08em}#vehicle-weapon-panel>div{display:flex;justify-content:space-between;margin-top:10px;font-size:10px;color:#b5c7bb}#vehicle-weapon-panel b{display:block;color:#f0ead6;font:19px/1.6 Consolas,monospace}#vw-hull-meter{width:100%;height:8px;margin:10px 0 4px}#vehicle-weapon-panel p{font-size:11px;line-height:1.6;color:#d3e4d8;margin:4px 0 0}#vw-hint{color:#c9c5ac}#vehicle-weapon-panel[data-tier=smoking]{border-color:#e6b883}#vehicle-weapon-panel[data-tier=disabled]{border-color:#ff795e;background:#382a25ed}#vehicle-weapon-panel[data-gunner=true]{border-color:#c8ffe9;box-shadow:0 0 18px #7fdcb955}body[data-chase-status=active] #vehicle-weapon-panel,body[data-joint-status=active] #vehicle-weapon-panel{display:none}.armament-brief{border-color:#9ccbb766}@media(max-width:1000px){#vehicle-weapon-panel{right:22px;top:115px;width:270px}}@media(max-width:560px){#vehicle-weapon-panel{top:245px;left:22px;right:22px;width:auto;padding:10px 12px}#vehicle-weapon-panel b{font-size:16px}#vehicle-weapon-panel p{font-size:10px}}
-#escort-panel{position:fixed;right:40px;top:372px;width:300px;padding:14px 17px;background:#122b35e8;border:1px solid #f0b86066;pointer-events:none}
-#escort-panel>small{color:#f3cf8f;font:10px Consolas,monospace;letter-spacing:.08em}
-#escort-panel>small+small{float:right;color:#d3e4d8}
-#escort-panel>div{display:flex;justify-content:space-between;margin-top:10px;font-size:10px;color:#b5c7bb}
-#escort-panel b{display:block;color:#f0ead6;font:19px/1.6 Consolas,monospace}
+#escort-panel,#lighthouse-panel{position:fixed;right:40px;top:372px;width:300px;padding:14px 17px;background:#122b35e8;border:1px solid #f0b86066;pointer-events:none}
+#escort-panel>small,#lighthouse-panel>small{color:#f3cf8f;font:10px Consolas,monospace;letter-spacing:.08em}
+#escort-panel>small+small,#lighthouse-panel>small+small{float:right;color:#d3e4d8}
+#escort-panel>div,#lighthouse-panel>div{display:flex;justify-content:space-between;margin-top:10px;font-size:10px;color:#b5c7bb}
+#escort-panel b,#lighthouse-panel b{display:block;color:#f0ead6;font:19px/1.6 Consolas,monospace}
 #escort-panel meter{width:100%;height:8px;margin-top:6px}
-#escort-panel p{font-size:11px;line-height:1.6;color:#d3e4d8;margin:6px 0 0}
+#escort-panel p,#lighthouse-panel p{font-size:11px;line-height:1.6;color:#d3e4d8;margin:6px 0 0}
 #escort-panel[data-warning=true]{border-color:#ff6a3c;box-shadow:0 0 18px #ff4a2c66;background:#3a2622ed}
 .escort-brief{border-color:#f0b86066}
 .escort-brief label{display:block;font-size:12px;color:#e3d3af;margin:8px 0}
 .escort-brief select{margin-left:6px;font:12px Consolas,monospace;background:#0f2028;color:#f0ead6;border:1px solid #f0b86066;padding:3px 6px}
 .escort-difficulty-copy{font-size:10px;line-height:1.6;margin:4px 0 8px;color:#b5c7bb}
-@media (max-width:1100px){#escort-panel{right:22px;top:352px;width:280px}}
-@media (max-width:720px){#escort-panel{top:auto;bottom:120px;right:22px;left:22px;width:auto;padding:10px 12px}#escort-panel b{font-size:16px}}
+@media (max-width:1100px){#escort-panel,#lighthouse-panel{right:22px;top:352px;width:280px}}
+@media (max-width:720px){#escort-panel,#lighthouse-panel{top:auto;bottom:120px;right:22px;left:22px;width:auto;padding:10px 12px}#escort-panel b{font-size:16px}}
+#lighthouse-panel{border-color:#9df5c666}
+#lighthouse-panel>small{color:#a9efcf}

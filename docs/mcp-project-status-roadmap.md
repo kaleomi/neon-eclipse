@@ -90,10 +90,16 @@
 - 新模块 `interaction-rules.js` / `interaction-world.js` / `interaction-layouts.js`：每章两座可按住 E 的基座——排气阀（1.5s 启动、5s 半径 3.2m 云：敌人半速且不能预警、6 HP/s、12s 充压）与照明开关（0.6s 切换：黑暗中远程射程 ×0.65、潜行者/猎犬 ×1.25，可恢复）。九章各有主题命名与经约束校验的摆位。
 - 451/451 check、105/105 rules、41/41 integration；`test-interactions-browser` 九章真实页面原生 E 通过，诊断 0。摆位/忙碌/灯光基准三类首版失败已记录并修正。详见 `docs/mcp-p1-environment.md`。下一批：P2 天气 / 击杀表现 / 过场。
 
+### P3 交付：先遣队第 5 关 · 灯塔岛登陆（2026-09-19）
+
+- 新模块 `lighthouse-mission.js` / `lighthouse-world.js`：游艇登船 → 灯塔岛北侧浮桥停稳 → 下船步行上岛 → 三处按住 F 清点 → 回船返港，8 阶段、三档时限与保持。`maritime-rules.js` 增加岛顶/浮桥步行地表与坡度高度，浮桥对船是障碍。先遣队接入为第 5 关（`lighthouse-v1`，锁定战役难度，无安全节点，从码头重试）；关卡数量改由任务表派生，旧 `front4-v1` 档案原样可读。
+- 464/464 check、107/107 rules、42/42 integration；`test-expedition-browser`（含第 5 关原生启动/失败/无效/单项脱离/通关/刷新）、backup、checkpoint 三条浏览器链串行 EXIT 0，诊断 0，登岛阶段截图已查看。首轮浮桥挡住追逐 AI 静态图等四处失败已记录修正。
+- 未实现：直升机并入试验区与撤离段（仍为独立 `helicopter.html`）、第 6–8 关、完整“先遣队”称号、第 5 关安全节点。详见 `docs/mcp-p3-expedition-mission5.md`。下一批：app.js 拆分 / CI / 统计。
+
 ### P2 交付：天气预设 / 击杀表现 / 章节过场（2026-09-19）
 
 - 新模块 `weather-rules.js` / `weather-world.js`（晴/雨/雾/沙尘/夜/雪 + 强度，URL `?weather=` 覆盖；雾使敌人开火距离 ×0.7，速度/预警/碰撞不变，港口与极地视觉仍由原世界模块负责）、`kill-fx-rules.js` / `kill-fx-world.js`（击杀白色幽灵 0.1s 闪白 + 0.3s 溶解；精英/Boss 0.3s ×0.35 慢动作；设置页三项开关持久化）、`cinematic-rules.js` / `cinematic-world.js`（10s 可跳过开场飞掠 + 三行 + 目标卡）与 `menu-ui.js` 数据驱动"进入下一关"简报。连杀提示沿用既有 `streak-banner`。
-- 461/461 check、106/106 rules、42/42 integration；`test-presentation-browser` 真实页面通过，smoke/interactions/boss-polish/datacenter/polar 串行复跑退出 0，诊断 0。自动化下默认关闭开场/幽灵/慢动作（`?intro=1` / `?fx=1` 开启）。六类首版失败已记录并修正。详见 `docs/mcp-p2-presentation.md`。下一批：第 5–8 关深度 / 直升机与载具演进。
+- 461/461 check、106/106 rules、42/42 integration；`test-presentation-browser` 真实页面通过，smoke/interactions/boss-polish/datacenter/polar 串行复跑退出 0，诊断 0。自动化下默认关闭开场/幽灵/慢动作（`?intro=1` / `?fx=1` 开启）。六类首版失败已记录并修正。详见 `docs/mcp-p2-presentation.md`。下一批：第 5–8 关深度 / 直升机与载具演进（第 5 关已于下批接入，见上）。
 
 ### 状态与范围
 

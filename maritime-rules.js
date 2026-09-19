@@ -6,16 +6,25 @@ export const PLANE_SPAWN={x:-300,z:220,yaw:0,y:1.3};
 export const DOCK={minX:205,maxX:272,minZ:174,maxZ:186};
 export const GANGWAY={minX:270,maxX:275,minZ:178.5,maxZ:181.5};
 export const ISLANDS=[{x:440,z:-230,r:35,h:6},{x:500,z:260,r:28,h:9}];
+export const LIGHTHOUSE_ISLAND=ISLANDS[1];
+// Floating pier runs north from the lighthouse island top down to water level (rising with z); the yacht parks alongside its west face.
+export const ISLAND_PIER={minX:496,maxX:504,minZ:204,maxZ:240,low:.85};
+export const LIGHTHOUSE_LANDING={x:491,z:216,yaw:0};
+const onIsland=(x,z,r)=>Math.hypot(x-LIGHTHOUSE_ISLAND.x,z-LIGHTHOUSE_ISLAND.z)+r<=LIGHTHOUSE_ISLAND.r*.78;
 export const FIELD_BUILDINGS=[{minX:-365,maxX:-325,minZ:175,maxZ:225,h:13},{minX:-366,maxX:-335,minZ:80,maxZ:130,h:9},{minX:173,maxX:205,minZ:218,maxZ:247,h:7}];
 export const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const inRect=(x,z,b,r=0)=>x-r>=b.minX&&x+r<=b.maxX&&z-r>=b.minZ&&z+r<=b.maxZ;
-export function isFootSurface(x,z,r=.4){return Math.abs(x)+r<=FIELD.bounds&&Math.abs(z)+r<=FIELD.bounds&&(x+r<=FIELD.coast||inRect(x,z,DOCK,r)||inRect(x,z,GANGWAY,r));}
-export function footHeight(x,z){return x>=205&&((x<=272&&z>=174&&z<=186)||(x<=275&&z>=178.5&&z<=181.5))?.85:0;}
+export function isFootSurface(x,z,r=.4){return Math.abs(x)+r<=FIELD.bounds&&Math.abs(z)+r<=FIELD.bounds&&(x+r<=FIELD.coast||inRect(x,z,DOCK,r)||inRect(x,z,GANGWAY,r)||inRect(x,z,ISLAND_PIER,r)||onIsland(x,z,r));}
+export function footHeight(x,z){
+ if(x>=205&&((x<=272&&z>=174&&z<=186)||(x<=275&&z>=178.5&&z<=181.5)))return .85;
+ if(onIsland(x,z,0))return LIGHTHOUSE_ISLAND.h;
+ if(inRect(x,z,ISLAND_PIER,0))return ISLAND_PIER.low+(LIGHTHOUSE_ISLAND.h-ISLAND_PIER.low)*clamp((z-ISLAND_PIER.minZ)/(ISLAND_PIER.maxZ-ISLAND_PIER.minZ),0,1);
+ return 0;
+}
 export function landSurface(x,z,r=1){return x+r<=FIELD.coast&&Math.abs(x)+r<=FIELD.bounds&&Math.abs(z)+r<=FIELD.bounds;}
 export function waterFree(x,z,r=2.7){
  if(x-r<=FIELD.coast||x+r>FIELD.bounds||Math.abs(z)+r>FIELD.bounds)return false;
- const dx=x-clamp(x,DOCK.minX,DOCK.maxX),dz=z-clamp(z,DOCK.minZ,DOCK.maxZ);
- if(dx*dx+dz*dz<r*r)return false;
+ for(const b of [DOCK,ISLAND_PIER]){const dx=x-clamp(x,b.minX,b.maxX),dz=z-clamp(z,b.minZ,b.maxZ);if(dx*dx+dz*dz<r*r)return false;}
  return ISLANDS.every(i=>Math.hypot(x-i.x,z-i.z)>i.r+r);
 }
 export function createYacht(){return {...YACHT_SPAWN,speed:0,steer:0,distance:0,impacts:0,cooldown:0};}

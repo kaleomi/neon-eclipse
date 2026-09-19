@@ -13,8 +13,9 @@ const fixture=`
 window.__p3Fixture={
  deferNaval(){const original=navalCheckpointUI.begin;window.__releaseNaval=null;navalCheckpointUI.begin=async(...args)=>{await new Promise(resolve=>window.__releaseNaval=resolve);navalCheckpointUI.begin=original;return original(...args);};},
  win(id,{invalid=false,recovered=false}={}){
-  pause();const m=id==='escort'?escort:id==='naval'?chase:id==='recon'?sortie:joint;
-  if(id==='escort'){
+  pause();const m=id==='escort'?escort:id==='naval'?chase:id==='recon'?sortie:id==='lighthouse'?lighthouse:joint;
+  if(id==='lighthouse'){m.elapsed=150;m.stage='complete';m.completed=[...LIGHTHOUSE_STAGES];m.surveys=invalid?2:3;}
+  else if(id==='escort'){
    Object.assign(m.truck,{arrived:true,index:4});m.waves=[true,!invalid,true];m.waveIndex=3;m.spawned=m.profile.waves.reduce((a,b)=>a+b,0);m.killed=m.spawned;
    m.hounds=Array.from({length:m.spawned},(_,i)=>({id:i+1,type:'hound',alive:false,hp:0,maxHp:54,x:0,y:1,z:0,yaw:0,r:1,flash:0,mode:'recover',timer:0,lock:null}));m.elapsed=100;
   }else if(id==='naval'){
@@ -24,9 +25,9 @@ window.__p3Fixture={
    m.result={attempt:m.attempt,completedAt:Date.now(),tookOff:true,approached:true,landedSafely:true,routeComplete:true,uploadTime:2,status:'won',elapsed:100,gates:3,stopTime:2,records:m.recon.records,uploaded:!invalid};
   }else{m.elapsed=300;m.stage='complete';m.completed=invalid?[]:[...JOINT_STAGES];m.flightId=crypto.randomUUID();}
   m.status='won';m.reason='受控集成夹具完成（非自然通关）';if(recovered)m.recovered=true;
-  if(id==='escort')finishEscort();else if(id==='naval')finishChase();else if(id==='recon')finishFlight();else finishJoint();
+  if(id==='escort')finishEscort();else if(id==='naval')finishChase();else if(id==='recon')finishFlight();else if(id==='lighthouse')finishLighthouse();else finishJoint();
  },
- lose(id){pause();const m=id==='escort'?escort:id==='naval'?chase:id==='recon'?sortie:joint;m.status='lost';m.reason='受控失败';if(id==='escort')finishEscort();else if(id==='naval')finishChase();else if(id==='recon')finishFlight();else finishJoint();},
+ lose(id){pause();const m=id==='escort'?escort:id==='naval'?chase:id==='recon'?sortie:id==='lighthouse'?lighthouse:joint;m.status='lost';m.reason='受控失败';if(id==='escort')finishEscort();else if(id==='naval')finishChase();else if(id==='recon')finishFlight();else if(id==='lighthouse')finishLighthouse();else finishJoint();},
  async seedJointCheckpoint(){
   const {checkpointFromMission}=await import('./joint-checkpoint-model.js');const {createJointCheckpointStore}=await import('./joint-checkpoint-store.js');
   const m=createJointMission(true);m.stage='drive';m.completed=['pickup'];m.elapsed=20;const c=checkpointFromMission(m);const store=createJointCheckpointStore(),r=await store.read();
@@ -73,8 +74,18 @@ try{
   await page.click('#resume-joint-checkpoint');await page.waitForFunction(()=>document.body.dataset.jointRecovered==='true');
   assert.equal(await page.getAttribute('body','data-expedition-mission'),'none');await win('joint');await progress(3);
   await twice('#expedition-continue');await running('joint');assert.equal(await page.getAttribute('body','data-joint-recovered'),'false');
-  await win('joint');await progress(4);assert(await page.locator('#expedition-continue').isDisabled());assert.match(await page.locator('#expedition-status').textContent(),/第 5–8 关未开放/);
-  await page.reload();await progress(4);
+  await win('joint');await progress(4);assert(!(await page.locator('#expedition-continue').isDisabled()),'fifth mission is now open');assert.match(await page.locator('#expedition-status').textContent(),/灯塔岛登陆/);
+  // Mission 5: native start from the marina with the campaign difficulty, standalone preference ignored, loss keeps progress, invalid evidence refused, then a qualified win.
+  await page.evaluate(()=>localStorage.setItem('neon-eclipse.lighthouse-difficulty.v1','easy'));
+  await twice('#expedition-continue');await running('lighthouse');assert.equal(await page.getAttribute('body','data-lighthouse-difficulty'),'hard');assert.equal(await page.getAttribute('body','data-lighthouse-stage'),'board');assert.equal(await page.getAttribute('body','data-vehicle-kind'),'walking');
+  await page.keyboard.press('Escape');await page.evaluate(()=>window.__p3Fixture.lose('lighthouse'));await progress(4);
+  await twice('#expedition-continue');await running('lighthouse');await win('lighthouse',{invalid:true});await progress(4);assert.match(await page.locator('#expedition-feedback').textContent(),/未满足/);
+  await page.keyboard.press('Escape');await twice('#start-lighthouse');await page.waitForFunction(()=>document.body.dataset.lighthouseStatus==='active'&&document.body.dataset.driveActive==='true');
+  assert.equal(await page.getAttribute('body','data-expedition-mission'),'none','standalone lighthouse detaches the campaign');assert.equal(await page.getAttribute('body','data-lighthouse-difficulty'),'easy');await win('lighthouse');await progress(4);
+  await twice('#expedition-continue');await running('lighthouse');await win('lighthouse');await progress(5);assert(await page.locator('#expedition-continue').isDisabled());assert.match(await page.locator('#expedition-status').textContent(),/第 6–8 关未开放/);
+  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="lighthouse"][data-difficulty="hard"]','data-count'),'1');
+  await page.reload();await progress(5);
+  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="lighthouse"][data-difficulty="hard"]','data-count'),'1');
   assert.equal(await page.getAttribute('.expedition-record-row[data-mission="escort"][data-difficulty="hard"]','data-count'),'1');
   assert.equal(await page.getAttribute('.expedition-record-row[data-mission="naval"][data-difficulty="hard"]','data-count'),'1');
   assert.equal(await page.getAttribute('.expedition-record-row[data-mission="recon"][data-difficulty="fixed"]','data-count'),'1');
@@ -82,11 +93,11 @@ try{
   assert.deepEqual(await page.evaluate(s=>Object.fromEntries(Object.keys(s).map(k=>[k,localStorage.getItem(k)])),sentinel),sentinel);
   for(const [width,height] of [[1280,900],[390,780],[320,700]]){await page.setViewportSize({width,height});await page.locator('#expedition-panel').scrollIntoViewIfNeeded();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no horizontal overflow '+width);}
   assert.deepEqual(errors,[]);await context.close();
-  console.log('PASS step 3: fixed-rule recon/joint, separate records, legacy checkpoint detachment, fourth mission completion/reload, grouped results, saved-data isolation and narrow layouts');
+  console.log('PASS step 3: fixed-rule recon/joint, separate records, legacy checkpoint detachment, fifth mission (lighthouse) locked difficulty/loss/invalid/standalone detachment/completion/reload, grouped results, saved-data isolation and narrow layouts');
   // Screenshot a clean, unmodified production page, not the synthetic completion fixture.
   const clean=await browser.newContext({viewport:{width:1280,height:900}}),cleanPage=await clean.newPage();
   await cleanPage.goto(server.base+'/vehicle.html');await cleanPage.waitForFunction(()=>document.body.dataset.expeditionState==='ready');
   await cleanPage.locator('#expedition-panel').scrollIntoViewIfNeeded();await cleanPage.screenshot({path:path.join(shots,'p3-expedition-menu.png')});
   await cleanPage.setViewportSize({width:390,height:780});await cleanPage.locator('#expedition-panel').scrollIntoViewIfNeeded();await cleanPage.screenshot({path:path.join(shots,'p3-expedition-mobile.png')});await clean.close();
-  console.log('PASS: front-four UI and score wiring. Terminal-state fixtures are not full natural/human playthroughs. Screenshots: '+shots);
+  console.log('PASS: five-mission UI and score wiring. Terminal-state fixtures are not full natural/human playthroughs. Screenshots: '+shots);
 }finally{await browser?.close();await server.stop();}

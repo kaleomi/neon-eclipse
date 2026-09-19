@@ -21,10 +21,10 @@ function fixture(){
  const c={createNavalAim,navalAim:createNavalAim(),console,Set,performance:{now:()=>1000},$:element,keys:new Set(),active:false,started:true,kind:null,drag:false,fire:false,rocketKey:false,recovery:0,accumulator:0,missionIntent:0,
   overlay:element('overlay'),canvas:{focus(){}},document:{exitPointerLock(){}},window:{addEventListener:(k,f)=>events.set(k,f)},
   vehicleAudio:{pause(){},resume(){},unlock(){},reset(){}},expeditionUI:{detach(){}},flightUI:{reset(){}},updateHUD(){},updateCamera(){},notify(){},
-  joint:{status:'idle'},chase:{status:'idle'},sortie:{status:'idle'},escort:{status:'idle'},rover:{speed:0},plane:{speed:0,yaw:0},yacht:{speed:0},
+  joint:{status:'idle'},chase:{status:'idle'},sortie:{status:'idle'},escort:{status:'idle'},lighthouse:{status:'idle'},rover:{speed:0},plane:{speed:0,yaw:0},yacht:{speed:0},
   roofGun:createWeaponState('roof'),planeGun:createWeaponState('plane'),wear:{rover:{hull:100},yacht:{hull:100}},player:{x:7,z:8},
   TEST_SPAWN:{x:0,z:0},createRover:()=>({speed:0}),createPlane:()=>({speed:0,yaw:0}),createYacht:()=>({speed:0}),
-  createJointMission:active=>({status:active?'active':'idle',runId:'joint-'+ ++serial}),createFlightMission:()=>({status:'idle'}),createSeaChase:()=>({status:'idle'}),createEscort:()=>({status:'idle'}),
+  createJointMission:active=>({status:active?'active':'idle',runId:'joint-'+ ++serial}),createFlightMission:()=>({status:'idle'}),createSeaChase:()=>({status:'idle'}),createEscort:()=>({status:'idle'}),createLighthouseMission:()=>({status:'idle'}),
   createDriveTrial:()=>({index:0,elapsed:0}),createDurability:()=>({hull:100}),createWeaponState,
   createNavalRun:(_boat,difficulty='normal',runId='naval-'+ ++serial)=>({status:'active',runId,naval:{profile:{id:difficulty}}}),selectedNavalDifficulty:()=> 'normal',
   checkpointUI:{async begin(){return true;}},navalCheckpointUI:{async begin(){return true;}},setGunner(v){c.gunner=v;},
@@ -62,7 +62,7 @@ await test('pause/resume clears latched controls and time debt, but preserves th
  c.pause();assert.equal(c.active,false);assert.equal(c.keys.size,0);assert.equal(c.fire||c.drag||c.rocketKey,false);assert.equal(c.recovery,0);assert.equal(c.accumulator,0);
  stepPlaneGun(c.planeGun,{}, {},5,{},[],{paused:true});assert.equal(JSON.stringify(c.planeGun),before);
  c.resume();assert.equal(c.active,true);assert.equal(c.last,1000);assert.equal(c.player,position);assert.equal(JSON.stringify(c.planeGun),before);
- for(const name of ['joint','chase','sortie','escort'])for(const status of ['won','lost']){c.active=false;c[name].status=status;c.resume();assert.equal(c.active,false);c[name].status='idle';}
+ for(const name of ['joint','chase','sortie','escort','lighthouse'])for(const status of ['won','lost']){c.active=false;c[name].status=status;c.resume();assert.equal(c.active,false);c[name].status='idle';}
 });
 await test('recover resets weapon projectiles/timers, held controls, missions and route state',()=>{
  const {c}=fixture();c.keys.add('KeyW');c.fire=c.drag=c.rocketKey=true;c.accumulator=.08;c.recovery=1;c.joint.status=c.chase.status=c.sortie.status=c.escort.status='active';

@@ -6,6 +6,8 @@ import {createNavalRun,navalCheckpointFromMission,restoreNavalCheckpoint,navalCh
 import {restoreJointCheckpoint} from './joint-checkpoint-model.js';
 import {createJointMission,stepJointMission,finishJointFlight,jointBoardAllowed,jointGoal,JOINT_STAGES,JOINT_LABELS} from './joint-mission.js';
 import {buildJointWorld} from './joint-world.js';
+import {createLighthouseMission,stepLighthouseMission,lighthouseGoal,lighthouseBoardAllowed,lighthouseSummary,LIGHTHOUSE_STAGES,LIGHTHOUSE_LABELS,LIGHTHOUSE_PROFILES,normalizeLighthouse} from './lighthouse-mission.js';
+import {buildLighthouseWorld} from './lighthouse-world.js';
 import {bindVehicleGuidance} from './vehicle-guidance.js';
 import {buildReconWorld} from './recon-world.js';
 import {createFlightMission,stepFlightMission,FLIGHT_PHASES,flightGoal,flightTitle,flightPhase,flightProgress,flightCourse} from './flight-mission.js';
@@ -32,7 +34,8 @@ import {buildEscortWorld,drawEscortOnRadar} from './escort-world.js';
 import {buildSeaAirField,createAircraftModel,createYachtModel} from './sea-air-world.js';
 const $=selector=>document.querySelector(selector),keys=new Set(),overlay=$('#drive-overlay'),message=$('#drive-message');
 let active=false,started=false,kind=null,drag=false,locked=false,cameraMode='chase',orbit=0,pitch=0,accumulator=0,last=performance.now(),time=0,recovery=0,recoveryArmed=false,messageTime=0,hudTimer=0,armedStation=null,flightHeading=0;
-let sortie=createFlightMission(),joint=createJointMission(),jointArmed=false;
+let sortie=createFlightMission(),joint=createJointMission(),jointArmed=false,lighthouse=createLighthouseMission(),lighthouseArmed=false;
+const LIGHTHOUSE_KEY='neon-eclipse.lighthouse-difficulty.v1',readLighthouseDifficulty=()=>{try{return normalizeLighthouse(localStorage.getItem(LIGHTHOUSE_KEY));}catch{return 'normal';}};
 let expeditionUI=null,missionIntent=0;
 const EXPEDITION_RESULT_NOTE=' 本轮属于先遣队，请在上方先遣队面板查看保存状态并继续/重试；不写入原 FPS 战役或单项飞行成绩。';
 // P3: target range, vehicle weapons and wear. Rules live in vehicle-weapons.js / vehicle-durability.js; nothing here is persisted.
@@ -59,9 +62,9 @@ const environment=buildProvingGround(scene,{extended:true}),seaAir=buildSeaAirFi
 const chaseWorld=buildChaseWorld(scene),seaCombatWorld=buildSeaCombatWorld(scene),interceptorWorld=buildChaseWorld(scene,{showMarkers:false,role:'interceptor'}),interceptorCombat=buildSeaCombatWorld(scene,{showPlayerGun:false});
 const rover=createRover(),plane=createPlane(),yacht=createYacht();
 const navalAim=createNavalAim(yacht.yaw);
-const guidance=bindVehicleGuidance(),jointWorld=buildJointWorld(scene);
+const guidance=bindVehicleGuidance(),jointWorld=buildJointWorld(scene),lighthouseWorld=buildLighthouseWorld(scene);
 const rangeWorld=buildTargetRange(scene,range),turretModel=createTurretModel(roverModel.body),fireEffects=createFireEffects(scene),damageSmoke=createDamageSmoke(scene);
-const armed=()=>joint.status!=='active'&&chase.status!=='active'&&sortie.status!=='active';
+const armed=()=>joint.status!=='active'&&chase.status!=='active'&&sortie.status!=='active'&&lighthouse.status!=='active';
 const escortWorld=buildEscortWorld(scene);const escorting=()=>escort.status==='active';
 function setGunner(on){if(on===gunner)return;gunner=on;if(on)enterGunner(roofGun,rover);else leaveGunner(roofGun);orbit=0;pitch=0;updateCamera(1);}
 const checkpointUI=bindJointCheckpointUI({onNotice:notify,onRestore:restoreCheckpoint});
@@ -80,13 +83,13 @@ function notify(text){message.textContent=text;message.classList.add('visible');
 function clearInput(){keys.clear();drag=false;fire=false;rocketKey=false;recovery=0;accumulator=0;}
 // Suspending or explicitly resuming supersedes any dispatch still waiting for storage.
 function pause(){++missionIntent;if(!active)return;active=false;vehicleAudio.pause();clearInput();overlay.hidden=false;document.exitPointerLock?.();$('#drive-overlay-title').textContent='联合试验已暂停';$('#drive-overlay-copy').textContent='载具、波浪与路线计时已冻结。继续会回到原位置；试验调度会回收全部载具并重置三条路线。';$('#resume-drive').textContent='继续试验 →';$('#resume-drive').focus();updateHUD();}
-function resume(){if(joint.status==='won'||joint.status==='lost'||chase.status==='won'||chase.status==='lost'||sortie.status==='won'||sortie.status==='lost'||escort.status==='won'||escort.status==='lost'){notify('请选择重试任务，或返回自由试驾。');return;}++missionIntent;active=true;started=true;vehicleAudio.resume();vehicleAudio.unlock();clearInput();overlay.hidden=true;last=performance.now();recoveryArmed=false;armedStation=null;$('#recover-drive').textContent='回收全部载具并重置路线';canvas.focus();updateHUD();}
+function resume(){if(lighthouse.status==='won'||lighthouse.status==='lost'||joint.status==='won'||joint.status==='lost'||chase.status==='won'||chase.status==='lost'||sortie.status==='won'||sortie.status==='lost'||escort.status==='won'||escort.status==='lost'){notify('请选择重试任务，或返回自由试驾。');return;}++missionIntent;active=true;started=true;vehicleAudio.resume();vehicleAudio.unlock();clearInput();overlay.hidden=true;last=performance.now();recoveryArmed=false;armedStation=null;$('#recover-drive').textContent='回收全部载具并重置路线';canvas.focus();updateHUD();}
 function recover(station='garage'){
  vehicleAudio.reset();// New task/restore must not inherit old audio counters or warning timers.
  ++missionIntent;// A newer dispatch/mode selection cancels an older async mission launch.
  expeditionUI?.detach();// Switching mode or restoring a legacy checkpoint never carries campaign score ownership.
- joint=createJointMission();jointArmed=false;
- const hadChase=chase.status!=='idle',hadFlight=sortie.status!=='idle';sortie=createFlightMission();flightUI.reset();chase=createSeaChase();chaseArmed=false;freeArmed=false;$('#resume-drive').hidden=false;if(hadChase||hadFlight){$('#drive-overlay-title').textContent='已返回自由试驾';$('#drive-overlay-copy').textContent='任务已结束，全部载具和路线已重置。可继续自由试驾或重新开始海上/飞行任务。';}
+ joint=createJointMission();jointArmed=false;const hadLighthouse=lighthouse.status!=='idle';lighthouse=createLighthouseMission();lighthouseArmed=false;
+ const hadChase=chase.status!=='idle',hadFlight=sortie.status!=='idle';sortie=createFlightMission();flightUI.reset();chase=createSeaChase();chaseArmed=false;freeArmed=false;$('#resume-drive').hidden=false;if(hadChase||hadFlight||hadLighthouse){$('#drive-overlay-title').textContent='已返回自由试驾';$('#drive-overlay-copy').textContent='任务已结束，全部载具和路线已重置。可继续自由试驾或重新开始海上/飞行任务。';}
  Object.assign(rover,createRover());Object.assign(plane,createPlane());Object.assign(yacht,createYacht());Object.assign(navalAim,createNavalAim(yacht.yaw));
  const hadEscort=escort.status!=='idle';escort=createEscort();escortArmed=false;if(hadEscort){$('#drive-overlay-title').textContent='已返回自由试驾';$('#drive-overlay-copy').textContent='护送任务已结束，全部载具和路线已重置。';}
  setGunner(false);fire=false;rocketKey=false;Object.assign(roofGun,createWeaponState('roof'));Object.assign(planeGun,createWeaponState('plane'));Object.assign(wear.rover,createDurability('rover'));Object.assign(wear.yacht,createDurability('yacht'));
@@ -99,23 +102,37 @@ function interact(){
  if(chase.status==='active'){notify('追逐任务中不能离船；按 Esc 可重试或返回自由试驾。');return;}
  if(escort.status==='active'&&kind==='rover'){notify('护送任务中不能下车；按 Esc 可中止或重试。');return;}
  if(kind){const s=entity(),result=kind==='plane'?planeExit(s,safeExitWorld):kind==='yacht'?yachtExit(s,safeExitWorld):exitRover(s,footWorldWithSegment());if(!result.ok){notify(gunner&&kind==='rover'?'炮手位不能直接下车：空格刹停或按 F 回到驾驶位。':result.reason);return;}player={x:result.x,z:result.z,yaw:s.yaw};s.speed=0;if(kind==='plane')s.throttle=0;if('steer'in s)s.steer=0;kind=null;setGunner(false);notify('已安全离开载具。靠近另一台载具按 E 进入。');}
- else{const target=nearby();if(!target){notify('靠近停稳的载具按 E。飞机在机场，游艇在东侧码头。');return;}if(!jointBoardAllowed(joint,target)){notify('当前联合阶段需要 '+JOINT_LABELS[joint.stage]+'，不能跳过换乘顺序。');return;}kind=target;const s=entity();s.speed=0;if(kind==='plane')notify('鼠标左右看即可引导航向 · Shift/Ctrl 油门 · '+flightPitchHint(isFlightInverted())+' · 地面空格刹车');else if(kind==='yacht')notify('高速游艇：W 加速 / S 倒车 · A/D 船舵 · 空格强反推 · 靠泊前提前减速');else notify('W / S 前进与倒车 · A/D 转向 · 空格刹车');}
+ else{const target=nearby();if(!target){notify('靠近停稳的载具按 E。飞机在机场，游艇在东侧码头。');return;}if(!jointBoardAllowed(joint,target)){notify('当前联合阶段需要 '+JOINT_LABELS[joint.stage]+'，不能跳过换乘顺序。');return;}if(!lighthouseBoardAllowed(lighthouse,target)){notify('灯塔岛登陆只使用游艇；越野车和飞机不参与本关。');return;}kind=target;const s=entity();s.speed=0;if(kind==='plane')notify('鼠标左右看即可引导航向 · Shift/Ctrl 油门 · '+flightPitchHint(isFlightInverted())+' · 地面空格刹车');else if(kind==='yacht')notify('高速游艇：W 加速 / S 倒车 · A/D 船舵 · 空格强反推 · 靠泊前提前减速');else notify('W / S 前进与倒车 · A/D 转向 · 空格刹车');}
  orbit=0;pitch=0;flightHeading=plane.yaw;Object.assign(navalAim,createNavalAim(yacht.yaw));clearInput();updateCamera(1);updateHUD();
 }
 function footWorldWithSegment(){return {...safeExitWorld,clearSegment:(a,b,r)=>geometry.clearSegment(a,b,r)};}
 async function launchExpeditionMission(spec,difficulty,checkpoint=null){
  if(checkpoint){
-  if(spec.id==='naval')restoreNavalCheckpointRun(checkpoint);else if(spec.id==='joint')restoreCheckpoint(checkpoint);else return null;
+  if(spec.id==='naval')restoreNavalCheckpointRun(checkpoint);else if(spec.id==='joint')restoreCheckpoint(checkpoint);else return null;// Lighthouse has no safe node; it always restarts from the pier.
   const source=spec.id==='naval'?chase:joint;return {source,isCurrent:()=>source===(spec.id==='naval'?chase:joint)};
  }
- const source=spec.id==='escort'?startEscort(difficulty):spec.id==='naval'?await startChase(difficulty):spec.id==='recon'?startFlight('recon'):await startJointTask();
- return {source,isCurrent:()=>source===(spec.id==='escort'?escort:spec.id==='naval'?chase:spec.id==='recon'?sortie:joint)};
+ const source=spec.id==='escort'?startEscort(difficulty):spec.id==='naval'?await startChase(difficulty):spec.id==='recon'?startFlight('recon'):spec.id==='lighthouse'?startLighthouse(difficulty):await startJointTask();
+ return {source,isCurrent:()=>source===(spec.id==='escort'?escort:spec.id==='naval'?chase:spec.id==='recon'?sortie:spec.id==='lighthouse'?lighthouse:joint)};
 }
 function startFlight(type='return'){
  recover('airfield');kind='plane';cameraMode='chase';flightHeading=plane.yaw;sortie=createFlightMission(plane,type);resume();notify(type==='recon'?'':'归航试炼：五分钟内完成五门导航、北向返航和跑道停稳；任务中 R 回收不可用。');updateCamera(1);updateHUD();return sortie;
 }
 function finishFlight(){if(joint.status==='active'&&joint.stage==='recon'){finishJointFlight(joint,sortie.result);sortie=createFlightMission();flightUI.reset();if(joint.status==='lost')finishJoint();else{notify('侦察上传已完成 · 停稳下机，到交接终端按住 F。');updateHUD();}return;}const expeditionOwned=expeditionUI?.finish('recon',sortie)||false;pause();flightUI.finish({record:!expeditionOwned,expedition:expeditionOwned});updateHUD();}
 function finishJoint(){const expeditionOwned=expeditionUI?.finish('joint',joint);if(joint.status==='won'&&!expeditionOwned)checkpointUI.complete(joint);pause();$('#resume-drive').hidden=true;$('#drive-overlay-title').textContent='海空接力 · '+(joint.status==='won'?'联合任务完成':'任务中止');$('#drive-overlay-copy').textContent=joint.reason+'。已完成 '+joint.completed.length+'/9 阶段，用时 '+joint.elapsed.toFixed(1)+' 秒'+(joint.recovered?'（检查点继续，不是完整一命用时）':'')+'。本轮不计入单项飞行成绩。'+(expeditionOwned?'先遣队节点和提交结果以上方面板为准。':'失败时可在下方检查点面板恢复最近安全阶段；以保存状态为准。');if(expeditionOwned)$('#drive-overlay-copy').textContent+=EXPEDITION_RESULT_NOTE;$('#drive-overlay-title').tabIndex=-1;$('#drive-overlay-title').focus({preventScroll:true});$('.drive-panel').scrollTop=0;updateHUD();}
+function startLighthouse(difficulty=readLighthouseDifficulty()){
+ recover('marina');lighthouse=createLighthouseMission(difficulty,true);resume();
+ notify('灯塔岛登陆：沿栈桥 E 登船 → 驶向东南灯塔岛浮桥停稳 → E 下船步行上岛 → 三处按住 F 清点 → 回船返港下船。'+LIGHTHOUSE_PROFILES[lighthouse.profile.id].description);updateHUD();return lighthouse;
+}
+function finishLighthouse(){
+ const expeditionOwned=expeditionUI?.finish('lighthouse',lighthouse);pause();$('#resume-drive').hidden=true;const s=lighthouseSummary(lighthouse);
+ $('#drive-overlay-title').textContent='灯塔岛登陆 · '+(lighthouse.status==='won'?'登陆任务完成':'任务失败');
+ $('#drive-overlay-copy').textContent=lighthouse.reason+'。难度 '+s.label+' · 用时 '+lighthouse.elapsed.toFixed(1)+' 秒 · 清点 '+s.surveys+'/'+s.total+' · 阶段 '+s.stageIndex+'/'+s.stages+'。本关没有安全节点，重试从码头重新开始；不写入单项飞行成绩。'+(expeditionOwned?EXPEDITION_RESULT_NOTE:'');
+ updateHUD();$('#start-lighthouse').focus({preventScroll:true});$('.drive-panel').scrollTop=0;
+}
+$('#start-lighthouse').addEventListener('click',()=>{if(!lighthouseArmed){lighthouseArmed=true;$('#start-lighthouse').textContent='确认开始 · 重置全部载具与路线';return;}lighthouseArmed=false;startLighthouse();});
+$('#start-lighthouse').addEventListener('blur',()=>{lighthouseArmed=false;$('#start-lighthouse').textContent=lighthouse.status==='idle'?'开始灯塔岛登陆 · 第 5 关':'重试灯塔岛登陆 · 第 5 关';});
+$('#lighthouse-free-drive').addEventListener('click',()=>{recover('marina');resume();});
+{const select=$('#lighthouse-difficulty-select'),copy=$('#lighthouse-difficulty-copy');if(select){select.value=readLighthouseDifficulty();const sync=()=>{copy.textContent=LIGHTHOUSE_PROFILES[normalizeLighthouse(select.value)].description;};sync();select.addEventListener('change',()=>{try{localStorage.setItem(LIGHTHOUSE_KEY,normalizeLighthouse(select.value));}catch{}sync();});}}
 function restoreCheckpoint(record){const restored=restoreJointCheckpoint(record);recover();joint=restored.mission;Object.assign(rover,restored.rover);Object.assign(plane,restored.plane);Object.assign(yacht,restored.yacht);Object.assign(navalAim,createNavalAim(yacht.yaw));player=restored.player;kind=null;orbit=0;pitch=0;flightHeading=plane.yaw;clearInput();updateCamera(1);resume();notify('已恢复安全阶段 · '+JOINT_LABELS[joint.stage]+'；本轮为检查点继续。');return joint.runId;}
 async function startJointTask(){
  const intent=++missionIntent,candidate=createJointMission(true);if(!await checkpointUI.begin(candidate.runId,()=>intent===missionIntent)||intent!==missionIntent)return null;
@@ -208,6 +225,10 @@ function updatePhysics(dt){
  if(kind==='plane'&&plane.onGround&&!plane.crashed&&stepRearm(planeGun,plane,dt,REPAIR_STATIONS.plane)){audioRearms++;notify('机库补给完成 · 机炮弹链与 2 枚火箭已装填');}
  if(plane.landings>planeLandingsBefore)audioLandings++;
  if(!active)return;
+ if(lighthouse.status==='active'){
+  const changed=stepLighthouseMission(lighthouse,{kind,player,yacht,action:held('KeyF')},dt);
+  if(changed){if(lighthouse.status!=='active'){finishLighthouse();return;}audioCheckpoints++;notify('登陆阶段 · '+LIGHTHOUSE_LABELS[lighthouse.stage]);}
+ }
  if(joint.status==='active'){
   const changed=stepJointMission(joint,{kind,player,rover,yacht,plane,action:held('KeyF')},dt);
   if(changed){if(!expeditionUI?.saveCheckpoint('joint',joint))checkpointUI.save(joint);audioCheckpoints++;if(joint.stage==='recon'){sortie=createFlightMission(plane,'recon');joint.flightId=sortie.attempt.id;flightHeading=plane.yaw;}if(joint.status==='won'){finishJoint();return;}notify('联合阶段 · '+JOINT_LABELS[joint.stage]);}
@@ -215,7 +236,7 @@ function updatePhysics(dt){
  if(joint.status!=='active'&&stepDriveTrial(trial,kind==='rover'?from:rover,rover,dt,kind==='rover'))notify(trial.complete?'陆地路线完成，可继续试驾或前往机场与码头。':'陆地检查点 '+trial.index+' / 6');
  if(joint.status!=='active'&&sortie.status==='idle'&&routeStep(airTrial,FLIGHT_GATES,kind==='plane'?from:plane,plane,dt,kind==='plane'&&!plane.onGround,23,true))notify(airTrial.complete?'飞行路线完成，请返回跑道安全降落。':'飞行导航门 '+airTrial.index+' / 5');
  if(joint.status!=='active'&&chase.status==='idle'&&routeStep(seaTrial,WATER_GATES,kind==='yacht'?from:yacht,yacht,dt,kind==='yacht',15))notify(seaTrial.complete?'海上路线完成，请停稳并靠泊。':'海上浮标 '+seaTrial.index+' / 5');
- if(held('KeyR')&&(joint.status==='active'||chase.status==='active'||sortie.status==='active'||escort.status==='active')){recovery=0;return;}
+ if(held('KeyR')&&(joint.status==='active'||chase.status==='active'||sortie.status==='active'||escort.status==='active'||lighthouse.status==='active')){recovery=0;return;}
  if(held('KeyR')){const s=entity();if((kind!=='plane'||plane.onGround||plane.crashed)&&(!kind||Math.abs(s.speed)<1.2)){recovery+=dt;if(recovery>=1.5)recover(kind==='plane'?'airfield':kind==='yacht'?'marina':'garage');}else{recovery=0;notify('行驶或飞行中不能快速回收；需要时在暂停菜单使用试验调度。');}}else recovery=0;
 }
 function updateCamera(blend){
@@ -290,6 +311,10 @@ function updateHUD(){
  flightUI.update();
  $('#abort-joint').hidden=joint.status==='idle';
  Object.assign(document.body.dataset,{jointStatus:joint.status,jointStage:joint.stage,jointRecovered:String(joint.recovered),jointRunId:joint.runId||'',jointHold:joint.hold.toFixed(3),jointElapsed:joint.elapsed.toFixed(3),jointCompleted:JSON.stringify(joint.completed),jointPlayer:JSON.stringify(player),jointRover:JSON.stringify({x:rover.x,z:rover.z,yaw:rover.yaw,speed:rover.speed}),jointYacht:JSON.stringify({x:yacht.x,z:yacht.z,yaw:yacht.yaw,speed:yacht.speed})});
+ const lighthouseOn=lighthouse.status!=='idle';$('#lighthouse-panel').hidden=!lighthouseOn;$('#lighthouse-free-drive').hidden=!lighthouseOn;if(!lighthouseArmed)$('#start-lighthouse').textContent=lighthouseOn?'重试灯塔岛登陆 · 第 5 关':'开始灯塔岛登陆 · 第 5 关';
+ if(lighthouseOn){const ls=lighthouseSummary(lighthouse),g=lighthouseGoal(lighthouse,{yacht,player,kind}),seconds=Math.ceil(ls.remaining);$('.drive-objective h1').textContent='灯塔岛登陆';$('#lighthouse-time').textContent=Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');$('#lighthouse-surveys').textContent=ls.surveys+' / '+ls.total;$('#lighthouse-active-difficulty').textContent='当前任务：'+ls.label;$('#lighthouse-state').textContent=lighthouse.status!=='active'?lighthouse.reason:LIGHTHOUSE_LABELS[lighthouse.stage];
+  $('#drive-task').textContent=lighthouse.status==='active'?g.name+' · '+Math.round(Math.hypot(s.x-g.x,s.z-g.z))+' m'+(lighthouse.hold>0?' · 保持 '+lighthouse.hold.toFixed(1)+' s':''):lighthouse.reason;$('#route-label').textContent='登陆阶段 '+ls.stageIndex+'/'+ls.stages+' · '+LIGHTHOUSE_LABELS[lighthouse.stage];$('#route-fill').style.width=(ls.stageIndex/ls.stages*100)+'%';$('#control-hints').textContent+=' · 灯塔岛：E 上下船，F 清点；调度/换任务会中止。';}
+ Object.assign(document.body.dataset,{lighthouseStatus:lighthouse.status,lighthouseStage:lighthouse.stage,lighthouseSurveys:String(lighthouse.surveys),lighthouseDifficulty:lighthouse.profile.id,lighthouseHold:lighthouse.hold.toFixed(3),lighthouseElapsed:lighthouse.elapsed.toFixed(3)});
  if(joint.status!=='idle'){const g=jointGoal(joint,{rover,yacht,plane,player,kind});$('.drive-objective h1').textContent='联合行动 · 海空接力';if(joint.stage!=='recon')$('#drive-task').textContent=joint.status==='active'?g.name+' · '+Math.round(Math.hypot(s.x-g.x,s.z-g.z))+' m'+(joint.hold>0?' · 操作保持 '+joint.hold.toFixed(1)+' s':''):joint.reason;$('#route-label').textContent='联合阶段 '+joint.completed.length+'/9 · '+JOINT_LABELS[joint.stage]+(joint.recovered?' · 检查点继续':'');$('#route-fill').style.width=(joint.completed.length/9*100)+'%';$('#control-hints').textContent+=' · 联合任务：F 交互，E 换乘；调度/换任务会中止。';}
 
  Object.assign(document.body.dataset,{escortStatus:escort.status,escortTruckHull:escort.truck.hull.toFixed(1),escortTruckX:escort.truck.x.toFixed(2),escortTruckZ:escort.truck.z.toFixed(2),escortTruckLeg:String(escort.truck.index),escortWave:String(escort.waveIndex),escortAlive:String(escortSummary(escort).alive),escortKilled:String(escort.killed),escortWarnings:String(escortSummary(escort).warnings),escortDifficulty:escort.profile.id});
@@ -311,5 +336,5 @@ function frame(now){const dt=Math.max(0,Math.min((now-last)/1000,.1));last=now;i
   const s=entity(),fleet=chase.naval?navalSummary(chase):null;
   vehicleAudio.update(dt,{kind,speed:s.speed||0,throttle:kind==='plane'?plane.throttle:kind?(Number(held('KeyW','ArrowUp'))-Number(held('KeyS','ArrowDown'))):0,onGround:plane.onGround,stall:plane.stall,crashed:plane.crashed,impacts:kind?s.impacts:0,active:true,nearWater:!kind&&Math.hypot(player.x-yacht.x,player.z-yacht.z)<40});
   vehicleAudio.events({roofShots:roofGun.shots,planeShots:planeGun.shots,rocketShots:planeGun.rocketShots,roofHits:roofGun.hits,planeHits:planeGun.hits,seaShots:fleet?.shots||0,seaHits:fleet?.hits||0,repairs:wear.rover.repairs+wear.yacht.repairs,rearms:audioRearms,landings:audioLandings,checkpoints:audioCheckpoints,hullHits:audioHullHits,waves:audioWaves,houndKills:escort.killed||0});if(messageTime>0){messageTime-=dt;if(messageTime<=0)message.classList.remove('visible');}}
- jointWorld.update(joint,time);escortWorld.update(escort,time);rangeWorld.update(time);turretModel.update(roofGun,rover.yaw);fireEffects.update([roofGun,planeGun]);damageSmoke.update([{tier:durabilityTier(wear.rover),x:rover.x,y:terrainHeight(rover.x,rover.z)+1.9,z:rover.z},{tier:durabilityTier(wear.yacht),x:yacht.x,y:2.2,z:yacht.z}],time);roverModel.update(rover,time);planeModel.update(plane,time);yachtModel.update(yacht,time);environment.update(trial.index,time);flightWorld.update(sortie,time);reconWorld.update(sortie,time,camera);seaAir.update(time,sortie.status==='idle'?airTrial.index:sortie.route.index,chase.status==='idle'?seaTrial.index:WATER_GATES.length,sortie.type!=='recon'||sortie.status==='idle');const members=chase.naval?.members,summary=chase.naval?navalSummary(chase):null;chaseWorld.update(members?.[0]||chase,time);seaCombatWorld.update(members?.[0]||chase,yacht,time,navalAimPoint(navalAim,yacht),summary?.playerFlash,chase.naval?.playerCombat);interceptorWorld.update(members?.[1]||emptyNaval,time);interceptorCombat.update(members?.[1]||emptyNaval,yacht,time);updateCamera(1-Math.exp(-9*dt));guidance.update({camera,goal:sortie.status==='active'?flightGoal(sortie):escort.status==='active'?{...escortGoal(escort),y:3}:joint.status==='active'?jointGoal(joint,{rover,yacht,plane,player,kind}):chase.status==='active'?(CHASE_GATES[chase.index]||CHASE_EVAC):kind==='plane'?FLIGHT_GATES[airTrial.index]:kind==='yacht'?WATER_GATES[seaTrial.index]:kind==='rover'?DRIVE_GATES[trial.index]:{x:rover.x,y:3,z:rover.z,name:'越野车 · E 上车'},position:kind==='plane'?plane:kind==='yacht'?yacht:kind==='rover'?rover:player,visible:active,recon:sortie.status==='active'&&sortie.type==='recon'&&['takeoff','route'].includes(sortie.phase),mission:sortie});hudTimer+=dt;if(hudTimer>.08){updateHUD();hudTimer=0;}renderer.render(scene,camera);requestAnimationFrame(frame);}
+ jointWorld.update(joint,time);lighthouseWorld.update(lighthouse,time);escortWorld.update(escort,time);rangeWorld.update(time);turretModel.update(roofGun,rover.yaw);fireEffects.update([roofGun,planeGun]);damageSmoke.update([{tier:durabilityTier(wear.rover),x:rover.x,y:terrainHeight(rover.x,rover.z)+1.9,z:rover.z},{tier:durabilityTier(wear.yacht),x:yacht.x,y:2.2,z:yacht.z}],time);roverModel.update(rover,time);planeModel.update(plane,time);yachtModel.update(yacht,time);environment.update(trial.index,time);flightWorld.update(sortie,time);reconWorld.update(sortie,time,camera);seaAir.update(time,sortie.status==='idle'?airTrial.index:sortie.route.index,chase.status==='idle'?seaTrial.index:WATER_GATES.length,sortie.type!=='recon'||sortie.status==='idle');const members=chase.naval?.members,summary=chase.naval?navalSummary(chase):null;chaseWorld.update(members?.[0]||chase,time);seaCombatWorld.update(members?.[0]||chase,yacht,time,navalAimPoint(navalAim,yacht),summary?.playerFlash,chase.naval?.playerCombat);interceptorWorld.update(members?.[1]||emptyNaval,time);interceptorCombat.update(members?.[1]||emptyNaval,yacht,time);updateCamera(1-Math.exp(-9*dt));guidance.update({camera,goal:sortie.status==='active'?flightGoal(sortie):escort.status==='active'?{...escortGoal(escort),y:3}:joint.status==='active'?jointGoal(joint,{rover,yacht,plane,player,kind}):lighthouse.status==='active'?lighthouseGoal(lighthouse,{yacht,player,kind}):chase.status==='active'?(CHASE_GATES[chase.index]||CHASE_EVAC):kind==='plane'?FLIGHT_GATES[airTrial.index]:kind==='yacht'?WATER_GATES[seaTrial.index]:kind==='rover'?DRIVE_GATES[trial.index]:{x:rover.x,y:3,z:rover.z,name:'越野车 · E 上车'},position:kind==='plane'?plane:kind==='yacht'?yacht:kind==='rover'?rover:player,visible:active,recon:sortie.status==='active'&&sortie.type==='recon'&&['takeoff','route'].includes(sortie.phase),mission:sortie});hudTimer+=dt;if(hudTimer>.08){updateHUD();hudTimer=0;}renderer.render(scene,camera);requestAnimationFrame(frame);}
 updateCamera(1);updateHUD();$('#resume-drive').focus();requestAnimationFrame(frame);

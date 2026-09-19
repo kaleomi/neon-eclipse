@@ -1,9 +1,11 @@
 // Local progress / score rules, not a server-verified leaderboard.
 import {flightRecordFromResult} from './flight-records-model.js';
 import {JOINT_STAGES} from './joint-mission.js';
+import {LIGHTHOUSE_STAGES,LIGHTHOUSE_SURVEYS} from './lighthouse-mission.js';
 import {validCheckpoint,canonicalCheckpoint,checkpointFromMission,CHECKPOINT_STAGES} from './joint-checkpoint-model.js';
 import {validNavalCheckpoint,canonicalNavalCheckpoint,navalCheckpointFromMission,NAVAL_CHECKPOINT_STAGES,navalCheckpointLabel} from './naval-checkpoint-model.js';
 
+// Archive rule id is kept verbatim so front-four archives stay readable; mission count is derived from EXPEDITION_MISSIONS.
 export const EXPEDITION_RULE='front4-v1';
 export const EXPEDITION_SCHEMA=2;
 export const EXPEDITION_RECORD_LIMIT=1000;
@@ -11,8 +13,11 @@ export const EXPEDITION_MISSIONS=Object.freeze([
   {id:'escort',title:'荒原车队护送',rule:'escort-v1',selectable:true},
   {id:'naval',title:'南湾突围',rule:'naval-v1',selectable:true},
   {id:'recon',title:'回声航线',rule:'recon-v1',selectable:false},
-  {id:'joint',title:'海空接力',rule:'joint-v1',selectable:false}
+  {id:'joint',title:'海空接力',rule:'joint-v1',selectable:false},
+  {id:'lighthouse',title:'灯塔岛登陆',rule:'lighthouse-v1',selectable:true}
 ].map(Object.freeze));
+export const EXPEDITION_TOTAL=EXPEDITION_MISSIONS.length;
+export const EXPEDITION_FINAL=8;// Planned campaign length; the title is only granted once all eight are wired.
 export const EXPEDITION_DIFFICULTIES=Object.freeze({easy:'简单',normal:'普通',hard:'困难',fixed:'固定规则'});
 const choices=['easy','normal','hard'];
 const idOK=id=>typeof id==='string'&&/^[a-zA-Z0-9-]{16,96}$/.test(id);
@@ -59,13 +64,13 @@ export function validExpedition(a,allowUndo=true){
   for(const r of a.records){
     if(seen.has(r.id))return false;seen.add(r.id);byId.set(r.id,r);
     const group=groups.get(r.campaignId)||[];
-    if(group.length>=4||r.mission!==EXPEDITION_MISSIONS[group.length].id||
-      (group.length===1&&r.difficulty!==group[0].difficulty))return false;
+    if(group.length>=EXPEDITION_TOTAL||r.mission!==EXPEDITION_MISSIONS[group.length].id||
+      (missionById(r.mission).selectable&&group.length>0&&r.difficulty!==group[0].difficulty))return false;
     group.push(r);groups.set(r.campaignId,group);
   }
   const c=a.campaign;
   if(c===null){if(a.records.length!==0)return false;}
-  else if(!c||!idOK(c.id)||!choices.includes(c.difficulty)||!Array.isArray(c.completed)||c.completed.length>4||
+  else if(!c||!idOK(c.id)||!choices.includes(c.difficulty)||!Array.isArray(c.completed)||c.completed.length>EXPEDITION_TOTAL||
     new Set(c.completed).size!==c.completed.length||(groups.get(c.id)?.length||0)!==c.completed.length||
     !c.completed.every((id,i)=>{const r=byId.get(id),m=EXPEDITION_MISSIONS[i];return r?.campaignId===c.id&&r.mission===m.id&&r.difficulty===expeditionDifficulty(m,c.difficulty);}))return false;
   if(a.schema===1)return true; // Read-only adoption; the first deliberate write stores schema 2.
@@ -125,6 +130,9 @@ export function expeditionRecordFromMission(attempt,m,extra={},now=Date.now()){
   }else if(spec.id==='recon'){
     const r=flightRecordFromResult(m.result);
     if(m.type!=='recon'||r?.type!=='recon'||r.id!==m.attempt?.id||m.elapsed!==m.result.elapsed)return null;
+  }else if(spec.id==='lighthouse'){
+    if(m.profile?.id!==attempt.difficulty||m.stage!=='complete'||m.surveys!==LIGHTHOUSE_SURVEYS||!(m.elapsed<m.profile.timeLimit)||
+      !Array.isArray(m.completed)||m.completed.length!==LIGHTHOUSE_STAGES.length||!LIGHTHOUSE_STAGES.every((s,i)=>m.completed[i]===s))return null;
   }else if(m.stage!=='complete'||!idOK(m.flightId)||!Array.isArray(m.completed)||
     m.completed.length!==JOINT_STAGES.length||!JOINT_STAGES.every((s,i)=>m.completed[i]===s))return null;
   const record={schema:resumed?2:1,id:attempt.id,campaignId:attempt.campaignId,mission:spec.id,rule:spec.rule,

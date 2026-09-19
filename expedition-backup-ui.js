@@ -21,7 +21,7 @@ export function bindExpeditionBackup(root,{manager=createExpeditionBackup(),isLo
     <div class="expedition-backup-preview" data-exp-backup-preview hidden><p data-exp-backup-diff></p><p>确认后替换整个先遣队档案，不合并历史。当前档案与替换结果在同一个事务提交；保留一份可撤销副本。再次替换会更新该副本。</p><div class="expedition-backup-actions"><button type="button" data-exp-backup-apply>确认替换先遣队档案</button><button type="button" data-exp-backup-cancel>取消</button></div></div>
     <p data-exp-backup-status role="status" aria-live="polite"></p>`;
   root.append(panel);const $=s=>panel.querySelector(s);let busy=false,plan=null,hasUndo=false;
-  const summary=s=>`${s.completed}/4 关 · ${s.next} · 前两关${s.difficulty} · 完整一命 ${s.qualified} 条 / 检查点继续 ${s.resumed} 条 · ${s.checkpoint}`;
+  const summary=s=>`${s.completed}/${s.total} 关 · ${s.next} · 可选关${s.difficulty} · 完整一命 ${s.qualified} 条 / 检查点继续 ${s.resumed} 条 · ${s.checkpoint}`;
   const status=(text,error=false)=>{const el=$('[data-exp-backup-status]');el.textContent=text;el.dataset.expBackupError=String(error);};
   function sync(){
     const locked=isLocked();panel.dataset.busy=String(busy);panel.dataset.locked=String(locked);

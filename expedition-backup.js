@@ -1,13 +1,13 @@
 // Dedicated expedition bundle: never consumes FPS/legacy-checkpoint keys or imports nested undo history.
 import {createExpeditionStore} from './expedition-store.js';
 import {emptyExpedition,validExpedition,canonicalExpedition,expeditionSnapshot,newExpeditionId,
-  nextExpeditionMission,expeditionCheckpointLabel,EXPEDITION_DIFFICULTIES} from './expedition-model.js';
+  nextExpeditionMission,expeditionCheckpointLabel,EXPEDITION_DIFFICULTIES,EXPEDITION_TOTAL} from './expedition-model.js';
 export const EXPEDITION_BACKUP_LIMIT=4*1024*1024;
 const fail=e=>({ok:false,code:e?.code||'failed'});
 export function expeditionArchiveSummary(a){
-  return {completed:a.campaign?.completed.length||0,records:a.records.length,qualified:a.records.filter(r=>!r.resumed).length,
+  return {completed:a.campaign?.completed.length||0,total:EXPEDITION_TOTAL,records:a.records.length,qualified:a.records.filter(r=>!r.resumed).length,
     resumed:a.records.filter(r=>r.resumed).length,difficulty:a.campaign?EXPEDITION_DIFFICULTIES[a.campaign.difficulty]:'未开始',
-    next:nextExpeditionMission(a)?.title||(a.campaign?'前四关完成':'尚未开始'),
+    next:nextExpeditionMission(a)?.title||(a.campaign?'前 '+EXPEDITION_TOTAL+' 关完成':'尚未开始'),
     checkpoint:a.checkpoint?expeditionCheckpointLabel(a.checkpoint):'无安全节点'};
 }
 export function makeExpeditionBundle(archive,now=Date.now()){

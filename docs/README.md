@@ -16,6 +16,7 @@
 - **P1 爆炸桶与后续开发方案**：`docs/mcp-p1-barrels.md`
 - **P1 四阶段与 U 携行合并：节点 / 运输站道具 / 处决 / 改装重炮**：`docs/mcp-p1-four-stage.md`
 - **P1 重武器改装（CINDER / LANCE 三槽）**：`docs/mcp-p1-heavy-mods.md`
+- **P1 敌人生态与小队协同（冲锋机 / 重炮机甲 / 行为树）**：`docs/mcp-p1-enemy-ecology.md`
 - **长期目标（非完成清单）**：`docs/mcp-full-development-plan.md`
 
 - **P4 完整交付：八种可玩模式 / 个人档案 / 称号 / 幽灵回放 / 每日周常**：`docs/mcp-p4-full-delivery.md`（当前 P4 结论入口）

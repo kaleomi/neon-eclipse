@@ -10,6 +10,8 @@ const p4Cooldown=n=>attackCooldown(n,p4?.difficulty)*(p4?.params.enemyCooldown??
 import {haloDamageMultiplier} from './weapons/halo-rules.js';
 import {createOrdnance} from './ordnance-world.js';
 import {ORDNANCE,cinderDamage,interruptBreakerBoss} from './ordnance-rules.js';
+import {createMortarMarkers} from './mortar-world.js';
+import {rusherBlastDamage,mortarStrike,RUSHER} from './squad.js';
 import {createTacticalThrowables as createEmpSystem} from './tactical-system.js';
 import {TACTICAL,tacticalFalloff} from './tactical-rules.js';
 import {createEmpUI} from './emp-ui.js';
@@ -273,7 +275,16 @@ const chapterCues=createChapterCues((name,opts)=>gameAudio.play(name,opts));
 let streakTime=0;const streakBanner=document.createElement('div');streakBanner.className='streak-banner';document.body.append(streakBanner);
 function showStreak(step){if(!step)return;streakBanner.textContent=step>=10?'连续击破 ×10 // 清场':step>=5?'连续击破 ×5 // 压制':'连续击破 ×3';streakBanner.dataset.step=String(step);streakBanner.dataset.show='true';streakTime=1.6;}
 function lineOfSight(origin){ray.set(camera.position,origin.clone().sub(camera.position).normalize());ray.far=camera.position.distanceTo(origin);return !obstacles.some(o=>ray.intersectObject(o.mesh,false).length);}
-const enemyDirector=createEnemyDirector({scaleCooldown:p4Cooldown,onEliteWindow:()=>fieldRecord.window(),thermalVision:IS_POLAR?()=>art.thermal:null,enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
+const mortarMarkers=createMortarMarkers(scene);
+function environmentHurt(damage,point,sound='player.hazard'){if(damage<=0||execution.invulnerable)return;damage=Math.min(health,p4Incoming(damage));ordnance.cancelCharge();fieldRecord.hurt(damage);achievementUI.attempt.hurt(damage);health=Math.max(0,health-damage);mission.interrupt();combatUI.damaged(point);damageTime=.3;gameAudio.play(sound);gameAudio.hurt(health);hud();}
+function rusherBlast({enemy,x,y,z,radius,damage}){const point=new THREE.Vector3(x,y+.9,z);art.burst(point,0xff3b3b,36);gameAudio.play('vehicle.impact',{position:{x,z}});const cover=obstacles.slice();
+ if(blastVisible(point,camera.position,cover))environmentHurt(rusherBlastDamage(camera.position.distanceTo(point),{radius,damage}),point);
+ for(const e of enemies){if(e===enemy||e.hp<=0||e.boss)continue;const anchor=voltAnchor(e),dealt=rusherBlastDamage(anchor.distanceTo(point),{radius,damage:RUSHER.selfKillDamage});if(dealt>0&&blastVisible(point,anchor,cover.filter(o=>o.owner!==e.group))){e.hp-=dealt;if(e.hp<=0){enemyProjectiles.cancelOwner(e.group);art.burst(anchor,0xffad68,24);weaponDrops.drop(e);disposeGroup(e.group);enemies.splice(enemies.indexOf(e),1);kills++;}}}
+ notify('自爆奔袭者起爆 // 波及 '+radius+'m');}
+function mortarEvent(m){if(m.type==='telegraph'){mortarMarkers.telegraph({x:m.x,z:m.z,radius:m.radius,seconds:m.seconds,owner:m.owner,y:playerMotion.state.y});gameAudio.telegraph('orange',{x:m.x,z:m.z},false);return;}
+ const point=new THREE.Vector3(m.x,playerMotion.state.y,m.z);art.burst(point.clone().add(new THREE.Vector3(0,.6,0)),0xff6a3d,40);gameAudio.play('vehicle.impact',{position:{x:m.x,z:m.z}});
+ const feet=new THREE.Vector3(camera.position.x,playerMotion.state.y,camera.position.z);if(Math.abs(feet.y-point.y)<2.2)environmentHurt(mortarStrike(point,feet,{radius:m.radius,damage:m.damage}),point);}
+const enemyDirector=createEnemyDirector({onRusherBlast:rusherBlast,onMortar:mortarEvent,scaleCooldown:p4Cooldown,onEliteWindow:()=>fieldRecord.window(),thermalVision:IS_POLAR?()=>art.thermal:null,enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
  if(event.changed){notify('Warden 阶段切换 // '+BOSS_PHASES[enemy.bossState.phase].name);gameAudio.play('boss.phase');}
  else if(event.opened){notify('Warden 过载 // 青色胸口核心暴露，集中攻击！');gameAudio.play('boss.window.open');}
  else if(event.closed)gameAudio.play('boss.window.close');
@@ -346,7 +357,7 @@ function spawnEncounter(stage){
  hud();
 }
 function reset(stageIndex=0,snapshot=null){
- ordnance.reset(snapshot?.ordnance);
+ ordnance.reset(snapshot?.ordnance);mortarMarkers.clear();
  weaponDrops.reset();loadoutWorld.hide();loadout.reset(snapshot?(snapshot.loadout===undefined?DEFAULT_LOADOUT:snapshot.loadout):undefined);
  destructibles?.suspend();barrels?.suspend();energyNodes?.suspend();execution.cancel();executionStagger.clear(enemies);executionHint='';fieldKit.reset(snapshot?(snapshot.fieldKit===undefined?defaultKit():snapshot.fieldKit):undefined);
  workshop.reset(snapshot?(snapshot.weaponMods??freshWeaponMods()):undefined);
@@ -373,7 +384,7 @@ function reset(stageIndex=0,snapshot=null){
  playerMotion.reset(camera.position,restoredFeet);destructibles?.reset(camera.position);barrels?.reset(camera.position);energyNodes?.reset(camera.position);camera.rotation.set(pitch,yaw,0);spawnEncounter(mission.current);campaignUI.announce(mission.current,runMode==='replay');
 
 }
-function end(win){if(p4?.gameEnd(win))return;ordnance.clear();weaponDrops.reset();loadoutWorld.hide();execution.cancel();fieldKit.clear();fieldKit.hide();parry.reset();emp.clear();engineerDirector.clear();enemyDirector.clear?.();haloBurst.cancel();cancelRail();if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
+function end(win){if(p4?.gameEnd(win))return;ordnance.clear();mortarMarkers.clear();weaponDrops.reset();loadoutWorld.hide();execution.cancel();fieldKit.clear();fieldKit.hide();parry.reset();emp.clear();engineerDirector.clear();enemyDirector.clear?.();haloBurst.cancel();cancelRail();if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
  if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';document.body.dataset.playState=state;gameAudio.play(win?'mission.won':'mission.lost');if(!win)gameAudio.play('player.death');document.exitPointerLock?.();overlay.hidden=false;
  $('#session-title').innerHTML=win?(runMode==='replay'?'阶段<span>训练完成</span>':'行动<span>撤离成功</span>'):'信号<span>连接中断</span>';
  const seconds=Math.floor(mission.state.time);
@@ -729,6 +740,7 @@ function update(dt){
  emp.update(dt);
  engineerDirector.update(dt);
  if(!p4?.range)enemyFireGate=enemyDirector.update(dt,elapsed,enemyFireGate);
+ for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&enemies[i].type==='rusher'){enemyProjectiles.cancelOwner(enemies[i].group);disposeGroup(enemies[i].group);enemies.splice(i,1);}
  enemyProjectiles.update(dt,camera.position,previousPlayer);
  overseer?.prepareMission?.(mission.state,enemies.length===0);
  overseer?.interact?.(dt,{camera,held:keys.has('KeyE'),busy:moving||firing||reload>0||handling.state.switchRemaining>0||meleeRemaining>0||emp.aiming||damageTime>0,feetY:playerMotion.state.y,grounded:playerMotion.state.grounded});
@@ -739,7 +751,7 @@ function update(dt){
  const hazard=art.hazardDamage?.(dt,{x:camera.position.x,z:camera.position.z,feetY:playerMotion.state.y});
  if(IS_ORBITAL||IS_DATACENTER||IS_POLAR)chapterCues.update(chapterSnapshot({map:MAP_ID,art,overseer,feetY:playerMotion.state.y,padLive:Boolean(hazard&&IS_ORBITAL)}));
  if(hazard&&!execution.invulnerable){ordnance.cancelCharge();fieldRecord.hurt(Math.min(health,hazard.damage));achievementUI.attempt.hurt(Math.min(health,hazard.damage));health=Math.max(0,health-hazard.damage);mission.interrupt();combatUI.damaged(new THREE.Vector3(hazard.x,0,hazard.z));damageTime=.3;gameAudio.play('player.hazard');hud();}
- fieldKit.step(dt);if(!keys.has('KeyH')&&!firing)ordnance.cancelCharge();ordnance.step(dt);energyNodes?.flush();barrels?.flush();executionStagger.update(enemies,0);
+ fieldKit.step(dt);if(!keys.has('KeyH')&&!firing)ordnance.cancelCharge();ordnance.step(dt);mortarMarkers.update(dt);energyNodes?.flush();barrels?.flush();executionStagger.update(enemies,0);
  if(health<=0){end(false);return;}
  missionWorld.collect(camera.position,type=>{
   if(type==='ammo'&&typedAmmo.enabled){const kind=typedAmmo.supplyType(supplyWeapon());if(kind==='grenade'&&!ordnance.owns(9))return false;const added=typedAmmo.supply(kind);if(!added)return false;syncTypedAmmo();notify(AMMO_NAMES[kind]+'共享储备 +'+added+' 单位 // B切换类型，投掷物不补充');gameAudio.play('supply.ammo');hud();return true;}

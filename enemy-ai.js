@@ -8,9 +8,11 @@ import {sameEnemyLayer,enemyMuzzleHeight} from './roof-enemy-navigation.js';
 import * as THREE from './node_modules/three/build/three.module.js';
 import {ENEMY_TYPES,BOSS_PHASES,turnTowards,facingDot,movementIntent,stepBossState,recordBossAttack,enemyBehavior} from './enemy-rules.js';
 import {animateEnemy} from './enemy-model.js';
+import {createSquadCoordinator,rusherIntent,RUSHER,ARTILLERY,stepArtillery} from './squad.js';
 const THERMAL_RANGE=26;
 
-export function createEnemyDirector({enemies,player,navigation,vertical=null,move,obstacles,projectiles,onBossEvent,onEliteWindow=()=>{},scaleCooldown=seconds=>seconds,thermalVision=null}){
+export function createEnemyDirector({enemies,player,navigation,vertical=null,move,obstacles,projectiles,onBossEvent,onEliteWindow=()=>{},scaleCooldown=seconds=>seconds,thermalVision=null,onRusherBlast=()=>{},onMortar=()=>{},squadEnabled=true}){
+ const squad=createSquadCoordinator({types:ENEMY_TYPES});const mortars=[];
  const coordination=createSwarmCoordination({position:e=>e.group.position,visible:(from,to)=>voltClearPath(from,to,obstacles.map(o=>o.mesh))});
  const budget=()=>(projectiles.countThreatTag?.('swarmDrone')||0)+(projectiles.countThreatTag?.('swarmCoordinated')||0);
  const canStart=()=>!projectiles.charging&&!projectiles.hasThreatTag?.('sentry')&&budget()<2;
@@ -24,6 +26,8 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
   const thermal=thermalVision?.()===true,solidMeshes=thermal?obstacles.filter(o=>!o.bank&&!o.ledge).map(o=>o.mesh):meshes;
   refreshCommanderSupport(enemies,(a,b)=>voltClearPath(a.group.position.clone().add(new THREE.Vector3(0,1.4,0)),b.group.position.clone().add(new THREE.Vector3(0,1.4,0)),meshes));
   coordination.update(dt,enemies,player.position);
+  let anyoneSees=false;
+  for(let i=mortars.length-1;i>=0;i--){const m=mortars[i];m.remaining-=dt;if(m.remaining<=0){mortars.splice(i,1);onMortar({type:'land',x:m.x,z:m.z,radius:ARTILLERY.radius,damage:ARTILLERY.damage,owner:m.owner});}}
   gate=sentry.update(dt,time,gate);
   gate=swarm.update(dt,time,gate);
   const start=enemies.length?nextActor%enemies.length:0,ordered=[...enemies.slice(start),...enemies.slice(0,start)];
@@ -47,14 +51,24 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
    const target=player.position.clone().add(new THREE.Vector3(0,-.35,0)),line=target.clone().sub(origin);
    ray.set(origin,line.clone().normalize());ray.far=line.length();
    const visible=dist<profile.range+10&&ray.intersectObjects(thermal&&dist<THERMAL_RANGE?solidMeshes:meshes,false).length===0;
+   if(visible)anyoneSees=true;
+   if(enemy.type==='artilleryMech'&&stepArtillery(enemy,dt))enemy.group.userData.artilleryClosed=true;
+   if(enemy.type==='rusher'){
+    const r=rusherIntent(enemy,dist,dt);enemy.rusherBlink=r.blink;
+    if(r.state==='detonate'){onRusherBlast({enemy,x:pos.x,z:pos.z,y:pos.y,radius:RUSHER.radius,damage:RUSHER.damage});enemy.hp=0;continue;}
+    if(r.state!=='armed'){const nav=navigation.direction(pos,player.position)||{x:dx,z:dz};const len=Math.hypot(nav.x,nav.z)||1,step=enemy.speed*dt;enemy.group.rotation.y=Math.atan2(dx,dz);moveEnemy(pos,nav.x/len*step,nav.z/len*step,enemy.radius);}
+    animateEnemy(enemy,time,r.state!=='armed',dist);continue;
+   }
    const coordinated=enemy.group.userData.swarmCoordinated===true;
    if(coordinated&&visible)enemy.lastVisualPoint=player.position.clone();
-   const searchTarget=coordinated&&!visible?(enemy.swarmIntel?.point||enemy.lastVisualPoint||pos):player.position;
+   const squadTarget=squadEnabled&&!coordinated&&!enemy.flankRoute?.length?squad.target(enemy,player.position):null;
+   // Squad flank offsets only apply while the squad has a fresh sighting; legacy omniscient pursuit is otherwise unchanged.
+   const searchTarget=coordinated&&!visible?(enemy.swarmIntel?.point||enemy.lastVisualPoint||pos):squadTarget&&squadTarget.role==='flank'&&!squadTarget.search&&visible&&dist>4?new THREE.Vector3(squadTarget.x,player.position.y,squadTarget.z):player.position;
    if(enemy.charge===0&&!locked)enemy.group.rotation.y=turnTowards(enemy.group.rotation.y,Math.atan2(searchTarget.x-pos.x,searchTarget.z-pos.z),profile.turn*dt);
    if(enemy.charge===0&&!locked){
     enemy.flankTime=(enemy.flankTime||0)+dt;while(enemy.flankRoute?.length&&Math.hypot(pos.x-enemy.flankRoute[0].x,pos.z-enemy.flankRoute[0].z)<1.1)enemy.flankRoute.shift();if(enemy.flankTime>16)enemy.flankRoute=[];const flank=enemy.flankRoute?.[0],navTarget=flank?new THREE.Vector3(flank.x,pos.y+1.7,flank.z):searchTarget;
     let climbing=!enemy.boss?vertical?.route(pos,navTarget,enemy.radius):null;if(flank)climbing={...(climbing||navigation.direction(pos,navTarget)),onDeck:false};
-    const intent=coordinated&&!visible&&Math.hypot(searchTarget.x-pos.x,searchTarget.z-pos.z)<1?'hold':climbing&&!climbing.onDeck?'approach':movementIntent(enemy.type,dist,visible);let direction=null;
+    let intent=coordinated&&!visible&&Math.hypot(searchTarget.x-pos.x,searchTarget.z-pos.z)<1?'hold':climbing&&!climbing.onDeck?'approach':movementIntent(enemy.type,dist,visible);if(squadTarget&&visible&&!climbing){if(squadTarget.role==='cover'&&dist<profile.far&&dist>profile.near)intent='strafe';else if(squadTarget.role==='flank'&&dist>4&&Math.hypot(searchTarget.x-pos.x,searchTarget.z-pos.z)>1.2)intent='approach';}let direction=null;
     const side=(Math.floor(time/3+enemy.seed)%2?1:-1);
     if(intent==='approach')direction=climbing||navigation.direction(pos,searchTarget);
     else if(intent==='retreat')direction={x:-dx,z:-dz};
@@ -75,7 +89,8 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
     const phase=enemy.boss?BOSS_PHASES[enemy.bossState.phase]:null,attack=phase?phase.attack:profile.attack;
     // Freeze position and aim during telegraph; all bolts retain this captured target.
     origin.set(pos.x,enemyMuzzleHeight(enemy),pos.z);
-    if(projectiles.queue(origin,target,enemy.boss,enemy.group,attack)){
+    if(enemy.type==='artilleryMech'){if(dist>=ARTILLERY.minRange&&projectiles.attackers<3){mortars.push({x:player.position.x,z:player.position.z,remaining:ARTILLERY.telegraph,owner:enemy.group});onMortar({type:'telegraph',x:player.position.x,z:player.position.z,radius:ARTILLERY.radius,seconds:ARTILLERY.telegraph,owner:enemy.group});enemy.charge=ARTILLERY.telegraph+.1;enemy.attack=scaleCooldown(profile.cooldown+Math.random()*.4);gate=.5;nextActor=(enemies.indexOf(enemy)+1)%Math.max(1,enemies.length);}}
+    else if(projectiles.queue(origin,target,enemy.boss,enemy.group,attack)){
      nextActor=(enemies.indexOf(enemy)+1)%Math.max(1,enemies.length);
      enemy.charge=attack.charge+(attack.bursts-1)*(attack.burstDelay||.3)+.05;
      enemy.attack=scaleCooldown((phase?phase.cooldown:profile.cooldown)+Math.random()*.25);
@@ -87,7 +102,8 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
    if(!enemy.boss&&enemy.charge>0){const aim=projectiles.aimTarget?.(enemy.group);if(aim)enemy.group.rotation.y=Math.atan2(aim.x-pos.x,aim.z-pos.z);}
    animateEnemy(enemy,time,pos.distanceToSquared(old)>.00001,dist);
   }
+  if(squadEnabled)squad.update(dt,enemies,player.position,anyoneSees);
   return gate;
  }
- return {update,get coordination(){return coordination.state;},clear(){swarm.clear();coordination.clear();clearCommanderSupport(enemies);nextActor=0;}};
+ return {update,get coordination(){return coordination.state;},get squad(){return squad.state;},get mortars(){return mortars.map(m=>({...m}));},clear(){swarm.clear();coordination.clear();squad.clear();mortars.length=0;clearCommanderSupport(enemies);nextActor=0;}};
 }

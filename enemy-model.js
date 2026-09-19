@@ -52,6 +52,22 @@ export function createEnemyModel(type){
   for(const [x,z] of [[-.35,.45],[.35,.45],[-.35,-.45],[.35,-.45]]){const l=box(g,.16,.5,.16,x,.25,z,steel);legs.push(l);}
   box(g,.1,.4,.1,0,1.2,-.3,dark);box(g,.12,.12,.12,0,1.42,-.3,accent);
  }
+ if(type==='rusher'){
+  // Rusher: crouched sprinter frame with a red payload dome; no gun. Blink handled in animateEnemy.
+  box(g,.5,.34,.5,0,1.45,-.35,new THREE.MeshStandardMaterial({color:0xff3b3b,emissive:0xff2222,emissiveIntensity:1.4}),'body');
+  const dome=g.children[g.children.length-1];g.userData.rusherDome=dome;g.userData.ownedMaterials.push(dome.material);
+ }
+ if(type==='artilleryMech'){
+  // Artillery mech: wide biped, twin mortar tubes on the back, exposed knee joints ('leg' zone) and a rear core behind armor.
+  for(const m of g.children.slice())g.remove(m);legs.length=0;arms.length=0;
+  box(g,1.5,1.1,1,0,1.7,0,dark,'armor');box(g,1.2,.3,.9,0,2.35,0,steel,'armor');
+  for(const side of [-1,1]){const l=box(g,.34,.9,.42,side*.55,.45,0,steel,'body');legs.push(l);const knee=box(g,.4,.24,.48,side*.55,.98,.05,accent,'leg');knee.userData.knee=true;
+   box(g,.22,.22,1.1,side*.42,2.65,-.2,dark,'armor');box(g,.26,.26,.2,side*.42,2.65,-.78,accent,'armor');}
+  box(g,.6,.4,.3,0,1.85,.62,steel,'head');
+  coreMaterial.color.setHex(0xffb060);coreMaterial.emissive.setHex(0xc35a10);coreMaterial.emissiveIntensity=1.4;
+  core=new THREE.Mesh(new THREE.IcosahedronGeometry(.26,1),coreMaterial);core.position.set(0,1.6,-.62);core.userData.hitZone='core';g.add(core);
+  const hatch=box(g,.9,.8,.14,0,1.6,-.56,dark,'armor');g.userData.artilleryHatch=hatch;
+ }
  if(type==='stalker'){
   // Stalker: slim frame, fins, no bright plates. Materials go transparent with distance in animateEnemy.
   box(g,.1,.7,.5,0,2.1,-.1,dark);box(g,.08,.1,.3,0,2.5,-.05,accent);
@@ -91,6 +107,8 @@ export function animateEnemy(enemy,time,walking,playerDistance=0){
  if(enemy.type==='harborElite'){const open=enemy.eliteState?.ventRemaining>0;p.coreMaterial.color.setHex(open?0x72ffe0:0xe4aa55);p.coreMaterial.emissive.setHex(open?0x32d6b0:0x986122);p.coreMaterial.emissiveIntensity=open?1.5:.5;p.core.scale.setScalar(open?1.35:1);p.core.rotation.y=time;}
  if(enemy.commanderSource&&enemy.charge<=0)p.accent.emissiveIntensity=1.6;
  if(enemy.group.userData.commandRing)enemy.group.userData.commandRing.material.opacity=enemy.commanderRecipients>0?.16+.035*Math.sin(time*3):.06;
+ if(enemy.type==='rusher'&&enemy.group.userData.rusherDome){const b=enemy.rusherBlink||0;enemy.group.userData.rusherDome.material.emissiveIntensity=1+Math.max(0,Math.sin(time*(6+b*30)))*(1.5+b*3);}
+ if(enemy.type==='artilleryMech'){const open=(enemy.artillery?.exposed||0)>0,hatch=enemy.group.userData.artilleryHatch;if(hatch)hatch.visible=!open;p.coreMaterial.emissiveIntensity=open?2.4+Math.sin(time*10)*.5:1.4;if(p.core)p.core.scale.setScalar(open?1.3:1);}
  if(enemy.boss){
   const open=enemy.bossState.openRemaining>0;
   p.coreMaterial.color.setHex(open?0x35d5a8:0xff648c);p.coreMaterial.emissive.setHex(open?0x15966f:0xb71a4a);p.coreMaterial.emissiveIntensity=open?1.2:.5;

@@ -1,5 +1,6 @@
 import {haloDamageMultiplier} from './weapons/halo-rules.js';
 import {harborEliteDamage} from './harbor-elite.js';
+import {artilleryDamage} from './squad.js';
 // Pure combat rules: silhouettes/colors identify roles, never hidden invulnerability.
 export const ENEMY_TYPES={
  commander:{name:'战术指挥官',color:0xeb9bff,hp:110,hpPerLevel:0,speed:1.9,turn:2.3,scale:1,radius:.65,near:12,far:18,range:28,cooldown:3.4,behavior:'ranged',hint:'12米同层无遮挡队友冷却恢复+25% · 不叠加/不缩短预警 · 击倒指挥官或切断链路',attack:{color:'purple',charge:1,speed:18,damage:8,angles:[0],bursts:1,showAim:true}},
@@ -21,6 +22,10 @@ export const ENEMY_TYPES={
   hint:'远处近乎透明 · 7 米内显形，听脚步与涟漪',attack:{color:'orange',charge:.45,speed:17,damage:6,angles:[0],bursts:1}},
  hound:{name:'猎犬机',color:0xff5a5a,hp:38,hpPerLevel:4,speed:5.2,turn:6,scale:.9,radius:.5,near:3.5,far:8,range:14,cooldown:1.4,behavior:'assault',thermal:true,
   hint:'低矮快速机械体 · 红眼预警后直线突进，横移后用霰弹/VOLT/EMP收掉 · 暴风雪中靠热成像仍能追踪',attack:{color:'orange',charge:.45,speed:19,damage:5,angles:[0],bursts:1}},
+ rusher:{name:'自爆奔袭者',color:0xff3b3b,hp:44,hpPerLevel:4,speed:5.6,turn:6,scale:.92,radius:.55,near:1.8,far:40,range:0,cooldown:99,behavior:'assault',mechanical:true,noSquad:true,
+  hint:'红光加速闪烁 · 2.2米内起爆1秒 · 远距击毁可波及旁边敌人',attack:{color:'orange',charge:.45,speed:0,damage:0,angles:[],bursts:0}},
+ artilleryMech:{name:'重炮机甲',color:0xff8a3d,hp:320,hpPerLevel:14,speed:1.05,turn:.8,scale:1.35,radius:1,near:9,far:26,range:34,cooldown:5.5,behavior:'ranged',mechanical:true,mortar:true,
+  hint:'迫击落点红圈 2 秒 · 离开红圈 · 打膝关节两次暴露核心 5 秒',attack:{color:'orange',charge:2,speed:0,damage:26,angles:[0],bursts:1,showAim:false}},
  shield:{name:'护盾兵',color:0x9fc4ff,hp:120,hpPerLevel:10,speed:1.9,turn:1.6,scale:1.1,radius:.8,near:7,far:11,range:26,cooldown:2.8,behavior:'assault',frontShield:true,
   hint:'正面护盾免疫 · EMP可破盾6秒 · 绕侧或打背部核心',attack:{color:'amber',charge:.8,speed:14,damage:8,angles:[-.08,.08],bursts:1}},
  warden:{name:'THE WARDEN',color:0xff668d,hp:1000,hpPerLevel:0,speed:1.75,turn:.95,scale:1.9,radius:1.235,near:10,far:15,range:44,cooldown:2.5,
@@ -59,6 +64,8 @@ export function resolveEnemyDamage(enemy,baseDamage,zone,attacker){
   // Frontal shield is an absolute block (readable: shots spark off) unless EMP has broken it; the rear core is the payoff.
   if(zone==='core'){multiplier=2;weak=true;}
   else if(!(enemy.shieldDownRemaining>0)&&facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.35){multiplier=0;armored=true;}
+ } else if(enemy.type==='artilleryMech'){
+  const r=artilleryDamage(enemy,1,zone);multiplier=r.damage;armored=r.armored;weak=r.weak;
  } else if(enemy.type==='heavy'){
   if(zone==='core'){multiplier=2;weak=true;}
   else if(facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.55){multiplier=.3;armored=true;}
@@ -82,6 +89,7 @@ export function stepBossState(enemy,dt,attackFinished=true){
 export const enemyBehavior=type=>ENEMY_TYPES[type]?.behavior||type;
 export function movementIntent(type,distance,visible){
  const p=ENEMY_TYPES[type],behavior=enemyBehavior(type);
+ if(type==='rusher')return 'approach';
  if(!visible||distance>p.far)return 'approach';
  if(behavior==='ranged'&&distance<p.near)return 'retreat';
  if(behavior==='ranged')return 'strafe';

@@ -2,6 +2,7 @@
 // `neon-eclipse.telemetry.v1`. Nothing is uploaded. The record is built from the same field
 // records the pause/result screens already show, plus attempt metadata (map, mode, difficulty).
 // Opt-out and "clear local statistics" live in Settings. Covered by test-telemetry.mjs.
+import {validFramePerf} from './frame-stats.js';
 export const TELEMETRY_DB='neon-eclipse.telemetry.v1';
 export const TELEMETRY_STORE='attempts';
 export const TELEMETRY_SETTING_KEY='neon-eclipse.telemetry-enabled.v1';
@@ -20,7 +21,7 @@ export function createTelemetryAttempt({map,mode,difficulty,stage=0,snapshot=fal
  return {id,map,mode,difficulty,startStage:stage,fromCheckpoint:!!snapshot,startedAt:now()};
 }
 // Build the durable record from an attempt and the per-stage field records.
-export function telemetryRecordFromResult({attempt,won,stages,kills,time,weaponShots=null,endStage,now=()=>Date.now()}){
+export function telemetryRecordFromResult({attempt,won,stages,kills,time,weaponShots=null,endStage,perf=null,now=()=>Date.now()}){
  const summary=stages.reduce((s,r)=>({seconds:s.seconds+r.seconds,damage:s.damage+r.damage,shots:s.shots+r.shots,coreHits:s.coreHits+r.coreHits,windows:s.windows+r.windows,usedWindows:s.usedWindows+r.usedWindows}),{seconds:0,damage:0,shots:0,coreHits:0,windows:0,usedWindows:0});
  const death=won?null:(stages.findLast?.(r=>r.death)||[...stages].reverse().find(r=>r.death))?.death||null;
  return {
@@ -31,7 +32,8 @@ export function telemetryRecordFromResult({attempt,won,stages,kills,time,weaponS
   weaponShots:Array.isArray(weaponShots)?weaponShots.map(n=>Math.max(0,Math.floor(n||0))):null,
   death:death?{stage:stages.find(r=>r.death===death)?.stage??endStage,x:death.x,z:death.z,feet:death.feet}:null,
   stages:stages.map(r=>({stage:r.stage,seconds:Math.round(r.seconds*10)/10,damage:Math.round(r.damage),shots:r.shots,died:!!r.death})),
-  startedAt:attempt.startedAt,finishedAt:now()
+  startedAt:attempt.startedAt,finishedAt:now(),
+  perf:validFramePerf(perf)&&perf?{frames:perf.frames,avgFps:perf.avgFps,p50Ms:perf.p50Ms,p95Ms:perf.p95Ms,maxMs:perf.maxMs,long:perf.long,quality:perf.quality}:null// Optional frame-timing summary; schema unchanged, older records simply lack it.
  };
 }
 export function validTelemetryRecord(r){
@@ -42,6 +44,7 @@ export function validTelemetryRecord(r){
  if(!Array.isArray(r.stages)||r.stages.length>200)return false;
  if(r.death!==null&&(!r.death||!num(r.death.x,-1e5,1e5)||!num(r.death.z,-1e5,1e5)))return false;
  if(!num(r.startedAt,0,4e12)||!num(r.finishedAt,0,4e12))return false;
+ if(r.perf!==undefined&&!validFramePerf(r.perf))return false;
  return true;
 }
 // Aggregate for the statistics page. Pure so it can be tested without IndexedDB.

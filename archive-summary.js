@@ -1,5 +1,7 @@
 // Read-only archive projections. No score writes, invented accuracy or unlocks.
 import {validTelemetryRecord} from './telemetry.js';
+import {validFramePerf,summarizeFramePerf} from './frame-stats.js';
+export {summarizeFramePerf};
 export const ARCHIVE_LIMIT=2000;
 export const WEAPON_LABELS=['VANGUARD','BREACHER','GHOST','ARC BLADE','TEMPEST','HALO','RAILSPIKE','VOLT'];
 const finite=(v,max=1e7)=>Number.isFinite(v)&&v>=0&&v<=max;
@@ -8,7 +10,7 @@ export function archiveRecord(r){
   if(!validTelemetryRecord(r)||!r.id||r.map.length>80||r.finishedAt<r.startedAt)return null;
   if(!r.stages.every(s=>s&&Number.isInteger(s.stage)&&s.stage>=0&&s.stage<=50&&finite(s.seconds,604800)&&finite(s.damage)&&finite(s.shots)&&typeof s.died==='boolean'))return null;
   const shots=Array.isArray(r.weaponShots)&&r.weaponShots.length<=32&&r.weaponShots.every(n=>Number.isInteger(n)&&finite(n))?[...r.weaponShots]:null;
-  return {schema:1,id:r.id,map:r.map,mode:r.mode,difficulty:r.difficulty,startStage:r.startStage,endStage:r.endStage,fromCheckpoint:r.fromCheckpoint,won:r.won,kills:r.kills,time:r.time,damage:r.damage,shots:r.shots,weaponShots:shots,startedAt:r.startedAt,finishedAt:r.finishedAt,death:r.death?{stage:Number.isInteger(r.death.stage)&&r.death.stage>=0&&r.death.stage<=50?r.death.stage:r.endStage,x:r.death.x,z:r.death.z}:null,stages:r.stages.map(s=>({stage:s.stage,seconds:s.seconds,damage:s.damage,shots:s.shots,died:s.died}))};
+  return {schema:1,id:r.id,map:r.map,mode:r.mode,difficulty:r.difficulty,startStage:r.startStage,endStage:r.endStage,fromCheckpoint:r.fromCheckpoint,won:r.won,kills:r.kills,time:r.time,damage:r.damage,shots:r.shots,weaponShots:shots,startedAt:r.startedAt,finishedAt:r.finishedAt,perf:r.perf&&validFramePerf(r.perf)?{...r.perf}:null,death:r.death?{stage:Number.isInteger(r.death.stage)&&r.death.stage>=0&&r.death.stage<=50?r.death.stage:r.endStage,x:r.death.x,z:r.death.z}:null,stages:r.stages.map(s=>({stage:s.stage,seconds:s.seconds,damage:s.damage,shots:s.shots,died:s.died}))};
  }catch{return null;}
 }
 export function prepareArchive(raw){

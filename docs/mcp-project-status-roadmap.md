@@ -90,6 +90,12 @@
 - 新模块 `interaction-rules.js` / `interaction-world.js` / `interaction-layouts.js`：每章两座可按住 E 的基座——排气阀（1.5s 启动、5s 半径 3.2m 云：敌人半速且不能预警、6 HP/s、12s 充压）与照明开关（0.6s 切换：黑暗中远程射程 ×0.65、潜行者/猎犬 ×1.25，可恢复）。九章各有主题命名与经约束校验的摆位。
 - 451/451 check、105/105 rules、41/41 integration；`test-interactions-browser` 九章真实页面原生 E 通过，诊断 0。摆位/忙碌/灯光基准三类首版失败已记录并修正。详见 `docs/mcp-p1-environment.md`。下一批：P2 天气 / 击杀表现 / 过场。
 
+### P0/P4 交付：帧时序统计 / 入口拆分第一步 / CI 工作流（2026-09-19）
+
+- 新 `frame-stats.js`（HUD 帧率与行动内帧间隔百分位采样）与 `player-collision.js`（`app.js` 碰撞函数提取）；遥测记录在 schema 1 内新增可选 `perf`，旧记录原样有效；`operations-archive` 新增「本机帧时序」面板（加权平均帧率、最差 P95、最长单帧、按画质档位）。`.github/workflows/ci.yml` 分 node-tests 与 browser-smoke 两个作业，`npm run test:ci`。
+- 467/467 check、108/108 rules、42/42 integration；smoke 15/15、archive、新 `test-frame-perf-browser`（真实 reactor 死亡后记录带 perf、档案页聚合）串行 EXIT 0，诊断 0。首轮 `const` 提取触发 TDZ 导致 smoke 0/15 的真实回归已记录并修正——规则/集成层未能发现，仅浏览器层暴露。
+- 未完成：`app.js` 仍 900+ 行（session/input/damage/objective-runner 未拆）；CI 文件未在 GitHub 实际运行（不推送）。详见 `docs/mcp-p0-frame-stats-ci.md`。下一批：输入 / 无障碍 / 多语言。
+
 ### P3 交付：先遣队第 5 关 · 灯塔岛登陆（2026-09-19）
 
 - 新模块 `lighthouse-mission.js` / `lighthouse-world.js`：游艇登船 → 灯塔岛北侧浮桥停稳 → 下船步行上岛 → 三处按住 F 清点 → 回船返港，8 阶段、三档时限与保持。`maritime-rules.js` 增加岛顶/浮桥步行地表与坡度高度，浮桥对船是障碍。先遣队接入为第 5 关（`lighthouse-v1`，锁定战役难度，无安全节点，从码头重试）；关卡数量改由任务表派生，旧 `front4-v1` 档案原样可读。

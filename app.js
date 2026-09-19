@@ -48,6 +48,8 @@ import {createPresentation} from './presentation.js';
 import {createGameAudio} from './audio/game-audio.js';
 import {createFieldRecord} from './field-record.js';
 import {createTelemetry,createTelemetryAttempt} from './telemetry.js';
+import {createFrameStats} from './frame-stats.js';
+import {createCollision} from './player-collision.js';
 import {createHarborCombatUI} from './harbor-combat-ui.js';
 import {createHarborWorld} from './harbor-world.js';
 import {createHarborNavigation} from './harbor-navigation.js';
@@ -115,7 +117,7 @@ import { createCampaignStore, STAGE_ENTRIES } from './campaign.js';
 import { createCampaignUI } from './campaign-ui.js';
 
 const fieldRecord=createFieldRecord();
-const telemetry=createTelemetry();let telemetryAttempt=null,telemetryShots=[0,0,0,0,0,0,0,0];
+const telemetry=createTelemetry(),frameStats=createFrameStats();let telemetryAttempt=null,telemetryShots=[0,0,0,0,0,0,0,0];
 window.neonTelemetry=telemetry;
 // Test-only probe (chapter 07 browser test): read feet height / boss state and place the player. No game-state writes beyond position.
 if(IS_DATACENTER)window.__datacenterProbe=()=>({feetY:playerMotion.state.y,x:camera.position.x,z:camera.position.z,stage:mission.state.index,level:art.level,phase:art.phase,pumps:art.pumps,speedScale:art.moveScale(playerMotion.state.y),shorted:art.shorted(selected,playerMotion.state.y),toast:toast.textContent,bossBlocking:Boolean(overseer?.blocking),place(x,z,feetY=0,facing=0){camera.position.set(x,feetY+1.7,z);playerMotion.reset(camera.position,feetY);yaw=facing;},advanceWater(seconds){art.advance(seconds);}});
@@ -162,7 +164,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75)); renderer.setSize(inner
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping;
 $('#game').append(renderer.domElement);
 const qualityButton=document.createElement('button');qualityButton.id='quality';qualityButton.type='button';qualityButton.textContent='画质：精细 / 按 Q 切换';qualityButton.setAttribute('aria-pressed','false');$('.mission-card').append(qualityButton);
-function toggleQuality(){presentation.toggleQuality();weather.reapply();weather.setQuality(document.body.dataset.renderQuality!=='0');}
+function toggleQuality(){presentation.toggleQuality();weather.reapply();weather.setQuality(document.body.dataset.renderQuality!=='0');frameStats.setQuality(Number(document.body.dataset.renderQuality)||0);}
 qualityButton.addEventListener('click',toggleQuality);
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x071217); scene.fog = new THREE.FogExp2(0x071217, .014);
 const camera = new THREE.PerspectiveCamera(74, innerWidth / innerHeight, .08, 160);
@@ -185,6 +187,7 @@ function box(w,h,d,x,y,z,mat=steel,parent=scene) {
  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat); m.position.set(x,y,z); parent.add(m); return m;
 }
 const obstacles=[],playerCeilings=[];let reactor=null;
+const {blocked,move}=createCollision(obstacles);// Declared with the obstacle list: earlier hoisted-function call sites (weapon knockback, enemies) must not hit a TDZ.
 function buildReactor(){
 const floor=box(ARENA.size,.3,ARENA.size,0,-.2,0,dark);floor.userData.floor=true;
 const grid = new THREE.GridHelper(ARENA.size,40,0x24545c,0x142c34);grid.position.y=.005;scene.add(grid);
@@ -393,7 +396,7 @@ function reset(stageIndex=0,snapshot=null){
  haloBurst.cancel();cancelRail();
  fieldRecord.begin(stageIndex);achievementUI.begin({map:MAP_ID,stage:stageIndex,snapshot:!!snapshot,replay:runMode==='replay'});
  telemetryAttempt=p4?.active?null:createTelemetryAttempt({map:MAP_ID,mode:runMode,difficulty:currentDifficulty().id,stage:stageIndex,snapshot:!!snapshot});
- p4?.begin?.({map:MAP_ID,difficulty:currentDifficulty().id,stage:stageIndex,snapshot:!!snapshot,replay:runMode==='replay',inheritedKills:snapshot?.kills||0});telemetryShots=[0,0,0,0,0,0,0,0];
+ p4?.begin?.({map:MAP_ID,difficulty:currentDifficulty().id,stage:stageIndex,snapshot:!!snapshot,replay:runMode==='replay',inheritedKills:snapshot?.kills||0});telemetryShots=[0,0,0,0,0,0,0,0];if(telemetryAttempt)frameStats.begin(Number(document.body.dataset.renderQuality)||0);else frameStats.finish();
  bossRecordUI?.clear();lookInput.reset();transport?.reset(snapshot?.transportTime||0,snapshot?.transportTrip===true);meleePending=false;meleeStrike.cancel();parry.reset();sprintBlend=0;
  overseer?.clear();art.clear();enemyProjectiles.clear();handling.reset();combatUI.clear();enemyUI.clear();mission.reset(stageIndex);missionWorld.reset();fireBuffer=0;enemyFireGate=0;moving=false;sprinting=false;aiming=false;firing=false;keys.clear();
  killFx.clear();slowmo.reset();chapterIntro?.cancel();delete document.body.dataset.slowmo;
@@ -412,7 +415,7 @@ function reset(stageIndex=0,snapshot=null){
 
 }
 function end(win){if(p4?.gameEnd(win))return;ordnance.clear();mortarMarkers.clear();weaponDrops.reset();loadoutWorld.hide();execution.cancel();fieldKit.clear();fieldKit.hide();parry.reset();emp.clear();engineerDirector.clear();enemyDirector.clear?.();haloBurst.cancel();cancelRail();if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
- if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';document.body.dataset.playState=state;gameAudio.play(win?'mission.won':'mission.lost');if(!win)gameAudio.play('player.death');document.exitPointerLock?.();overlay.hidden=false;
+ if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,perf:frameStats.finish(),endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';document.body.dataset.playState=state;gameAudio.play(win?'mission.won':'mission.lost');if(!win)gameAudio.play('player.death');document.exitPointerLock?.();overlay.hidden=false;
  $('#session-title').innerHTML=win?(runMode==='replay'?'阶段<span>训练完成</span>':'行动<span>撤离成功</span>'):'信号<span>连接中断</span>';
  const seconds=Math.floor(mission.state.time);
  $('#brief').textContent=`${win?(runMode==='replay'?'本阶段训练完成，主行动检查点未改变。':(IS_POLAR?'GLACIER 已沉入冰湖，小队离开极地雷达阵列。':IS_DATACENTER?'ABYSS 已停机，小队离开沉没数据中心。':IS_ORBITAL?'TETHER 已沉寂，小队离开轨道电梯基座。':IS_HARBOR?'小队已登船，离开风暴港口。':IS_TRAIN?'列车控制权已移交，接应队伍已登车。':IS_TOWER?'中枢已隔离，小队已从大厅撤离。':IS_ROOF?'信号已送出，小队已返回升降平台。':IS_STATION?'已登上末班列车，运输站行动完成。':'反应堆已移交，撤离完成。')):'可从阶段入口检查点重试，或重新开始行动。'} 击破 ${kills} 个目标 · 用时 ${Math.floor(seconds/60)}分${seconds%60}秒 · 阶段 ${runMode==='replay'?replayEntry.stageIndex+1:Math.min(5,mission.state.index+1)}/5。`;
@@ -560,8 +563,6 @@ function startReload(){
  syncTypedAmmo();if(!reserves[selected]){notify('备用弹药耗尽 · 切换武器');return;}
  haloBurst.cancel();cancelRail();reload=w.reload;fireBuffer=0;gameAudio.play(selected===4?'reload.tempest':'reload.start');hud();
 }
-function blocked(x,z,r){return obstacles.some(o=>Math.abs(x-o.x)<o.w/2+r&&Math.abs(z-o.z)<o.d/2+r);}
-function move(pos,dx,dz,r){if(!blocked(pos.x+dx,pos.z,r))pos.x+=dx;if(!blocked(pos.x,pos.z+dz,r))pos.z+=dz;}
 function trace(from,to,color=0xffbd75){
  const mesh=new THREE.Line(new THREE.BufferGeometry().setFromPoints([from,to]),new THREE.LineBasicMaterial({color,transparent:true,opacity:.9}));scene.add(mesh);effects.push({mesh,life:.09});
 }
@@ -870,7 +871,7 @@ const p4HurtBase=fieldRecord.hurt;fieldRecord.hurt=n=>{p4.hurt?.(n);p4HurtBase(n
 if(p4.active){overlay.style.setProperty('display','none','important');p4.boot();}
 else {const link=document.createElement('a');link.href='./p4-hub.html';link.textContent='行动中枢 / P4 ↗';link.className='p4-home-link';link.style.cssText='position:fixed;top:68px;right:28px;z-index:140;padding:10px 18px;color:#a2f5da;background:linear-gradient(135deg,#12343eee,#081820ee);border:1px solid #497c87;text-decoration:none;font:13px sans-serif;box-shadow:0 8px 24px #0008,inset 0 1px #abfff833';document.body.append(link);const hideStyle=document.createElement('style');hideStyle.textContent='body[data-play-state="playing"] .p4-home-link{display:none}';document.head.append(hideStyle);}
 
-let last=performance.now(),fpsTime=0,frames=0;
+let last=performance.now();
 function frame(now){
  const p4RealDt=Math.max(0,(now-last)/1000);p4?.prepareFrame?.(p4RealDt);
  const dt=Math.max(0,Math.min((now-last)/1000,.05));last=now;
@@ -906,7 +907,7 @@ function frame(now){
  toastTime=Math.max(0,toastTime-dt);toast.style.opacity=toastTime>0?'1':'0';damageTime=Math.max(0,damageTime-dt);damageScreen.style.opacity=damageTime*2;hitTime=Math.max(0,hitTime-dt);hit.style.opacity=hitTime>0?'1':'0';
  if(streakTime>0){streakTime-=dt;if(streakTime<=0)streakBanner.dataset.show='false';}
  gameAudio.setListener(camera.position.x,camera.position.z,yaw);gameAudio.update(dt,{playState:state,health,enemiesNear:enemies.reduce((n,e)=>n+(e.group.position.distanceToSquared(camera.position)<45*45?1:0),0),bossActive:Boolean(overseer?.blocking||enemies.some(e=>e.boss)),defending:mission.state.defending===true,extracting:mission.state.extracting===true});
- frames++;fpsTime+=Math.min((now-(frame.previousNow||now))/1000,1);frame.previousNow=now;if(fpsTime>.5){$('#fps').textContent=Math.round(frames/fpsTime);frames=0;fpsTime=0;}
+ {const shown=$('#fps').textContent,fps=frameStats.sample(now);if(fps&&String(fps)!==shown)$('#fps').textContent=fps;}
  achievementUI.update(state);
  presentation.update(dt,yaw,pitch,state);
  const displayedDifficulty=DIFFICULTIES[p4?.difficulty]||currentDifficulty();document.body.dataset.combatDifficulty=displayedDifficulty.id;$('.boss-note').textContent=mission.current.title+' · '+displayedDifficulty.label;

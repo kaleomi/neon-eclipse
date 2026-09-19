@@ -1,0 +1,46 @@
+# Layered regression for NEON ECLIPSE. Rules/integration run on every push; the Playwright smoke layer
+# is a separate job so a flaky software-WebGL run never masks a rules failure.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node scripts/run-tests.mjs --layer check
+      - run: node scripts/run-tests.mjs --layer rules --jobs 2
+      - run: node scripts/run-tests.mjs --layer integration --jobs 2
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: node-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm install --no-save playwright@1
+      - run: npx playwright install --with-deps chromium
+      - name: smoke (menu + first chapter) in isolated Chromium
+        run: node test-smoke-browser.mjs
+        env:
+          VEHICLE_PLAYWRIGHT_MODULE: playwright
+      - name: expedition + archive pages
+        run: node test-expedition-browser.mjs && node test-archive-browser.mjs
+        env:
+          VEHICLE_PLAYWRIGHT_MODULE: playwright

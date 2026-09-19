@@ -67,7 +67,7 @@ try{
 
   // Capture a clean production menu, never a fixture victory.
   const clean=await browser.newContext({viewport:{width:1280,height:1000}}),cp=await clean.newPage();await cp.goto(server.base+'/vehicle.html');await cp.waitForFunction(()=>document.body.dataset.expeditionState==='ready');
-  await cp.click('.expedition-backup>summary');await cp.waitForFunction(()=>document.querySelector('[data-exp-backup-health]').textContent.includes('0/5'));
+  await cp.click('.expedition-backup>summary');await cp.waitForFunction(()=>document.querySelector('[data-exp-backup-health]').textContent.includes('0/8'));
   const shots=process.env.VEHICLE_SCREENSHOT_DIR||fs.mkdtempSync(path.join(os.tmpdir(),'neon-expedition-b5-'));fs.mkdirSync(shots,{recursive:true});
   await cp.locator('.expedition-backup').screenshot({path:path.join(shots,'p3-backup-desktop.png')});
   for(const width of [390,320]){await cp.setViewportSize({width,height:900});await cp.locator('.expedition-backup').scrollIntoViewIfNeeded();assert(await cp.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));if(width===390)await cp.locator('.expedition-backup').screenshot({path:path.join(shots,'p3-backup-mobile.png')});}

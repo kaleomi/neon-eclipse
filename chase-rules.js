@@ -1,5 +1,5 @@
 import {createSeaCombat,stepSeaCombat,clearSeaCombat} from './sea-combat.js';
-import {createYacht,stepYacht,waterFree,yachtFree,ISLANDS,clamp,routeStep} from './maritime-rules.js';
+import {createYacht,stepYacht,waterFree,yachtFree,ISLANDS,PLATFORM,clamp,routeStep} from './maritime-rules.js';
 import {forward} from './vehicle-rules.js';
 export const CHASE=Object.freeze({timeLimit:180,enemySpeed:27,loseDistance:125,loseSeconds:4,reacquireDistance:85,evacRadius:24,evacSpeed:12,headStart:3});
 export const CHASE_GATES=Object.freeze([{x:320,z:-65,name:'北上水道'},{x:525,z:-370,name:'绕过北岛'},{x:545,z:70,name:'外海折返'}].map(Object.freeze));
@@ -12,7 +12,9 @@ export function clearWaterLine(a,b,radius=10){
  return true;
 }
 // Small static visibility graph, shared by the single pursuit AI; no streamed map or teleport recovery.
-const nodes=[{x:285,z:145},{x:285,z:215},{x:245,z:-550},{x:575,z:-550},{x:575,z:550},{x:245,z:550},...ISLANDS.flatMap(island=>Array.from({length:12},(_,i)=>({x:island.x+Math.sin(i*Math.PI/6)*(island.r+24),z:island.z+Math.cos(i*Math.PI/6)*(island.r+24)})))].filter(p=>waterFree(p.x,p.z,10));
+const nodes=[{x:285,z:145},{x:285,z:215},{x:245,z:-550},{x:575,z:-550},{x:575,z:550},{x:245,z:550},...ISLANDS.flatMap(island=>Array.from({length:12},(_,i)=>({x:island.x+Math.sin(i*Math.PI/6)*(island.r+24),z:island.z+Math.cos(i*Math.PI/6)*(island.r+24)}))),
+ // Drilling platform (mission 7) is a solid rectangle in the chase water: route around its corners.
+ ...[[-1,-1],[1,-1],[1,1],[-1,1]].map(([sx,sz])=>({x:(sx<0?PLATFORM.minX:PLATFORM.maxX)+sx*26,z:(sz<0?PLATFORM.minZ:PLATFORM.maxZ)+sz*26}))].filter(p=>waterFree(p.x,p.z,10));
 let graph;
 function staticGraph(){return graph??=nodes.map((a,i)=>nodes.flatMap((b,j)=>j!==i&&clearWaterLine(a,b)?[{index:j,cost:distance(a,b)}]:[]));}
 function departureLine(a,b){

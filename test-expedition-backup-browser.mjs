@@ -24,7 +24,7 @@ try{
   async function page(c){const p=await c.newPage();p.on('pageerror',e=>errors.push(e.message));p.setDefaultTimeout(30000);await p.goto(server.base+'/expedition-backup-fixture.html');await p.waitForFunction(()=>window.ready);return p;}
   const c=await context(),p=await page(c);
   const rawBefore=await p.evaluate(async()=>{localStorage.setItem('neon-eclipse.journey.v7','preserve-fps');const a=api.make(2);a.schema=1;delete a.checkpoint;delete a.undo;await api.raw({id:'state',schema:1,revision:7,operationId:crypto.randomUUID(),checkpoint:a});return api.raw();});
-  await p.click('.expedition-backup>summary');await p.waitForFunction(()=>document.querySelector('[data-exp-backup-health]').textContent.includes('2/5'));
+  await p.click('.expedition-backup>summary');await p.waitForFunction(()=>document.querySelector('[data-exp-backup-health]').textContent.includes('2/8'));
   assert(await p.locator('[data-exp-backup-undo]').isDisabled());
   const [download]=await Promise.all([p.waitForEvent('download'),p.click('[data-exp-backup-export]')]);
   const exported=JSON.parse(fs.readFileSync(await download.path(),'utf8'));assert.equal(exported.kind,'expedition');assert.equal(exported.archive.schema,2);assert.equal(exported.archive.undo,null);assert.equal(exported.archive.records.length,2);
@@ -36,8 +36,8 @@ try{
   const applied=await p.evaluate(()=>api.raw());assert.equal(applied.checkpoint.campaign.completed.length,1);assert(applied.checkpoint.checkpoint);assert.deepEqual(applied.checkpoint.undo.archive.records,rawBefore.checkpoint.records);
   await upload(incoming);await p.click('[data-exp-backup-apply]');await p.waitForFunction(()=>document.querySelector('[data-exp-backup-status]').textContent.includes('内容一致'));assert.deepEqual(await p.evaluate(()=>api.raw()),applied,'a new preview of identical content preserves the undo snapshot and revision');
   await p.click('[data-exp-backup-undo]');await p.waitForFunction(()=>!document.querySelector('[data-exp-backup-apply]').disabled);await p.click('[data-exp-backup-apply]');
-  await p.waitForFunction(()=>document.querySelector('[data-exp-backup-health]').textContent.includes('2/5'));
-  await p.reload();await p.waitForFunction(()=>window.ready);await p.click('.expedition-backup>summary');await p.waitForFunction(()=>document.querySelector('[data-exp-backup-health]').textContent.includes('2/5'));
+  await p.waitForFunction(()=>document.querySelector('[data-exp-backup-health]').textContent.includes('2/8'));
+  await p.reload();await p.waitForFunction(()=>window.ready);await p.click('.expedition-backup>summary');await p.waitForFunction(()=>document.querySelector('[data-exp-backup-health]').textContent.includes('2/8'));
   assert(!(await p.locator('[data-exp-backup-undo]').isDisabled()));assert.equal(await p.evaluate(()=>localStorage.getItem('neon-eclipse.journey.v7')),'preserve-fps');
   const beforeInvalid=await p.evaluate(()=>api.raw());await p.setInputFiles('[data-exp-backup-file]',{name:'invalid.json',mimeType:'application/json',buffer:Buffer.from('{"app":"neon-eclipse","kind":"expedition","schema":99}')});
   await p.waitForFunction(()=>document.querySelector('[data-exp-backup-status]').textContent.includes('无效'));assert.deepEqual(await p.evaluate(()=>api.raw()),beforeInvalid);

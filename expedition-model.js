@@ -4,6 +4,7 @@ import {JOINT_STAGES} from './joint-mission.js';
 import {LIGHTHOUSE_STAGES,LIGHTHOUSE_SURVEYS,LIGHTHOUSE_RULE,LIGHTHOUSE_CHECKPOINT_STAGES,validLighthouseCheckpoint,canonicalLighthouseCheckpoint,lighthouseCheckpointFromMission,lighthouseCheckpointLabel} from './lighthouse-mission.js';
 import {validCheckpoint,canonicalCheckpoint,checkpointFromMission,CHECKPOINT_STAGES} from './joint-checkpoint-model.js';
 import {validNavalCheckpoint,canonicalNavalCheckpoint,navalCheckpointFromMission,NAVAL_CHECKPOINT_STAGES,navalCheckpointLabel} from './naval-checkpoint-model.js';
+import {FRONTIER_IDS,FRONTIER_TITLES,FRONTIER_RULES,FRONTIER_STAGES,FRONTIER_CHECKPOINT_STAGES,validFrontierCheckpoint,canonicalFrontierCheckpoint,frontierCheckpointFromMission,frontierCheckpointLabel} from './frontier-missions.js';
 
 // Archive rule id is kept verbatim so front-four archives stay readable; mission count is derived from EXPEDITION_MISSIONS.
 export const EXPEDITION_RULE='front4-v1';
@@ -15,19 +16,22 @@ export const EXPEDITION_MISSIONS=Object.freeze([
   {id:'recon',title:'回声航线',rule:'recon-v1',selectable:false},
   {id:'joint',title:'海空接力',rule:'joint-v1',selectable:false},
   // lighthouse-v1 (yacht return leg, no safe node) records stay valid for campaign progress but are grouped separately from v2 best times.
-  {id:'lighthouse',title:'灯塔岛登陆',rule:LIGHTHOUSE_RULE,legacyRules:['lighthouse-v1'],selectable:true}
+  {id:'lighthouse',title:'灯塔岛登陆',rule:LIGHTHOUSE_RULE,legacyRules:['lighthouse-v1'],selectable:true},
+  ...FRONTIER_IDS.map(id=>({id,title:FRONTIER_TITLES[id],rule:FRONTIER_RULES[id],selectable:true}))
 ].map(Object.freeze));
 export const EXPEDITION_TOTAL=EXPEDITION_MISSIONS.length;
-export const EXPEDITION_FINAL=8;// Planned campaign length; the title is only granted once all eight are wired.
+export const EXPEDITION_FINAL=8;// Campaign length; all eight are wired. The '先遣队' title is granted when a campaign completes all of them.
+export const EXPEDITION_TITLE='先遣队';
 export const EXPEDITION_DIFFICULTIES=Object.freeze({easy:'简单',normal:'普通',hard:'困难',fixed:'固定规则'});
 const choices=['easy','normal','hard'];
 const idOK=id=>typeof id==='string'&&/^[a-zA-Z0-9-]{16,96}$/.test(id);
 const timeOK=n=>Number.isSafeInteger(n)&&n>=0&&n<=8640000000000000;
 const clone=value=>JSON.parse(JSON.stringify(value));
 const missionById=id=>EXPEDITION_MISSIONS.find(m=>m.id===id);
-const nodeStages=id=>id==='naval'?NAVAL_CHECKPOINT_STAGES:id==='joint'?CHECKPOINT_STAGES:id==='lighthouse'?LIGHTHOUSE_CHECKPOINT_STAGES:null;
+const isFrontier=id=>FRONTIER_IDS.includes(id);
+const nodeStages=id=>id==='naval'?NAVAL_CHECKPOINT_STAGES:id==='joint'?CHECKPOINT_STAGES:id==='lighthouse'?LIGHTHOUSE_CHECKPOINT_STAGES:isFrontier(id)?FRONTIER_CHECKPOINT_STAGES[id]:null;
 const ruleOK=(mission,rule)=>rule===mission.rule||(mission.legacyRules||[]).includes(rule);
-const difficultyNode=id=>id==='naval'||id==='lighthouse';
+const difficultyNode=id=>id==='naval'||id==='lighthouse'||isFrontier(id);
 export const expeditionDifficulty=(mission,difficulty)=>mission.selectable?difficulty:'fixed';
 let serial=0;
 export const newExpeditionId=()=>globalThis.crypto?.randomUUID?.()||`exp-${Date.now()}-${++serial}-${Math.random().toString(36).slice(2).padEnd(12,'0')}`;
@@ -47,14 +51,14 @@ export function validExpeditionRecord(r){
 }
 export function validExpeditionCheckpoint(c){
   if(!c||!idOK(c.campaignId)||!idOK(c.attemptId)||!nodeStages(c.mission)||typeof c.node?.stage!=='string')return false;
-  return (c.mission==='naval'?validNavalCheckpoint(c.node):c.mission==='lighthouse'?validLighthouseCheckpoint(c.node):validCheckpoint(c.node))&&c.node.elapsedMs<86400000;
+  return (c.mission==='naval'?validNavalCheckpoint(c.node):c.mission==='lighthouse'?validLighthouseCheckpoint(c.node):isFrontier(c.mission)?validFrontierCheckpoint(c.mission,c.node):validCheckpoint(c.node))&&c.node.elapsedMs<86400000;
 }
 export function canonicalExpeditionCheckpoint(c){
   return c===null?null:{campaignId:c.campaignId,attemptId:c.attemptId,mission:c.mission,
-    node:c.mission==='naval'?canonicalNavalCheckpoint(c.node):c.mission==='lighthouse'?canonicalLighthouseCheckpoint(c.node):canonicalCheckpoint(c.node)};
+    node:c.mission==='naval'?canonicalNavalCheckpoint(c.node):c.mission==='lighthouse'?canonicalLighthouseCheckpoint(c.node):isFrontier(c.mission)?canonicalFrontierCheckpoint(c.node):canonicalCheckpoint(c.node)};
 }
 export const expeditionCheckpointRank=c=>Object.keys(nodeStages(c.mission)||{}).indexOf(c.node.stage);
-export const expeditionCheckpointLabel=c=>c.mission==='naval'?navalCheckpointLabel(c.node):c.mission==='lighthouse'?lighthouseCheckpointLabel(c.node):CHECKPOINT_STAGES[c.node.stage];
+export const expeditionCheckpointLabel=c=>c.mission==='naval'?navalCheckpointLabel(c.node):c.mission==='lighthouse'?lighthouseCheckpointLabel(c.node):isFrontier(c.mission)?frontierCheckpointLabel(c.mission,c.node):CHECKPOINT_STAGES[c.node.stage];
 function matchesCheckpoint(c,campaign,next){
   return validExpeditionCheckpoint(c)&&!!campaign&&c.campaignId===campaign.id&&c.mission===next?.id&&
     (!difficultyNode(c.mission)||c.node.difficulty===campaign.difficulty);
@@ -102,7 +106,7 @@ export function newExpeditionCampaign(a,difficulty,id=newExpeditionId()){
 export function expeditionCheckpointFromMission(attempt,m,now=Date.now()){
   if(!attempt||typeof attempt.fromStart!=='boolean'||!nodeStages(attempt.mission)||m?.status!=='active'||(m.recovered===true)!==!attempt.fromStart)return null;
   if(!attempt.fromStart&&(!validExpeditionCheckpoint(attempt.resume)||attempt.resume.campaignId!==attempt.campaignId||attempt.resume.mission!==attempt.mission))return null;
-  const node=attempt.mission==='naval'?navalCheckpointFromMission(m,now):attempt.mission==='lighthouse'?lighthouseCheckpointFromMission(m,now):checkpointFromMission(m,now);
+  const node=attempt.mission==='naval'?navalCheckpointFromMission(m,now):attempt.mission==='lighthouse'?lighthouseCheckpointFromMission(m,now):isFrontier(attempt.mission)?frontierCheckpointFromMission(m,now):checkpointFromMission(m,now);
   const c={campaignId:attempt.campaignId,attemptId:attempt.id,mission:attempt.mission,node};
   return validExpeditionCheckpoint(c)&&(!difficultyNode(c.mission)||node.difficulty===attempt.difficulty)?canonicalExpeditionCheckpoint(c):null;
 }
@@ -136,6 +140,11 @@ export function expeditionRecordFromMission(attempt,m,extra={},now=Date.now()){
   }else if(spec.id==='lighthouse'){
     if(m.profile?.id!==attempt.difficulty||m.stage!=='complete'||m.surveys!==LIGHTHOUSE_SURVEYS||!(m.elapsed<m.profile.timeLimit)||
       !Array.isArray(m.completed)||m.completed.length!==LIGHTHOUSE_STAGES.length||!LIGHTHOUSE_STAGES.every((s,i)=>m.completed[i]===s))return null;
+  }else if(isFrontier(spec.id)){
+    const stages=FRONTIER_STAGES[spec.id];
+    if(m.id!==spec.id||m.profile?.id!==attempt.difficulty||m.stage!=='complete'||!(m.elapsed<m.profile.timeLimit)||!(m.health>0)||
+      !Array.isArray(m.completed)||m.completed.length!==stages.length||!stages.every((s,i)=>m.completed[i]===s)||
+      !Array.isArray(m.hostiles)||m.hostiles.length===0||m.hostiles.some(h=>h.alive!==false))return null;
   }else if(m.stage!=='complete'||!idOK(m.flightId)||!Array.isArray(m.completed)||
     m.completed.length!==JOINT_STAGES.length||!JOINT_STAGES.every((s,i)=>m.completed[i]===s))return null;
   const record={schema:resumed?2:1,id:attempt.id,campaignId:attempt.campaignId,mission:spec.id,rule:spec.rule,
@@ -157,4 +166,10 @@ export function summarizeExpedition(a){
     const all=a.records.filter(r=>r.mission===m.id&&r.difficulty===difficulty&&r.rule===m.rule),records=all.filter(r=>!r.resumed);
     return {mission:m.id,title:m.title,difficulty,count:records.length,resumedCount:all.length-records.length,bestMs:records.length?Math.min(...records.map(r=>r.elapsedMs)):null};
   }));
+}
+// Title: granted by a campaign whose eight records are all present (resumed wins count; the title is about completion, not the one-life board).
+export function expeditionTitleEarned(a){
+  if(!validExpedition(a))return false;
+  const groups=new Map();for(const r of a.records){const g=groups.get(r.campaignId)||[];g.push(r);groups.set(r.campaignId,g);}
+  return [...groups.values()].some(g=>g.length===EXPEDITION_FINAL);
 }

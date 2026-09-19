@@ -9,6 +9,8 @@ import {createYacht} from './maritime-rules.js';
 import {createFlightMission} from './flight-mission.js';
 import {createJointMission,JOINT_STAGES} from './joint-mission.js';
 import {createLighthouseMission,LIGHTHOUSE_STAGES,LIGHTHOUSE_RULE} from './lighthouse-mission.js';
+import {createFrontierMission,FRONTIER_IDS,FRONTIER_STAGES} from './frontier-missions.js';
+import {expeditionTitleEarned} from './expedition-model.js';
 
 // Native-shaped end-state fixtures exercise score eligibility, not human gameplay completion.
 function won(id,difficulty='normal'){
@@ -23,6 +25,8 @@ function won(id,difficulty='normal'){
     m.result={attempt:m.attempt,completedAt:Date.now(),tookOff:true,approached:true,landedSafely:true,routeComplete:true,uploadTime:2,status:'won',elapsed:100,gates:3,stopTime:2,records:['north-relay','sea-beacon','airfield-terminal'].map(id=>({id})),uploaded:true};
   }else if(id==='lighthouse'){
     m=createLighthouseMission(difficulty,true);m.stage='complete';m.completed=[...LIGHTHOUSE_STAGES];m.surveys=3;m.elapsed=200;
+  }else if(FRONTIER_IDS.includes(id)){
+    m=createFrontierMission(id,difficulty,true);m.stage='complete';m.completed=[...FRONTIER_STAGES[id]];m.elapsed=250;m.hostiles=[{alive:false}];
   }else{
     m=createJointMission(true);m.stage='complete';m.completed=[...JOINT_STAGES];m.flightId=newExpeditionId();m.elapsed=300;
   }
@@ -45,8 +49,8 @@ for(const spec of EXPEDITION_MISSIONS){
   const before=JSON.stringify(a),next=advanceExpedition(a,record);assert(next&&validExpedition(next));assert.equal(JSON.stringify(a),before,'immutable reduction');
   assert.equal(advanceExpedition(next,record),null,'duplicate does not advance twice');a=next;
 }
-assert.equal(a.campaign.completed.length,EXPEDITION_MISSIONS.length);assert.equal(a.records.length,EXPEDITION_MISSIONS.length);assert.equal(EXPEDITION_MISSIONS.length,5);
-assert.equal(advanceExpedition(a,score(a,'joint')),null);assert.equal(advanceExpedition(a,score(a,'lighthouse')),null,'no sixth mission yet');
+assert.equal(a.campaign.completed.length,EXPEDITION_MISSIONS.length);assert.equal(a.records.length,EXPEDITION_MISSIONS.length);assert.equal(EXPEDITION_MISSIONS.length,8);assert(expeditionTitleEarned(a),'eight-record campaign earns the title');
+assert.equal(advanceExpedition(a,score(a,'joint')),null);assert.equal(advanceExpedition(a,score(a,'radar')),null,'no ninth mission');
 const malformed=[{schema:99},{rule:'front4-v2'},{records:[...a.records,a.records[0]]},{campaign:{...a.campaign,completed:a.campaign.completed.slice(1)}},{campaign:{...a.campaign,difficulty:'easy'}}];
 for(const patch of malformed)assert(!validExpedition({...a,...patch}));
 for(const patch of [{difficulty:'hard',mission:'recon',rule:'recon-v1'},{resumed:true},{elapsedMs:0},{completedAt:NaN},{rule:'escort-v2'}])assert(!validExpeditionRecord({...a.records[0],...patch}));
@@ -64,7 +68,7 @@ assert.equal(expeditionRecordFromMission(attempt(a,'escort'),won('escort','hard'
 const previous=JSON.stringify(a);let second=newExpeditionCampaign(a,'easy');assert.equal(JSON.stringify(a),previous);
 for(const spec of EXPEDITION_MISSIONS)second=advanceExpedition(second,score(second,spec.id));
 const rows=summarizeExpedition(second);assert.equal(rows.find(r=>r.mission==='escort'&&r.difficulty==='hard').count,1);assert.equal(rows.find(r=>r.mission==='escort'&&r.difficulty==='easy').count,1);assert.equal(rows.find(r=>r.mission==='recon').count,2);
-assert.equal(second.records.length,10);assert.equal(rows.find(r=>r.mission==='lighthouse'&&r.difficulty==='easy').count,1);assert.equal(rows.find(r=>r.mission==='lighthouse'&&r.difficulty==='hard').count,1);
+assert.equal(second.records.length,16);assert.equal(rows.find(r=>r.mission==='lighthouse'&&r.difficulty==='easy').count,1);assert.equal(rows.find(r=>r.mission==='radar'&&r.difficulty==='easy').count,1);assert.equal(rows.find(r=>r.mission==='lighthouse'&&r.difficulty==='hard').count,1);
 assert.equal(score(second,'lighthouse',won('lighthouse','hard')),null,'fifth mission difficulty is locked to the campaign');assert.throws(()=>summarizeExpedition({schema:2}));
 // lighthouse-v1 archives (yacht return, pre-helicopter) remain readable and count for progress; v2 is the rule new records carry.
 assert.equal(LIGHTHOUSE_RULE,'lighthouse-v2');const v1Rec=second.records.find(r=>r.mission==='lighthouse');assert.equal(v1Rec.rule,'lighthouse-v2');
@@ -98,4 +102,4 @@ const reloaded=createExpeditionSession({store});assert(await reloaded.load());as
 const denied=createExpeditionSession({store:{read:async()=>({ok:false,code:'denied'}),close(){}}});assert.equal(await denied.load(),false);assert.equal(await denied.newCampaign('normal'),false);
 assert.deepEqual(await createExpeditionStore(null).read(),{ok:false,code:'unavailable'});
 assert.deepEqual(await createExpeditionStore({open(){throw new DOMException('Denied','SecurityError');}}).read(),{ok:false,code:'denied'});
-console.log('PASS: five-mission ordering (lighthouse appended, front-four rule id kept), strict native completion evidence, locked vs fixed difficulty, qualified score grouping, immutable/corrupt guards, owned sessions, loss/abort/reload, atomic progress, quota retry and conflict rejection');
+console.log('PASS: eight-mission ordering (lighthouse + frontier 6–8 appended, front-four rule id kept, title after eight), strict native completion evidence, locked vs fixed difficulty, qualified score grouping, immutable/corrupt guards, owned sessions, loss/abort/reload, atomic progress, quota retry and conflict rejection');

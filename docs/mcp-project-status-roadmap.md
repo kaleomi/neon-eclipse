@@ -98,6 +98,11 @@
 - 新模块 `interaction-rules.js` / `interaction-world.js` / `interaction-layouts.js`：每章两座可按住 E 的基座——排气阀（1.5s 启动、5s 半径 3.2m 云：敌人半速且不能预警、6 HP/s、12s 充压）与照明开关（0.6s 切换：黑暗中远程射程 ×0.65、潜行者/猎犬 ×1.25，可恢复）。九章各有主题命名与经约束校验的摆位。
 - 451/451 check、105/105 rules、41/41 integration；`test-interactions-browser` 九章真实页面原生 E 通过，诊断 0。摆位/忙碌/灯光基准三类首版失败已记录并修正。详见 `docs/mcp-p1-environment.md`。下一批：P2 天气 / 击杀表现 / 过场。
 
+### 第二关浏览器基线：naval / sea-combat 夹具跟进手动舰炮（2026-09-19）
+
+- 两项自 `4ddd5ea`（手动舰炮，F 不再自动锁定）起持续失败，已在 `939bd1c` 复现确认非先遣队批次引入。夹具改为按真实“右键拖动瞄准 + F”路径转向目标；`vehicle-app.js` 只追加只读 `navalAimYaw/X/Z` dataset，海战规则未改。
+- 两项单独串行重跑 EXIT=0；`test-naval-manual-aim` 10/10、session lifecycle 9/9、诊断 0。详见 `docs/mcp-naval-fixture-manual-aim.md`。
+
 ### P3 交付：先遣队第 6–8 关 · 风电场 / 钻井平台 / 雷达站 · “先遣队”称号（2026-09-19）
 
 - 新 `frontier-site.js` / `frontier-missions.js` / `frontier-world.js`：第 6 关越野车穿门→登塔步枪狙击哨戒机→直升机飞回机场；第 7 关直升机登平台→清炮塔→安放炸药→快艇逃离；第 8 关飞机机炮毁天线→越野车 + 步枪击毁重型机甲。各三档难度、时限 / 生命 / 敌对全灭才计成绩；安全节点分别为风电场停机坪 / 平台停机坪 / 雷达站大门，恢复记为检查点继续。

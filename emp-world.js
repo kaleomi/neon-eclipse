@@ -29,8 +29,11 @@ export function advanceEmp(state,dt,obstacles,points=null){
 export function predictEmp(position,direction,obstacles){const state=empLaunch(position,direction,obstacles),points=[state.position.clone()];advanceEmp(state,EMP.fuse,obstacles,points);return {point:state.position.clone(),points};}
 export function applyEmp(point,enemies,obstacles,projectiles){
  const affected=[];
- for(const e of enemies){if(!empEligible(e))continue;const anchor=voltAnchor(e);if(!empWithin(point,anchor))continue;
+ for(const e of enemies){if(!e||e.hp<=0||e.boss)continue;const anchor=voltAnchor(e);if(!empWithin(point,anchor))continue;
   const meshes=obstacles.filter(o=>o.owner!==e.group).map(o=>o.mesh);meshes.forEach(m=>m.updateWorldMatrix(true,false));if(!voltClearPath(point,anchor,meshes))continue;
+  // Shield carriers are not frozen: the EMP breaks their plate, the carrier keeps moving and fighting.
+  if(e.type==='shield'){e.shieldDownRemaining=EMP.shieldDuration;affected.push(e);continue;}
+  if(!empEligible(e))continue;
   projectiles.cancelOwner(e.group);e.charge=0;e.empRemaining=EMP.duration;e.empBlocked=true;e.attack=Math.max(e.attack||0,EMP.recovery);
   // Disabled members break formation; independent reactivation starts at the same location, never teleports to a moving pack.
   if(e.type==='swarmDrone'&&e.swarm){const o=SWARM_OFFSETS[e.swarmSlot];e.swarm={center:{x:e.group.position.x-o.x,y:e.group.position.y,z:e.group.position.z-o.z}};}
@@ -38,4 +41,4 @@ export function applyEmp(point,enemies,obstacles,projectiles){
  }
  return affected;
 }
-export function empVisual(e,disabled){const p=e.group.userData.parts;if(!p)return;if(p.sentry){p.fan.visible=!disabled;p.edge.visible=!disabled;p.green.emissiveIntensity=disabled?.08:1.1;if(disabled)e.sentryPhase='disabled';}else if(p.accent)p.accent.emissiveIntensity=disabled?.08:1;}
+export function empVisual(e,disabled){const p=e.group.userData.parts;if(!p)return;if(p.sentry){p.fan.visible=!disabled;p.edge.visible=!disabled;p.green.emissiveIntensity=disabled?.08:1.1;if(disabled)e.sentryPhase='disabled';}else if(p.shield){p.shield.forEach(m=>m.visible=!disabled);p.shield[0].material.opacity=disabled?0:.75;p.shield[0].material.emissiveIntensity=disabled?.02:.9;}else if(p.accent)p.accent.emissiveIntensity=disabled?.08:1;}

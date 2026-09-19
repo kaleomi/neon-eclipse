@@ -1,9 +1,19 @@
 // L3: real app shoot/update/input/damage paths with deterministic scene fixtures.
 // Instrumentation exists only in this Playwright response, never in shipped app.js.
 import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {createServer} from 'node:net';
 const {chromium}=await import(process.env.VEHICLE_PLAYWRIGHT_MODULE||'playwright');
-const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+let browser=null,child=null;
 try{
+ let base=process.env.GAME_TEST_URL;
+ if(!base){
+  const port=await new Promise((resolve,reject)=>{const s=createServer();s.on('error',reject);s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
+  child=spawn(process.execPath,['server.cjs'],{cwd:process.cwd(),env:{...process.env,PORT:String(port)},stdio:['ignore','pipe','pipe']});
+  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('test server timeout')),15000);child.stdout.on('data',d=>{if(String(d).includes('ready')){clearTimeout(timer);resolve();}});child.on('error',reject);child.on('exit',c=>{clearTimeout(timer);reject(new Error('server exit '+c));});});
+  base='http://127.0.0.1:'+port+'/index.html?map=reactor&menu=chapter';
+ }
+ browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const context=await browser.newContext({viewport:{width:960,height:720}}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(60000);
  await page.addInitScript(()=>{globalThis.__p1manual=true;});
@@ -29,7 +39,7 @@ try{
   };`;
   await route.fulfill({response,body:source});
  });
- await page.goto(process.env.GAME_TEST_URL||'http://127.0.0.1:5173/index.html');
+ await page.goto(base);
  await page.waitForFunction(()=>Boolean(window.__meleeFixture));
  await page.evaluate(()=>localStorage.setItem('p1-melee-save-sentinel','keep'));
  const setup=options=>page.evaluate(o=>window.__meleeFixture.setup(o),options);
@@ -59,4 +69,4 @@ try{
  assert.equal(await page.evaluate(()=>localStorage.getItem('p1-melee-save-sentinel')),'keep');
  assert.deepEqual(errors,[]);console.log('PASS: real app input/update/shoot/damage; visible-window contact, arc/close/range/cover, late entry, 120ms frames, one hit/whiff/telemetry, switch/pause/reset and save sentinel; no page errors');
  await context.close();
-}finally{await browser.close();}
+}finally{await browser?.close();child?.kill();}

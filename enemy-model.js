@@ -25,6 +25,13 @@ export function createEnemyModel(type){
  }
  box(g,.55,.8,.25,0,1.2,-.38,dark);
  if(type==='engineer'){g.name='FIELD_ENGINEER';box(g,1.05,.85,.42,0,1.38,-.58,steel);for(const side of [-1,1]){box(g,.15,.72,.46,side*.4,1.4,-.62,accent);box(g,.16,.42,.16,side*.42,2.08,-.58,dark);}box(g,.85,.12,.78,0,2.2,0,accent,'head');box(g,.22,.22,.85,.65,.92,.45,steel);}
+ if(type==='commander'){
+  g.name='TACTICAL_COMMANDER';box(g,.8,.5,.3,0,1.6,-.5,dark);
+  for(const side of [-1,1]){box(g,.06,.7,.06,side*.34,2.2,-.5,steel);box(g,.14,.12,.14,side*.34,2.57,-.5,accent);}
+  box(g,.44,.12,.22,0,2.23,.04,accent,'head');
+  const ring=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({length:64},(_,i)=>new THREE.Vector3(Math.cos(i*Math.PI/32)*12,.055,Math.sin(i*Math.PI/32)*12))),new THREE.LineBasicMaterial({color:profile.color,transparent:true,opacity:.12,depthWrite:false}));
+  ring.raycast=()=>{};ring.userData.combatDecoration=true;g.add(ring);g.userData.commandRing=ring;g.userData.ownedMaterials.push(ring.material);
+ }
  let core=null;
  if(heavy){
   coreMaterial.color.setHex(0x85ffe0);coreMaterial.emissive.setHex(0x26dcae);coreMaterial.emissiveIntensity=1.6;
@@ -36,7 +43,7 @@ export function createEnemyModel(type){
  if(type==='shield'){
   // Tower shield: a wide translucent plate in front, rear core exposed. Frontal hits read as 'armor'.
   const plate=box(g,1.5,2.1,.12,0,1.15,.72,new THREE.MeshStandardMaterial({color:0x9fc4ff,emissive:0x2d5fa8,emissiveIntensity:.9,transparent:true,opacity:.75}),'armor');g.userData.ownedMaterials.push(plate.material);
-  box(g,1.55,.08,.16,0,2.22,.72,accent,'armor');
+  const edge=box(g,1.55,.08,.16,0,2.22,.72,accent,'armor');g.userData.partsShield=[plate,edge];
  }
  if(type==='hound'){
   // Hound: low quadruped frame, red eye lamp. The humanoid frame is dropped entirely so hits and the silhouette match.
@@ -71,7 +78,7 @@ export function createEnemyModel(type){
   const coreFrame=new THREE.Mesh(new THREE.TorusGeometry(.31,.045,6,24),steel);coreFrame.position.set(0,1.32,.49);g.add(coreFrame);
   const crown=new THREE.Mesh(new THREE.TorusGeometry(.44,.045,6,28),accent);crown.position.set(0,2.18,0);crown.rotation.x=Math.PI/2;g.add(crown);
  }
- g.userData.parts={legs,arms,accent,coreMaterial,core,fade:type==='stalker'?g.children.map(o=>o.material):null};return g;
+ g.userData.parts={legs,arms,accent,coreMaterial,core,shield:g.userData.partsShield||null,fade:type==='stalker'?g.children.map(o=>o.material):null};return g;
 }
 export function stalkerOpacity(distance,stealth){if(!stealth)return 1;if(distance<=stealth.near)return 1;if(distance>=stealth.far)return .08;return 1-(distance-stealth.near)/(stealth.far-stealth.near)*.92;}
 export function animateEnemy(enemy,time,walking,playerDistance=0){
@@ -82,6 +89,8 @@ export function animateEnemy(enemy,time,walking,playerDistance=0){
  p.arms.forEach((arm,i)=>arm.rotation.x=enemy.charge>0?-.18:stride*(i?-.4:.4));
  p.accent.emissiveIntensity=enemy.charge>0?2.3+Math.sin(time*22)*.8:1;
  if(enemy.type==='harborElite'){const open=enemy.eliteState?.ventRemaining>0;p.coreMaterial.color.setHex(open?0x72ffe0:0xe4aa55);p.coreMaterial.emissive.setHex(open?0x32d6b0:0x986122);p.coreMaterial.emissiveIntensity=open?1.5:.5;p.core.scale.setScalar(open?1.35:1);p.core.rotation.y=time;}
+ if(enemy.commanderSource&&enemy.charge<=0)p.accent.emissiveIntensity=1.6;
+ if(enemy.group.userData.commandRing)enemy.group.userData.commandRing.material.opacity=enemy.commanderRecipients>0?.16+.035*Math.sin(time*3):.06;
  if(enemy.boss){
   const open=enemy.bossState.openRemaining>0;
   p.coreMaterial.color.setHex(open?0x35d5a8:0xff648c);p.coreMaterial.emissive.setHex(open?0x15966f:0xb71a4a);p.coreMaterial.emissiveIntensity=open?1.2:.5;

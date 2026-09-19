@@ -6,6 +6,8 @@
 //   integration  test-*.mjs that import three (real Three.js directors, physics, worlds)
 //   browser      test-*-browser.mjs (Playwright; opt-in, never part of the default run)
 // Usage: node scripts/run-tests.mjs [--layer check|rules|integration|browser|all] [--filter text] [--jobs n] [--list] [--verbose]
+// Concurrency: --jobs > TEST_JOBS env > default 2. Kept low on purpose: integration and browser tests each spawn
+// a Three.js/Chromium process and several sessions may run in parallel on the same 6-core host.
 import {readdirSync,readFileSync,existsSync} from 'node:fs';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
@@ -17,7 +19,8 @@ const option=(name,fallback)=>{const i=args.indexOf(name);return i>=0&&args[i+1]
 const flag=name=>args.includes(name);
 const layer=option('--layer','default');
 const filter=option('--filter','');
-const jobs=Math.max(1,Number(option('--jobs',process.env.TEST_JOBS||4))||4);
+const DEFAULT_JOBS=2;
+const jobs=Math.max(1,Number(option('--jobs',process.env.TEST_JOBS||DEFAULT_JOBS))||DEFAULT_JOBS);
 const verbose=flag('--verbose');
 const listOnly=flag('--list');
 

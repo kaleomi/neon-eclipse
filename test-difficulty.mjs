@@ -19,11 +19,16 @@ const denied={getItem(){throw Error('denied')},setItem(){throw Error('quota')}};
 data.set(DIFFICULTY_KEY,'corrupt');assert.equal(readDifficulty(storage),'normal');
 // Integration guards: do not leave scaling as an unused settings-only helper.
 const app=fs.readFileSync(new URL('./app.js',import.meta.url),'utf8'),ai=fs.readFileSync(new URL('./enemy-ai.js',import.meta.url),'utf8');
-assert(app.includes('damage=incomingDamage(damage);'));
-assert(app.includes('const bossDamage=incomingDamage(overseer?.update('));
-assert(app.includes('overseer.hit(impact.object,outgoingDamage(damageAtDistance('));
-assert(app.includes('const baseDamage=outgoingDamage(damageAtDistance('));
-assert(app.includes('scaleCooldown:attackCooldown'));assert(ai.includes('enemy.attack=scaleCooldown('));
+assert(app.includes('damage=p4Incoming(damage);'));
+assert(app.includes('const p4Incoming=n=>incomingDamage(n,p4?.difficulty)'));
+assert(app.includes('const p4Outgoing=(n,zone)=>p4Damage(outgoingDamage(n,p4?.difficulty)'));
+assert(app.includes('const p4Cooldown=n=>attackCooldown(n,p4?.difficulty)'));
+const {p4Damage}=await import('./p4-runtime.js');
+for(const id of ['easy','normal','hard']){const p4={difficulty:id,params:{incoming:1,health:1,enemyCooldown:1}};for(const [name,expected] of [['p4Incoming',incomingDamage(20,id)],['p4Outgoing',outgoingDamage(20,id)],['p4Cooldown',attackCooldown(20,id)]]){const expression=app.match(new RegExp('const '+name+'=([^;]+);'))?.[1];assert(expression,name+' connected wrapper');const fn=Function('p4','incomingDamage','outgoingDamage','attackCooldown','p4Damage','return ('+expression+')')(p4,incomingDamage,outgoingDamage,attackCooldown,p4Damage);assert.equal(fn(20),expected);}}
+assert(app.includes('const bossDamage=p4Incoming(overseer?.update('));
+assert(app.includes('overseer.hit(impact.object,p4Outgoing(damageAtDistance('));
+assert(app.includes('const baseDamage=p4Outgoing(damageAtDistance('));
+assert(app.includes('scaleCooldown:p4Cooldown'));assert(ai.includes('enemy.attack=scaleCooldown('));
 assert(!app.includes('incomingDamage(hazard.damage)'),'environment damage deliberately unchanged');
 console.log('PASS: three difficulty profiles, normal identity, damage/cooldown ordering, zero shield damage, persistence/fallback/save isolation, ordinary and special boss integration');
 const T=await import('./node_modules/three/build/three.module.js');

@@ -1,3 +1,4 @@
+import {createBossChargeInterrupt} from './boss-charge-interrupt.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
 import * as T from './node_modules/three/build/three.module.js';
@@ -26,8 +27,10 @@ export function createAbyssWorld(scene,obstacles,water){
   const mark=haloMarkText(haloTarget);if(mark)hint.textContent+=' · '+mark;
   panel.style.borderColor=s.phase==='exposed'?'#71ffff':'#ffc85a';panel.dataset.exposed=String(s.phase==='exposed');
  }
- function setStage(index){if(stage===index)return;delete haloTarget.haloMark;stage=index;rules.reset(index===3);if(index===3)battle.start(ABYSS_NAME);sync();}
- function clear(){delete haloTarget.haloMark;battle.clear();stage=-1;shieldFeedback=0;rules.reset();sync(false);}
+ function setStage(index){if(stage===index)return;breaker.reset();delete haloTarget.haloMark;stage=index;rules.reset(index===3);if(index===3)battle.start(ABYSS_NAME);sync();}
+ const breaker=createBossChargeInterrupt(rules,'abyss');
+ function interruptCharge(){const ok=breaker.interrupt();if(ok)sync(true);return ok;}
+ function clear(){breaker.reset();delete haloTarget.haloMark;battle.clear();stage=-1;shieldFeedback=0;rules.reset();sync(false);}
  let summonRequest=0;
  function update(dt,player,feetY,playing,grounded=true,alive=0){
   if(!rules.blocking||!playing){sync(playing);return 0;}
@@ -39,5 +42,5 @@ export function createAbyssWorld(scene,obstacles,water){
  function takeSummons(player){const n=summonRequest;summonRequest=0;if(!n)return [];return [...STALKER_POOLS].sort((a,b)=>Math.hypot(b.x-player.x,b.z-player.z)-Math.hypot(a.x-player.x,a.z-player.z)).slice(0,n).map(p=>({x:p.x,z:p.z,y:0}));}
  function hit(object,amount,{halo=false}={}){const shielded=rules.blocking&&rules.state.phase==='shield';if(shielded)shieldFeedback=1.5;const was=rules.blocking,dealt=rules.damage('core',amount*haloDamageMultiplier(haloTarget));const marked=halo&&dealt>0&&registerHaloWeakHit(haloTarget);battle.hit(dealt,true,false);sync();return {shielded,marked,damage:dealt,killed:was&&!rules.blocking,weak:dealt>0,message:'冷却液护罩！等待排水后核心露出再攻击',killMessage:'ABYSS 已停机 // 水位归零，返回进气闸撤离'};}
  function updateMarkers(){}
- clear();return {setStage,clear,update,hit,updateMarkers,takeSummons,battle,origin:new T.Vector3(ABYSS_POSITION.x,0,ABYSS_POSITION.z),get blocking(){return rules.blocking;},get state(){return rules.state;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[])]:[];}};
+ clear();return {interruptCharge,setStage,clear,update,hit,updateMarkers,takeSummons,battle,origin:new T.Vector3(ABYSS_POSITION.x,0,ABYSS_POSITION.z),get blocking(){return rules.blocking;},get state(){return rules.state;},get targets(){return rules.blocking?[core,...(cage.visible?[cage]:[])]:[];}};
 }

@@ -1,3 +1,8 @@
+import {validTypedAmmoEnvelope} from './typed-ammo.js';
+import {validWeaponModsEnvelope} from './weapon-mods-rules.js';
+import {validTacticalEnvelope} from './tactical-rules.js';
+import {validOrdnanceEnvelope} from './ordnance-rules.js';
+import {validLoadoutEnvelope} from './loadout-rules.js';
 import {validEmpState} from './emp-rules.js';
 import {validTempestState,validHaloState,validRailspikeState,validVoltState} from './weapons/runtime.js';
 import {ORBITAL_ENTRIES} from './orbital-data.js';
@@ -18,7 +23,7 @@ const integer=(v,min,max)=>Number.isInteger(v)&&number(v,min,max);
 export function validCheckpoint(s,supplies=SUPPLIES){
  if(!s||typeof s!=='object'||!integer(s.stageIndex,0,4)||!number(s.health,1,100)||!integer(s.selected,0,3))return false;
  if(!number(s.x,-38,38)||!number(s.z,-38,38)||!number(s.yaw,-100000,100000)||!number(s.pitch,-1.45,1.45)||!number(s.time,0,86400)||!integer(s.kills,0,10000))return false;
- if(!validEmpState(s.emp))return false;
+ if(!validTypedAmmoEnvelope(s.typedAmmo)||!validWeaponModsEnvelope(s.weaponMods)||!validTacticalEnvelope(s.tactical)||!validOrdnanceEnvelope(s.ordnance)||!validEmpState(s.emp)||!validLoadoutEnvelope(s.loadout))return false;
  if(!validVoltState(s.volt)||s.volt?.equipped&&(s.selected!==0||s.tempest?.equipped||s.halo?.equipped||s.railspike?.equipped))return false;
  if(!validRailspikeState(s.railspike)||s.railspike?.equipped&&(s.selected!==0||s.tempest?.equipped||s.halo?.equipped))return false;
  if(!validHaloState(s.halo)||s.halo?.equipped&&(s.selected!==0||s.tempest?.equipped))return false;

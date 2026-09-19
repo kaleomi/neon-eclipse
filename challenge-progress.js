@@ -13,7 +13,7 @@ export function deriveChallengeProgress(state,map) {
   const arsenal=kills.filter(value=>value>0).length;
   return ACHIEVEMENTS.map(achievement=>{
     const id=achievement.id,applicable=id!=='counter'||map==='harbor';
-    const met=id==='blade'?shots===0&&kills[3]>0:id==='untouched'?damage===0:id==='survivor'?true:id==='arsenal'?arsenal===4:coreKills>=3;
+    const met=id==='blade'?!run?.bladeDisqualified&&shots===0&&count(run?.environmentDamage)===0&&kills[3]>0:id==='untouched'?damage===0:id==='survivor'?true:id==='arsenal'?arsenal===4:coreKills>=3;
     let status='active',label='进行中';
     if(!applicable){status='unavailable';label='仅限港口';}
     else if(!current){status='idle';label='待开始';}
@@ -21,10 +21,10 @@ export function deriveChallengeProgress(state,map) {
     else if(!run.eligible){status='blocked';label='本轮不计挑战';}
     else if(!run.alive){status='failed';label='已阵亡 · 本轮失效';}
     else if(run.finished&&!run.complete){status='blocked';label='未完成整章';}
-    else if((id==='blade'&&shots>0)||(id==='untouched'&&damage>0)){status='failed';label=id==='blade'?'已开枪 · 本轮失效':'已承伤 · 本轮失效';}
+    else if((id==='blade'&&(run?.bladeDisqualified||shots>0||count(run?.environmentDamage)>0))||(id==='untouched'&&damage>0)){status='failed';label=id==='blade'?(run?.bladeDisqualified?(run.nonBladeReason||'非刀攻击')+' · 纯刀失效':shots>0?'已开枪 · 本轮失效':'爆炸命中 · 纯刀失效'):'已承伤 · 本轮失效';}
     else if(run.finished){status=met?'completed':'failed';label=met?'本轮达成':'本轮未达成';}
     else if(met&&id!=='survivor'){status='ready';label='条件满足 · 待通关';}
-    const detail=id==='blade'?`刀击破 ${kills[3]} · 枪械开火 ${shots} 发`:
+    const detail=id==='blade'?`刀击破 ${kills[3]} · 枪械开火 ${shots} 发 · 爆炸伤敌 ${rounded(count(run?.environmentDamage))}`:
       id==='untouched'?`累计承伤 ${rounded(damage)} · 补血不清除承伤历史`:
       id==='survivor'?'从章首一命完成；读档、阶段训练不计挑战':
       id==='arsenal'?`已用 ${arsenal}/4 种武器击破目标`:

@@ -13,7 +13,7 @@ export function createMissionUI(){
  for(const s of STAGES){const item=document.createElement('li');item.textContent=s.title;list.append(item);}
  const marker=root.querySelector('.objective-marker'),prompt=root.querySelector('.interact-prompt'),progress=prompt.querySelector('[role=progressbar]');
  const projected=new THREE.Vector3(),forward=new THREE.Vector3();let lastIndex=-1;
- function update({playing,mission,camera,yaw,target,remaining,canInteract,busy,blockedReason,markerLabel}){
+ function update({playing,mission,camera,yaw,target,remaining,canInteract,busy,blockedReason,markerLabel,mechanicActive=false}){
   root.hidden=!playing;if(!playing)return;
   const stage=mission.current,index=mission.state.index;const wrongFloor=stage.feetY!==undefined&&Math.abs(camera.position.y-1.7-stage.feetY)>=.7;
   if(index!==lastIndex){lastIndex=index;[...list.children].forEach((li,i)=>{li.dataset.state=i<index?'done':i===index?'current':'locked';});}
@@ -32,7 +32,7 @@ export function createMissionUI(){
   marker.style.left=screenX+'px';marker.style.top=screenY+'px';
   marker.querySelector('b').textContent=onscreen?'◇':relative>0?'→':'←';marker.querySelector('span').textContent=(markerLabel||stage.short)+' / '+Math.ceil(distance)+' m';
   marker.hidden=stage.boss&&remaining===0;
-  const near=distance<=2.8;prompt.classList.toggle('upload-mode',mission.state.defending);prompt.hidden=mission.state.defending?false:stage.boss||!near;
+  const near=distance<=2.8;prompt.classList.toggle('upload-mode',mission.state.defending);prompt.hidden=mechanicActive||(mission.state.defending?false:stage.boss||!near);
   if(!prompt.hidden){
    prompt.querySelector('span').textContent=mission.state.defending?(mission.state.progress>=stage.defenseDuration?(stage.defenseLabel||'上传')+'完成 · 清除剩余 '+remaining+' 个敌人':wrongFloor?'链路暂停 · 返回终端所在楼层':distance>stage.defenseRadius?'链路暂停 · 返回终端 '+stage.defenseRadius+' 米内':(stage.defenseLabel||'上传防守')+' '+Math.floor(mission.state.progress)+' / '+stage.defenseDuration+' 秒 · 可移动射击，无需按 E'):remaining>0?'清除当前区域威胁 · 剩余 '+remaining+' 个敌人':blockedReason?blockedReason:busy?'站定、停止射击并完成换弹':!canInteract?'面向目标，保持视线畅通':'按住 E · '+stage.action+'（松开或受击会中断）';
    const duration=mission.state.defending?stage.defenseDuration:stage.duration;const value=duration?mission.state.progress/duration*100:0;progress.setAttribute('aria-valuenow',String(Math.round(value)));progress.querySelector('i').style.width=value+'%';

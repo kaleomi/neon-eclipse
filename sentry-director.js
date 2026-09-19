@@ -11,13 +11,13 @@ export function createSentryDirector({enemies,player,obstacles,projectiles,scale
    const pending=projectiles.hasPending(g);
    if(!pending){e.sentryScan+=dt;g.rotation.y=sentryScanYaw(e.sentryHome,e.sentryScan);}
    e.sentryPhase=pending?'locked':e.attack>0?'recover':'scan';
-   const target=player.position.clone().add(new T.Vector3(0,-.35,0)),center=g.position.clone().add(new T.Vector3(0,1.42,0));
+   const center=g.position.clone().add(new T.Vector3(0,1.42,0)),base=player.position.clone().add(new T.Vector3(0,-.35,0)),target=projectiles.resolveTarget?.(center,base,false,g)||base;
    if(dt>0&&!pending&&e.attack<=0&&gate<=0&&!projectiles.hasThreatTag?.('sentry')&&canQueue()&&inSentrySector(center,g.rotation.y,target)){
     const yaw=Math.atan2(target.x-center.x,target.z-center.z),origin=center.clone().add(new T.Vector3(Math.sin(yaw)*SENTRY.muzzle,0,Math.cos(yaw)*SENTRY.muzzle));
     const meshes=obstacles.filter(o=>o.owner!==g).map(o=>o.mesh);for(const mesh of meshes)mesh.updateWorldMatrix(true,false);
     if(voltClearPath(center,target,meshes)&&voltClearPath(origin,target,meshes)){
      const attack={color:'green',charge:SENTRY.warning+dt,speed:SENTRY.speed,damage:SENTRY.damage,angles:[-.09],bursts:SENTRY.bursts,burstDelay:SENTRY.burstDelay,burstOffset:.09,showAim:true};
-     if(projectiles.queue(origin,target,false,g,attack)){g.rotation.y=yaw;e.charge=SENTRY.warning+(SENTRY.bursts-1)*SENTRY.burstDelay;e.attack=scaleCooldown(SENTRY.cooldown);e.sentryPhase='locked';gate=e.charge+.15;}
+     if(projectiles.queue(origin,target,false,g,attack)){const aim=projectiles.aimTarget?.(g)||target;g.rotation.y=Math.atan2(aim.x-center.x,aim.z-center.z);e.charge=SENTRY.warning+(SENTRY.bursts-1)*SENTRY.burstDelay;e.attack=scaleCooldown(SENTRY.cooldown);e.sentryPhase='locked';gate=e.charge+.15;}
     }
    }
    parts.green.emissiveIntensity=e.sentryPhase==='locked'?2.1:1.1;parts.fan.material.opacity=e.sentryPhase==='locked'?.22:.12;parts.core.rotation.y=time;

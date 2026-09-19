@@ -1,0 +1,39 @@
+// Native input, isolated storage. Deterministic actor/clock fixtures exist only in test responses.
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {spawn} from 'node:child_process';
+import {createServer} from 'node:net';
+import {mkdir} from 'node:fs/promises';
+import path from 'node:path';
+const {chromium}=await import(process.env.VEHICLE_PLAYWRIGHT_MODULE||'playwright');
+let child=null,browser=null;
+try{
+ let base=process.env.GAME_TEST_URL;
+ if(!base){
+  const port=await new Promise((resolve,reject)=>{const s=createServer();s.on('error',reject);s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p));});});
+  child=spawn(process.execPath,['server.cjs'],{cwd:process.cwd(),env:{...process.env,PORT:String(port)},stdio:['ignore','pipe','pipe']});
+  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('test server timeout')),15000);child.stdout.on('data',d=>{if(String(d).includes('ready')){clearTimeout(timer);resolve();}});child.on('error',reject);child.on('exit',c=>{clearTimeout(timer);reject(new Error('server exit '+c));});});
+  base=`http://127.0.0.1:${port}/index.html`;
+ }
+ browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ const errors=[],url=new URL(base);url.search='?map=reactor&menu=chapter';
+
+ const context=await browser.newContext({viewport:{width:1000,height:800}}),p=await context.newPage();p.setDefaultTimeout(60000);p.on('pageerror',e=>errors.push(e.stack));
+ await p.route('**/app.js',async route=>{const response=await route.fetch();let source=await response.text();assert(source.includes("if(state==='playing')update(dt);"));source=source.replace("if(state==='playing')update(dt);",'if(false)update(dt);');source+=`
+ window.__mods={fresh(){reset(0);state='playing';document.body.dataset.playState=state;overlay.hidden=true;enemies.forEach(e=>e.attack=999);return this.snap();},snap(){return {map:MAP_ID,state,health,attempt:achievementUI.attempt.state,profile:weapons.map(w=>({damage:w.damage,cap:Number.isFinite(w.cap)?w.cap:null,spread:w.spread,kick:w.kick,reload:w.reload,zoom:w.zoom??22,movementPenalty:w.movementPenalty??.55})),mods:workshop.snapshot(),cp:checkpoint(),reload,fov:camera.fov};},stars(n){for(const map of ['reactor','station','roof'].slice(0,n))starWorld.store.collect(map);workshop.refresh();},award(){achievementUI.store.unlock(['survivor'],'reactor');workshop.refresh();},tick(dt){if(state==='playing')update(dt);return this.snap();},spend(){rounds[0]--;},zero(){rounds[0]=0;typedAmmo.take(0,typedAmmo.available(0));syncTypedAmmo();return checkpoint();},restore(cp){reset(cp.stageIndex,cp);state='playing';document.body.dataset.playState=state;overlay.hidden=true;enemies.forEach(e=>e.attack=999);return this.snap();}
+ };`;await route.fulfill({response,body:source});});
+ const run=(m,a)=>p.evaluate(([m,a])=>window.__mods[m](a),[m,a]);
+ async function open(map='reactor'){url.search='?map='+map+'&menu=chapter';await p.goto(url.href);await p.waitForFunction(()=>!!window.__mods);await run('fresh');}
+ async function bench(){await p.keyboard.press('u');await p.locator('.carry-panel').waitFor({state:'visible'});if(!(await p.locator('.weapon-workshop').evaluate(e=>e.open)))await p.locator('.weapon-workshop summary').click();await p.locator('[data-save-mods]').waitFor({state:'visible'});}
+ const selector=(slot)=>'[data-weapon-mod="0:'+slot+'"]';
+ await open();const baseState=await run('snap');await bench();assert.equal(await p.locator('[data-weapon-mod]').count(),21);assert(await p.locator(selector(0)+' option[value="1"]').evaluate(e=>e.disabled));
+ await p.evaluate(()=>document.querySelector('[data-weapon-mod="0:0"]').value='1');await p.click('[data-save-mods]');assert((await p.locator('[data-mod-status]').textContent()).includes('尚未解锁'));assert.deepEqual((await run('snap')).mods.draft.weapons[0],[0,0,0]);
+ await run('stars',1);assert(!(await p.locator(selector(0)+' option[value="1"]').evaluate(e=>e.disabled)));assert(await p.locator(selector(1)+' option[value="1"]').evaluate(e=>e.disabled));await run('award');assert(!(await p.locator(selector(2)+' option[value="2"]').evaluate(e=>e.disabled)));await run('stars',2);
+ await p.selectOption(selector(0),'1');await p.selectOption(selector(1),'1');await p.selectOption(selector(2),'2');await p.selectOption('[data-weapon-mod="1:2"]','2');await p.click('[data-save-mods]');let s=await run('snap');assert.deepEqual(s.mods.draft.weapons[0],[1,1,2]);assert.deepEqual(s.mods.current.weapons[0],[0,0,0]);assert.deepEqual(s.profile,baseState.profile);assert.deepEqual(s.cp.rounds,baseState.cp.rounds);assert.deepEqual(s.attempt,baseState.attempt);
+ await p.click('[data-start-mods]');assert((await p.locator('[data-start-mods]').textContent()).includes('确认重开'));assert.deepEqual((await run('snap')).mods.current.weapons[0],[0,0,0]);await p.click('[data-start-mods]');await p.waitForFunction(()=>document.body.dataset.menuOpen==='false');s=await run('snap');assert.deepEqual(s.mods.current.weapons[0],[1,1,2]);assert(s.profile[0].reload<baseState.profile[0].reload);assert.equal(s.profile[0].damage,baseState.profile[0].damage);assert.equal(s.profile[0].cap,baseState.profile[0].cap);
+ await run('spend');await p.keyboard.press('r');s=await run('snap');assert(Math.abs(s.reload-s.profile[0].reload)<1e-6,'native R uses modified reload');await run('tick',s.reload+.1);await p.mouse.down({button:'right'});s=await run('tick',.5);assert(s.fov<42,'native ADS uses selected scope zoom');await p.mouse.up({button:'right'});await run('tick',.5);
+ const cp=await run('zero');s=await run('restore',cp);assert.equal(s.cp.rounds[0],0);assert.equal(s.cp.reserves[0],0);assert.deepEqual(s.cp.weaponMods,cp.weaponMods);assert(!s.attempt.eligible);const future={...cp,weaponMods:{version:9,alien:[7]}};s=await run('restore',future);assert(s.mods.unsupported);assert.deepEqual(s.cp.weaponMods,future.weaponMods);assert.equal(s.profile[0].zoom,22);assert.equal(s.profile[1].movementPenalty,baseState.profile[1].movementPenalty,'removing scope must remove synthetic movement penalty');const legacy={...cp};delete legacy.weaponMods;s=await run('restore',legacy);assert.deepEqual(s.mods.current.weapons[0],[0,0,0]);assert.equal(s.cp.rounds[0],0);
+ console.log('PASS native workshop locks/star/challenge unlocks, three exclusive slots, deferred changes/no ammo or challenge reset, actual reload and ADS, exact0/legacy/future snapshots');
+ for(const map of ['station','roof','tower','train','harbor','orbital','datacenter','polar']){await open(map);await bench();assert.equal(await p.locator('[data-weapon-mod]').count(),21);await p.selectOption(selector(0),'2');await p.click('[data-save-mods]');s=await run('fresh');assert.deepEqual(s.mods.current.weapons[0],[2,0,0]);assert(s.profile[0].spread<baseState.profile[0].spread);console.log('PASS workshop in '+map);}
+ await p.setViewportSize({width:390,height:844});await bench();assert(await p.locator('[data-save-mods]').isVisible());assert(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));if(process.env.MOD_SCREENSHOT){await mkdir(path.dirname(process.env.MOD_SCREENSHOT),{recursive:true});await p.screenshot({path:process.env.MOD_SCREENSHOT});}assert.deepEqual(errors,[]);await context.close();console.log('PASS weapon workshop browser');
+}finally{await browser?.close();child?.kill();}

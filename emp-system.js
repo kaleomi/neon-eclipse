@@ -16,12 +16,13 @@ export function createEmpSystem({scene,camera,enemies,obstacles,projectiles,onEv
  function update(dt){
   if(!Number.isFinite(dt)||dt<0)return;
   for(const e of enemies){const was=e.empRemaining>0;e.empBlocked=was;if(was){e.empRemaining=Math.max(0,e.empRemaining-dt);empVisual(e,true);if(e.empRemaining===0){e.attack=Math.max(e.attack||0,EMP.recovery);empVisual(e,false);}}}
+  for(const e of enemies){if(e.shieldDownRemaining>0){e.shieldDownRemaining=Math.max(0,e.shieldDownRemaining-dt);if(e.shieldDownRemaining===0)empVisual(e,false);}}
   if(aiming){previewTimer-=dt;if(previewTimer<=0)refreshPreview();}
   for(let i=pulses.length-1;i>=0;i--){const p=pulses[i];p.life-=dt;p.mesh.material.opacity=Math.max(0,p.life/.55)*.48;if(p.life<=0){dispose(p.mesh);pulses.splice(i,1);}}
   if(flight){advanceEmp(flight.state,dt,obstacles);flight.mesh.position.copy(flight.state.position);flight.mesh.rotation.y+=dt*5;
    if(flight.state.remaining===0){const point=flight.state.position.clone(),affected=applyEmp(point,enemies,obstacles,projectiles);affected.forEach(e=>empVisual(e,true));dispose(flight.mesh);flight=null;const mesh=sphere(point,.48);mesh.name='EMP_PULSE';scene.add(mesh);pulses.push({mesh,life:.55});onEvent('burst',affected.length);}
   }
  }
- function clear(){cancelAim();if(flight)dispose(flight.mesh);flight=null;for(const p of pulses)dispose(p.mesh);pulses.length=0;for(const e of enemies){if(e.empRemaining>0)empVisual(e,false);delete e.empRemaining;delete e.empBlocked;}}
+ function clear(){cancelAim();if(flight)dispose(flight.mesh);flight=null;for(const p of pulses)dispose(p.mesh);pulses.length=0;for(const e of enemies){if(e.empRemaining>0)empVisual(e,false);delete e.empRemaining;delete e.empBlocked;if(e.shieldDownRemaining>0)empVisual(e,false);delete e.shieldDownRemaining;}}
  return {begin,release,cancelAim,update,clear,reset(value){clear();charges=restoreEmpCharges(value);},checkpoint:()=>({emp:{charges}}),get charges(){return charges;},get aiming(){return aiming;},get active(){return !!flight;},get remaining(){return flight?.state.remaining??0;}};
 }

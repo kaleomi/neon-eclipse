@@ -1,0 +1,19 @@
+import assert from 'node:assert/strict';
+import {DEFAULT_LOADOUT,PRIMARY_SLOTS,validLoadout,validLoadoutEnvelope,createLoadoutState,terminalInReach} from './loadout-rules.js';
+import {validCheckpoint,createCampaignStore} from './campaign.js';
+import {restoreRuntimeAmmo} from './weapons/runtime.js';
+const s=createLoadoutState();assert.deepEqual(s.state,DEFAULT_LOADOUT);assert.deepEqual(Array.from({length:9},(_,i)=>i).filter(s.allows),[0,2,3]);
+for(const primary of PRIMARY_SLOTS.filter(i=>i!==8)){assert(s.equip(primary));assert.deepEqual(Array.from({length:9},(_,i)=>i).filter(s.allows).sort((a,b)=>a-b),[primary,2,3].sort((a,b)=>a-b));}
+for(const bad of [-1,2,3,8,9,1.5,'6',NaN,Infinity])assert(!s.equip(bad));
+for(const bad of [null,[],{}, {...DEFAULT_LOADOUT,secondary:1},{...DEFAULT_LOADOUT,melee:0},{...DEFAULT_LOADOUT,throwable:'damage'},{...DEFAULT_LOADOUT,primary:12}])assert(!validLoadout(bad));
+assert(validLoadoutEnvelope(undefined));assert(!validLoadoutEnvelope(null));assert(!validLoadoutEnvelope({version:Infinity}));assert(!validLoadoutEnvelope({...DEFAULT_LOADOUT,primary:99}));assert(validLoadoutEnvelope({version:2,future:{inventory:[99]}}));
+const future={version:2,future:{inventory:[99]}};s.reset(future);future.future.inventory.push(88);assert(s.unsupported);assert(!s.equip(4));assert.deepEqual(s.checkpoint().loadout,{version:2,future:{inventory:[99]}});assert.deepEqual(s.state,DEFAULT_LOADOUT);
+s.reset();assert(!s.unsupported);assert(s.equip(6,{deployment:true}));s.reset();assert.equal(s.first(),6);s.reset(DEFAULT_LOADOUT);assert.equal(s.first(),0,'legacy checkpoint migration ignores next-run draft');
+const heavy=createLoadoutState({heavySupported:true});assert(heavy.equip(8));assert(heavy.allows(8));assert(!heavy.allows(0));assert(heavy.allows(2)&&heavy.allows(3));assert.equal(heavy.first(),2);s.reset(heavy.checkpoint().loadout);assert(s.unsupported);assert.equal(s.checkpoint().loadout.primary,8,'unsupported chapter preserves foreign equipment');
+const cp={stageIndex:0,health:73,rounds:[18,4,10],reserves:[97,30,60],selected:0,x:0,z:29,yaw:.1,pitch:0,time:93.5,kills:5,collected:[],emp:{charges:0},tempest:{rounds:11,reserve:33,equipped:false},halo:{rounds:8,reserve:22,equipped:false},railspike:{rounds:1,reserve:0,equipped:true},volt:{rounds:0,reserve:0,equipped:false}};
+assert(validCheckpoint(cp));const ammo=restoreRuntimeAmmo(cp),before=structuredClone(ammo);s.reset(DEFAULT_LOADOUT);for(let n=0;n<40;n++)for(const i of PRIMARY_SLOTS.filter(i=>i!==8))assert(s.equip(i));assert.deepEqual(ammo,before,'swaps cannot refill or delete unequipped inventory');
+const entries=new Map(),storage={getItem:k=>entries.get(k)||null,setItem:(k,v)=>entries.set(k,v)},store=createCampaignStore(storage);assert(store.save({...cp,...s.checkpoint()}));const restored=createCampaignStore(storage).checkpoint;assert.deepEqual(restoreRuntimeAmmo(restored),before);assert.equal(restored.emp.charges,0);assert.equal(restored.health,73);assert.equal(restored.kills,5);assert.deepEqual(restored.loadout,s.state);assert(!validCheckpoint({...cp,loadout:{...DEFAULT_LOADOUT,primary:99}}));assert(validCheckpoint({...cp,loadout:{version:4,unknown:[99]}}));
+const saved=s.checkpoint();saved.loadout.primary=0;assert.notEqual(s.state.primary,0);
+for(const feetY of [0,3,6,12]){const entry={x:2,z:5,feetY};assert(terminalInReach({x:2,y:feetY+1.7,z:5},entry));assert(terminalInReach({x:5.2,y:feetY+1.7,z:5},entry));assert(!terminalInReach({x:5.21,y:feetY+1.7,z:5},entry));assert(!terminalInReach({x:2,y:feetY+4.7,z:5},entry));}
+assert(!terminalInReach({x:NaN,y:1.7,z:0},{x:0,z:0}));
+console.log('PASS: mandatory 1 primary/1 secondary/melee/EMP, all primary exchanges, legacy/future/unsupported chapter preservation, immutable snapshots, deployment vs retry, 240 inventory-preserving swaps, zero ammo/EMP checkpoint round-trip, terminal radius and floor boundaries');

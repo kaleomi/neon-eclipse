@@ -1,3 +1,4 @@
+import {refreshCommanderSupport,commandedCooldownRate,clearCommanderSupport} from './commander-rules.js';
 import {createSentryDirector} from './sentry-director.js';
 import {createSwarmCoordination} from './swarm-coordination.js';
 import {voltClearPath} from './volt-world.js';
@@ -16,20 +17,23 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
  const sentry=createSentryDirector({enemies,player,obstacles,projectiles,scaleCooldown,canQueue:()=>!projectiles.charging&&budget()===0});
  const swarm=createSwarmDirector({enemies,player,navigation,obstacles,projectiles,scaleCooldown,canQueue:canStart,onDesignate:(source,point)=>coordination.publish(source,point,enemies)});
  const moveEnemy=vertical?vertical.move:move;
- const ray=new THREE.Raycaster();
+ const ray=new THREE.Raycaster();let nextActor=0;
  function update(dt,time,gate){
   const meshes=obstacles.map(o=>o.mesh);
   // Chapter 09 blizzard: while thermal vision is on, soft cover (snow banks) no longer hides the player inside THERMAL range.
   const thermal=thermalVision?.()===true,solidMeshes=thermal?obstacles.filter(o=>!o.bank&&!o.ledge).map(o=>o.mesh):meshes;
+  refreshCommanderSupport(enemies,(a,b)=>voltClearPath(a.group.position.clone().add(new THREE.Vector3(0,1.4,0)),b.group.position.clone().add(new THREE.Vector3(0,1.4,0)),meshes));
   coordination.update(dt,enemies,player.position);
   gate=sentry.update(dt,time,gate);
   gate=swarm.update(dt,time,gate);
-  for(const enemy of enemies){
+  const start=enemies.length?nextActor%enemies.length:0,ordered=[...enemies.slice(start),...enemies.slice(0,start)];
+  for(const enemy of ordered){
    if(enemy.type==='swarmDrone'||enemy.type==='sentry'||enemy.empRemaining>0||enemy.empBlocked)continue;
-   if(enemy.engineerBuilding){animateEnemy(enemy,time,false);enemy.group.userData.parts.arms.forEach(a=>a.rotation.x=-.75);enemy.group.userData.parts.accent.emissiveIntensity=2+Math.sin(time*12)*.4;continue;}
+   if(enemy.staggerRemaining>0){animateEnemy(enemy,time,false);continue;}
+   if(enemy.engineerBuilding||enemy.engineerRepairing){animateEnemy(enemy,time,false);enemy.group.userData.parts.arms.forEach(a=>a.rotation.x=-.75);enemy.group.userData.parts.accent.emissiveIntensity=2+Math.sin(time*12)*.4;continue;}
    const profile=ENEMY_TYPES[enemy.type],pos=enemy.group.position,old=pos.clone();
    const dx=player.position.x-pos.x,dz=player.position.z-pos.z,dist=Math.hypot(dx,dz)||.001;
-   enemy.charge=Math.max(0,(enemy.charge||0)-dt);enemy.attack-=dt;
+   enemy.charge=Math.max(0,(enemy.charge||0)-dt);enemy.attack-=dt*commandedCooldownRate(enemy);
    if(enemy.boss){
     const event=stepBossState(enemy,dt,enemy.charge===0&&!projectiles.hasPending(enemy.group));
     if(event.changed){projectiles.cancelOwner(enemy.group,true);enemy.charge=0;enemy.attack=1.5;}
@@ -72,6 +76,7 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
     // Freeze position and aim during telegraph; all bolts retain this captured target.
     origin.set(pos.x,enemyMuzzleHeight(enemy),pos.z);
     if(projectiles.queue(origin,target,enemy.boss,enemy.group,attack)){
+     nextActor=(enemies.indexOf(enemy)+1)%Math.max(1,enemies.length);
      enemy.charge=attack.charge+(attack.bursts-1)*(attack.burstDelay||.3)+.05;
      enemy.attack=scaleCooldown((phase?phase.cooldown:profile.cooldown)+Math.random()*.25);
      gate=enemy.boss?.55:coordinated?attack.charge+.12:enemyBehavior(enemy.type)==='ranged'?.45:.28;
@@ -79,9 +84,10 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
      if(enemy.boss)recordBossAttack(enemy.bossState);
     }
    }
+   if(!enemy.boss&&enemy.charge>0){const aim=projectiles.aimTarget?.(enemy.group);if(aim)enemy.group.rotation.y=Math.atan2(aim.x-pos.x,aim.z-pos.z);}
    animateEnemy(enemy,time,pos.distanceToSquared(old)>.00001,dist);
   }
   return gate;
  }
- return {update,get coordination(){return coordination.state;},clear(){swarm.clear();coordination.clear();}};
+ return {update,get coordination(){return coordination.state;},clear(){swarm.clear();coordination.clear();clearCommanderSupport(enemies);nextActor=0;}};
 }

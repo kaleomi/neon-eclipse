@@ -29,7 +29,7 @@ function progressElement(model) {
 export function createAchievementUI(map,start){
   const attempt=createChapterAttempt(),store=createAchievementStore(),panel=document.createElement('details');
   panel.className='achievement-panel';
-  panel.innerHTML='<summary>荣誉殿堂 / 单章挑战</summary><div class="achievement-notice" role="status"></div><p class="challenge-eligibility"></p><p class="challenge-progress-note">本轮进度与历史荣誉分别记录。满足数值条件后，仍需一命完成整章；本轮达成不等于已经保存成功。</p><div class="achievement-list"></div><p class="achievement-rules">各章分别记录。从本章起点连续完成，一命挑战；开枪会失去纯刀资格，死亡后重试不能恢复本轮资格。读档、刷新后继续、阶段训练均不计。切换或装填枪械不等于开枪。暂停不影响资格。原有星星成就不变。</p><button type="button" class="challenge-start">从头挑战本章 ↗</button><button type="button" class="achievement-retry" hidden>重试保存成就</button>';
+  panel.innerHTML='<summary>荣誉殿堂 / 单章挑战</summary><div class="achievement-notice" role="status"></div><p class="challenge-eligibility"></p><p class="challenge-progress-note">本轮进度与历史荣誉分别记录。满足数值条件后，仍需一命完成整章；本轮达成不等于已经保存成功。</p><div class="achievement-list"></div><p class="achievement-rules">各章分别记录。从本章起点连续完成，一命挑战；开枪、挥击重锤、投出脉冲手雷或主动引发爆炸伤敌会失去纯刀资格；环境击杀不算武器击杀。死亡后重试不能恢复本轮资格。读档、刷新后继续、阶段训练均不计。切换或装填枪械不等于开枪。暂停不影响资格。原有星星成就不变。</p><button type="button" class="challenge-start">从头挑战本章 ↗</button><button type="button" class="achievement-retry" hidden>重试保存成就</button>';
   document.querySelector('.mission-card').append(panel);
   const preferences=createAchievementNotices(),toast=createAchievementToast(preferences);
   const filters=document.createElement('div');filters.className='achievement-filters';
@@ -80,7 +80,7 @@ export function createAchievementUI(map,start){
       list.append(row);
     }
     if(!rows.length&&!data.error){const empty=document.createElement('p');empty.className='achievement-empty';empty.textContent='此筛选下暂无荣誉。可切换章节或选择全部荣誉；破核猎手仅适用于风暴港口。';list.append(empty);}
-    panel.querySelector('.challenge-eligibility').textContent=state?(state.reason+' · 已开枪 '+(Number.isFinite(state.shots)?state.shots:'—')+' 发 · 承伤 '+(Number.isFinite(state.damage)?Math.round(state.damage):'—')+(state.shots?' · 纯刀资格已失效':'')):'从头开始本章即可挑战。';
+    panel.querySelector('.challenge-eligibility').textContent=state?(state.reason+' · 已开枪 '+(Number.isFinite(state.shots)?state.shots:'—')+' 发 · 承伤 '+(Number.isFinite(state.damage)?Math.round(state.damage):'—')+(state.shots||state.bladeDisqualified?' · 纯刀资格已失效':'')):'从头开始本章即可挑战。';
     panel.querySelector('.achievement-notice').textContent=message||(data.error?'成就存储不可用或记录损坏；原存档未被覆盖。':'');
     previousSnapshot=JSON.stringify(state);
   }

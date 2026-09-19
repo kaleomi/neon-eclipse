@@ -40,10 +40,14 @@ export function createEnemyUI(){
    inspector.style.setProperty('--enemy-accent','#'+p.color.toString(16).padStart(6,'0'));
    inspector.querySelector('i').style.width=Math.max(0,target.hp/target.maxHp*100)+'%';
    inspector.querySelector('span').textContent=target.boss?target.bossState.openRemaining>0?'青色胸口核心 ×2.5':'装甲减伤 · 等待过载':target.type==='heavy'?facingDot(target.group.position,target.group.rotation.y,camera.position)>.55?'正面护甲：仅承受 30% 伤害':'侧后方无正面减伤 · 背部核心 ×2':p.hint;
-   if(target.type==='engineer')inspector.querySelector('span').textContent=target.engineerBuilding?'部署炮塔 '+target.engineerRemaining.toFixed(1)+'s · 命中工程兵可打断':target.engineerSpent?'部署配额已用尽 · 已建炮塔需独立摧毁':(target.engineerStatus?target.engineerStatus+' · ':'')+p.hint;
+   if(target.type==='engineer')inspector.querySelector('span').textContent=target.engineerRepairing?'维修炮塔 '+target.engineerRepairRemaining.toFixed(1)+'s · 命中工程兵/EMP炮塔可打断':target.engineerBuilding?'部署炮塔 '+target.engineerRemaining.toFixed(1)+'s · 命中工程兵可打断':target.engineerSpent?'部署已用尽 · 维修余量 '+Math.max(0,2-(target.engineerRepairUsed||0))+'/2 · 已建炮塔需独立摧毁':(target.engineerStatus?target.engineerStatus+' · ':'')+p.hint;
    if(target.type==='sentry')inspector.querySelector('span').textContent=(target.sentryPhase==='locked'?'锁定 / 三连扫射 · 立即横移或入掩体':'扫描扇区外可绕行 · 正面承伤 35%')+' · 背部绿核 ×2';
+   if(target.type==='commander')inspector.querySelector('span').textContent='指挥链路 '+(target.commanderRecipients||0)+' 名 · 12m同层/无遮挡 · 击倒或掩体切断';
+   if(target.commanderSource)inspector.querySelector('span').textContent+=' · 指挥增益：冷却恢复+25%，预警不变';
    if(target.swarmIntel)inspector.querySelector('span').textContent+=' · 蜂群共享旧位 '+target.swarmIntel.remaining.toFixed(1)+'s';
    if(target.empRemaining>0)inspector.querySelector('span').textContent='EMP 失能 '+target.empRemaining.toFixed(1)+'s · 仍可受伤，已发弹丸仍需躲避';
+   if(target.blindRemaining>0)inspector.querySelector('span').textContent='脉冲致盲 '+target.blindRemaining.toFixed(1)+'s · 无法建立攻击锁定，已发弹丸仍需躲避';
+   if(target.staggerRemaining>0)inspector.querySelector('span').textContent='负伤硬直 '+target.staggerRemaining.toFixed(1)+'s · 持刀近身 V 处决';
    const mark=haloMarkText(target);if(mark)inspector.querySelector('span').textContent+=' · '+mark;
   }
  }

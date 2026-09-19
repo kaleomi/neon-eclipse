@@ -2,7 +2,8 @@ import {haloDamageMultiplier} from './weapons/halo-rules.js';
 import {harborEliteDamage} from './harbor-elite.js';
 // Pure combat rules: silhouettes/colors identify roles, never hidden invulnerability.
 export const ENEMY_TYPES={
- engineer:{name:'战地工程兵',color:0xffc36a,hp:90,hpPerLevel:0,speed:1.8,turn:2.5,scale:1,radius:.65,near:10,far:16,range:24,cooldown:3.6,behavior:'ranged',hint:'琥珀施工框预警 2.5s · 任何有效伤害打断部署 · 单次炮塔配额',attack:{color:'amber',charge:1,speed:17,damage:5,angles:[0],bursts:1,showAim:true}},
+ commander:{name:'战术指挥官',color:0xeb9bff,hp:110,hpPerLevel:0,speed:1.9,turn:2.3,scale:1,radius:.65,near:12,far:18,range:28,cooldown:3.4,behavior:'ranged',hint:'12米同层无遮挡队友冷却恢复+25% · 不叠加/不缩短预警 · 击倒指挥官或切断链路',attack:{color:'purple',charge:1,speed:18,damage:8,angles:[0],bursts:1,showAim:true}},
+ engineer:{name:'战地工程兵',color:0xffc36a,hp:90,hpPerLevel:0,speed:1.8,turn:2.5,scale:1,radius:.65,near:10,far:16,range:24,cooldown:3.6,behavior:'ranged',hint:'部署2.5s受击打断 · 维修1.6s可受击/EMP目标打断，限2次 · 单次炮塔配额',attack:{color:'amber',charge:1,speed:17,damage:5,angles:[0],bursts:1,showAim:true}},
  sentry:{name:'哨兵炮塔',color:0x6affb6,hp:150,hpPerLevel:0,speed:0,turn:0,scale:1,radius:.75,near:1.6,far:0,range:22,cooldown:4.8,hint:'绿色扫描扇区 · 锁定 1.2s 后三连扫射 · 横移/掩体，绕后打绿色核心 ×2',attack:{color:'green',charge:1.2,speed:16,damage:7,angles:[-.09],bursts:3,burstDelay:.18,burstOffset:.09,showAim:true}},
  swarmDrone:{name:'蜂群无人机 · 编队型',color:0x63cfff,hp:28,hpPerLevel:0,speed:2,turn:5,scale:.8,radius:.55,near:6,far:8,range:18,cooldown:4,behavior:'ranged',hint:'六机蜂群 · 蓝光蜂鸣预警 1s · 横移躲开旧瞄准点 / 霰弹与 VOLT 清群',attack:{color:'blue',charge:1,speed:13,damage:3,angles:[0],bursts:1,showAim:true}},
  harborElite:{name:'港务镇压者',color:0x8fe3ec,hp:230,hpPerLevel:0,speed:1.65,turn:1.15,scale:1.12,radius:.85,near:9,far:14,range:34,cooldown:5.2,hint:'金色瞄准锁定 · 双轮扇射后青色胸核暴露 2.4 秒',attack:{color:'amber',charge:1.3,speed:18,damage:9,angles:[-.12,0,.12],bursts:2,burstDelay:.35,burstOffset:.06,showAim:true}},
@@ -19,9 +20,9 @@ export const ENEMY_TYPES={
  stalker:{name:'潜行者',color:0x7fd7c8,hp:46,hpPerLevel:5,speed:3.9,turn:4.5,scale:.95,radius:.55,near:3.5,far:9,range:14,cooldown:1.6,behavior:'assault',stealth:{far:18,near:7},
   hint:'远处近乎透明 · 7 米内显形，听脚步与涟漪',attack:{color:'orange',charge:.45,speed:17,damage:6,angles:[0],bursts:1}},
  hound:{name:'猎犬机',color:0xff5a5a,hp:38,hpPerLevel:4,speed:5.2,turn:6,scale:.9,radius:.5,near:3.5,far:8,range:14,cooldown:1.4,behavior:'assault',thermal:true,
-  hint:'低矮快速 · 红眼预警后直线突进，横移后用霰弹或 VOLT 收掉 · 暴风雪中靠热成像仍能追踪',attack:{color:'orange',charge:.45,speed:19,damage:5,angles:[0],bursts:1}},
+  hint:'低矮快速机械体 · 红眼预警后直线突进，横移后用霰弹/VOLT/EMP收掉 · 暴风雪中靠热成像仍能追踪',attack:{color:'orange',charge:.45,speed:19,damage:5,angles:[0],bursts:1}},
  shield:{name:'护盾兵',color:0x9fc4ff,hp:120,hpPerLevel:10,speed:1.9,turn:1.6,scale:1.1,radius:.8,near:7,far:11,range:26,cooldown:2.8,behavior:'assault',frontShield:true,
-  hint:'正面护盾免疫 · 绕到侧后方或打背部核心',attack:{color:'amber',charge:.8,speed:14,damage:8,angles:[-.08,.08],bursts:1}},
+  hint:'正面护盾免疫 · EMP可破盾6秒 · 绕侧或打背部核心',attack:{color:'amber',charge:.8,speed:14,damage:8,angles:[-.08,.08],bursts:1}},
  warden:{name:'THE WARDEN',color:0xff668d,hp:1000,hpPerLevel:0,speed:1.75,turn:.95,scale:1.9,radius:1.235,near:10,far:15,range:44,cooldown:2.5,
   hint:'等待过载窗口 · 攻击青色胸口核心'}
 };
@@ -38,7 +39,7 @@ const ROLE_SETS={
  access:['ranged','assault','heavy','ranged','assault','assault'],
  reactor:['heavy','ranged','assault','ranged','heavy','assault','assault'],
  warden:['warden','assault','ranged','assault'],
- extract:['assault','ranged','assault','heavy']
+ extract:['assault','commander','assault','heavy']
 };
 export function roleForStage(stage,index){const roles=stage.roles||ROLE_SETS[stage.id]||['assault'];return roles[index%roles.length];}
 export function turnTowards(current,target,maxStep){const delta=Math.atan2(Math.sin(target-current),Math.cos(target-current));return current+Math.max(-maxStep,Math.min(maxStep,delta));}
@@ -55,9 +56,9 @@ export function resolveEnemyDamage(enemy,baseDamage,zone,attacker){
  } else if(enemy.type==='sentry'){if(zone==='core'){multiplier=2;weak=true;}else if(facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.45){multiplier=.35;armored=true;}
  } else if(enemy.type==='harborElite'){const result=harborEliteDamage(enemy,zone,facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.55);multiplier=result.multiplier;armored=result.armored;weak=result.weak;
  } else if(enemy.type==='shield'){
-  // Frontal shield is an absolute block (readable: shots spark off); the rear core is the payoff.
+  // Frontal shield is an absolute block (readable: shots spark off) unless EMP has broken it; the rear core is the payoff.
   if(zone==='core'){multiplier=2;weak=true;}
-  else if(facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.35){multiplier=0;armored=true;}
+  else if(!(enemy.shieldDownRemaining>0)&&facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.35){multiplier=0;armored=true;}
  } else if(enemy.type==='heavy'){
   if(zone==='core'){multiplier=2;weak=true;}
   else if(facingDot(enemy.group.position,enemy.group.rotation.y,attacker)>.55){multiplier=.3;armored=true;}

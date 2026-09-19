@@ -1,3 +1,4 @@
+import {equipAtTerminal} from './browser-loadout-driver.mjs';
 // Native input plus isolated deterministic combat fixtures. Never edits the shipped app.
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
@@ -15,7 +16,7 @@ try{
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const errors=[];
  const native=await browser.newContext({viewport:{width:1280,height:800}}),page=await native.newPage();page.setDefaultTimeout(60000);page.on('pageerror',e=>{errors.push(e.message);console.error(e.stack);});
- const url=new URL(base);url.search='?map=reactor&menu=chapter';await page.goto(url.href);await page.click('#deploy');await page.waitForFunction(()=>document.body.dataset.menuOpen==='false');await page.keyboard.press('Digit8');await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='6');assert.equal(await page.locator('.loadout-card').count(),8);await native.close();console.log('PASS: unmodified reactor boots and key8/eight weapons remain available');
+ const url=new URL(base);url.search='?map=reactor&menu=chapter';await page.goto(url.href);await page.click('#deploy');await page.waitForFunction(()=>document.body.dataset.menuOpen==='false');await equipAtTerminal(page,7);await page.keyboard.press('Digit8');await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='6');assert.equal(await page.locator('.loadout-card').count(),8);await native.close();console.log('PASS: unmodified reactor boots and terminal-equipped key8/eight inventory cards remain available');
  const context=await browser.newContext({viewport:{width:1280,height:800}}),p=await context.newPage();p.setDefaultTimeout(60000);p.on('pageerror',e=>{errors.push(e.message);console.error(e.stack);});
  await p.route('**/app.js',async route=>{const response=await route.fetch();let source=await response.text();assert(source.includes("if(state==='playing')update(dt);"));source=source.replace("if(state==='playing')update(dt);",'if(false)update(dt);');source+=`
 window.__empFixture={
@@ -25,7 +26,7 @@ window.__empFixture={
  scene.updateMatrixWorld(true);return this.snapshot();},
  snapshot(){return {state,charges:emp.charges,aiming:emp.aiming,active:emp.active,fuse:emp.remaining,hp:this.actors?.map(e=>e.hp)||[],disabled:this.actors?.map(e=>e.empRemaining||0)||[],positions:this.actors?.map(e=>e.group.position.toArray())||[],pending:enemyProjectiles.charging,bolts:enemyProjectiles.count,health,kills,shots:[...telemetryShots],eligible:achievementUI.attempt.state.eligible,alive:achievementUI.attempt.state.alive,knifeValid:achievementUI.attempt.state.eligible&&achievementUI.attempt.state.alive&&achievementUI.attempt.state.shots===0,visuals:scene.children.filter(o=>o.name?.startsWith('EMP_')).map(o=>o.name)};},
  inspectDisabled(){const e=this.actors[0];camera.position.copy(e.group.position).add(new THREE.Vector3(-3.2,2.8,4));playerMotion.reset(camera.position,1.1);camera.lookAt(e.group.position.clone().add(new THREE.Vector3(0,1.25,0)));yaw=camera.rotation.y;pitch=camera.rotation.x;camera.updateMatrixWorld(true);enemyUI.clear();},
- closeKnife(){const e=this.actors[2];camera.position.copy(e.group.position).add(new THREE.Vector3(0,1.7,1.6));playerMotion.reset(camera.position,0);camera.lookAt(e.group.position.clone().add(new THREE.Vector3(0,1.15,0)));yaw=camera.rotation.y;pitch=camera.rotation.x;camera.updateMatrixWorld(true);changeWeapon(3);handling.update(1,false);cooldown=0;},gun(){changeWeapon(0);handling.update(1,false);cooldown=0;},
+ closeKnife(){const e=this.actors[2];camera.position.copy(e.group.position).add(new THREE.Vector3(0,1.7,1.6));playerMotion.reset(camera.position,0);camera.lookAt(e.group.position.clone().add(new THREE.Vector3(0,1.15,0)));yaw=camera.rotation.y;pitch=camera.rotation.x;camera.updateMatrixWorld(true);changeWeapon(3);handling.update(1,false);cooldown=0;},gun(){loadout.equip(0);changeWeapon(0);handling.update(1,false);cooldown=0;},
  tick(dt){if(state==='playing')update(dt);return this.snapshot();},save(){saveCheckpoint();return checkpoint();},restore(){const cp=campaign.checkpoint;reset(cp.stageIndex,cp);state='playing';overlay.hidden=true;this.actors=[];return this.snapshot();},finish(){end(false);return this.snapshot();},resume(){return enterPlay();}
 };`;await route.fulfill({response,body:source});});
  await p.goto(url.href);await p.waitForFunction(()=>!!window.__empFixture);

@@ -23,10 +23,10 @@ export function createSwarmDirector({enemies,player,navigation,obstacles,project
     const origin=e.group.position.clone(),target=player.position.clone().add(new T.Vector3(0,-.35,0));
     if(origin.distanceTo(target)>SWARM.range||!voltClearPath(origin,target,obstacles.map(o=>o.mesh)))continue;
     const attack={color:'blue',charge:SWARM.warning+dt,speed:13,damage:SWARM.damage,angles:[0],bursts:1,showAim:true};
-    if(projectiles.queue(origin,target,false,e.group,attack)){onDesignate(e,player.position.clone());e.charge=SWARM.warning;e.attack=scaleCooldown(4);cursor=(i+1)%drones.length;gate=SWARM.warning+.12;break;}
+    if(projectiles.queue(origin,target,false,e.group,attack)){const aim=projectiles.aimTarget?.(e.group),redirected=aim&&(Math.abs(aim.x-player.position.x)+Math.abs(aim.z-player.position.z)>1e-6);onDesignate(e,redirected?aim:player.position.clone());e.charge=SWARM.warning;e.attack=scaleCooldown(4);cursor=(i+1)%drones.length;gate=SWARM.warning+.12;break;}
    }
   }
-  for(const e of drones){if(!projectiles.hasPending(e.group))e.group.rotation.y=Math.atan2(player.position.x-e.group.position.x,player.position.z-e.group.position.z);animateSwarm(e,time);}
+  for(const e of drones){const aim=projectiles.aimTarget?.(e.group);if(aim)e.group.rotation.y=Math.atan2(aim.x-e.group.position.x,aim.z-e.group.position.z);else if(!projectiles.hasPending(e.group))e.group.rotation.y=Math.atan2(player.position.x-e.group.position.x,player.position.z-e.group.position.z);animateSwarm(e,time);}
   return gate;
  }
  return {update,clear(){cursor=0;}};

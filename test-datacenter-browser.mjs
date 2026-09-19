@@ -1,3 +1,4 @@
+import {equipAtTerminal} from './browser-loadout-driver.mjs';
 // Chapter 08 browser check (L3, opt-in): boots the sunken data center in an isolated Chromium context,
 // verifies the tide HUD / water slow / energy-weapon short, the dry plinth top, then replays the boss stage
 // and checks the ABYSS panel gating and the v5 (seven-chapter) journey archive import. Own static server.
@@ -18,7 +19,8 @@ const results=[];
 async function step(name,fn){try{await fn();results.push({name,ok:true});console.log('ok  ',name);}catch(e){results.push({name,ok:false});console.log('FAIL',name,'\n',e?.stack||e);}}
 const menuOpen=page=>page.waitForFunction(()=>document.body.dataset.menuOpen==='true');
 const playing=page=>page.waitForFunction(()=>document.body.dataset.menuOpen==='false');
-async function newPage(context){const page=await context.newPage();page.setDefaultTimeout(45000);const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/WebGL|GPU|swiftshader|Automatic fallback/i.test(m.text()))errors.push(m.text());});return {page,errors};}
+async function newPage(context){const page=await context.newPage();page.setDefaultTimeout(45000);const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/WebGL|GPU|swiftshader|Automatic fallback/i.test(m.text()))errors.push(m.text());});// Controlled simulation clock: wall-clock waits under software WebGL are not speed evidence.
+await page.route('**/app.js',async route=>{const response=await route.fetch();let source=await response.text();const clock='const dt=Math.max(0,Math.min((now-last)/1000,.05));last=now;';assert(source.includes(clock));source=source.replace(clock,'const dt=.05;last=now;').replace("if(state==='playing')update(dt);","if(state==='playing'){update(dt);window.__waterFrames=(window.__waterFrames||0)+1;}");await route.fulfill({response,body:source});});return {page,errors};}
 const probe=page=>page.evaluate(()=>window.__datacenterProbe?.());
 try{
  const context=await browser.newContext({viewport:{width:1280,height:850}});
@@ -34,13 +36,13 @@ try{
  await step('single run: tide HUD cycles low -> rising -> high, water slows walking, energy weapon shorts, plinth top stays dry',async()=>{
   const {page,errors}=await newPage(context);
   await page.goto(`${base}/index.html?map=datacenter&menu=chapter`);await menuOpen(page);
-  await page.click('#deploy');await playing(page);
+  await page.click('#deploy');await playing(page);await equipAtTerminal(page,5);
   await page.waitForFunction(()=>document.querySelector('.hazard-notice.water-notice')&&!document.querySelector('.hazard-notice.water-notice').hidden);
   const first=await probe(page);assert.equal(first.stage,0);assert.equal(first.pumps,0);assert.equal(first.level,0);assert.equal(first.phase,'low');
   assert.match(await page.locator('.hazard-notice.water-notice').innerText(),/低水位/);
   // Dry-floor speed sample: walk north on open floor for 1 s.
   await page.evaluate(()=>window.__datacenterProbe().place(0,10,0,0));
-  await page.keyboard.down('KeyW');await page.waitForTimeout(1000);await page.keyboard.up('KeyW');
+  {const start=await page.evaluate(()=>window.__waterFrames||0);await page.keyboard.down('KeyW');await page.waitForFunction(n=>(window.__waterFrames||0)>=n+20,start);await page.keyboard.up('KeyW');}
   const dry=await probe(page);const dryDist=10-dry.z;assert.ok(dryDist>1,'dry walk distance '+dryDist);
   // Jump the tide clock to HIGH water (rise starts at 14 s, high at 20 s), then repeat the walk.
   await page.evaluate(()=>window.__datacenterProbe().advanceWater(21));
@@ -49,7 +51,7 @@ try{
   assert.match(await page.locator('.hazard-notice.water-notice').innerText(),/高水位/);
   const high=await probe(page);assert.ok(Math.abs(high.level-1.2)<.01,'level at high '+high.level);
   await page.evaluate(()=>window.__datacenterProbe().place(0,10,0,0));
-  await page.keyboard.down('KeyW');await page.waitForTimeout(1000);await page.keyboard.up('KeyW');
+  {const start=await page.evaluate(()=>window.__waterFrames||0);await page.keyboard.down('KeyW');await page.waitForFunction(n=>(window.__waterFrames||0)>=n+20,start);await page.keyboard.up('KeyW');}
   const wet=await probe(page);const wetDist=10-wet.z;
   assert.equal(wet.speedScale,.55,'water speed scale');assert.ok(wetDist<dryDist*.75,'wet walk '+wetDist+' vs dry '+dryDist);
   assert.match(await page.locator('.hazard-notice.water-notice').innerText(),/短路/);

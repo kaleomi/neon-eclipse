@@ -1,7 +1,9 @@
+import {createEngineerRepair} from './engineer-repair.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {ENGINEER,chooseEngineerSite,engineerSiteSafe} from './engineer-rules.js';
 import {voltClearPath} from './volt-world.js';
 export function createEngineerDirector({scene,enemies,player,obstacles,projectiles,protectedPoints=()=>[],deploy,canStart=()=>true,onEvent=()=>{}}){
+ const repair=createEngineerRepair({scene,enemies,obstacles,projectiles,onEvent});
  const records=new Map();let used=false;
  function remove(e){const r=records.get(e);if(r){scene.remove(r.marker);r.marker.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});records.delete(e);}e.engineerBuilding=false;e.engineerRemaining=0;}
  function cancel(e,reason){remove(e);e.engineerCooldown=ENGINEER.retry;e.engineerStatus=reason;onEvent('interrupted',e);}
@@ -9,8 +11,9 @@ export function createEngineerDirector({scene,enemies,player,obstacles,projectil
  function capacity(){return !used&&!enemies.some(e=>e.hp>0&&e.type==='sentry');}
  function update(dt){
   if(!Number.isFinite(dt)||dt<0)return;
+  repair.update(dt);
   for(const [e] of records)if(e.hp<=0||!enemies.includes(e)){remove(e);onEvent('cancelled',e);}
-  for(const e of enemies){if(e.type!=='engineer'||e.hp<=0)continue;
+  for(const e of enemies){if(e.type!=='engineer'||e.hp<=0||e.engineerRepairing)continue;
    const damaged=e.engineerLastHp!==undefined&&e.hp<e.engineerLastHp;e.engineerLastHp=e.hp;
    const r=records.get(e);
    if(damaged){if(r)cancel(e,'受击打断');else e.engineerCooldown=ENGINEER.retry;continue;}
@@ -31,6 +34,6 @@ export function createEngineerDirector({scene,enemies,player,obstacles,projectil
    records.set(e,{site,marker});e.engineerBuilding=true;e.engineerRemaining=ENGINEER.warning;e.engineerStatus='部署中';onEvent('started',e);
   }
  }
- function clear(){for(const [e] of records)remove(e);used=false;}
- return {update,clear,get pending(){return records.size;},get used(){return used;}};
+ function clear(){repair.clear();for(const [e] of records)remove(e);used=false;}
+ return {update,clear,get repairing(){return repair.pending;},get pending(){return records.size;},get used(){return used;}};
 }

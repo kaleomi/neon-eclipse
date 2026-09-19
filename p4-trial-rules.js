@@ -1,0 +1,17 @@
+import {CollisionGrid,createRover,stepRover,terrainHeight} from './vehicle-rules.js';
+import {createYacht,stepYacht} from './maritime-rules.js';
+import {createPlane,stepPlane} from './flight-rules.js';
+export const CIRCUITS=Object.freeze({
+ rover:{name:'工业环线',spawn:{x:-110,z:110,yaw:0},radius:12,limit:180,gates:[[-110,0,35],[-110,0,-85],[-20,0,-110],[110,0,-85],[110,0,25],[90,0,110],[0,0,110],[-110,0,110]]},
+ bike:{name:'窄道回环',spawn:{x:-85,z:90,yaw:0},radius:8,limit:180,gates:[[-85,0,15],[-65,0,-75],[0,0,-90],[75,0,-65],[65,0,10],[0,0,30],[65,0,90],[-85,0,90]]},
+ yacht:{name:'沿海航道',spawn:{x:278,z:180,yaw:0},radius:17,limit:240,gates:[[278,0,50],[300,0,-130],[385,0,-340],[540,0,-340],[540,0,40],[410,0,175],[278,0,180]]},
+ plane:{name:'空中检查门',spawn:{x:-300,z:220,yaw:0,y:1.3},radius:24,limit:300,gates:[[-300,45,-280],[-65,95,-420],[270,100,-180],[120,70,120],[-200,40,80],[-300,45,150]]}
+});
+export const TRIAL_BOXES=[{minX:-30,maxX:30,minZ:-35,maxZ:-15,h:7},{minX:15,maxX:40,minZ:48,maxZ:65,h:5}];
+const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+export function segmentNear(a,b,p,r,vertical=false){const ax=a.x-p.x,ay=vertical?(a.y||0)-p.y:0,az=a.z-p.z,dx=b.x-a.x,dy=vertical?(b.y||0)-(a.y||0):0,dz=b.z-a.z;const n=dx*dx+dy*dy+dz*dz,t=n?clamp(-(ax*dx+ay*dy+az*dz)/n,0,1):0;return Math.hypot(ax+dx*t,ay+dy*t,az+dz*t)<=r;}
+export function stepBike(s,input,dt,world){const h=Math.min(.05,Math.max(0,dt));if(!h||input.paused)return;s.impactCooldown=Math.max(0,s.impactCooldown-h);const throttle=clamp(Number(input.throttle)||0,-1,1),steer=clamp(Number(input.steer)||0,-1,1);s.steer+=(steer-s.steer)*(1-Math.exp(-10*h));let acceleration=input.brake?-Math.sign(s.speed)*24:throttle*12-Math.sign(s.speed)*(1.1+s.speed*s.speed*.0016);const old=s.speed;s.speed=clamp(s.speed+acceleration*h,-5,42);if((input.brake||!throttle)&&old*s.speed<0)s.speed=0;const yaw=s.yaw+s.speed/1.5*Math.tan(s.steer*.5/(1+Math.abs(s.speed)*.065))*h,x=s.x+Math.sin((yaw+s.yaw)/2)*s.speed*h,z=s.z-Math.cos((yaw+s.yaw)/2)*s.speed*h;if(world.free(x,z,.55)){s.distance+=Math.hypot(x-s.x,z-s.z);Object.assign(s,{x,z,yaw});}else{if(Math.abs(s.speed)>3&&!s.impactCooldown){s.impacts++;s.impactCooldown=1;}s.speed=0;}s.lean=-s.steer*Math.min(.55,Math.abs(s.speed)*.025);}
+export function createTrial(kind){if(!CIRCUITS[kind])throw Error('Unknown circuit');const c=CIRCUITS[kind],world=new CollisionGrid(TRIAL_BOXES,24,180),body=kind==='plane'?createPlane():kind==='yacht'?createYacht():createRover(c.spawn);let phase='ready',elapsed=0,gate=0;
+ function position(){return {x:body.x,y:kind==='plane'?body.y:kind==='yacht'?.8:terrainHeight(body.x,body.z)+.55,z:body.z,yaw:body.yaw};}
+ return {body,config:c,kind,position,get state(){return {phase,elapsed,gate,distance:body.distance,impacts:body.impacts};},start(){if(phase==='ready'||phase==='paused')phase='playing';},pause(){if(phase==='playing')phase='paused';},abort(){if(phase!=='won'&&phase!=='lost')phase='abandoned';},step(dt,input){if(phase!=='playing'||!Number.isFinite(dt)||dt<=0)return;const from=position();elapsed+=dt;if(kind==='plane')stepPlane(body,input,dt,[]);else if(kind==='yacht')stepYacht(body,input,dt);else if(kind==='bike')stepBike(body,input,dt,world);else stepRover(body,input,dt,world);const to=position(),g=c.gates[gate];if(g&&segmentNear(from,to,{x:g[0],y:g[1],z:g[2]},c.radius,kind==='plane')){gate++;if(gate===c.gates.length)phase='won';}if(body.crashed||body.impacts>=5||elapsed>=c.limit)phase='lost';}}
+}

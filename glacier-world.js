@@ -1,3 +1,4 @@
+import {createBossChargeInterrupt} from './boss-charge-interrupt.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
 import * as T from './node_modules/three/build/three.module.js';
@@ -35,8 +36,10 @@ export function createGlacierWorld(scene,obstacles,weather){
   const mark=haloMarkText(haloTarget);if(mark)hint.textContent+=' · '+mark;
   panel.style.borderColor=exposed?'#ff7a3a':'#9fd2ff';panel.dataset.exposed=String(exposed);
  }
- function setStage(index){if(stage===index)return;delete haloTarget.haloMark;stage=index;rules.reset(index===3);if(index===3)battle.start(GLACIER_NAME);sync();}
- function clear(){delete haloTarget.haloMark;battle.clear();stage=-1;armorFeedback=0;rules.reset();sync(false);}
+ function setStage(index){if(stage===index)return;breaker.reset();delete haloTarget.haloMark;stage=index;rules.reset(index===3);if(index===3)battle.start(GLACIER_NAME);sync();}
+ const breaker=createBossChargeInterrupt(rules,'glacier');
+ function interruptCharge(){const ok=breaker.interrupt();if(ok)sync(true);return ok;}
+ function clear(){breaker.reset();delete haloTarget.haloMark;battle.clear();stage=-1;armorFeedback=0;rules.reset();sync(false);}
  function update(dt,player,feetY,playing,grounded=true){
   if(!rules.blocking||!playing){sync(playing);return 0;}
   stepHaloMark(haloTarget,dt);battle.tick(dt);armorFeedback=Math.max(0,armorFeedback-dt);
@@ -49,5 +52,5 @@ export function createGlacierWorld(scene,obstacles,weather){
  // Test-only helpers (chapter 09 browser test): teleport the mech / fast-forward its rule clock without rendering.
  function place(x,z){rules.state.x=x;rules.state.z=z;}
  function advance(seconds,player={x:0,z:0},feetY=0){for(let left=seconds;left>0;left-=.05)rules.tick(Math.min(.05,left),{player,feetY});sync();}
- clear();return {setStage,clear,update,hit,updateMarkers,battle,place,advance,get origin(){return new T.Vector3(rules.state.x,0,rules.state.z);},get blocking(){return rules.blocking;},get targets(){return rules.blocking?mech.children.filter(m=>m.userData.overseer!==undefined):[];},get position(){return {x:rules.state.x,z:rules.state.z};},get state(){return rules.state;}};
+ clear();return {interruptCharge,setStage,clear,update,hit,updateMarkers,battle,place,advance,get origin(){return new T.Vector3(rules.state.x,0,rules.state.z);},get blocking(){return rules.blocking;},get targets(){return rules.blocking?mech.children.filter(m=>m.userData.overseer!==undefined):[];},get position(){return {x:rules.state.x,z:rules.state.z};},get state(){return rules.state;}};
 }

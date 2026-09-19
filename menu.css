@@ -402,3 +402,26 @@ body[data-menu-open=true] > :is(.topbar, .scanlines, .art-stamp, .compass, .left
 .streak-banner[data-step="10"] { border-color: #74f8ed; color: #d4fffb; text-shadow: 0 0 12px #34e0d0; }
 .hitmarker[data-kind=armor] { color: #9fb4c8; }
 .hitmarker[data-kind=core] { color: #74f8ed; text-shadow: 0 0 7px #34e0d0; }
+
+/* batch 8: key bindings, gamepad, accessibility, language */
+.menu-shell .menu-binding-group { margin-top: 10px; }
+.menu-shell .menu-binding-group-title { display: block; font-size: 10px; letter-spacing: .18em; color: #718f81; margin-bottom: 4px; text-transform: uppercase; }
+.menu-shell .menu-binding-row { display: grid; grid-template-columns: 1fr auto 14px; align-items: center; gap: 8px; font-size: 12px; color: #c5e8d3; padding: 3px 0; border-bottom: 1px solid rgba(125, 227, 177, .08); }
+.menu-shell .menu-binding-key { min-width: 96px; padding: 3px 8px; font: inherit; font-size: 11px; letter-spacing: .08em; color: #eafff3; background: rgba(125, 227, 177, .08); border: 1px solid rgba(125, 227, 177, .35); border-radius: 4px; cursor: pointer; }
+.menu-shell .menu-binding-key:focus-visible, .menu-shell .menu-binding-key:hover:not(:disabled) { border-color: #7de3b1; outline: none; }
+.menu-shell .menu-binding-key:disabled { opacity: .45; cursor: default; }
+.menu-shell .menu-binding-custom { color: #ffcf6a; font-style: normal; font-size: 9px; }
+.menu-shell .menu-binding-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.menu-shell .menu-binding-status { font-size: 11px; color: #7de3b1; }
+.menu-shell .menu-gamepad-status[data-connected=true] { color: #7de3b1; }
+.menu-shell .menu-language select, .menu-shell .menu-a11y-panel select { font: inherit; font-size: 12px; color: #eafff3; background: #0d1a16; border: 1px solid rgba(125, 227, 177, .35); border-radius: 4px; padding: 2px 6px; }
+.menu-shell .menu-a11y-panel .menu-telemetry { margin-top: 10px; }
+/* SFX subtitles (accessibility.js) */
+.sfx-subtitles { position: fixed; left: 50%; bottom: calc(14vh); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 4px; pointer-events: none; z-index: 40; font-size: calc(13px * var(--subtitle-scale, 1)); }
+.sfx-subtitles div { padding: 3px 12px; border-radius: 4px; background: rgba(4, 10, 8, .78); color: #eafff3; letter-spacing: .06em; border-left: 3px solid #7de3b1; }
+.sfx-subtitles div[data-kind=threat] { border-left-color: #ff6a5a; }
+.sfx-subtitles div[data-kind=objective] { border-left-color: #ffcf6a; }
+body[data-menu-open=true] > .sfx-subtitles { visibility: hidden !important; }
+/* high-contrast: stronger HUD text edges */
+html[data-color-mode=high-contrast] body { --hud-text-shadow: 0 0 2px #000, 0 0 4px #000; }
+html[data-color-mode=high-contrast] .toast, html[data-color-mode=high-contrast] .mission-tracker, html[data-color-mode=high-contrast] #enemy-combat-hud { text-shadow: 0 0 2px #000, 0 0 4px #000; }

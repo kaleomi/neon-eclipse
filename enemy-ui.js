@@ -35,7 +35,7 @@ export function createEnemyUI(){
   if(target&&!enemies.includes(target))target=null;
   inspector.hidden=!target;document.body.classList.toggle('boss-targeted',Boolean(target?.boss));
   if(target){
-   const p=ENEMY_TYPES[target.type];inspector.querySelector('b').textContent=p.name+' / '+Math.max(0,Math.ceil(target.hp));
+   const p=ENEMY_TYPES[target.type];const shape=document.documentElement.dataset.a11yShapes==='true'&&p.attack?.color?(globalThis.neonShape?.(p.attack.color)||''):'';inspector.querySelector('b').textContent=(shape?shape+' ':'')+p.name+' / '+Math.max(0,Math.ceil(target.hp));
    inspector.dataset.haloMarked=String(Boolean(haloMarkText(target)));
    inspector.style.setProperty('--enemy-accent','#'+p.color.toString(16).padStart(6,'0'));
    inspector.querySelector('i').style.width=Math.max(0,target.hp/target.maxHp*100)+'%';

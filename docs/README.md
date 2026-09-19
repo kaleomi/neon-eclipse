@@ -5,6 +5,7 @@
 - **改动归属、提交与回退边界**：`docs/mcp-change-ownership-2026-09-18.md`
 - **先遣队备份/检查点交付**：`docs/mcp-p3-expedition-backup-recovery.md`
 - **先遣队第 5 关 · 灯塔岛登陆**：`docs/mcp-p3-expedition-mission5.md`
+- **键位重绑 / 手柄 / 辅助功能 / i18n 骨架**：`docs/mcp-p6-input-a11y-i18n.md`
 - **帧时序统计 / 入口拆分第一步 / CI**：`docs/mcp-p0-frame-stats-ci.md`
 - **载具与章节音频补记**：`docs/mcp-audio-integration-2026-09-18.md`
 - **九章Boss总交付与后续方案**：`docs/mcp-boss-completion.md`

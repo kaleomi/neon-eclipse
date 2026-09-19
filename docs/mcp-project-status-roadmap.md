@@ -90,6 +90,14 @@
 - 新模块 `interaction-rules.js` / `interaction-world.js` / `interaction-layouts.js`：每章两座可按住 E 的基座——排气阀（1.5s 启动、5s 半径 3.2m 云：敌人半速且不能预警、6 HP/s、12s 充压）与照明开关（0.6s 切换：黑暗中远程射程 ×0.65、潜行者/猎犬 ×1.25，可恢复）。九章各有主题命名与经约束校验的摆位。
 - 451/451 check、105/105 rules、41/41 integration；`test-interactions-browser` 九章真实页面原生 E 通过，诊断 0。摆位/忙碌/灯光基准三类首版失败已记录并修正。详见 `docs/mcp-p1-environment.md`。下一批：P2 天气 / 击杀表现 / 过场。
 
+### P6 交付：键位重绑 / 手柄 / 辅助功能 / i18n 骨架（2026-09-19）
+
+- 新 `input-bindings.js`：19 个动作可重绑（交换语义、保留键/锁定动作、`neon-eclipse.bindings.v1` 仅存覆盖）；标准布局手柄映射与边沿检测。`app.js` 所有硬编码 `e.code` 改走 `bindings.is/held`，`pollGamepad()` 把手柄按键合成为当前主键的键盘事件，因此手柄自动跟随重绑。
+- 新 `accessibility.js`：色觉模式（SVG 矩阵滤镜施加于 canvas，高对比加描边）、敌人预警形状标记（`enemy-ui.js` 目标名前缀）、音效字幕（包装 `gameAudio.play`，含前/后/左/右方位、去重与 4 行队列）。
+- 新 `i18n/`（zh-CN / en 45 键，parity 测试）、`input-settings-ui.js`：设置页新增键位绑定表、手柄状态、辅助功能、语言面板。
+- 验证：474/474 check、111/111 rules、42/42 integration、诊断 0、smoke 15/15、新 `test-input-a11y-browser.mjs` 连续 3 次通过（真实重绑生效、伪手柄移动/开火/切枪/暂停、色觉滤镜、语言切换）。
+- 未做：触屏、手柄自定义映射与震动、3D 特效内的形状标记、战斗内文案与载具/档案页的翻译、真人辅助功能验收。详见 `docs/mcp-p6-input-a11y-i18n.md`。
+
 ### P0/P4 交付：帧时序统计 / 入口拆分第一步 / CI 工作流（2026-09-19）
 
 - 新 `frame-stats.js`（HUD 帧率与行动内帧间隔百分位采样）与 `player-collision.js`（`app.js` 碰撞函数提取）；遥测记录在 schema 1 内新增可选 `perf`，旧记录原样有效；`operations-archive` 新增「本机帧时序」面板（加权平均帧率、最差 P95、最长单帧、按画质档位）。`.github/workflows/ci.yml` 分 node-tests 与 browser-smoke 两个作业，`npm run test:ci`。

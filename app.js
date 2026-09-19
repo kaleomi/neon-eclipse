@@ -115,6 +115,9 @@ import { createMissionWorld } from './mission-world.js';
 import { createMissionUI } from './mission-ui.js';
 import { createCampaignStore, STAGE_ENTRIES } from './campaign.js';
 import { createCampaignUI } from './campaign-ui.js';
+import { createBindings, createGamepadInput } from './input-bindings.js';
+import { createAccessibility, createSubtitles, shapeFor } from './accessibility.js';
+import { createI18n } from './i18n/index.js';
 
 const fieldRecord=createFieldRecord();
 const telemetry=createTelemetry(),frameStats=createFrameStats();let telemetryAttempt=null,telemetryShots=[0,0,0,0,0,0,0,0];
@@ -285,6 +288,10 @@ const interactionRay=new THREE.Raycaster();
 const lookInput=createLookInput();
 let rounds=[], reserves=[],ammoHudKey='';
 const gameAudio=createGameAudio({storage:localStorage});window.neonAudio=gameAudio;
+const bindings=createBindings({storage:localStorage}),gamepad=createGamepadInput({getGamepads:()=>navigator.getGamepads?.()||[]});window.neonInput={bindings,gamepad};
+const a11y=createAccessibility({storage:localStorage}),subtitles=createSubtitles({a11y});subtitles.attach(gameAudio);window.neonA11y=a11y;window.neonShape=shapeFor;
+const i18n=createI18n({storage:localStorage,languages:navigator.languages});window.neonI18n=i18n;
+let padLook={x:0,y:0},padMove={x:0,z:0},padHeld=new Set();
 const energyNodes=fieldLayout?.nodes.length?createEnergyNodes(scene,obstacles,fieldLayout.nodes,{enemies,projectiles:enemyProjectiles,onTopologyChange:()=>navigation.invalidate(),onPulse:n=>{gameAudio.play('hit.armor');notify('EMP节点放电 // '+n+'个机械目标瘫痪3秒');}}):null;
 const execution=createExecution(),executionStagger=createExecutionStagger(e=>{enemyProjectiles.cancelOwner(e.group);e.charge=0;});let executionHint='',executionHintTime=0;
 const fieldKit=createFieldKit({scene,camera,gun,weapons,enabled:!!fieldLayout,onRestart:()=>startSingleChapter(),getTargets:()=>enemies.filter(e=>e.hp>0).flatMap(e=>e.group.children).concat(obstacles.map(o=>o.mesh),overseer?.targets||[]),onFire:()=>{p4?.shot(8);fieldRecord.shot();achievementUI.attempt.shot(8);gameAudio.play('fire.railspike');},onImpact:(point)=>{
@@ -516,32 +523,32 @@ renderer.domElement.addEventListener('mouseleave',()=>lookInput.end());
 document.addEventListener('keydown',e=>{
  if(e.code==='Escape'&&(loadoutWorld.open||fieldKit.open)){e.preventDefault();e.stopPropagation();loadoutWorld.hide();fieldKit.hide();$('#deploy').focus();return;}
  const typing=e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||e.target instanceof HTMLTextAreaElement||e.target.isContentEditable;
- if(p4?.active&&e.code==='KeyT'&&!typing){e.preventDefault();e.stopImmediatePropagation();notify('P4 使用波间整备；T 试点不会重开挑战，U 装备终端仍可使用');return;}
- if(e.code==='KeyT'&&!e.repeat&&!typing&&fieldLayout){e.preventDefault();e.stopPropagation();if(state==='playing'){pause();document.exitPointerLock?.();}loadoutWorld.hide();if(fieldKit.open){fieldKit.hide();$('#deploy').focus();}else fieldKit.show();return;}
- if(e.code==='KeyU'&&!e.repeat&&!typing){e.preventDefault();e.stopPropagation();if(loadoutWorld.open)loadoutWorld.hide();else{if(state==='playing'){pause();document.exitPointerLock?.();}fieldKit.hide();loadoutWorld.show();}}
+ if(p4?.active&&bindings.is(e.code,'fieldKit')&&!typing){e.preventDefault();e.stopImmediatePropagation();notify('P4 使用波间整备；T 试点不会重开挑战，U 装备终端仍可使用');return;}
+ if(bindings.is(e.code,'fieldKit')&&!e.repeat&&!typing&&fieldLayout){e.preventDefault();e.stopPropagation();if(state==='playing'){pause();document.exitPointerLock?.();}loadoutWorld.hide();if(fieldKit.open){fieldKit.hide();$('#deploy').focus();}else fieldKit.show();return;}
+ if(bindings.is(e.code,'loadout')&&!e.repeat&&!typing){e.preventDefault();e.stopPropagation();if(loadoutWorld.open)loadoutWorld.hide();else{if(state==='playing'){pause();document.exitPointerLock?.();}fieldKit.hide();loadoutWorld.show();}}
 },true);
 document.addEventListener('keydown',e=>{
  if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||e.target instanceof HTMLTextAreaElement||e.target.isContentEditable)return;
  if(state==='playing'&&['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
- if(e.code==='KeyQ'&&!e.repeat){toggleQuality();return;}
+ if(bindings.is(e.code,'quality')&&!e.repeat){toggleQuality();return;}
  if(e.code==='Escape'){pause();document.exitPointerLock?.();}
  if(state!=='playing')return;
  if(chapterIntro?.active){if(e.code==='Space'||e.code==='Enter'){e.preventDefault();chapterIntro.skip();}return;}
  keys.add(e.code);
- if(e.code==='KeyF'&&!e.repeat){if(!ordnance.pick())weaponDrops.pick();return;}
- if(e.code==='KeyG'){e.preventDefault();if(!e.repeat&&!parry.busy&&empReady()&&!emp.begin())notify(emp.charges?'投掷物引信正在运行':'当前投掷物已耗尽 · 本章不补充');return;}
- if(p4?.params.headshotsOnly&&e.code==='KeyV'){notify('弱点协议：处决关闭，请攻击头部、弱点或机关');return;}
- if(e.code==='KeyB'&&!e.repeat&&typedAmmo.enabled){typedAmmo.cycleSupply();notify('弹药箱补给类型 // '+AMMO_NAMES[typedAmmo.supplyType(supplyWeapon())]+' · 不补充投掷物');return;}
- if(e.code==='KeyV'&&!e.repeat&&loadout.state.melee===3&&selected===3&&!execution.active&&!fieldKit.busy&&!ordnance.busy&&!parry.busy&&!meleePending&&cooldown<=0&&reload<=0&&handling.state.switchRemaining<=0){const target=executionTarget();if(execution.begin(target)){emp.cancelAim();cooldown=EXECUTION.cooldown;fireBuffer=0;firing=false;gameAudio.play('melee.swing');}return;}
- if(e.code==='KeyH'&&!e.repeat&&selected===3&&loadout.state.melee===11){emp.cancelAim();if(ordnance.press({index:11,ready:!loadoutBusy()&&!parry.busy&&handling.state.switchRemaining<=0})){firing=false;fireBuffer=0;}return;}
- if(e.code==='KeyH'&&!e.repeat&&loadout.state.primary>=9){emp.cancelAim();camera.rotation.set(THREE.MathUtils.clamp(pitch+handling.state.pitch,-1.45,1.45),yaw+handling.state.yaw,0);if(ordnance.press({ads:aiming&&handling.state.ads>=(workshop.heavy(loadout.state.primary)?.adsThreshold??.9),ready:!loadoutBusy()&&!parry.busy&&meleeRemaining<=0&&handling.state.switchRemaining<=0})){firing=false;fireBuffer=0;}return;}
- if(e.code==='KeyH'&&!e.repeat&&!loadout.allows(8)){notify('PULSE 未装备 // 在 U 装备终端中替换主武器');return;}
- if(e.code==='KeyH'&&!e.repeat&&fieldLayout&&loadout.allows(8)&&!execution.active&&!parry.busy&&!meleePending&&meleeRemaining<=0&&cooldown<=0&&reload<=0&&handling.state.switchRemaining<=0&&!haloBurst.active&&railCharge.progress===0){emp.cancelAim();camera.rotation.set(THREE.MathUtils.clamp(pitch+handling.state.pitch,-1.45,1.45),yaw+handling.state.yaw,0);if(fieldKit.launch()){firing=false;fireBuffer=0;aiming=false;}else notify('重型脉冲炮冷却中、仍在飞行或弹药耗尽');return;}
- if(e.code==='Space'&&!e.repeat)jumpRequested=true;
+ if(bindings.is(e.code,'pickup')&&!e.repeat){if(!ordnance.pick())weaponDrops.pick();return;}
+ if(bindings.is(e.code,'grenade')){e.preventDefault();if(!e.repeat&&!parry.busy&&empReady()&&!emp.begin())notify(emp.charges?'投掷物引信正在运行':'当前投掷物已耗尽 · 本章不补充');return;}
+ if(p4?.params.headshotsOnly&&bindings.is(e.code,'execute')){notify('弱点协议：处决关闭，请攻击头部、弱点或机关');return;}
+ if(bindings.is(e.code,'ammoType')&&!e.repeat&&typedAmmo.enabled){typedAmmo.cycleSupply();notify('弹药箱补给类型 // '+AMMO_NAMES[typedAmmo.supplyType(supplyWeapon())]+' · 不补充投掷物');return;}
+ if(bindings.is(e.code,'execute')&&!e.repeat&&loadout.state.melee===3&&selected===3&&!execution.active&&!fieldKit.busy&&!ordnance.busy&&!parry.busy&&!meleePending&&cooldown<=0&&reload<=0&&handling.state.switchRemaining<=0){const target=executionTarget();if(execution.begin(target)){emp.cancelAim();cooldown=EXECUTION.cooldown;fireBuffer=0;firing=false;gameAudio.play('melee.swing');}return;}
+ if(bindings.is(e.code,'special')&&!e.repeat&&selected===3&&loadout.state.melee===11){emp.cancelAim();if(ordnance.press({index:11,ready:!loadoutBusy()&&!parry.busy&&handling.state.switchRemaining<=0})){firing=false;fireBuffer=0;}return;}
+ if(bindings.is(e.code,'special')&&!e.repeat&&loadout.state.primary>=9){emp.cancelAim();camera.rotation.set(THREE.MathUtils.clamp(pitch+handling.state.pitch,-1.45,1.45),yaw+handling.state.yaw,0);if(ordnance.press({ads:aiming&&handling.state.ads>=(workshop.heavy(loadout.state.primary)?.adsThreshold??.9),ready:!loadoutBusy()&&!parry.busy&&meleeRemaining<=0&&handling.state.switchRemaining<=0})){firing=false;fireBuffer=0;}return;}
+ if(bindings.is(e.code,'special')&&!e.repeat&&!loadout.allows(8)){notify('PULSE 未装备 // 在 U 装备终端中替换主武器');return;}
+ if(bindings.is(e.code,'special')&&!e.repeat&&fieldLayout&&loadout.allows(8)&&!execution.active&&!parry.busy&&!meleePending&&meleeRemaining<=0&&cooldown<=0&&reload<=0&&handling.state.switchRemaining<=0&&!haloBurst.active&&railCharge.progress===0){emp.cancelAim();camera.rotation.set(THREE.MathUtils.clamp(pitch+handling.state.pitch,-1.45,1.45),yaw+handling.state.yaw,0);if(fieldKit.launch()){firing=false;fireBuffer=0;aiming=false;}else notify('重型脉冲炮冷却中、仍在飞行或弹药耗尽');return;}
+ if(bindings.is(e.code,'jump')&&!e.repeat)jumpRequested=true;
  if(/^Digit[1-8]$/.test(e.code)&&!e.repeat)changeWeapon(Number(e.code.slice(-1))-1);
- if(e.code==='KeyR')startReload();
+ if(bindings.is(e.code,'reload'))startReload();
 });
-document.addEventListener('keyup',e=>{keys.delete(e.code);if(e.code==='KeyH')ordnance.cancelCharge();if(e.code==='KeyG'){if(empReady()){camera.rotation.set(pitch,yaw,0);emp.release();}else emp.cancelAim();}});
+document.addEventListener('keyup',e=>{keys.delete(e.code);if(bindings.is(e.code,'special'))ordnance.cancelCharge();if(bindings.is(e.code,'grenade')){if(empReady()){camera.rotation.set(pitch,yaw,0);emp.release();}else emp.cancelAim();}});
 document.addEventListener('mousedown',e=>{if(state!=='playing')return;if(chapterIntro?.active){if(e.button===0)chapterIntro.skip();return;}if(e.button===0){emp.cancelAim();firing=true;fireBuffer=.18;}if(e.button===2){
  if(selected===3&&loadout.state.melee===11){aiming=false;return;}
  if(selected===3){aiming=false;emp.cancelAim();if(parry.press({ready:!ordnance.busy&&!execution.active&&!fieldKit.busy&&cooldown<=0&&handling.state.switchRemaining<=0&&meleeRemaining<=0&&reload<=0})){fireBuffer=0;firing=false;gameAudio.play('weapon.switch');}}
@@ -726,9 +733,10 @@ function update(dt){
  const previousMelee=meleeRemaining;meleeRemaining=Math.max(0,meleeRemaining-dt);
  if(reload>0){syncTypedAmmo();const before=rounds[selected],next=advanceReload(dt,reload,rounds[selected],reserves[selected],weapons[selected]);reload=next.remaining;rounds[selected]=next.rounds;if(typedAmmo.enabled){typedAmmo.take(selected,next.rounds-before);syncTypedAmmo();}else reserves[selected]=next.reserve;if(next.inserted){gameAudio.play('reload.shell');hud();}}
 
- if(keys.has('ArrowLeft'))yaw+=dt*1.6;if(keys.has('ArrowRight'))yaw-=dt*1.6;
- let mx=Number(keys.has('KeyD'))-Number(keys.has('KeyA')),mz=Number(keys.has('KeyS'))-Number(keys.has('KeyW'));
- moving=mx!==0||mz!==0;sprinting=!ordnance.busy&&!execution.active&&!fieldKit.busy&&(keys.has('ShiftLeft')||keys.has('ShiftRight'))&&canSprintWithWeapon(weapons[selected],{moving,aiming:aiming||(selected===3&&parry.busy),firing,reload});
+ if(bindings.held(keys,'turnLeft'))yaw+=dt*1.6;if(bindings.held(keys,'turnRight'))yaw-=dt*1.6;
+ if(padLook.x||padLook.y){const s=2.6*combatUI.sensitivity*(1-handling.state.ads*.35);yaw-=padLook.x*s*dt;pitch=THREE.MathUtils.clamp(pitch-padLook.y*s*dt,-1.35,1.35);}
+ let mx=Number(bindings.held(keys,'right'))-Number(bindings.held(keys,'left'))+padMove.x,mz=Number(bindings.held(keys,'back'))-Number(bindings.held(keys,'forward'))+padMove.z;mx=THREE.MathUtils.clamp(mx,-1,1);mz=THREE.MathUtils.clamp(mz,-1,1);
+ moving=mx!==0||mz!==0;sprinting=!ordnance.busy&&!execution.active&&!fieldKit.busy&&(bindings.held(keys,'sprint')||padHeld.has('sprint'))&&canSprintWithWeapon(weapons[selected],{moving,aiming:aiming||(selected===3&&parry.busy),firing,reload});
  handling.update(dt,aiming&&reload<=0&&selected!==3);
  const ads=handling.state.ads,len=Math.hypot(mx,mz)||1,speed=(sprinting?8*fieldKit.speed:5)*(1-ads*.4)*(art.moveScale?.(playerMotion.state.y)??1);
  mx=mx/len*dt*speed*(p4?.params.move??1);mz=mz/len*dt*speed*(p4?.params.move??1);
@@ -777,13 +785,13 @@ function update(dt){
  emp.update(dt);
  engineerDirector.update(dt);
  if(!p4?.range)enemyFireGate=enemyDirector.update(dt,elapsed,enemyFireGate);
- if(interactions){const hint=interactions.prompt(camera.position,playerMotion.state.y);if(hint&&toastTime<=0.05&&!mission.state.defending){notify(hint);toastTime=.6;}interactions.update(dt,{player:camera.position,feetY:playerMotion.state.y,held:keys.has('KeyE'),busy:moving||firing||reload>0||handling.state.switchRemaining>0||meleeRemaining>0||emp.aiming||!playerMotion.state.grounded});
+ if(interactions){const hint=interactions.prompt(camera.position,playerMotion.state.y);if(hint&&toastTime<=0.05&&!mission.state.defending){notify(hint);toastTime=.6;}interactions.update(dt,{player:camera.position,feetY:playerMotion.state.y,held:(bindings.held(keys,'interact')||padHeld.has('interact')),busy:moving||firing||reload>0||handling.state.switchRemaining>0||meleeRemaining>0||emp.aiming||!playerMotion.state.grounded});
   if(interactions.vent.state.active>0){if(interactions.vent.inZone(camera.position,playerMotion.state.y))environmentHurt(VENT.dps*dt,new THREE.Vector3(interactions.vent.zone.x,camera.position.y,interactions.vent.zone.z));for(const e of enemies){if(e.hp<=0||e.boss||!interactions.vent.inZone(e.group.position,e.group.position.y))continue;e.hp-=VENT.dps*dt;if(e.hp<=0){e.hp=0;achievementUI.attempt.environmentHit(1);}}
    for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&!enemies[i].boss&&interactions.vent.inZone(enemies[i].group.position,enemies[i].group.position.y)){enemyProjectiles.cancelOwner(enemies[i].group);killPresentation(enemies[i]);weaponDrops.drop(enemies[i]);disposeGroup(enemies[i].group);enemies.splice(i,1);kills++;}}}
  for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&enemies[i].type==='rusher'){enemyProjectiles.cancelOwner(enemies[i].group);disposeGroup(enemies[i].group);enemies.splice(i,1);}
  enemyProjectiles.update(dt,camera.position,previousPlayer);
  overseer?.prepareMission?.(mission.state,enemies.length===0);
- overseer?.interact?.(dt,{camera,held:keys.has('KeyE'),busy:moving||firing||reload>0||handling.state.switchRemaining>0||meleeRemaining>0||emp.aiming||damageTime>0,feetY:playerMotion.state.y,grounded:playerMotion.state.grounded});
+ overseer?.interact?.(dt,{camera,held:(bindings.held(keys,'interact')||padHeld.has('interact')),busy:moving||firing||reload>0||handling.state.switchRemaining>0||meleeRemaining>0||emp.aiming||damageTime>0,feetY:playerMotion.state.y,grounded:playerMotion.state.grounded});
  const bossDamage=p4Incoming(overseer?.update(dt,camera.position,playerMotion.state.y,true,playerMotion.state.grounded,enemies.filter(e=>e.type==='stalker').length)||0);
  if(overseer?.takeSummons){const spots=overseer.takeSummons(camera.position);if(spots.length){spawnEncounter({...mission.current,count:spots.length,spawns:spots.map(p=>({x:p.x,z:p.z,feetY:p.y??0})),roles:[overseer.summonRole||'stalker'],feetY:0});notify(overseer.summonMessage||'ABYSS 唤出潜行者 // 涨水期间从水中接近');gameAudio.play('reinforcement');}}
  if(bossDamage&&!execution.invulnerable){overseer.battle.hurt(Math.min(health,bossDamage));ordnance.cancelCharge();fieldRecord.hurt(Math.min(health,bossDamage));achievementUI.attempt.hurt(Math.min(health,bossDamage));health=Math.max(0,health-bossDamage);mission.interrupt();combatUI.damaged(overseer.origin||new THREE.Vector3(0,0,-21));damageTime=.3;gameAudio.hurt(health);hud();}
@@ -791,7 +799,7 @@ function update(dt){
  const hazard=art.hazardDamage?.(dt,{x:camera.position.x,z:camera.position.z,feetY:playerMotion.state.y});
  if(IS_ORBITAL||IS_DATACENTER||IS_POLAR)chapterCues.update(chapterSnapshot({map:MAP_ID,art,overseer,feetY:playerMotion.state.y,padLive:Boolean(hazard&&IS_ORBITAL)}));
  if(hazard&&!execution.invulnerable){ordnance.cancelCharge();fieldRecord.hurt(Math.min(health,hazard.damage));achievementUI.attempt.hurt(Math.min(health,hazard.damage));health=Math.max(0,health-hazard.damage);mission.interrupt();combatUI.damaged(new THREE.Vector3(hazard.x,0,hazard.z));damageTime=.3;gameAudio.play('player.hazard');hud();}
- fieldKit.step(dt);if(!keys.has('KeyH')&&!firing)ordnance.cancelCharge();ordnance.step(dt);mortarMarkers.update(dt);energyNodes?.flush();barrels?.flush();executionStagger.update(enemies,0);
+ fieldKit.step(dt);if(!bindings.held(keys,'special')&&!padHeld.has('special')&&!firing)ordnance.cancelCharge();ordnance.step(dt);mortarMarkers.update(dt);energyNodes?.flush();barrels?.flush();executionStagger.update(enemies,0);
  if(health<=0){end(false);return;}
  missionWorld.collect(camera.position,type=>{
   if(type==='ammo'&&typedAmmo.enabled){const kind=typedAmmo.supplyType(supplyWeapon());if(kind==='grenade'&&!ordnance.owns(9))return false;const added=typedAmmo.supply(kind);if(!added)return false;syncTypedAmmo();notify(AMMO_NAMES[kind]+'共享储备 +'+added+' 单位 // B切换类型，投掷物不补充');gameAudio.play('supply.ammo');hud();return true;}
@@ -800,7 +808,7 @@ function update(dt){
  });
  starWorld.update(dt,elapsed,camera.position,true);
  const interaction=interactionStatus();
- const event=p4?.manual?null:mission.tick(dt,{player:camera.position,held:keys.has('KeyE'),clear:enemies.length===0&&!overseer?.blocking&&(overseer?.canAdvance?.(mission.state)??true),canInteract:interaction.allowed,transportReady:transport?.tripCompleted===true});
+ const event=p4?.manual?null:mission.tick(dt,{player:camera.position,held:(bindings.held(keys,'interact')||padHeld.has('interact')),clear:enemies.length===0&&!overseer?.blocking&&(overseer?.canAdvance?.(mission.state)??true),canInteract:interaction.allowed,transportReady:transport?.tripCompleted===true});
  if(event){
   if(event.type==='node'){keys.delete('KeyE');firing=false;fireBuffer=0;notify(event.message);gameAudio.play('objective.node');hud();}
   else if(event.type==='reinforcement'){spawnEncounter(event.stage);notify(event.message);gameAudio.play('reinforcement');hud();}
@@ -872,12 +880,32 @@ if(p4.active){overlay.style.setProperty('display','none','important');p4.boot();
 else {const link=document.createElement('a');link.href='./p4-hub.html';link.textContent='行动中枢 / P4 ↗';link.className='p4-home-link';link.style.cssText='position:fixed;top:68px;right:28px;z-index:140;padding:10px 18px;color:#a2f5da;background:linear-gradient(135deg,#12343eee,#081820ee);border:1px solid #497c87;text-decoration:none;font:13px sans-serif;box-shadow:0 8px 24px #0008,inset 0 1px #abfff833';document.body.append(link);const hideStyle=document.createElement('style');hideStyle.textContent='body[data-play-state="playing"] .p4-home-link{display:none}';document.head.append(hideStyle);}
 
 let last=performance.now();
+// Gamepad → same action ids as keyboard; buttons are dispatched as synthetic keydown/keyup with the action's primary code.
+function pollGamepad(){
+ const f=gamepad.poll();padLook=f.look;padMove=f.move;padHeld=f.held;
+ if(!f.active&&!f.released.length)return;
+ const synth=(type,action)=>{const code=bindings.codesFor(action)[0];if(code)document.dispatchEvent(new KeyboardEvent(type,{code,bubbles:true,cancelable:true}));};
+ for(const a of f.pressed){
+  if(a==='pause'){if(state==='playing'){pause();document.exitPointerLock?.();}else if(document.body.dataset.menuOpen==='true')gameMenu.activatePrimary?.();continue;}
+  if(a==='fire'){if(state==='playing'&&!chapterIntro?.active){emp.cancelAim();firing=true;fireBuffer=.18;}else if(chapterIntro?.active)chapterIntro.skip();continue;}
+  if(a==='aim'){if(state==='playing')aiming=true;continue;}
+  if(a==='weaponNext'||a==='weaponPrev'){if(state==='playing'){let i=selected;for(let n=0;n<weapons.length;n++){i=(i+(a==='weaponNext'?1:-1)+weapons.length)%weapons.length;if(loadout.allows(i)){changeWeapon(i);break;}}}continue;}
+  synth('keydown',a);
+ }
+ for(const a of f.released){
+  if(a==='fire'){firing=false;ordnance.cancelCharge();if(selected===6)cancelRail();continue;}
+  if(a==='aim'){aiming=false;parry.release();continue;}
+  if(a==='pause'||a==='weaponNext'||a==='weaponPrev')continue;
+  synth('keyup',a);
+ }
+}
 function frame(now){
  const p4RealDt=Math.max(0,(now-last)/1000);p4?.prepareFrame?.(p4RealDt);
  const dt=Math.max(0,Math.min((now-last)/1000,.05));last=now;
  frameTimeScale=state==='playing'?slowmo.step(dt):1;if(!slowmo.active&&document.body.dataset.slowmo)delete document.body.dataset.slowmo;
  const introActive=Boolean(chapterIntro?.active);if(introActive)chapterIntro.step(dt);
  gun.visible=state==='playing'&&!introActive;
+ pollGamepad();
  if(state==='playing')update(dt);
  else starWorld.update(0,elapsed,camera.position,false);
  p4?.frame(p4RealDt);
@@ -909,7 +937,7 @@ function frame(now){
  gameAudio.setListener(camera.position.x,camera.position.z,yaw);gameAudio.update(dt,{playState:state,health,enemiesNear:enemies.reduce((n,e)=>n+(e.group.position.distanceToSquared(camera.position)<45*45?1:0),0),bossActive:Boolean(overseer?.blocking||enemies.some(e=>e.boss)),defending:mission.state.defending===true,extracting:mission.state.extracting===true});
  {const shown=$('#fps').textContent,fps=frameStats.sample(now);if(fps&&String(fps)!==shown)$('#fps').textContent=fps;}
  achievementUI.update(state);
- presentation.update(dt,yaw,pitch,state);
+ presentation.update(dt,yaw,pitch,state);subtitles.update(dt,{listener:camera.position,yaw});
  const displayedDifficulty=DIFFICULTIES[p4?.difficulty]||currentDifficulty();document.body.dataset.combatDifficulty=displayedDifficulty.id;$('.boss-note').textContent=mission.current.title+' · '+displayedDifficulty.label;
  gameMenu.update(state);
  renderer.render(scene,camera);requestAnimationFrame(frame);

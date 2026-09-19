@@ -3,6 +3,7 @@ import {bindFlightPitchSetting} from './flight-settings.js';
 import {bindSaveHub} from './save-hub-ui.js';
 import {bindTelemetrySetting} from './telemetry.js';
 import {bindAudioSettings} from './audio/audio-settings-ui.js';
+import {bindKeyBindings, bindGamepadStatus, bindAccessibilitySettings, bindLanguageSetting} from './input-settings-ui.js';
 import {createFlightRecordStore} from './flight-records-store.js';
 import {vehicleEntryDecision} from './vehicle-entry.js';
 import {HOME_MENU_ITEMS, MENU_CHAPTERS, chapterInfo, chapterURL, readSingleSlots, continueTarget, primaryAction, formatPlayTime} from './menu-state.js';
@@ -54,9 +55,9 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
         <details class="menu-training"><summary>当前关卡的阶段训练 <span>独立训练，不覆盖战役</span></summary><div id="menu-training-slot"></div></details>
       </section>
       <section class="menu-view menu-subpage" data-view="settings" aria-labelledby="menu-settings-title" hidden>
-        <div class="menu-page-heading"><div><p class="menu-eyebrow">PREFERENCES</p><h2 id="menu-settings-title" tabindex="-1">设置</h2></div><p>画面、操作与战斗难度，按你的习惯调整。</p></div>
+        <div class="menu-page-heading"><div><p class="menu-eyebrow">PREFERENCES</p><h2 id="menu-settings-title" tabindex="-1" data-i18n="settings.title">设置</h2></div><p>画面、操作与战斗难度，按你的习惯调整。</p></div>
         <div class="menu-settings-grid">
-          <section class="menu-settings-panel"><h3>${menuIcon('settings')} 画面与界面</h3>
+          <section class="menu-settings-panel"><h3>${menuIcon('settings')} <span data-i18n="settings.display">画面与界面</span></h3>
             <fieldset class="menu-quality"><legend>渲染质量</legend><div class="menu-quality-options">
               <label><input type="radio" name="menu-quality" value="0"><span>性能<small>更低渲染负载</small></span></label>
               <label><input type="radio" name="menu-quality" value="1"><span>均衡<small>推荐默认</small></span></label>
@@ -65,12 +66,14 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
             <div class="menu-motion-slot"></div><div class="menu-presentation-slot"></div>
             <p class="menu-setting-hint">画质与 HUD 偏好自动保存在当前浏览器；系统减少动态效果优先。</p>
           </section>
-          <section class="menu-settings-panel"><h3>${menuIcon('play')} 操作</h3><div class="menu-sensitivity-slot"></div><div id="menu-flight-pitch"></div><div id="menu-combat-difficulty"></div><h4>键位说明</h4><div class="menu-controls-slot"></div><p class="menu-setting-hint">进入战斗后锁定鼠标。按 Esc 暂停；无法锁定时可按住左键拖动瞄准。</p></section>
+          <section class="menu-settings-panel"><h3>${menuIcon('play')} <span data-i18n="settings.controls">操作</span></h3><div class="menu-sensitivity-slot"></div><div id="menu-flight-pitch"></div><div id="menu-combat-difficulty"></div><h4 data-i18n="settings.legend">键位说明</h4><div class="menu-controls-slot"></div><p class="menu-setting-hint">进入战斗后锁定鼠标。按 Esc 暂停；无法锁定时可按住左键拖动瞄准。</p><div id="menu-bindings"></div><div id="menu-gamepad"></div></section>
+          <section class="menu-settings-panel menu-a11y-panel" id="menu-a11y"></section>
+          <section class="menu-settings-panel menu-language-panel" id="menu-language"></section>
           <section class="menu-settings-panel menu-save-hub" id="menu-save-hub"></section>
-          <section class="menu-settings-panel menu-audio-panel"><h3>${menuIcon('play')} 声音</h3><div id="menu-audio"></div></section>
-          <section class="menu-settings-panel menu-telemetry-panel"><h3>${menuIcon('star')} 本地统计</h3><div id="menu-telemetry"></div></section>
+          <section class="menu-settings-panel menu-audio-panel"><h3>${menuIcon('play')} <span data-i18n="settings.audio">声音</span></h3><div id="menu-audio"></div></section>
+          <section class="menu-settings-panel menu-telemetry-panel"><h3>${menuIcon('star')} <span data-i18n="settings.telemetry">本地统计</span></h3><div id="menu-telemetry"></div></section>
         </div>
-        <div class="menu-page-bottom"><span>设置在当前界面直接生效</span><button type="button" data-back class="menu-secondary">完成设置 ${menuIcon('check')}</button></div>
+        <div class="menu-page-bottom"><span data-i18n="settings.live">设置在当前界面直接生效</span><button type="button" data-back class="menu-secondary">完成设置 ${menuIcon('check')}</button></div>
       </section>
       <section class="menu-view menu-context" data-view="context" aria-labelledby="menu-context-title" hidden>
         <div class="menu-context-copy"><p id="menu-context-kicker" class="menu-eyebrow"></p><h2 id="menu-context-title" tabindex="-1"></h2><p id="menu-context-description"></p><div id="menu-result-stats" class="menu-result-stats"></div><div id="menu-briefing" class="menu-briefing" hidden></div><ol id="menu-chapter-track" class="menu-chapter-track" aria-label="战役章节进度"></ol></div>
@@ -359,6 +362,12 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   bindSaveHub($('#menu-save-hub'), {records: createFlightRecordStore(), onChanged: () => { if (getSession().state !== 'playing') refresh(); }});
   bindTelemetrySetting($('#menu-telemetry'), window.neonTelemetry);
   bindAudioSettings($('#menu-audio'), window.neonAudio);
+  const t = (key, vars) => window.neonI18n ? window.neonI18n.t(key, vars) : key;
+  bindKeyBindings($('#menu-bindings'), window.neonInput?.bindings, {t});
+  bindGamepadStatus($('#menu-gamepad'), window.neonInput?.gamepad, {t});
+  bindAccessibilitySettings($('#menu-a11y'), window.neonA11y, {t});
+  bindLanguageSetting($('#menu-language'), window.neonI18n);
+  window.neonI18n?.apply(card); window.neonI18n?.onChange(() => window.neonI18n.apply(card));
   $('#menu-settings').addEventListener('click', () => show('settings'));
   $('#menu-back').addEventListener('click', back);
   card.querySelectorAll('[data-back]').forEach(button => button.addEventListener('click', back));

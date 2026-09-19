@@ -1,7 +1,7 @@
 // Local progress / score rules, not a server-verified leaderboard.
 import {flightRecordFromResult} from './flight-records-model.js';
 import {JOINT_STAGES} from './joint-mission.js';
-import {LIGHTHOUSE_STAGES,LIGHTHOUSE_SURVEYS} from './lighthouse-mission.js';
+import {LIGHTHOUSE_STAGES,LIGHTHOUSE_SURVEYS,LIGHTHOUSE_RULE,LIGHTHOUSE_CHECKPOINT_STAGES,validLighthouseCheckpoint,canonicalLighthouseCheckpoint,lighthouseCheckpointFromMission,lighthouseCheckpointLabel} from './lighthouse-mission.js';
 import {validCheckpoint,canonicalCheckpoint,checkpointFromMission,CHECKPOINT_STAGES} from './joint-checkpoint-model.js';
 import {validNavalCheckpoint,canonicalNavalCheckpoint,navalCheckpointFromMission,NAVAL_CHECKPOINT_STAGES,navalCheckpointLabel} from './naval-checkpoint-model.js';
 
@@ -14,7 +14,8 @@ export const EXPEDITION_MISSIONS=Object.freeze([
   {id:'naval',title:'南湾突围',rule:'naval-v1',selectable:true},
   {id:'recon',title:'回声航线',rule:'recon-v1',selectable:false},
   {id:'joint',title:'海空接力',rule:'joint-v1',selectable:false},
-  {id:'lighthouse',title:'灯塔岛登陆',rule:'lighthouse-v1',selectable:true}
+  // lighthouse-v1 (yacht return leg, no safe node) records stay valid for campaign progress but are grouped separately from v2 best times.
+  {id:'lighthouse',title:'灯塔岛登陆',rule:LIGHTHOUSE_RULE,legacyRules:['lighthouse-v1'],selectable:true}
 ].map(Object.freeze));
 export const EXPEDITION_TOTAL=EXPEDITION_MISSIONS.length;
 export const EXPEDITION_FINAL=8;// Planned campaign length; the title is only granted once all eight are wired.
@@ -24,7 +25,9 @@ const idOK=id=>typeof id==='string'&&/^[a-zA-Z0-9-]{16,96}$/.test(id);
 const timeOK=n=>Number.isSafeInteger(n)&&n>=0&&n<=8640000000000000;
 const clone=value=>JSON.parse(JSON.stringify(value));
 const missionById=id=>EXPEDITION_MISSIONS.find(m=>m.id===id);
-const nodeStages=id=>id==='naval'?NAVAL_CHECKPOINT_STAGES:id==='joint'?CHECKPOINT_STAGES:null;
+const nodeStages=id=>id==='naval'?NAVAL_CHECKPOINT_STAGES:id==='joint'?CHECKPOINT_STAGES:id==='lighthouse'?LIGHTHOUSE_CHECKPOINT_STAGES:null;
+const ruleOK=(mission,rule)=>rule===mission.rule||(mission.legacyRules||[]).includes(rule);
+const difficultyNode=id=>id==='naval'||id==='lighthouse';
 export const expeditionDifficulty=(mission,difficulty)=>mission.selectable?difficulty:'fixed';
 let serial=0;
 export const newExpeditionId=()=>globalThis.crypto?.randomUUID?.()||`exp-${Date.now()}-${++serial}-${Math.random().toString(36).slice(2).padEnd(12,'0')}`;
@@ -33,7 +36,7 @@ export const nextExpeditionMission=a=>a?.campaign?EXPEDITION_MISSIONS[a.campaign
 
 export function validExpeditionRecord(r){
   const mission=missionById(r?.mission);
-  if(!mission||!idOK(r.id)||!idOK(r.campaignId)||r.rule!==mission.rule||
+  if(!mission||!idOK(r.id)||!idOK(r.campaignId)||!ruleOK(mission,r.rule)||
     !(mission.selectable?choices.includes(r.difficulty):r.difficulty==='fixed')||
     !Number.isSafeInteger(r.elapsedMs)||r.elapsedMs<=0||r.elapsedMs>86400000||
     (r.mission==='recon'&&r.elapsedMs>300000)||!timeOK(r.completedAt))return false;
@@ -44,17 +47,17 @@ export function validExpeditionRecord(r){
 }
 export function validExpeditionCheckpoint(c){
   if(!c||!idOK(c.campaignId)||!idOK(c.attemptId)||!nodeStages(c.mission)||typeof c.node?.stage!=='string')return false;
-  return (c.mission==='naval'?validNavalCheckpoint(c.node):validCheckpoint(c.node))&&c.node.elapsedMs<86400000;
+  return (c.mission==='naval'?validNavalCheckpoint(c.node):c.mission==='lighthouse'?validLighthouseCheckpoint(c.node):validCheckpoint(c.node))&&c.node.elapsedMs<86400000;
 }
 export function canonicalExpeditionCheckpoint(c){
   return c===null?null:{campaignId:c.campaignId,attemptId:c.attemptId,mission:c.mission,
-    node:c.mission==='naval'?canonicalNavalCheckpoint(c.node):canonicalCheckpoint(c.node)};
+    node:c.mission==='naval'?canonicalNavalCheckpoint(c.node):c.mission==='lighthouse'?canonicalLighthouseCheckpoint(c.node):canonicalCheckpoint(c.node)};
 }
 export const expeditionCheckpointRank=c=>Object.keys(nodeStages(c.mission)||{}).indexOf(c.node.stage);
-export const expeditionCheckpointLabel=c=>c.mission==='naval'?navalCheckpointLabel(c.node):CHECKPOINT_STAGES[c.node.stage];
+export const expeditionCheckpointLabel=c=>c.mission==='naval'?navalCheckpointLabel(c.node):c.mission==='lighthouse'?lighthouseCheckpointLabel(c.node):CHECKPOINT_STAGES[c.node.stage];
 function matchesCheckpoint(c,campaign,next){
   return validExpeditionCheckpoint(c)&&!!campaign&&c.campaignId===campaign.id&&c.mission===next?.id&&
-    (c.mission!=='naval'||c.node.difficulty===campaign.difficulty);
+    (!difficultyNode(c.mission)||c.node.difficulty===campaign.difficulty);
 }
 export function validExpedition(a,allowUndo=true){
   if(!a||![1,EXPEDITION_SCHEMA].includes(a.schema)||a.rule!==EXPEDITION_RULE||!Array.isArray(a.records)||
@@ -99,9 +102,9 @@ export function newExpeditionCampaign(a,difficulty,id=newExpeditionId()){
 export function expeditionCheckpointFromMission(attempt,m,now=Date.now()){
   if(!attempt||typeof attempt.fromStart!=='boolean'||!nodeStages(attempt.mission)||m?.status!=='active'||(m.recovered===true)!==!attempt.fromStart)return null;
   if(!attempt.fromStart&&(!validExpeditionCheckpoint(attempt.resume)||attempt.resume.campaignId!==attempt.campaignId||attempt.resume.mission!==attempt.mission))return null;
-  const node=attempt.mission==='naval'?navalCheckpointFromMission(m,now):checkpointFromMission(m,now);
+  const node=attempt.mission==='naval'?navalCheckpointFromMission(m,now):attempt.mission==='lighthouse'?lighthouseCheckpointFromMission(m,now):checkpointFromMission(m,now);
   const c={campaignId:attempt.campaignId,attemptId:attempt.id,mission:attempt.mission,node};
-  return validExpeditionCheckpoint(c)&&(c.mission!=='naval'||node.difficulty===attempt.difficulty)?canonicalExpeditionCheckpoint(c):null;
+  return validExpeditionCheckpoint(c)&&(!difficultyNode(c.mission)||node.difficulty===attempt.difficulty)?canonicalExpeditionCheckpoint(c):null;
 }
 export function saveExpeditionCheckpoint(a,c){
   if(!validExpedition(a)||!matchesCheckpoint(c,a.campaign,nextExpeditionMission(a)))return null;
@@ -115,7 +118,7 @@ export function expeditionRecordFromMission(attempt,m,extra={},now=Date.now()){
   const resumed=attempt.fromStart===false,c=attempt.resume;
   if(resumed){
     if(!validExpeditionCheckpoint(c)||c.campaignId!==attempt.campaignId||c.mission!==spec.id||m.recovered!==true||
-      (spec.id==='naval'&&c.node.difficulty!==attempt.difficulty)||m.elapsed*1000<c.node.elapsedMs)return null;
+      (difficultyNode(spec.id)&&c.node.difficulty!==attempt.difficulty)||m.elapsed*1000<c.node.elapsedMs)return null;
   }else if(attempt.fromStart!==true||m.recovered===true)return null;
   if(spec.id==='escort'){
     if(m.profile?.id!==attempt.difficulty||m.truck?.arrived!==true||!(m.truck.hull>0)||!(extra.roverHull>0)||

@@ -90,6 +90,13 @@
 - 新模块 `interaction-rules.js` / `interaction-world.js` / `interaction-layouts.js`：每章两座可按住 E 的基座——排气阀（1.5s 启动、5s 半径 3.2m 云：敌人半速且不能预警、6 HP/s、12s 充压）与照明开关（0.6s 切换：黑暗中远程射程 ×0.65、潜行者/猎犬 ×1.25，可恢复）。九章各有主题命名与经约束校验的摆位。
 - 451/451 check、105/105 rules、41/41 integration；`test-interactions-browser` 九章真实页面原生 E 通过，诊断 0。摆位/忙碌/灯光基准三类首版失败已记录并修正。详见 `docs/mcp-p1-environment.md`。下一批：P2 天气 / 击杀表现 / 过场。
 
+### P3 交付：直升机并入试验区 · 第 5 关直升机撤离与安全节点（2026-09-19）
+
+- 直升机成为 `vehicle.html` 第四种载具（新 `helicopter-field.js` / `helipad-world.js`，复用 `helicopter-rules.js` 物理，新增场地适配 `siteGround/forbidden`）：岸边停机坪出生、E 侧门上机、I 启停、Shift/Ctrl 升降、只能在陆地 / 码头 / 灯塔岛着陆，落水即坠毁；独立页 `helicopter.html` 7 条测试不变。
+- 第 5 关升为 `lighthouse-v2` 十阶段：三处清点后登直升机 → 离地 8 m → 飞往岸边停机坪 → 平稳着陆熄火；第三处清点完成写入“灯塔停机坪”安全节点，“从安全节点继续”对第 5 关生效（恢复记为检查点继续）。旧 v1 成绩经 `legacyRules` 仍可读。
+- 478/478 check、112/112 rules、42/42 integration，诊断 0；`test-expedition-browser`（含节点保存 / 失败保留 / 恢复 / 检查点通关）、新 `test-helicopter-field-browser`、smoke 15/15 串行通过。
+- 未做：第 6–8 关、吊运 / 武装、直升机专属音频、机体与步行碰撞、真人手感验收。详见 `docs/mcp-p3-helicopter-field.md`。
+
 ### P6 交付：键位重绑 / 手柄 / 辅助功能 / i18n 骨架（2026-09-19）
 
 - 新 `input-bindings.js`：19 个动作可重绑（交换语义、保留键/锁定动作、`neon-eclipse.bindings.v1` 仅存覆盖）；标准布局手柄映射与边沿检测。`app.js` 所有硬编码 `e.code` 改走 `bindings.is/held`，`pollGamepad()` 把手柄按键合成为当前主键的键盘事件，因此手柄自动跟随重绑。

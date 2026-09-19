@@ -18,9 +18,11 @@ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const axis=n=>typeof n==='number'&&Number.isFinite(n)?clamp(n,-1,1):0;
 const smooth=(a,b,k,h)=>a+(b-a)*(1-Math.exp(-k*h));
 export const helicopterSpeed=s=>Math.hypot(s.vx,s.vz);
-export function createHelicopter(){
-  const pad=HELICOPTER_SITE.pads[0];
-  return {x:pad.x,y:0,z:pad.z,vx:0,vy:0,vz:0,yaw:0,yawRate:0,pitch:0,roll:0,
+// Optional site.ground(x,z) gives a world ground height (default 0) so the same craft flies over the vehicle field's island / terrain.
+export const siteGround=(site,x,z)=>typeof site?.ground==='function'?site.ground(x,z):0;
+export function createHelicopter(spawn=null){
+  const pad=spawn||HELICOPTER_SITE.pads[0];
+  return {x:pad.x,y:pad.y||0,z:pad.z,vx:0,vy:0,vz:0,yaw:0,yawRate:0,pitch:0,roll:0,
     rpm:0,collective:0,rotorAngle:0,powered:false,grounded:true,status:'ready',reason:'',
     elapsed:0,distance:0,landings:0,remainder:0};
 }
@@ -29,7 +31,7 @@ function fail(s,reason){s.status='crashed';s.reason=reason;s.powered=false;s.vx=
 function obstructed(s,site){
   const r=HELICOPTER.radius;
   if(Math.abs(s.x)+r>site.bounds||Math.abs(s.z)+r>site.bounds)return '越出试飞边界';
-  if(s.y+HELICOPTER.height>site.ceiling)return '触及 65 m 安全空域上限';
+  if(s.y+HELICOPTER.height>site.ceiling)return '触及 '+site.ceiling+' m 安全空域上限';
   return site.obstacles.find(b=>s.x+r>b.minX&&s.x-r<b.maxX&&s.z+r>b.minZ&&s.z-r<b.maxZ&&
     s.y+HELICOPTER.height>b.minY&&s.y-helicopterSkidClearance(s)<b.maxY)?.id||null;
 }
@@ -52,7 +54,8 @@ function integrate(s,input,h,site){
   s.yaw=Math.atan2(Math.sin(s.yaw+s.yawRate*h),Math.cos(s.yaw+s.yawRate*h));
   let verticalTarget=brake?0:lift*(lift>=0?HELICOPTER.climb:HELICOPTER.descent);
   // Beginner landing assist is a velocity target, not teleportation or a ground snap from the air.
-  if(s.y<4&&verticalTarget<0)verticalTarget=Math.max(verticalTarget,-HELICOPTER.landingDescent);
+  const groundBefore=siteGround(site,s.x,s.z);
+  if(s.y-groundBefore<4&&verticalTarget<0)verticalTarget=Math.max(verticalTarget,-HELICOPTER.landingDescent);
   const up=Math.cos(s.pitch)*Math.cos(s.roll);
   const desired=(HELICOPTER.gravity+(verticalTarget-s.vy)*3.5)/(HELICOPTER.lift*Math.max(.01,s.rpm*s.rpm)*up);
   const collective=wasGrounded&&(lift<=0||brake)?0:clamp(desired,0,1);
@@ -64,17 +67,17 @@ function integrate(s,input,h,site){
   s.vz+=(-f*Math.cos(s.yaw)+r*Math.sin(s.yaw)-s.vz*drag)*h;
   s.vy+=(thrust*up-HELICOPTER.gravity-.12*s.vy)*h;
   s.x+=s.vx*h;s.z+=s.vz*h;s.y+=s.vy*h;
-  const skidClearance=helicopterSkidClearance(s);
-  if(s.y<=skidClearance){
+  const skidClearance=helicopterSkidClearance(s),ground=siteGround(site,s.x,s.z);
+  if(s.y-ground<=skidClearance){
     const hard=!wasGrounded&&(s.vy< -HELICOPTER.landingVertical||helicopterSpeed(s)>HELICOPTER.landingHorizontal||
       Math.max(Math.abs(s.pitch),Math.abs(s.roll))>HELICOPTER.landingTilt);
-    s.y=skidClearance;s.grounded=true;
+    s.y=ground+skidClearance;s.grounded=true;
     if(hard){fail(s,'硬着陆：需先稳定姿态、降低水平与下降速度');return;}
-    if(!wasGrounded)s.landings++;
-    s.y=0;s.vx=s.vy=s.vz=0;s.pitch=s.roll=s.yawRate=0;
+    if(!wasGrounded){const bad=typeof site.forbidden==='function'?site.forbidden(s.x,s.z):null;if(bad){fail(s,bad);return;}s.landings++;}
+    s.y=ground;s.vx=s.vy=s.vz=0;s.pitch=s.roll=s.yawRate=0;
   }else s.grounded=false;
   const contact=obstructed(s,site);
-  if(contact){s.x=old.x;s.y=Math.max(0,old.y);s.z=old.z;fail(s,['hangar','tower','cargo'].includes(contact)?'机体 / 旋翼安全包络碰撞：'+({hangar:'维修库',tower:'观察塔',cargo:'货箱'}[contact]):contact);return;}
+  if(contact){s.x=old.x;s.y=Math.max(siteGround(site,old.x,old.z),old.y);s.z=old.z;fail(s,['hangar','tower','cargo'].includes(contact)?'机体 / 旋翼安全包络碰撞：'+({hangar:'维修库',tower:'观察塔',cargo:'货箱'}[contact]):contact);return;}
   s.distance+=Math.hypot(s.x-old.x,s.y-old.y,s.z-old.z);
   s.rotorAngle=(s.rotorAngle+s.rpm*42*h)%(Math.PI*2);
 }

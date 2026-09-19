@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {EXPEDITION_MISSIONS,emptyExpedition,validExpedition,validExpeditionRecord,newExpeditionCampaign,
-  expeditionRecordFromMission,advanceExpedition,summarizeExpedition,newExpeditionId} from './expedition-model.js';
+  expeditionRecordFromMission,advanceExpedition,summarizeExpedition,newExpeditionId,canonicalExpedition} from './expedition-model.js';
 import {createExpeditionSession} from './expedition-session.js';
 import {createExpeditionStore} from './expedition-store.js';
 import {createEscort} from './escort-rules.js';
@@ -8,7 +8,7 @@ import {createNavalRun} from './naval-checkpoint-model.js';
 import {createYacht} from './maritime-rules.js';
 import {createFlightMission} from './flight-mission.js';
 import {createJointMission,JOINT_STAGES} from './joint-mission.js';
-import {createLighthouseMission,LIGHTHOUSE_STAGES} from './lighthouse-mission.js';
+import {createLighthouseMission,LIGHTHOUSE_STAGES,LIGHTHOUSE_RULE} from './lighthouse-mission.js';
 
 // Native-shaped end-state fixtures exercise score eligibility, not human gameplay completion.
 function won(id,difficulty='normal'){
@@ -66,6 +66,11 @@ for(const spec of EXPEDITION_MISSIONS)second=advanceExpedition(second,score(seco
 const rows=summarizeExpedition(second);assert.equal(rows.find(r=>r.mission==='escort'&&r.difficulty==='hard').count,1);assert.equal(rows.find(r=>r.mission==='escort'&&r.difficulty==='easy').count,1);assert.equal(rows.find(r=>r.mission==='recon').count,2);
 assert.equal(second.records.length,10);assert.equal(rows.find(r=>r.mission==='lighthouse'&&r.difficulty==='easy').count,1);assert.equal(rows.find(r=>r.mission==='lighthouse'&&r.difficulty==='hard').count,1);
 assert.equal(score(second,'lighthouse',won('lighthouse','hard')),null,'fifth mission difficulty is locked to the campaign');assert.throws(()=>summarizeExpedition({schema:2}));
+// lighthouse-v1 archives (yacht return, pre-helicopter) remain readable and count for progress; v2 is the rule new records carry.
+assert.equal(LIGHTHOUSE_RULE,'lighthouse-v2');const v1Rec=second.records.find(r=>r.mission==='lighthouse');assert.equal(v1Rec.rule,'lighthouse-v2');
+const legacy=canonicalExpedition(second);legacy.records=legacy.records.map(r=>r.mission==='lighthouse'?{...r,rule:'lighthouse-v1'}:r);assert(validExpedition(legacy),'v1 lighthouse record still valid');
+assert(!validExpedition({...legacy,records:legacy.records.map(r=>r.mission==='lighthouse'?{...r,rule:'lighthouse-v0'}:r)}),'unknown rule rejected');
+assert.equal(summarizeExpedition(legacy).find(r=>r.mission==='lighthouse'&&r.difficulty==='easy').count,0,'v1 times are not mixed into v2 best times');
 
 const copy=x=>JSON.parse(JSON.stringify(x));
 function memoryStore(){

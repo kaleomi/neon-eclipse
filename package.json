@@ -12,6 +12,8 @@
     "test:integration": "node scripts/run-tests.mjs --layer integration",
     "test:browser": "node scripts/run-tests.mjs --layer browser",
     "test:browser:smoke": "node test-smoke-browser.mjs",
+    "test:helicopter-field": "node test-helicopter-field.mjs",
+    "test:browser:helicopter-field": "node test-helicopter-field-browser.mjs",
     "test:all": "node scripts/run-tests.mjs --layer all",
     "test:ci": "node scripts/run-tests.mjs --layer check && node scripts/run-tests.mjs --layer rules && node scripts/run-tests.mjs --layer integration",
     "test:list": "node scripts/run-tests.mjs --list --layer all",

@@ -7,6 +7,7 @@ import {createExpeditionBackup,makeExpeditionBundle,parseExpeditionBundle} from 
 import {createNavalRun,restoreNavalCheckpoint} from './naval-checkpoint-model.js';
 import {createJointMission,JOINT_STAGES} from './joint-mission.js';
 import {restoreJointCheckpoint} from './joint-checkpoint-model.js';
+import {createLighthouseMission,restoreLighthouseCheckpoint,LIGHTHOUSE_STAGES} from './lighthouse-mission.js';
 import {createYacht} from './maritime-rules.js';
 const copy=x=>JSON.parse(JSON.stringify(x));
 function archive(count=1){
@@ -15,13 +16,14 @@ function archive(count=1){
   return a;
 }
 function native(id){
-  const m=id==='naval'?createNavalRun(createYacht(),'hard'):createJointMission(true);m.elapsed=20;
-  if(id==='naval')m.index=1;else{m.stage='drive';m.completed=['pickup'];}return m;
+  const m=id==='naval'?createNavalRun(createYacht(),'hard'):id==='lighthouse'?createLighthouseMission('hard',true):createJointMission(true);m.elapsed=20;
+  if(id==='naval')m.index=1;else if(id==='lighthouse'){m.stage='heli';m.surveys=3;m.completed=LIGHTHOUSE_STAGES.slice(0,6);}else{m.stage='drive';m.completed=['pickup'];}return m;
 }
-function at(a,id){return {id:newExpeditionId(),campaignId:a.campaign.id,mission:id,difficulty:id==='naval'?'hard':'fixed',fromStart:true};}
+function at(a,id){return {id:newExpeditionId(),campaignId:a.campaign.id,mission:id,difficulty:id==='naval'||id==='lighthouse'?'hard':'fixed',fromStart:true};}
 function win(m,id){
   Object.assign(m,{status:'won',elapsed:45});
   if(id==='naval'){Object.assign(m,{index:3,escaped:true,complete:true,remaining:100});m.naval.members.forEach(x=>x.escaped=true);}
+  else if(id==='lighthouse'){m.stage='complete';m.completed=[...LIGHTHOUSE_STAGES];m.surveys=3;}
   else{m.stage='complete';m.completed=[...JOINT_STAGES];m.flightId=newExpeditionId();}return m;
 }
 function store(initial=archive()){
@@ -37,14 +39,14 @@ function store(initial=archive()){
 const current=archive(2),legacy={schema:1,rule:current.rule,campaign:current.campaign,records:current.records},raw=JSON.stringify(legacy);
 assert(validExpedition(legacy));const migrated=canonicalExpedition(legacy);assert.equal(migrated.schema,2);assert.equal(migrated.checkpoint,null);assert.equal(migrated.undo,null);assert.deepEqual(migrated.records,current.records);assert.equal(JSON.stringify(legacy),raw);
 assert(!validExpedition({...current,schema:99}));assert(!validExpedition({...current,checkpoint:undefined}));assert(!validExpedition({...current,undo:{archive:current}}));
-for(const id of ['naval','joint']){
-  let a=archive(id==='naval'?1:3);const owned=at(a,id),m=native(id),node=expeditionCheckpointFromMission(owned,m,100);
+for(const id of ['naval','joint','lighthouse']){
+  let a=archive(id==='naval'?1:id==='joint'?3:4);const owned=at(a,id),m=native(id),node=expeditionCheckpointFromMission(owned,m,100);
   assert(node);assert.equal(expeditionCheckpointFromMission({...owned,fromStart:undefined},m),null);
   assert.equal(saveExpeditionCheckpoint(a,{...node,node:{...node.node,stage:[node.node.stage]}}),null);
   a=saveExpeditionCheckpoint(a,node);assert(validExpedition(a));assert.equal(node.campaignId,a.campaign.id);
   for(const bad of [{...node,campaignId:newExpeditionId()},{...node,mission:'recon'},{...node,node:{...node.node,stage:'constructor'}},{...node,node:{...node.node,elapsedMs:NaN}}])assert.equal(saveExpeditionCheckpoint(a,bad),null);
-  if(id==='naval')assert.equal(saveExpeditionCheckpoint(a,{...node,node:{...node.node,difficulty:'easy'}}),null);
-  const restored=id==='naval'?restoreNavalCheckpoint(node.node).task:restoreJointCheckpoint(node.node).mission;
+  if(id==='naval'||id==='lighthouse')assert.equal(saveExpeditionCheckpoint(a,{...node,node:{...node.node,difficulty:'easy'}}),null);
+  const restored=id==='naval'?restoreNavalCheckpoint(node.node).task:id==='lighthouse'?restoreLighthouseCheckpoint(node.node).mission:restoreJointCheckpoint(node.node).mission;
   win(restored,id);const resumed={...owned,id:newExpeditionId(),fromStart:false,resume:node};
   const r=expeditionRecordFromMission(resumed,restored);assert(r?.resumed);assert.equal(r.schema,2);
   assert.equal(expeditionRecordFromMission({...resumed,resume:null},restored),null);
@@ -53,11 +55,11 @@ for(const id of ['naval','joint']){
   assert.equal(expeditionRecordFromMission(resumed,{...restored,recovered:false}),null);
   assert.equal(expeditionRecordFromMission(resumed,{...restored,elapsed:10}),null);
   const done=advanceExpedition(a,r);assert(validExpedition(done));assert.equal(done.checkpoint,null);
-  const row=summarizeExpedition(done).find(x=>x.mission===id&&x.difficulty===(id==='naval'?'hard':'fixed'));
+  const row=summarizeExpedition(done).find(x=>x.mission===id&&x.difficulty===(id==='naval'||id==='lighthouse'?'hard':'fixed'));
   assert.equal(row.count,0);assert.equal(row.bestMs,null);assert.equal(row.resumedCount,1);
   assert(!validExpedition({...done,schema:1}),'legacy schema must not accept resumed records');
 }
-console.log('PASS migration, campaign/mission/difficulty/node binding, native recovered evidence, honest separate scores and atomic node retirement');
+console.log('PASS migration, campaign/mission/difficulty/node binding (naval, joint, lighthouse helipad node), native recovered evidence, honest separate scores and atomic node retirement');
 
 // Checkpoint writes and a finish can overlap. A later result must reduce on committed state, never disappear.
 for(const fault of ['delayed','quota']){

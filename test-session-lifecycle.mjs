@@ -24,7 +24,7 @@ function fixture(){
   joint:{status:'idle'},chase:{status:'idle'},sortie:{status:'idle'},escort:{status:'idle'},lighthouse:{status:'idle'},rover:{speed:0},plane:{speed:0,yaw:0},yacht:{speed:0},
   roofGun:createWeaponState('roof'),planeGun:createWeaponState('plane'),wear:{rover:{hull:100},yacht:{hull:100}},player:{x:7,z:8},
   TEST_SPAWN:{x:0,z:0},createRover:()=>({speed:0}),createPlane:()=>({speed:0,yaw:0}),createYacht:()=>({speed:0}),
-  createJointMission:active=>({status:active?'active':'idle',runId:'joint-'+ ++serial}),createFlightMission:()=>({status:'idle'}),createSeaChase:()=>({status:'idle'}),createEscort:()=>({status:'idle'}),createLighthouseMission:()=>({status:'idle'}),
+  createJointMission:active=>({status:active?'active':'idle',runId:'joint-'+ ++serial}),createFlightMission:()=>({status:'idle'}),createSeaChase:()=>({status:'idle'}),createEscort:()=>({status:'idle'}),createLighthouseMission:()=>({status:'idle'}),heli:{status:'ready'},parkHelicopter(){},HELI_PADS:{shore:{}},
   createDriveTrial:()=>({index:0,elapsed:0}),createDurability:()=>({hull:100}),createWeaponState,
   createNavalRun:(_boat,difficulty='normal',runId='naval-'+ ++serial)=>({status:'active',runId,naval:{profile:{id:difficulty}}}),selectedNavalDifficulty:()=> 'normal',
   checkpointUI:{async begin(){return true;}},navalCheckpointUI:{async begin(){return true;}},setGunner(v){c.gunner=v;},

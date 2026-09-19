@@ -1,0 +1,60 @@
+// Optional browser regression: the helicopter as the fourth field vehicle on vehicle.html.
+// Real key input drives boarding, engine start, lift-off, landing and exit; only the walk to the pad is shortened via a fixture hook.
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import assert from 'node:assert/strict';
+const {chromium}=await import(process.env.VEHICLE_PLAYWRIGHT_MODULE||'playwright');
+const shots=process.env.VEHICLE_SCREENSHOT_DIR||fs.mkdtempSync(path.join(os.tmpdir(),'neon-heli-field-'));
+fs.mkdirSync(shots,{recursive:true});
+const url=process.env.VEHICLE_TEST_URL||'http://127.0.0.1:5173/vehicle.html';
+const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const context=await browser.newContext({viewport:{width:1280,height:800}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.route('**/vehicle-app.js',async route=>{
+ const body=await (await route.fetch()).text();
+ const hook=`\nwindow.__heliFixture={async walkToPad(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;},heli:()=>({x:heli.x,y:heli.y,z:heli.z,status:heli.status,powered:heli.powered,grounded:heli.grounded,rpm:heli.rpm}),player:()=>({...player})};`;
+ route.fulfill({body:body+hook,headers:{'content-type':'text/javascript'}});
+});
+await page.goto(url);await page.waitForSelector('#vehicle-scene canvas');
+await page.evaluate(()=>{localStorage.setItem('neon-eclipse.journey.v6','sentinel-journey');});
+await page.click('#resume-drive');await page.waitForFunction(()=>document.body.dataset.driveActive==='true');
+assert.equal(await page.getAttribute('body','data-heli-status'),'ready','helicopter cold and ready at the shore pad on boot');
+const spawn=await page.evaluate(()=>window.__heliFixture.heli());assert(Math.hypot(spawn.x-196,spawn.z-120)<.5,'shore pad position '+JSON.stringify(spawn));
+// Walk (teleported) to the side door, board with E.
+await page.evaluate(()=>window.__heliFixture.walkToPad());await page.waitForTimeout(200);await page.keyboard.press('KeyE');
+await page.waitForFunction(()=>document.body.dataset.vehicleKind==='helicopter');
+assert.equal(await page.locator('#drive-mode').textContent(),'AIR / 直升机');
+await page.screenshot({path:`${shots}/heli-boarded.png`});
+// Engine off: Shift does nothing; exit allowed while cold.
+await page.keyboard.down('ShiftLeft');await page.waitForTimeout(600);await page.keyboard.up('ShiftLeft');
+assert.equal(await page.getAttribute('body','data-heli-grounded'),'true','no lift without the engine');
+assert.equal(await page.getAttribute('body','data-heli-powered'),'false');
+// Start the engine (I), spool up, lift with Shift.
+await page.keyboard.press('KeyI');await page.waitForFunction(()=>document.body.dataset.heliPowered==='true');
+await page.keyboard.press('KeyE');assert.equal(await page.getAttribute('body','data-vehicle-kind'),'helicopter','cannot exit with the engine running');
+await page.keyboard.down('ShiftLeft');await page.waitForFunction(()=>document.body.dataset.heliGrounded==='false',{},{timeout:30000});
+await page.waitForFunction(()=>Number(document.body.dataset.heliY)>4,{},{timeout:30000});await page.keyboard.up('ShiftLeft');
+await page.screenshot({path:`${shots}/heli-airborne.png`});
+const air=await page.evaluate(()=>window.__heliFixture.heli());assert(air.y>4&&air.status==='running'&&!air.grounded,'airborne '+JSON.stringify(air));
+assert.equal(await page.getAttribute('body','data-vehicle-kind'),'helicopter');
+// Hold Space (brake) then descend gently with Ctrl; expect a landing, not a crash.
+await page.keyboard.down('Space');await page.waitForTimeout(800);await page.keyboard.up('Space');
+await page.keyboard.down('ControlLeft');await page.waitForFunction(()=>document.body.dataset.heliGrounded==='true',{},{timeout:45000});await page.keyboard.up('ControlLeft');
+const down=await page.evaluate(()=>window.__heliFixture.heli());assert.notEqual(down.status,'crashed','gentle descent lands: '+JSON.stringify(down));
+// Shut down, exit on foot.
+await page.keyboard.press('KeyI');await page.waitForFunction(()=>document.body.dataset.heliPowered==='false');
+await page.waitForFunction(()=>window.__heliFixture.heli().rpm<.08,{},{timeout:45000});
+const cold=await page.evaluate(()=>window.__heliFixture.heli());await page.keyboard.press('KeyE');
+try{await page.waitForFunction(()=>document.body.dataset.vehicleKind==='walking',{},{timeout:15000});}catch(e){throw new Error('exit failed: '+JSON.stringify(cold)+' hint='+await page.locator('#drive-message').textContent().catch(()=>'?')+' '+errors.join('|'));}
+await page.screenshot({path:`${shots}/heli-exit.png`});
+// Recovery from the pause overlay parks the helicopter back on the shore pad.
+await page.keyboard.press('Escape');await page.click('#recover-drive');await page.click('#recover-drive');await page.click('#resume-drive');await page.waitForFunction(()=>document.body.dataset.driveActive==='true');
+const parked=await page.evaluate(()=>window.__heliFixture.heli());assert(Math.hypot(parked.x-196,parked.z-120)<.5&&parked.status==='ready'&&!parked.powered,'recovered to shore pad '+JSON.stringify(parked));
+// Lighthouse standalone start parks the helicopter on the island pad, cold.
+await page.keyboard.press('Escape');await page.click('#start-lighthouse');await page.click('#start-lighthouse');
+await page.waitForFunction(()=>document.body.dataset.lighthouseStatus==='active'&&document.body.dataset.driveActive==='true');
+const island=await page.evaluate(()=>window.__heliFixture.heli());assert(Math.hypot(island.x-512,island.z-252)<.5&&island.powered===false,'island pad '+JSON.stringify(island));
+assert.equal(await page.getAttribute('body','data-lighthouse-stage'),'board');
+assert.deepEqual(errors,[],'no page errors');
+await browser.close();
+console.log('PASS: helicopter field browser — shore pad spawn, door boarding, cold-engine gate, I engine toggle, Shift lift-off, Ctrl landing, shutdown/exit, recovery park, lighthouse island pad. Screenshots: '+shots);

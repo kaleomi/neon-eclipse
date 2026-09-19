@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
-import {createLighthouseMission,stepLighthouseMission,lighthouseGoal,lighthouseBoardAllowed,lighthouseSummary,onIslandTop,onPier,
-  LIGHTHOUSE_POINTS,LIGHTHOUSE_STAGES,LIGHTHOUSE_PROFILES,normalizeLighthouse} from './lighthouse-mission.js';
+import {createLighthouseMission,stepLighthouseMission,lighthouseGoal,lighthouseBoardAllowed,lighthouseExitAllowed,lighthouseSummary,onIslandTop,onPier,onIslandHelipad,
+  LIGHTHOUSE_POINTS,LIGHTHOUSE_STAGES,LIGHTHOUSE_PROFILES,LIGHTHOUSE_RULE,ISLAND_HELIPAD,SHORE_HELIPAD,normalizeLighthouse,
+  lighthouseCheckpointFromMission,validLighthouseCheckpoint,restoreLighthouseCheckpoint,canonicalLighthouseCheckpoint} from './lighthouse-mission.js';
+import {createFieldHelicopter,FIELD_HELI_SITE,HELI_PADS} from './helicopter-field.js';
+import {stepHelicopter} from './helicopter-rules.js';
 import {createYacht,stepYacht,yachtFree,yachtExit,canBoardYacht,isFootSurface,footHeight,waterFree,FIELD_BUILDINGS,LIGHTHOUSE_ISLAND,LIGHTHOUSE_LANDING,ISLAND_PIER,YACHT_SPAWN} from './maritime-rules.js';
 import {CollisionGrid,walkPlayer,createRover} from './vehicle-rules.js';
 import {expeditionRecordFromMission,newExpeditionId} from './expedition-model.js';
@@ -30,7 +33,7 @@ assert(onIslandTop(player.x,player.z),'walked onto island top '+JSON.stringify(p
 assert.equal(footHeight(player.x,player.z),I.h);
 
 // Mission lifecycle at 120 Hz with synthetic-but-consistent inputs.
-const m=createLighthouseMission('hard',true),s={kind:null,player:{x:200,z:180,yaw:0},yacht:createYacht(),action:false};
+const m=createLighthouseMission('hard',true),s={kind:null,player:{x:200,z:180,yaw:0},yacht:createYacht(),heli:createFieldHelicopter(HELI_PADS.island),action:false};
 const hold=(n=1)=>{let changed=false;for(let i=0;i<Math.round(120*n);i++)changed=stepLighthouseMission(m,s,1/120)||changed;return changed;};
 assert.equal(m.profile.id,'hard');assert.equal(m.stage,'board');assert.equal(lighthouseBoardAllowed(m,'rover'),false);assert.equal(lighthouseBoardAllowed(m,'yacht'),true);
 assert.equal(lighthouseGoal(m,s).x,218,'walk to gangway entrance first');s.player={x:270,z:180};assert.equal(lighthouseGoal(m,s).name,LIGHTHOUSE_POINTS.board.name);
@@ -41,9 +44,24 @@ s.player={x:0,z:0};s.kind=null;hold(.1);assert.equal(m.stage,'land','must be on 
 s.player={...LIGHTHOUSE_POINTS['survey-1']};hold(.5);assert.equal(m.stage,'survey-1','needs F');s.action=true;hold(1.5);assert.equal(m.stage,'survey-1','hard holds 2 s');assert(m.hold>1.4);s.action=false;hold(.1);assert.equal(m.hold,0,'hold resets');
 s.action=true;hold(2.1);assert.equal(m.stage,'survey-2');assert.equal(m.surveys,1);
 s.player={...LIGHTHOUSE_POINTS['survey-3']};hold(2.1);assert.equal(m.stage,'survey-2','order is enforced');
-s.player={...LIGHTHOUSE_POINTS['survey-2']};hold(2.1);s.player={...LIGHTHOUSE_POINTS['survey-3']};hold(2.1);assert.equal(m.stage,'reboard');assert.equal(m.surveys,3);
-s.action=false;s.kind='yacht';hold(.05);assert.equal(m.stage,'return');
-Object.assign(s.yacht,YACHT_SPAWN,{speed:0});hold(.5);assert.equal(m.stage,'return','must disembark');s.kind=null;s.player={x:272,z:180};hold(.05);
+s.player={...LIGHTHOUSE_POINTS['survey-2']};hold(2.1);s.player={...LIGHTHOUSE_POINTS['survey-3']};hold(2.1);assert.equal(m.stage,'heli');assert.equal(m.surveys,3);
+// Safe node exists exactly here (three surveys, before boarding); yacht may no longer be boarded, helicopter may.
+assert.equal(lighthouseBoardAllowed(m,'yacht'),false);assert.equal(lighthouseBoardAllowed(m,'helicopter'),true);assert.equal(lighthouseBoardAllowed(m,'rover'),false);
+const node=lighthouseCheckpointFromMission(m,123);assert(node&&validLighthouseCheckpoint(node));assert.equal(node.rule,LIGHTHOUSE_RULE);assert.equal(node.difficulty,'hard');assert.equal(node.stage,'heli');
+assert.equal(lighthouseCheckpointFromMission({...m,stage:'survey-3'}),null,'no node before the third survey');assert.equal(lighthouseCheckpointFromMission({...m,stage:'lift'}),null,'no node after boarding');
+assert(!validLighthouseCheckpoint({...node,elapsedMs:LIGHTHOUSE_PROFILES.hard.timeLimit*1000}),'node past time limit rejected');assert(!validLighthouseCheckpoint({...node,rule:'lighthouse-v1'}));
+assert.deepEqual(canonicalLighthouseCheckpoint({...node,extra:1}),node);
+s.action=false;s.kind='helicopter';hold(.05);assert.equal(m.stage,'lift');assert.equal(lighthouseExitAllowed(m,'helicopter'),true,'may still step off on the island pad');
+// Real rotorcraft physics inside the field site: spool up, climb 8 m above the island pad, cruise to the shore pad, land, shut down.
+const h=s.heli;h.status='running';h.powered=true;
+const fly=(seconds,input)=>{for(let i=0;i<Math.round(seconds*60);i++){stepHelicopter(h,input,1/60,FIELD_HELI_SITE);stepLighthouseMission(m,s,1/60);if(m.status!=='active')break;}};
+fly(5,{lift:1});assert.equal(m.stage,'evac','lifted 8 m: '+JSON.stringify({y:h.y,g:h.grounded}));assert.equal(lighthouseExitAllowed(m,'helicopter'),false);
+assert.equal(lighthouseGoal(m,s).x,SHORE_HELIPAD.x);
+// Teleport-free cruise is long (~300 m); the rules only need the craft over the pad and low enough, so place it there at altitude and descend.
+Object.assign(h,{x:SHORE_HELIPAD.x,z:SHORE_HELIPAD.z,vx:0,vz:0,vy:0,pitch:0,roll:0});h.y=SHORE_HELIPAD.y+20;fly(.1,{});assert.equal(m.stage,'evac','still too high');
+fly(6,{lift:-1});assert.equal(m.stage,'touchdown','arrived over pad: y='+h.y.toFixed(2));
+fly(12,{lift:-1});assert(h.grounded,'landed y='+h.y.toFixed(2)+' status='+h.status+' '+h.reason);assert.equal(h.status,'running','soft landing');assert.equal(m.stage,'touchdown','engine still on');
+h.powered=false;h.collective=0;fly(1.2,{});
 assert.equal(m.status,'won');assert.equal(m.stage,'complete');assert.deepEqual(m.completed,LIGHTHOUSE_STAGES);
 const frozen=JSON.stringify(m);hold(3);assert.equal(JSON.stringify(m),frozen,'terminal state is frozen');
 const summary=lighthouseSummary(m);assert.equal(summary.stageIndex,LIGHTHOUSE_STAGES.length);assert.equal(summary.surveys,3);
@@ -55,12 +73,21 @@ assert.equal(normalizeLighthouse('nope'),'normal');assert.equal(createLighthouse
 
 // Expedition evidence: won flag alone is not enough; profile must match campaign difficulty.
 const attempt=id=>({id:newExpeditionId(),campaignId:newExpeditionId(),mission:'lighthouse',difficulty:id,fromStart:true});
-const record=expeditionRecordFromMission(attempt('hard'),m);assert(record);assert.equal(record.rule,'lighthouse-v1');assert.equal(record.difficulty,'hard');
+const record=expeditionRecordFromMission(attempt('hard'),m);assert(record);assert.equal(record.rule,'lighthouse-v2');assert.equal(record.difficulty,'hard');
 assert.equal(expeditionRecordFromMission(attempt('normal'),m),null,'difficulty mismatch');
 assert.equal(expeditionRecordFromMission(attempt('hard'),{...m,surveys:2}),null);
 assert.equal(expeditionRecordFromMission(attempt('hard'),{...m,completed:m.completed.slice(0,-1)}),null);
 assert.equal(expeditionRecordFromMission(attempt('hard'),{...m,elapsed:m.profile.timeLimit+1}),null);
 assert.equal(expeditionRecordFromMission(attempt('hard'),{...m,recovered:true}),null);
+// Crash during evacuation loses the run; water touchdown is a crash in the field site.
+const crashRun=createLighthouseMission('normal',true);crashRun.stage='evac';crashRun.surveys=3;crashRun.completed=LIGHTHOUSE_STAGES.slice(0,8);
+const wreck=createFieldHelicopter(HELI_PADS.island);wreck.status='crashed';wreck.reason='硬着陆';assert(stepLighthouseMission(crashRun,{kind:'helicopter',player:{x:0,z:0},yacht:createYacht(),heli:wreck},.1));assert.equal(crashRun.status,'lost');assert.match(crashRun.reason,/直升机损坏/);
+assert.equal(FIELD_HELI_SITE.forbidden(400,0),'落水：直升机只能在陆地、码头或灯塔岛着陆');assert.equal(FIELD_HELI_SITE.forbidden(SHORE_HELIPAD.x,SHORE_HELIPAD.z),null);assert.equal(FIELD_HELI_SITE.forbidden(ISLAND_HELIPAD.x,ISLAND_HELIPAD.z),null);
+assert(onIslandHelipad(ISLAND_HELIPAD.x,ISLAND_HELIPAD.z));assert(onIslandTop(ISLAND_HELIPAD.x,ISLAND_HELIPAD.z),'island pad sits on the walkable top');assert(!onIslandTop(SHORE_HELIPAD.x,SHORE_HELIPAD.z));
+assert(isFootSurface(SHORE_HELIPAD.x,SHORE_HELIPAD.z),'shore pad is on land');
+// Restore from the safe node: operator on the island next to the pad, mission flagged recovered, elapsed kept, evidence counts as resumed only.
+const restored=restoreLighthouseCheckpoint(node);assert.equal(restored.mission.stage,'heli');assert.equal(restored.mission.recovered,true);assert.equal(restored.mission.surveys,3);assert.equal(restored.mission.elapsed,node.elapsedMs/1000);assert.equal(restored.mission.completed.length,6);
+assert(onIslandTop(restored.player.x,restored.player.z));assert.throws(()=>restoreLighthouseCheckpoint({...node,stage:'lift'}));
 
 // Real yacht physics: a two-waypoint pilot (line up west of the pier, then slide east alongside it) reaches the landing without collisions.
 const y=createYacht();let arrived=false,leg=0;const waypoints=[{x:LIGHTHOUSE_LANDING.x-30,z:LIGHTHOUSE_LANDING.z-60},{x:LIGHTHOUSE_LANDING.x,z:LIGHTHOUSE_LANDING.z-45},LIGHTHOUSE_LANDING];
@@ -70,4 +97,4 @@ for(let i=0;i<120*240&&!arrived;i++){const w=waypoints[leg],d=Math.hypot(w.x-y.x
  stepYacht(y,{throttle:d>10?(y.speed>4?0:.25):0,steer:steerTo(w),brake:d<=10},1/120);if(d<=12&&Math.abs(y.speed)<=.6)arrived=true;}
 assert(arrived,'yacht can reach the landing');assert.equal(y.impacts,0,'no collision on the approach');
 const parked={...y,speed:0},pierExit=yachtExit(parked,{...foot,geometry:grid});assert(pierExit.ok,'parked yacht can be exited onto the pier: '+JSON.stringify({x:y.x,z:y.z,yaw:y.yaw}));
-console.log('PASS: lighthouse island foot surface / pier ramp, yacht exit and re-board at the pier, ordered 8-stage landing lifecycle, holds, time limit, pause, evidence rejection and physical approach');
+console.log('PASS: lighthouse island foot surface / pier ramp, yacht exit and re-board at the pier, ordered 10-stage landing + helicopter evacuation lifecycle with real rotorcraft physics, safe node create/validate/restore, crash loss, holds, time limit, pause, evidence rejection and physical approach');

@@ -22,7 +22,7 @@ export function buildLighthouseWorld(scene){
  const tank=new T.Mesh(new T.CylinderGeometry(1.5,1.5,2.4,14),std(0x5b6f5a));tank.position.set(LIGHTHOUSE_POINTS['survey-3'].x,top+1.2,LIGHTHOUSE_POINTS['survey-3'].z);group.add(tank);
  // Stage markers.
  const markerMat=new T.MeshBasicMaterial({color:0x9df5c6,transparent:true,opacity:.8,depthWrite:false}),markers=new T.Group(),nodes={};
- for(const [key,g] of Object.entries(LIGHTHOUSE_POINTS)){const node=new T.Group();node.position.set(g.x,g.y-1,g.z);const ring=new T.Mesh(new T.TorusGeometry(key==='sail'||key==='reboard'?12:4,.35,6,64),markerMat);ring.rotation.x=Math.PI/2;ring.position.y=.3;node.add(ring);const beacon=new T.Mesh(new T.OctahedronGeometry(1.3),markerMat);beacon.position.y=5;node.add(beacon);markers.add(node);nodes[key]=node;}
+ for(const [key,g] of Object.entries(LIGHTHOUSE_POINTS)){const node=new T.Group();node.position.set(g.x,g.y-1,g.z);const ring=new T.Mesh(new T.TorusGeometry(key==='sail'?12:key==='evac'||key==='touchdown'?9:key==='heli'||key==='lift'?6:4,.35,6,64),markerMat);ring.rotation.x=Math.PI/2;ring.position.y=.3;node.add(ring);const beacon=new T.Mesh(new T.OctahedronGeometry(1.3),markerMat);beacon.position.y=5;node.add(beacon);markers.add(node);nodes[key]=node;}
  group.add(markers);scene.add(group);
  return {update(m,time){beamPivot.rotation.y=time*.6;markers.visible=m.status==='active';for(const [key,node] of Object.entries(nodes)){node.visible=key===m.stage;node.children[1].rotation.y=time*.5;}},
   dispose(){scene.remove(group);group.traverse(o=>{o.geometry?.dispose();if(o.material&&!Array.isArray(o.material))o.material.dispose();});}};

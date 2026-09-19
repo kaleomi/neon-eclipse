@@ -27,6 +27,7 @@ window.__p3Fixture={
   m.status='won';m.reason='受控集成夹具完成（非自然通关）';if(recovered)m.recovered=true;
   if(id==='escort')finishEscort();else if(id==='naval')finishChase();else if(id==='recon')finishFlight();else if(id==='lighthouse')finishLighthouse();else finishJoint();
  },
+ async reachHelipad(){const {LIGHTHOUSE_POINTS}=await import('./lighthouse-mission.js');const m=lighthouse;m.stage='survey-3';m.surveys=2;m.completed=['board','sail','land','survey-1','survey-2'];m.elapsed=90;let changed=false;for(let i=0;i<40&&!changed;i++)changed=stepLighthouseMission(m,{kind:null,player:{...LIGHTHOUSE_POINTS['survey-3']},yacht,heli,action:true},.1);if(changed){expeditionUI?.saveCheckpoint('lighthouse',m);}return m.stage;},
  lose(id){pause();const m=id==='escort'?escort:id==='naval'?chase:id==='recon'?sortie:id==='lighthouse'?lighthouse:joint;m.status='lost';m.reason='受控失败';if(id==='escort')finishEscort();else if(id==='naval')finishChase();else if(id==='recon')finishFlight();else if(id==='lighthouse')finishLighthouse();else finishJoint();},
  async seedJointCheckpoint(){
   const {checkpointFromMission}=await import('./joint-checkpoint-model.js');const {createJointCheckpointStore}=await import('./joint-checkpoint-store.js');
@@ -44,7 +45,7 @@ try{
   await page.goto(server.base+'/vehicle.html');await page.waitForFunction(()=>document.body.dataset.expeditionState==='ready');
   const twice=async selector=>{await page.click(selector);await page.click(selector);};
   const running=id=>page.waitForFunction(id=>document.body.dataset.expeditionMission===id&&document.body.dataset.expeditionState==='playing',id);
-  const progress=n=>page.waitForFunction(n=>document.body.dataset.expeditionCompleted===String(n)&&document.body.dataset.expeditionRecords===String(n)&&document.body.dataset.expeditionState==='ready',n);
+  const progress=(n,records=n)=>page.waitForFunction(([n,records])=>document.body.dataset.expeditionCompleted===String(n)&&document.body.dataset.expeditionRecords===String(records)&&document.body.dataset.expeditionState==='ready',[n,records]);
   const win=async(id,options={})=>page.evaluate(([id,options])=>window.__p3Fixture.win(id,options),[id,options]);
   await page.selectOption('#expedition-difficulty','hard');await page.click('#expedition-new');assert.equal(await page.getAttribute('body','data-escort-status'),'idle','first click only arms');
   await page.click('#expedition-new');await running('escort');assert.equal(await page.getAttribute('body','data-escort-difficulty'),'hard');
@@ -80,20 +81,39 @@ try{
   await twice('#expedition-continue');await running('lighthouse');assert.equal(await page.getAttribute('body','data-lighthouse-difficulty'),'hard');assert.equal(await page.getAttribute('body','data-lighthouse-stage'),'board');assert.equal(await page.getAttribute('body','data-vehicle-kind'),'walking');
   await page.keyboard.press('Escape');await page.evaluate(()=>window.__p3Fixture.lose('lighthouse'));await progress(4);
   await twice('#expedition-continue');await running('lighthouse');await win('lighthouse',{invalid:true});await progress(4);assert.match(await page.locator('#expedition-feedback').textContent(),/未满足/);
+  // Safe node: driving the real mission rules to the third survey saves a helipad node; a loss keeps it; resuming restores a recovered run on the island with a cold helicopter.
+  await twice('#expedition-continue');await running('lighthouse');assert(await page.locator('#expedition-checkpoint').isDisabled(),'no node yet');
+  assert.equal(await page.evaluate(()=>window.__p3Fixture.reachHelipad()),'heli','real rules advanced from survey-3 to heli');
+  await page.waitForFunction(()=>/灯塔停机坪/.test(document.querySelector('#expedition-checkpoint-info').textContent));
+  await page.keyboard.press('Escape');await page.evaluate(()=>window.__p3Fixture.lose('lighthouse'));await progress(4);
+  assert(!(await page.locator('#expedition-checkpoint').isDisabled()),'node survives the loss');
+  await twice('#expedition-checkpoint');await running('lighthouse');
+  assert.equal(await page.getAttribute('body','data-lighthouse-recovered'),'true');assert.equal(await page.getAttribute('body','data-lighthouse-stage'),'heli');assert.equal(await page.getAttribute('body','data-lighthouse-surveys'),'3');assert.equal(await page.getAttribute('body','data-expedition-resumed'),'true');
+  assert.equal(await page.getAttribute('body','data-heli-powered'),'false');assert.equal(await page.getAttribute('body','data-lighthouse-difficulty'),'hard');
+  const heliPos=await page.evaluate(()=>[Number(document.body.dataset.heliX),Number(document.body.dataset.heliZ)]);assert(Math.hypot(heliPos[0]-512,heliPos[1]-252)<1,'helicopter parked on island pad '+heliPos);
+  await page.keyboard.press('Escape');await win('lighthouse',{recovered:true});await progress(5);
+  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="lighthouse"][data-difficulty="hard"]','data-resumed-count'),'1','resumed win recorded separately');
+  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="lighthouse"][data-difficulty="hard"]','data-count'),'0');
+  assert(await page.locator('#expedition-checkpoint').isDisabled(),'node retired after completion');
+  // Fresh campaign for the remaining clean-run assertions below.
+  await page.selectOption('#expedition-difficulty','hard');await twice('#expedition-new');await running('escort');await win('escort');await progress(1,6);
+  await twice('#expedition-continue');await running('naval');await win('naval');await progress(2,7);
+  await twice('#expedition-continue');await running('recon');await win('recon');await progress(3,8);
+  await twice('#expedition-continue');await running('joint');await win('joint');await progress(4,9);
   await page.keyboard.press('Escape');await twice('#start-lighthouse');await page.waitForFunction(()=>document.body.dataset.lighthouseStatus==='active'&&document.body.dataset.driveActive==='true');
-  assert.equal(await page.getAttribute('body','data-expedition-mission'),'none','standalone lighthouse detaches the campaign');assert.equal(await page.getAttribute('body','data-lighthouse-difficulty'),'easy');await win('lighthouse');await progress(4);
-  await twice('#expedition-continue');await running('lighthouse');await win('lighthouse');await progress(5);assert(await page.locator('#expedition-continue').isDisabled());assert.match(await page.locator('#expedition-status').textContent(),/第 6–8 关未开放/);
+  assert.equal(await page.getAttribute('body','data-expedition-mission'),'none','standalone lighthouse detaches the campaign');assert.equal(await page.getAttribute('body','data-lighthouse-difficulty'),'easy');await win('lighthouse');await progress(4,9);
+  await twice('#expedition-continue');await running('lighthouse');await win('lighthouse');await progress(5,10);assert(await page.locator('#expedition-continue').isDisabled());assert.match(await page.locator('#expedition-status').textContent(),/第 6–8 关未开放/);
   assert.equal(await page.getAttribute('.expedition-record-row[data-mission="lighthouse"][data-difficulty="hard"]','data-count'),'1');
-  await page.reload();await progress(5);
+  await page.reload();await progress(5,10);
   assert.equal(await page.getAttribute('.expedition-record-row[data-mission="lighthouse"][data-difficulty="hard"]','data-count'),'1');
-  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="escort"][data-difficulty="hard"]','data-count'),'1');
-  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="naval"][data-difficulty="hard"]','data-count'),'1');
-  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="recon"][data-difficulty="fixed"]','data-count'),'1');
-  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="joint"][data-difficulty="fixed"]','data-count'),'1');
+  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="escort"][data-difficulty="hard"]','data-count'),'2','two campaigns');
+  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="naval"][data-difficulty="hard"]','data-count'),'2','two campaigns');
+  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="recon"][data-difficulty="fixed"]','data-count'),'2','two campaigns');
+  assert.equal(await page.getAttribute('.expedition-record-row[data-mission="joint"][data-difficulty="fixed"]','data-count'),'2','two campaigns');
   assert.deepEqual(await page.evaluate(s=>Object.fromEntries(Object.keys(s).map(k=>[k,localStorage.getItem(k)])),sentinel),sentinel);
   for(const [width,height] of [[1280,900],[390,780],[320,700]]){await page.setViewportSize({width,height});await page.locator('#expedition-panel').scrollIntoViewIfNeeded();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no horizontal overflow '+width);}
   assert.deepEqual(errors,[]);await context.close();
-  console.log('PASS step 3: fixed-rule recon/joint, separate records, legacy checkpoint detachment, fifth mission (lighthouse) locked difficulty/loss/invalid/standalone detachment/completion/reload, grouped results, saved-data isolation and narrow layouts');
+  console.log('PASS step 3: fixed-rule recon/joint, separate records, legacy checkpoint detachment, fifth mission (lighthouse) locked difficulty/loss/invalid/helipad safe node save-lose-resume-recovered win/standalone detachment/completion/reload, grouped results, saved-data isolation and narrow layouts');
   // Screenshot a clean, unmodified production page, not the synthetic completion fixture.
   const clean=await browser.newContext({viewport:{width:1280,height:900}}),cleanPage=await clean.newPage();
   await cleanPage.goto(server.base+'/vehicle.html');await cleanPage.waitForFunction(()=>document.body.dataset.expeditionState==='ready');

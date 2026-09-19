@@ -9,9 +9,10 @@ import * as THREE from './node_modules/three/build/three.module.js';
 import {ENEMY_TYPES,BOSS_PHASES,turnTowards,facingDot,movementIntent,stepBossState,recordBossAttack,enemyBehavior} from './enemy-rules.js';
 import {animateEnemy} from './enemy-model.js';
 import {createSquadCoordinator,rusherIntent,RUSHER,ARTILLERY,stepArtillery} from './squad.js';
+import {environmentModifiers} from './interaction-rules.js';
 const THERMAL_RANGE=26;
 
-export function createEnemyDirector({enemies,player,navigation,vertical=null,move,obstacles,projectiles,onBossEvent,onEliteWindow=()=>{},scaleCooldown=seconds=>seconds,thermalVision=null,onRusherBlast=()=>{},onMortar=()=>{},squadEnabled=true,attackBudget=null}){
+export function createEnemyDirector({enemies,player,navigation,vertical=null,move,obstacles,projectiles,onBossEvent,onEliteWindow=()=>{},scaleCooldown=seconds=>seconds,thermalVision=null,onRusherBlast=()=>{},onMortar=()=>{},squadEnabled=true,attackBudget=null,environment=null}){
  const squad=createSquadCoordinator({types:ENEMY_TYPES});const mortars=[];
  attackBudget?.register('mortars',()=>mortars.length);
  const coordination=createSwarmCoordination({position:e=>e.group.position,visible:(from,to)=>voltClearPath(from,to,obstacles.map(o=>o.mesh))});
@@ -37,6 +38,7 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
    if(enemy.staggerRemaining>0){animateEnemy(enemy,time,false);continue;}
    if(enemy.engineerBuilding||enemy.engineerRepairing){animateEnemy(enemy,time,false);enemy.group.userData.parts.arms.forEach(a=>a.rotation.x=-.75);enemy.group.userData.parts.accent.emissiveIntensity=2+Math.sin(time*12)*.4;continue;}
    const profile=ENEMY_TYPES[enemy.type],pos=enemy.group.position,old=pos.clone();
+   const env=environment?environmentModifiers(enemy,environment):null;enemy.envSlow=env?env.speed:1;
    const dx=player.position.x-pos.x,dz=player.position.z-pos.z,dist=Math.hypot(dx,dz)||.001;
    enemy.charge=Math.max(0,(enemy.charge||0)-dt);enemy.attack-=dt*commandedCooldownRate(enemy);
    if(enemy.boss){
@@ -57,7 +59,7 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
    if(enemy.type==='rusher'){
     const r=rusherIntent(enemy,dist,dt);enemy.rusherBlink=r.blink;
     if(r.state==='detonate'){onRusherBlast({enemy,x:pos.x,z:pos.z,y:pos.y,radius:RUSHER.radius,damage:RUSHER.damage});enemy.hp=0;continue;}
-    if(r.state!=='armed'){const nav=navigation.direction(pos,player.position)||{x:dx,z:dz};const len=Math.hypot(nav.x,nav.z)||1,step=enemy.speed*dt;enemy.group.rotation.y=Math.atan2(dx,dz);moveEnemy(pos,nav.x/len*step,nav.z/len*step,enemy.radius);}
+    if(r.state!=='armed'){const nav=navigation.direction(pos,player.position)||{x:dx,z:dz};const len=Math.hypot(nav.x,nav.z)||1,step=enemy.speed*dt*(env?env.speed:1);enemy.group.rotation.y=Math.atan2(dx,dz);moveEnemy(pos,nav.x/len*step,nav.z/len*step,enemy.radius);}
     animateEnemy(enemy,time,r.state!=='armed',dist);continue;
    }
    const coordinated=enemy.group.userData.swarmCoordinated===true;
@@ -75,7 +77,7 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
     else if(intent==='retreat')direction={x:-dx,z:-dz};
     else if(intent==='strafe')direction={x:-dz*side,z:dx*side};
     if(direction){
-     const speed=enemy.speed*(enemy.boss&&enemy.bossState.phase===2?1.35:1),step=speed*dt*(intent==='strafe'?.65:1),length=Math.hypot(direction.x,direction.z)||1;
+     const speed=enemy.speed*(enemy.boss&&enemy.bossState.phase===2?1.35:1)*(env?env.speed:1),step=speed*dt*(intent==='strafe'?.65:1),length=Math.hypot(direction.x,direction.z)||1;
      moveEnemy(pos,direction.x/length*step,direction.z/length*step,enemy.radius);
      if(pos.distanceToSquared(old)<step*step*.05)moveEnemy(pos,-dz/dist*step*side,dx/dist*step*side,enemy.radius);
     }
@@ -86,7 +88,7 @@ export function createEnemyDirector({enemies,player,navigation,vertical=null,mov
     }
    }
    const aligned=facingDot(pos,enemy.group.rotation.y,player.position)>(enemyBehavior(enemy.type)==='ranged'?.95:.83);
-   if(enemy.attack<=0&&enemy.charge===0&&!locked&&dist<profile.range&&visible&&aligned&&gate<=0&&(!coordinated||canStart())){
+   if(enemy.attack<=0&&enemy.charge===0&&!locked&&dist<profile.range*(env?env.range:1)&&visible&&aligned&&gate<=0&&(!coordinated||canStart())&&(!env||env.canTelegraph)){
     const phase=enemy.boss?BOSS_PHASES[enemy.bossState.phase]:null,attack=phase?phase.attack:profile.attack;
     // Freeze position and aim during telegraph; all bolts retain this captured target.
     origin.set(pos.x,enemyMuzzleHeight(enemy),pos.z);

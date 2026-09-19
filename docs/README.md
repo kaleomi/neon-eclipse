@@ -18,6 +18,7 @@
 - **P1 重武器改装（CINDER / LANCE 三槽）**：`docs/mcp-p1-heavy-mods.md`
 - **P1 敌人生态与小队协同（冲锋机 / 重炮机甲 / 行为树）**：`docs/mcp-p1-enemy-ecology.md`
 - **P1 Boss 适配器与全局攻击预算**：`docs/mcp-p1-boss-budget.md`
+- **P1 九章环境交互（排气阀 / 照明开关）**：`docs/mcp-p1-environment.md`
 - **长期目标（非完成清单）**：`docs/mcp-full-development-plan.md`
 
 - **P4 完整交付：八种可玩模式 / 个人档案 / 称号 / 幽灵回放 / 每日周常**：`docs/mcp-p4-full-delivery.md`（当前 P4 结论入口）

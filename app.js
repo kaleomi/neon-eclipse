@@ -96,6 +96,9 @@ import { ARENA, createNavigator } from './arena.js';
 import { createRadar } from './radar.js';
 import { createEnemyProjectiles } from './projectiles.js';
 import {createAttackBudget} from './attack-budget.js';
+import {createInteractionWorld} from './interaction-world.js';
+import {INTERACTION_LAYOUTS} from './interaction-layouts.js';
+import {VENT} from './interaction-rules.js';
 import { WEAPONS, createHandling, damageAtDistance, shotSpread, advanceReload, meleePose } from './combat.js';
 import { createCombatUI } from './combat-ui.js';
 import { STAGES, SUPPLIES, createMission, applySupply, chooseEncounterSpawns } from './mission.js';
@@ -157,8 +160,9 @@ qualityButton.addEventListener('click',toggleQuality);
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x071217); scene.fog = new THREE.FogExp2(0x071217, .014);
 const camera = new THREE.PerspectiveCamera(74, innerWidth / innerHeight, .08, 160);
 camera.rotation.order = 'YXZ'; scene.add(camera);
-scene.add(new THREE.HemisphereLight(0x94e9f6, 0x17232b, 2.2));
+const hemiLight=new THREE.HemisphereLight(0x94e9f6, 0x17232b, 2.2);scene.add(hemiLight);
 const sun = new THREE.DirectionalLight(0x9bcbd5, 2.6); sun.position.set(8, 18, 6); scene.add(sun);
+const sceneLights=[hemiLight,sun];
 const cyan = new THREE.MeshStandardMaterial({ color: 0x36dfe8, emissive: 0x16bccd, emissiveIntensity: 2 });
 const orange = new THREE.MeshStandardMaterial({ color: 0xff7844, emissive: 0xff3a10, emissiveIntensity: 1.5 });
 if(IS_TOWER){stamp.innerHTML='<strong>CONTROL SPIRE</strong><span>C-04 / VERTICAL LOCKDOWN<br>大厅 · 设备层 · 核心层 · 撤离</span>';stamp.classList.add('tower-stamp');}
@@ -288,7 +292,8 @@ function mortarEvent(m){if(m.type==='telegraph'){mortarMarkers.telegraph({x:m.x,
  const point=new THREE.Vector3(m.x,playerMotion.state.y,m.z);art.burst(point.clone().add(new THREE.Vector3(0,.6,0)),0xff6a3d,40);gameAudio.play('vehicle.impact',{position:{x:m.x,z:m.z}});
  const feet=new THREE.Vector3(camera.position.x,playerMotion.state.y,camera.position.z);if(Math.abs(feet.y-point.y)<2.2)environmentHurt(mortarStrike(point,feet,{radius:m.radius,damage:m.damage}),point);}
 attackBudget.register('projectiles',()=>enemyProjectiles.attackers);attackBudget.register('boss',()=>overseer?.boss?.threatening?1:0);
-const enemyDirector=createEnemyDirector({attackBudget,onRusherBlast:rusherBlast,onMortar:mortarEvent,scaleCooldown:p4Cooldown,onEliteWindow:()=>fieldRecord.window(),thermalVision:IS_POLAR?()=>art.thermal:null,enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
+const interactions=createInteractionWorld(scene,obstacles,INTERACTION_LAYOUTS[MAP_ID],{lights:sceneLights,onTopologyChange:()=>navigation.invalidate(),onEvent:e=>{if(e.type==='vent'){notify('冷却剂喷射 // 区域内敌人减速且无法预警，'+e.seconds+' 秒');gameAudio.play('vehicle.impact',{position:{x:e.x,z:e.z}});}else{notify(e.type==='dark'?'区域照明切断 // 远程守卫射程缩短，潜行者与猎犬加速':'区域照明恢复');gameAudio.play('hit.armor',{position:{x:e.x,z:e.z}});}}});
+const enemyDirector=createEnemyDirector({attackBudget,environment:interactions?{vent:interactions.vent,lights:interactions.light}:null,onRusherBlast:rusherBlast,onMortar:mortarEvent,scaleCooldown:p4Cooldown,onEliteWindow:()=>fieldRecord.window(),thermalVision:IS_POLAR?()=>art.thermal:null,enemies,player:camera,navigation,vertical:roofEnemyNavigation,move,obstacles,projectiles:enemyProjectiles,onBossEvent:(enemy,event)=>{
  if(event.changed){notify('Warden 阶段切换 // '+BOSS_PHASES[enemy.bossState.phase].name);gameAudio.play('boss.phase');}
  else if(event.opened){notify('Warden 过载 // 青色胸口核心暴露，集中攻击！');gameAudio.play('boss.window.open');}
  else if(event.closed)gameAudio.play('boss.window.close');
@@ -361,7 +366,7 @@ function spawnEncounter(stage){
  hud();
 }
 function reset(stageIndex=0,snapshot=null){
- ordnance.reset(snapshot?.ordnance);mortarMarkers.clear();
+ ordnance.reset(snapshot?.ordnance);mortarMarkers.clear();interactions?.reset();
  weaponDrops.reset();loadoutWorld.hide();loadout.reset(snapshot?(snapshot.loadout===undefined?DEFAULT_LOADOUT:snapshot.loadout):undefined);
  destructibles?.suspend();barrels?.suspend();energyNodes?.suspend();execution.cancel();executionStagger.clear(enemies);executionHint='';fieldKit.reset(snapshot?(snapshot.fieldKit===undefined?defaultKit():snapshot.fieldKit):undefined);
  workshop.reset(snapshot?(snapshot.weaponMods??freshWeaponMods()):undefined);
@@ -744,6 +749,9 @@ function update(dt){
  emp.update(dt);
  engineerDirector.update(dt);
  if(!p4?.range)enemyFireGate=enemyDirector.update(dt,elapsed,enemyFireGate);
+ if(interactions){const hint=interactions.prompt(camera.position,playerMotion.state.y);if(hint&&toastTime<=0.05&&!mission.state.defending){notify(hint);toastTime=.6;}interactions.update(dt,{player:camera.position,feetY:playerMotion.state.y,held:keys.has('KeyE'),busy:moving||firing||reload>0||handling.state.switchRemaining>0||meleeRemaining>0||emp.aiming||!playerMotion.state.grounded});
+  if(interactions.vent.state.active>0){if(interactions.vent.inZone(camera.position,playerMotion.state.y))environmentHurt(VENT.dps*dt,new THREE.Vector3(interactions.vent.zone.x,camera.position.y,interactions.vent.zone.z));for(const e of enemies){if(e.hp<=0||e.boss||!interactions.vent.inZone(e.group.position,e.group.position.y))continue;e.hp-=VENT.dps*dt;if(e.hp<=0){e.hp=0;achievementUI.attempt.environmentHit(1);}}
+   for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&!enemies[i].boss&&interactions.vent.inZone(enemies[i].group.position,enemies[i].group.position.y)){enemyProjectiles.cancelOwner(enemies[i].group);weaponDrops.drop(enemies[i]);disposeGroup(enemies[i].group);enemies.splice(i,1);kills++;}}}
  for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&enemies[i].type==='rusher'){enemyProjectiles.cancelOwner(enemies[i].group);disposeGroup(enemies[i].group);enemies.splice(i,1);}
  enemyProjectiles.update(dt,camera.position,previousPlayer);
  overseer?.prepareMission?.(mission.state,enemies.length===0);

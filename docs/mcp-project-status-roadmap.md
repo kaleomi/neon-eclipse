@@ -85,6 +85,11 @@
 - 新模块 `attack-budget.js`：弹丸攻击者、重炮机甲迫击炮、场地 Boss 预警共享“同时 3 个预警”预算；Boss 预警占一槽，普通攻击者随之降为两个。
 - 445/445 check、104/104 rules、40/40 integration；`test-attack-budget-browser`（roof 真实刷怪）与 `test-ordnance-browser`（九章 Boss 打断）通过，诊断 0。首版浏览器摆位被掩体遮挡的失败已记录。详见 `docs/mcp-p1-boss-budget.md`。下一批：每章 ≥2 项环境交互。
 
+### P1 追加交付：九章环境交互（排气阀冷却剂云 / 区域照明开关）（2026-09-19）
+
+- 新模块 `interaction-rules.js` / `interaction-world.js` / `interaction-layouts.js`：每章两座可按住 E 的基座——排气阀（1.5s 启动、5s 半径 3.2m 云：敌人半速且不能预警、6 HP/s、12s 充压）与照明开关（0.6s 切换：黑暗中远程射程 ×0.65、潜行者/猎犬 ×1.25，可恢复）。九章各有主题命名与经约束校验的摆位。
+- 451/451 check、105/105 rules、41/41 integration；`test-interactions-browser` 九章真实页面原生 E 通过，诊断 0。摆位/忙碌/灯光基准三类首版失败已记录并修正。详见 `docs/mcp-p1-environment.md`。下一批：P2 天气 / 击杀表现 / 过场。
+
 ### 状态与范围
 
 | 方向 | 已实现 / 已接线 | 当前边界 |

@@ -1,0 +1,69 @@
+{
+  "passes": [
+    "new ADS option is in Controls; old sensitivity survives and defaults to hold without a storage write",
+    "default hold mode aims only while RMB is held, using actual ADS interpolation",
+    "native setting change persists across reload; changing sensitivity preserves mode and unrelated fields; desktop/narrow layout fits",
+    "toggle mode survives RMB release, second click exits, and a long press only toggles once",
+    "reload temporarily lowers the sight without losing the toggle choice",
+    "1/2/3 weapon changes clear ADS; blade RMB stays parry, never a toggle latch",
+    "pause/resume, blur, pointer-lock loss, death and reset cannot leave a stuck scope",
+    "mouse and gamepad sources do not release each other; LT remains hold in both modes; mode changes clear aiming",
+    "tap-to-aim satisfies the real LANCE ADS gate, while unscoped fire remains blocked",
+    "uninstrumented game loads the saved option: two native RMB clicks enter/exit ADS; resume is unscoped"
+  ],
+  "errors": [],
+  "last": {
+    "state": "playing",
+    "aiming": true,
+    "ads": 0.9995902650210202,
+    "mode": "toggle",
+    "selected": 10,
+    "controller": true,
+    "parry": {
+      "remaining": 0,
+      "recovery": 0,
+      "held": false,
+      "feedback": "",
+      "active": false
+    },
+    "ord": {
+      "version": 1,
+      "owned": [
+        10
+      ],
+      "rounds": [
+        0,
+        1,
+        0
+      ],
+      "reserve": [
+        0,
+        10,
+        0
+      ],
+      "unsupported": false,
+      "charging": false,
+      "charge": 0,
+      "reload": 0,
+      "cooldown": 0.65,
+      "flight": null
+    },
+    "prefs": {
+      "version": 1,
+      "sensitivity": 1.4,
+      "keep": "legacy-preference",
+      "aimMode": "toggle"
+    },
+    "reload": 0,
+    "rounds": [
+      30,
+      8,
+      15,
+      null,
+      36,
+      24,
+      1,
+      6
+    ]
+  }
+}

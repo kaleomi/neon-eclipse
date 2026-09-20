@@ -1,0 +1,238 @@
+{
+  "time": "2026-09-20T01:18:09.393Z",
+  "log": ".tools/qa-combat-controls/matrix-1789867041485.log",
+  "results": [
+    {
+      "label": "syntax weapon-selection.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax input-bindings.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax input-settings-ui.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax weapon-hud.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax ui-shell.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax i18n/zh-CN.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax i18n/en.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax ammo-resupply-rules.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax typed-ammo.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax typed-ammo-ui.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax field-kit-rules.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax field-kit.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax ordnance-rules.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax ordnance-world.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax loadout-world.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax p4-runtime.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax app.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-boss-polish-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-barrel-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-datacenter-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-elevator-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-emp-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-destructible-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-engineer-repair-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-engineer-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-halo-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-field-systems-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-link-route-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-loadout-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-ordnance-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-parry-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-railspike-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-sentry-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-siege-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-smoke-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-swarm-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-switchyard-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-tactical-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-tempest-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-train-route-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-typed-ammo-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-volt-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-weapon-registry-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-combat-controls.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-combat-controls-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "full check/rules/integration",
+      "exit": 1
+    }
+  ],
+  "sources": {
+    "weapon-selection.js": "3691019633f4ec8a92f05b50a62e75aad880a4f1eb05171d3ec37a78b3bad2da",
+    "input-bindings.js": "c870e0fd10abfc91565244628354db698e571271dac730f423dfecd9181fdc7b",
+    "input-settings-ui.js": "670d127153eaceb063851ace1b4e83f7e97697500efb8616425bbb7a5bf815af",
+    "weapon-hud.js": "ed9208a4e949fea5d62dc49fd256abe62530862c1e5a0980399ece6a0822a05c",
+    "ui-shell.js": "afabd18b2972555f089a9f4c3931583f31cff26c7725be610c08959f191f1ac6",
+    "i18n/zh-CN.js": "d58e8c45d097aa1da8139a974f0e110ac785ee30a767904414293483eaefeaab",
+    "i18n/en.js": "fa5ecda9bbe873e264ad833bd6104f7a97800210c3239e273bf66c7e0ba514da",
+    "ammo-resupply-rules.js": "20886457feebd7af02ceda6d8a64cea8ba32cda27b700e14e535de17bf3f9065",
+    "typed-ammo.js": "ef974b44aefa5c5cf950825fcfec5d0099cc85968e78990d272db85461dd96dc",
+    "typed-ammo-ui.js": "7b535451d8f226a24899437f0ad9b5ceab58ee06c2c0141c2aeebc30ea3cc159",
+    "field-kit-rules.js": "a68beef8c93296408f73fa8ec212e9789af82faababeee6d7942e80fc81e4e95",
+    "field-kit.js": "b96be92f4a2bfe166e3fcabf466658039f751dc1bffcb1722d8bfa417c63c327",
+    "ordnance-rules.js": "e7a74cfd3d7b66c5c8ad5339fb3eb8896fe33318002b5f3d9ed8596cf45c46da",
+    "ordnance-world.js": "da2c9c6412fa69730b26f254f04115c7b1b478810d256ace146ca880fa5f81f8",
+    "loadout-world.js": "88ecce24e73c5b873b71d4f927a2b3624ecb2fb9bd2981fa464c4274ad7d81c2",
+    "p4-runtime.js": "2d7816fb025abefec2d352597d02d607735ac9d061bb9dd07a7bb9ddada8bc88",
+    "app.js": "5a8deb116fbb030f7c4ac34a9019670882005b458f336f0ed56dba0bcd309bff",
+    "test-boss-polish-browser.mjs": "607b6acacb693ce294c5f84b42de032496183bc2ffc72e8123a4fcf8bf464c4a",
+    "test-barrel-browser.mjs": "795eb10bfb94b19b79399934b4a08085d1c3e0d8e0c2553223116758496e165b",
+    "test-datacenter-browser.mjs": "0f27523c54b923a8476956934564d01ca5b42c6b063324a2d4e657ba2aa7cf21",
+    "test-elevator-browser.mjs": "98e1758725fe7729fbed96224911084f73bdaa6eec90f402eec6baf5b45e6aee",
+    "test-emp-browser.mjs": "f84c561dd9fe8bd0b1fdd4e078e84f903e36ddfaa5195b8143db168d19dc1905",
+    "test-destructible-browser.mjs": "e0292a33f6d31c1fd80162651b9a5fa90420c878551d246d638310e72640a521",
+    "test-engineer-repair-browser.mjs": "dd9a4b0d175611d7172646f6bf815a320a15bfa3e3b906eb92ed677ffee0476b",
+    "test-engineer-browser.mjs": "b644b228d37e2331aff72208ddf3598c18e2164c2faf82c43751d62ff77c1fa0",
+    "test-halo-browser.mjs": "30337d89748fb4faf3576fddf54501bd1f9ebc59041a81fc7d1d19fe57400290",
+    "test-field-systems-browser.mjs": "c7b66b94656eaca8271a030500d7d1e6b764c49c61bcfb418a8e6a8d3eeb753b",
+    "test-link-route-browser.mjs": "da6fa452d1e32bd6143c91c646ef2f933bb3ba8f2b4f7b9055acab8a92b67b93",
+    "test-loadout-browser.mjs": "75e7554b25692eb6e2b4b01357c56e0d193a7adc6aadbda9d2c18b83f7f350d3",
+    "test-ordnance-browser.mjs": "78db8b72a28128c39a8108b244efccc4c532a32d6e8c6e4a7728236b4e560abb",
+    "test-parry-browser.mjs": "2cfab5b42181b6d4bdbd0f89db1b109461374165d0b25c396dc5201b3e6725b2",
+    "test-railspike-browser.mjs": "f43883c2eb16d360152b2fc57171e6f2a5e922ded5b343b41b47a7308c41a7a6",
+    "test-sentry-browser.mjs": "c931502caf863bbb4c5ad2933610ddf7a4d217799629c587afd71f771a353b0b",
+    "test-siege-browser.mjs": "134de22a57251951c7b834a38a302a6147f9f7d96c05fc54341b2e3b192eb38f",
+    "test-smoke-browser.mjs": "22af261c43b2fd7f0828aacbddc5dff8f919ad639a22b4f8ecb9e787ae821e26",
+    "test-swarm-browser.mjs": "26c4c95cc3750f160ff7fdb3ab1feb98f53bb02ae8246b4e4aff47de3452d6d2",
+    "test-switchyard-browser.mjs": "24a74ef164dd99149ca878703add3f64755ab7c7f67f6182e33716899806b88b",
+    "test-tactical-browser.mjs": "a77c17d8dc794efe16a12c941e7ae21aa2a514b1b022cc5acdf5c62da9c30d8d",
+    "test-tempest-browser.mjs": "7e1a29cbb474483db19c6afec17e96f6f04e31e5166f9d8984343a5cd1b75a8d",
+    "test-train-route-browser.mjs": "fe8c305c07e56081945c567de71c4dafd3856447992a01e1f3a4f0616bb09297",
+    "test-typed-ammo-browser.mjs": "0de8fe26a5416ac12a6005293d380d845a81bc009fe3e0f3a9fb9fd5401f3845",
+    "test-volt-browser.mjs": "60957e7e4ec616c5266960a288d718ecb3d3a0e73eb893c0d645c44837e79e8e",
+    "test-weapon-registry-browser.mjs": "790de39d811dfc2be31629e521ab2ac3adbd8414f67445f1891fdf94eb3c2420",
+    "test-combat-controls.mjs": "c8730f69fe94f41a084a71194387bbab80d36aca533c650cb8ad839bc5f9acad",
+    "test-combat-controls-browser.mjs": "0ce5ef76949a1a21598b074ff688b00f48ad7d9d241dae2923cf998128b42a6f"
+  },
+  "failed": true
+}

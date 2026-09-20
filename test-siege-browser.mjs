@@ -49,7 +49,7 @@ window.__siege={
   await run('control',1);await p.keyboard.down('e');s=await run('tick',.65);await p.keyboard.up('e');assert.equal(s.arena.mode,'ready');
   await run('control',0);await p.keyboard.down('e');await run('tick',.3);await p.keyboard.press('Escape');await p.keyboard.up('e');s=await run('snapshot');assert.equal(s.arena.hold,0);const timer=s.timer;s=await run('tick',5);assert.equal(s.timer,timer);await p.click('#deploy');await p.waitForFunction(()=>document.body.dataset.playState==='playing');
   console.log('PASS',map,'last defense frame, shield hit, wrong control, pause clears incomplete E');
-  await run('setup');await run('tick',.1);await p.keyboard.press('Digit4');await run('tick',.4);let sawHounds=false,jumped=false;const shots=new Set();
+  await run('setup');await run('tick',.1);await p.keyboard.press('Digit3');await run('tick',.4);let sawHounds=false,jumped=false;const shots=new Set();
   async function arm(){await run('control');await p.keyboard.down('e');let a=await run('tick',.65);await p.keyboard.up('e');assert.equal(a.arena.mode,'operation',JSON.stringify(a));a=await run('tick',operation+.06);assert.equal(a.phase,'exposed');if(map==='train'&&a.arena.index===0&&!sawHounds){assert.equal(a.hounds.length,2);assert(a.hounds.every(h=>h.y===4.5));sawHounds=true;}await run('clearGuards');await run('core');return a;}
   for(let i=0;i<120;i++){
    s=await run('snapshot');if(s.stage===4)break;
@@ -66,7 +66,7 @@ window.__siege={
   console.log('PASS',map,'real E operation, phases, native knife kill, roof hounds / native catwalk jump, battle totals, old checkpoint and extraction');
   await p.reload();await p.click('#deploy');await p.waitForFunction(()=>document.body.dataset.playState==='playing');
   for(let weapon=0;weapon<8;weapon++){
-   await run('setup');await run('tick',.1);assert(await run('equipWeapon',weapon));await p.keyboard.press('Digit'+(weapon+1));await run('tick',.4);await arm();await p.mouse.down();s=await run('tick',weapon===6?.95:.4);await p.mouse.up();assert(s.hp<max&&s.hp>=max-(map==='train'?800:600),'weapon '+weapon+JSON.stringify(s));assert(s.shots[weapon]>0);
+   await run('setup');await run('tick',.1);assert(await run('equipWeapon',weapon));await p.keyboard.press((weapon===3?'Digit3':weapon===2?'Digit2':'Digit1'));await run('tick',.4);await arm();await p.mouse.down();s=await run('tick',weapon===6?.95:.4);await p.mouse.up();assert(s.hp<max&&s.hp>=max-(map==='train'?800:600),'weapon '+weapon+JSON.stringify(s));assert(s.shots[weapon]>0);
   }
   await run('setup');await run('tick',.1);await run('control');await p.keyboard.down('e');await run('tick',.65);await p.keyboard.up('e');s=await run('snapshot');assert.equal(s.arena.mode,'operation');assert(await run('saveEntry'));await run('fail');await run('retry');s=await run('snapshot');assert.equal(s.stage,3);assert.equal(s.phase,'inactive');assert.equal(s.hp,max);assert.equal(s.arena.index,0);assert.equal(s.arena.hold,0);assert(!s.defending);assert(!s.challenge.eligible);assert.deepEqual(errors,[]);console.log('PASS',map,'all eight weapons, operation death/retry reset, no page errors');await p.close();
  }

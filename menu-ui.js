@@ -1,3 +1,4 @@
+import {createViewDeck} from './ui-navigation.js';
 import {bindCombatDifficulty} from './combat-difficulty.js';
 import {bindFlightPitchSetting} from './flight-settings.js';
 import {bindSaveHub} from './save-hub-ui.js';
@@ -12,11 +13,13 @@ import {briefing} from './cinematic-rules.js';
 
 export function createGameMenu({overlay, journey, campaign, getSession, actions}) {
   const card = overlay.querySelector('.mission-card');
+  let bindingEditor=null,settingsDeck=null;
+  const cancelListening=()=>{if(bindingEditor?.listening)bindingEditor.cancel();};
   const find = selector => card.querySelector(selector);
   const original = {
     title: find('#session-title'), eyebrow: find('#session-eyebrow'), brief: find('#brief'), note: find('#lock-note'),
     deploy: find('#deploy'), controls: find('.controls'), levels: find('.level-menu'), campaign: find('.campaign-menu'),
-    sensitivity: find('.sensitivity-setting'), quality: find('#quality'), motion: find('#hud-motion'),
+    sensitivity: find('.sensitivity-setting'), aimMode: find('.aim-mode-setting'), quality: find('#quality'), motion: find('#hud-motion'),
     presentation: find('.presentation-controls'), report: find('.field-report'),
     achievements: find('.achievement-panel'), stars: find('#star-collection'), boss: find('#boss-battle-record')
   };
@@ -27,24 +30,34 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   card.replaceChildren();
   card.innerHTML = `
     <header class="menu-header">
-      <div class="menu-brand">${eclipseMark}<span>NEON ECLIPSE<small>TACTICAL CAMPAIGN</small></span></div>
-      <div class="menu-header-meta"><span class="menu-status-dot"></span> 单人战役 <span class="menu-header-divider">/</span> 06 CHAPTERS</div>
+      <div class="menu-brand">${eclipseMark}<span>NEON ECLIPSE<small>战术行动 · 本地进度</small></span></div>
+      <div class="menu-header-meta"><span class="menu-status-dot"></span> <span class="menu-header-divider">/</span> ${MENU_CHAPTERS.length} 章战役</div>
     </header>
+    <aside class="menu-rail" aria-label="菜单目录"><p class="ui-nav-caption">行动终端</p>
+      <button type="button" data-open="home">${menuIcon('resume')}<span>总览</span></button>
+      <button type="button" data-open="levels">${menuIcon('levels')}<span>章节行动</span></button>
+      <button type="button" id="menu-equipment">${menuIcon('play')}<span>装备管理</span><kbd>U</kbd></button>
+      <button type="button" data-open="settings">${menuIcon('settings')}<span>设置</span></button>
+      <button type="button" data-open="records">${menuIcon('resume')}<span>战斗记录</span></button>
+      <button type="button" data-open="achievements">${menuIcon('star')}<span>成就与收藏</span></button>
+      <div class="menu-rail-bottom"><p class="ui-nav-caption">其他行动</p><button type="button" data-menu-route="vehicle">海陆空先遣 <span>↗</span></button><button type="button" data-menu-route="p4">行动中枢 <span>↗</span></button><button type="button" data-menu-route="archive">行动档案 <span>↗</span></button></div>
+    </aside>
     <div class="menu-toolbar" hidden><button type="button" id="menu-back">${menuIcon('back')}<span>返回主菜单</span></button><span class="menu-breadcrumb"></span></div>
-    <div id="menu-notice" role="alert" hidden></div>
     <main class="menu-views">
+    <div id="menu-notice" role="alert" hidden></div>
       <section class="menu-view menu-home" data-view="home" aria-label="主菜单">
         <div class="menu-home-copy">
-          <p class="menu-eyebrow"><span></span> 九章行动 · 一个未熄灭的信号</p>
-          <h1>NEON<br><span>ECLIPSE</span><i>暗影突围</i></h1>
-          <p class="menu-home-intro">穿越封锁线，让信号重返黎明。</p>
+          <p class="menu-eyebrow"><span></span> 部署就绪 · 九章战役</p>
+          <h1>穿越长夜，<br><span>让信号重返黎明。</span></h1>
+          <p class="menu-home-intro">选择下一次行动。进度、装备与偏好，分别管理。</p>
           <nav class="menu-home-actions" aria-label="游戏主菜单">
             ${HOME_MENU_ITEMS.map(item => `<button type="button" id="${item.id}" aria-label="${item.label}">${menuIcon(item.icon)}<span><b>${item.label}</b><small${item.id === 'menu-continue' ? ' id="menu-resume-description"' : ''}>${item.hint}</small></span>${menuIcon('arrow')}</button>`).join('')}
           </nav>
+          <div class="menu-mobile-actions"><small>其他行动</small><button type="button" data-menu-route="vehicle">海陆空先遣 ↗</button><button type="button" data-menu-route="p4">行动中枢 ↗</button><button type="button" data-menu-route="archive">行动档案 ↗</button></div>
         </div>
         <div class="menu-home-scene" aria-hidden="true">
-          <div class="menu-signal"><span class="signal-corner"></span><span class="signal-coordinate">SECTOR / K-19</span><div class="signal-reticle">+</div><span class="signal-coordinate signal-bottom">SIGNAL FOUND<span>●</span></span></div>
-          <div class="menu-scene-caption"><span>THE CAMPAIGN</span><strong>长夜未尽，行动继续。</strong><p>反应堆 → 运输站 → 天穹 → 中枢塔 → 列车 → 港口 → 轨道基座</p></div>
+          <div class="menu-home-art">${chapterArtwork(getSession().map)}</div>
+          <div class="menu-scene-caption"><span>THE CAMPAIGN</span><strong>长夜未尽，行动继续。</strong><p>从反应堆到极地前线 · 九个独立战场</p></div>
         </div>
       </section>
       <section class="menu-view menu-subpage" data-view="levels" aria-labelledby="menu-levels-title" hidden>
@@ -55,23 +68,21 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
         <details class="menu-training"><summary>当前关卡的阶段训练 <span>独立训练，不覆盖战役</span></summary><div id="menu-training-slot"></div></details>
       </section>
       <section class="menu-view menu-subpage" data-view="settings" aria-labelledby="menu-settings-title" hidden>
-        <div class="menu-page-heading"><div><p class="menu-eyebrow">PREFERENCES</p><h2 id="menu-settings-title" tabindex="-1" data-i18n="settings.title">设置</h2></div><p>画面、操作与战斗难度，按你的习惯调整。</p></div>
-        <div class="menu-settings-grid">
-          <section class="menu-settings-panel"><h3>${menuIcon('settings')} <span data-i18n="settings.display">画面与界面</span></h3>
+        <div class="menu-page-heading"><div><p class="menu-eyebrow">PREFERENCES</p><h2 id="menu-settings-title" tabindex="-1" data-i18n="settings.title">设置</h2></div><p>选择左侧分类，只查看当前需要的选项。</p></div>
+        <div id="menu-settings-deck" class="ui-settings-deck">
+          <section class="menu-settings-panel" data-settings-content="graphics"><h3>画面</h3><p class="ui-muted">渲染品质与场景表现。</p>
             <fieldset class="menu-quality"><legend>渲染质量</legend><div class="menu-quality-options">
               <label><input type="radio" name="menu-quality" value="0"><span>性能<small>更低渲染负载</small></span></label>
               <label><input type="radio" name="menu-quality" value="1"><span>均衡<small>推荐默认</small></span></label>
               <label><input type="radio" name="menu-quality" value="2"><span>精细<small>环境阴影</small></span></label>
-            </div></fieldset>
-            <div class="menu-motion-slot"></div><div class="menu-presentation-slot"></div>
-            <p class="menu-setting-hint">画质与 HUD 偏好自动保存在当前浏览器；系统减少动态效果优先。</p>
+            </div></fieldset><div class="menu-effects-slot"></div>
           </section>
-          <section class="menu-settings-panel"><h3>${menuIcon('play')} <span data-i18n="settings.controls">操作</span></h3><div class="menu-sensitivity-slot"></div><div id="menu-flight-pitch"></div><div id="menu-combat-difficulty"></div><h4 data-i18n="settings.legend">键位说明</h4><div class="menu-controls-slot"></div><p class="menu-setting-hint">进入战斗后锁定鼠标。按 Esc 暂停；无法锁定时可按住左键拖动瞄准。</p><div id="menu-bindings"></div><div id="menu-gamepad"></div></section>
-          <section class="menu-settings-panel menu-a11y-panel" id="menu-a11y"></section>
-          <section class="menu-settings-panel menu-language-panel" id="menu-language"></section>
-          <section class="menu-settings-panel menu-save-hub" id="menu-save-hub"></section>
-          <section class="menu-settings-panel menu-audio-panel"><h3>${menuIcon('play')} <span data-i18n="settings.audio">声音</span></h3><div id="menu-audio"></div></section>
-          <section class="menu-settings-panel menu-telemetry-panel"><h3>${menuIcon('star')} <span data-i18n="settings.telemetry">本地统计</span></h3><div id="menu-telemetry"></div></section>
+          <section class="menu-settings-panel menu-audio-panel" data-settings-content="audio"><h3 data-i18n="settings.audio">声音</h3><p class="ui-muted">分开调整音乐、战斗与界面音效。</p><div id="menu-audio"></div></section>
+          <section class="menu-settings-panel" data-settings-content="controls"><h3 data-i18n="settings.controls">操作</h3><div class="menu-sensitivity-slot"></div><div id="menu-flight-pitch"></div><div id="menu-gamepad"></div><details class="ui-control-guide"><summary>默认键位与鼠标锁定</summary><div class="menu-controls-slot"></div><p class="menu-setting-hint">进入战斗后锁定鼠标。Esc 暂停；无法锁定时可按住左键拖动瞄准。</p></details><div id="menu-bindings"></div></section>
+          <section class="menu-settings-panel" data-settings-content="interface"><h3>界面与语言</h3><p class="ui-muted">HUD 大小、信息密度与动态效果。</p><div class="menu-motion-slot"></div><div class="menu-presentation-slot"></div><div id="menu-language"></div></section>
+          <section class="menu-settings-panel" data-settings-content="accessibility"><div class="menu-a11y-panel" id="menu-a11y"></div></section>
+          <section class="menu-settings-panel" data-settings-content="gameplay"><h3>游戏与难度</h3><div id="menu-combat-difficulty"></div><div class="ui-gameplay-links"><button type="button" data-menu-gear>装备管理 · U</button><button type="button" id="menu-field-kit">试点战地整备 · T</button></div><p class="menu-setting-hint">携带与正式改装在装备面板中分别管理，不混入画面或声音设置。</p></section>
+          <section class="menu-settings-panel" data-settings-content="data"><h3>存档与数据</h3><p class="ui-muted">导入、导出与本地统计。危险操作沿用原有确认和校验。</p><div class="menu-save-hub" id="menu-save-hub"></div><details class="ui-telemetry-disclosure"><summary>本地战斗统计与清理</summary><div id="menu-telemetry"></div></details></section>
         </div>
         <div class="menu-page-bottom"><span data-i18n="settings.live">设置在当前界面直接生效</span><button type="button" data-back class="menu-secondary">完成设置 ${menuIcon('check')}</button></div>
       </section>
@@ -113,7 +124,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   original.deploy.className = 'menu-primary';
   original.deploy.type = 'button';
   mount('.menu-motion-slot', original.motion); mount('.menu-presentation-slot', original.presentation);
-  mount('.menu-sensitivity-slot', original.sensitivity); mount('.menu-controls-slot', original.controls);
+  mount('.menu-sensitivity-slot', original.sensitivity); mount('.menu-sensitivity-slot', original.aimMode); mount('.menu-controls-slot', original.controls);
   mount('#menu-training-slot', original.campaign); mount('#menu-field-slot', original.report);
   mount('#menu-stars-slot', original.stars); mount('#menu-achievements-slot', original.achievements); mount('#menu-boss-slot', original.boss);
   if (original.achievements) original.achievements.open = true;
@@ -146,11 +157,12 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     if (options.intent !== undefined) intent = options.intent;
     view = next;
     if (next === 'home') { history = []; intent = null; }
-    clearError(); refresh(); overlay.scrollTop = 0;
+    cancelListening(); clearError(); refresh(); overlay.scrollTop = 0; $('.menu-views').scrollTop=0;
     const focus = next === 'home' ? (resume ? $('#menu-continue') : $('#menu-new')) : next === 'context' ? original.deploy : $('[data-view="' + next + '"] h2');
-    focus?.focus({preventScroll: true});
+    if(!document.querySelector('.carry-panel:not([hidden]),.field-kit-panel:not([hidden])'))focus?.focus({preventScroll:true});
   }
   function back() {
+    cancelListening();
     const previous = history.pop();
     if (!previous) { show('home', {remember: false}); return; }
     intent = previous.intent; view = previous.view; clearError(); refresh();
@@ -174,14 +186,14 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   }
   function closeConfirm() {
     $('.menu-confirm').hidden = true; confirmation = null;
-    $('.menu-views').inert = false; $('.menu-header').inert = false; $('.menu-toolbar').inert = false;
+    $('.menu-views').inert = false; $('.menu-header').inert = false; $('.menu-toolbar').inert = false; $('.menu-rail').inert=false;
     previousFocus?.focus();
   }
   function confirm(title, description, action, label = '确认继续') {
-    previousFocus = document.activeElement; confirmation = action;
+    cancelListening(); previousFocus = document.activeElement; confirmation = action;
     $('#menu-confirm-title').textContent = title; $('#menu-confirm-description').textContent = description;
     $('#menu-confirm-ok').innerHTML = label + menuIcon('arrow'); $('.menu-confirm-error').hidden = true;
-    $('.menu-confirm').hidden = false; $('.menu-views').inert = true; $('.menu-header').inert = true; $('.menu-toolbar').inert = true;
+    $('.menu-confirm').hidden = false; $('.menu-views').inert = true; $('.menu-header').inert = true; $('.menu-toolbar').inert = true; $('.menu-rail').inert=true;
     $('#menu-confirm-cancel').focus();
   }
   function requestNewGame() {
@@ -263,7 +275,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     let time = result?.time ?? s.time, kills = result?.kills ?? s.kills;
     if (complete) { time = s.journey.results.reduce((sum, item) => sum + item.time, 0); kills = s.journey.results.reduce((sum, item) => sum + item.kills, 0); }
     const stats = $('#menu-result-stats'); stats.hidden = !finished && !paused && !lost;
-    stats.innerHTML = `<div><span>${complete ? '总行动用时' : '行动用时'}</span><strong>${formatPlayTime(time)}</strong></div><div><span>击破目标</span><strong>${Math.max(0, kills || 0)}<small>个</small></strong></div><div><span>${paused || lost ? '当前阶段' : '行动状态'}</span><strong class="menu-status-value">${paused || lost ? String(s.stage + 1).padStart(2, '0') + ' / 05' : complete ? '06 / 06' : training ? '训练完成' : '已完成'}</strong></div>`;
+    stats.innerHTML = `<div><span>${complete ? '总行动用时' : '行动用时'}</span><strong>${formatPlayTime(time)}</strong></div><div><span>击破目标</span><strong>${Math.max(0, kills || 0)}<small>个</small></strong></div><div><span>${paused || lost ? '当前阶段' : '行动状态'}</span><strong class="menu-status-value">${paused || lost ? String(s.stage + 1).padStart(2, '0') + ' / ' + String(s.stageCount||5).padStart(2,'0') : complete ? MENU_CHAPTERS.length+' / '+MENU_CHAPTERS.length : training ? '训练完成' : '已完成'}</strong></div>`;
     const brief = $('#menu-briefing'), briefData = advancing ? briefing({mode: s.mode, journey: s.journey, current, next: target, result: result || {time: s.time, kills: s.kills}}) : null;
     brief.hidden = !briefData;
     if (briefData) {
@@ -293,6 +305,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     $('#menu-context-restart').textContent = paused ? '重试本阶段' : '从头重玩本关';
     $('#menu-exit-training').hidden = !training;
     $('.menu-context').dataset.outcome = complete || finished ? 'success' : lost || s.pending ? 'warning' : 'ready';
+    $('.menu-context').dataset.context=paused?'paused':finished||lost||s.pending?'result':'brief';
   }
   function renderSaves() {
     const list = $('#menu-save-list'); list.replaceChildren();
@@ -318,6 +331,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     $('#menu-back span').textContent = '返回' + labels[history.at(-1)?.view || 'home'];
     $('.menu-breadcrumb').textContent = '主菜单 / ' + labels[view];
     overlay.dataset.menuView = view;
+    card.querySelectorAll('.menu-rail [data-open]').forEach(b=>{const selected=b.dataset.open===view;b.setAttribute('aria-current',selected?'page':'false');});
     document.body.dataset.menuOpen = String(session.state !== 'playing');
     if (view === 'context') renderContext();
     if (view === 'saves') renderSaves();
@@ -343,7 +357,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     if (state === previousState) return;
     const first = previousState === null; previousState = state;
     document.body.dataset.menuOpen = String(state !== 'playing');
-    if (state === 'playing') { intent = null; closeConfirm(); return; }
+    if (state === 'playing') { cancelListening(); intent = null; closeConfirm(); return; }
     if (!first) { history = []; show('context', {intent: null, remember: false}); }
     else refresh();
   }
@@ -363,10 +377,23 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   bindTelemetrySetting($('#menu-telemetry'), window.neonTelemetry);
   bindAudioSettings($('#menu-audio'), window.neonAudio);
   const t = (key, vars) => window.neonI18n ? window.neonI18n.t(key, vars) : key;
-  bindKeyBindings($('#menu-bindings'), window.neonInput?.bindings, {t});
+  bindingEditor=bindKeyBindings($('#menu-bindings'), window.neonInput?.bindings, {t});
   bindGamepadStatus($('#menu-gamepad'), window.neonInput?.gamepad, {t});
   bindAccessibilitySettings($('#menu-a11y'), window.neonA11y, {t});
   bindLanguageSetting($('#menu-language'), window.neonI18n);
+  const health=$('[data-save-health]');if(health){const disclosure=document.createElement('details');disclosure.className='ui-save-health-disclosure';const summary=document.createElement('summary');summary.textContent='查看各存档槽位状态';health.before(disclosure);disclosure.append(summary,health);}
+  const effects=original.presentation?.querySelector('.presentation-fx');if(effects)mount('.menu-effects-slot',effects);
+  settingsDeck=createViewDeck({host:$('#menu-settings-deck'),id:'settings',orientation:'vertical',label:'设置分类',beforeChange:cancelListening,items:[
+    ['graphics','画面','质量与场景表现'],['audio','声音','音乐与音效'],['controls','操作','鼠标、键位与手柄'],['interface','界面与语言','HUD 与显示语言'],['accessibility','辅助功能','色彩、形状与字幕'],['gameplay','游戏','难度与装备'],['data','存档与数据','备份与本地记录']
+  ].map(([id,label,hint])=>({id,label,hint,content:$('[data-settings-content="'+id+'"]')}))});
+  const equipment=()=>{cancelListening();actions.equipment?.();};$('#menu-equipment').addEventListener('click',equipment);$('[data-menu-gear]').addEventListener('click',equipment);
+  $('#menu-field-kit').disabled=!actions.fieldKitEnabled;$('#menu-field-kit').title=actions.fieldKitEnabled?'旧版战地整备试点，沿用原有生效规则':'本章未提供该试点';$('#menu-field-kit').addEventListener('click',()=>{cancelListening();actions.fieldKit?.();});
+  card.querySelectorAll('[data-menu-route]').forEach(button=>button.addEventListener('click',()=>{
+    cancelListening();if(button.dataset.menuRoute==='vehicle'){$('#menu-rover').click();return;}
+    const dest=button.dataset.menuRoute==='p4'?['行动中枢','p4-hub.html']:['行动档案','operations-archive.html'];
+    const session=getSession();if(session.pending){show('context',{intent:null});error('请先保存当前结果，再离开此页。');return;}
+    const go=()=>{location.href=dest[1];return true;};if(session.state==='paused')confirm('前往'+dest[0]+'？','离开后只能从最近的已保存阶段继续，当前未保存战斗不会保留。',()=>perform(go),'确认前往');else go();
+  }));
   window.neonI18n?.apply(card); window.neonI18n?.onChange(() => window.neonI18n.apply(card));
   $('#menu-settings').addEventListener('click', () => show('settings'));
   $('#menu-back').addEventListener('click', back);
@@ -407,7 +434,8 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   if (entry === 'chapter' || entry === 'continue') {
     view = 'context'; intent = getSession().mode === 'journey' ? 'journey' : 'single';
   }
+  if(entry==='settings'){view='settings';intent=null;settingsDeck.select(new URLSearchParams(location.search).get('category')||'graphics');}
   refresh();
-  (view === 'context' ? original.deploy : resume ? $('#menu-continue') : $('#menu-new')).focus({preventScroll: true});
+  (view === 'context' ? original.deploy : view==='settings'?$('#menu-settings-title'):resume ? $('#menu-continue') : $('#menu-new')).focus({preventScroll: true});
   return {refresh, update, error, activatePrimary, home: () => show('home')};
 }

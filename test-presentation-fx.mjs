@@ -59,12 +59,12 @@ assert.equal(saveFxSettings({setItem(){throw new Error('quota');}},{}),false);as
 assert(INTRO.duration>=8&&INTRO.duration<=12,'8-12 s intro');assert.equal(INTRO.lineAt.length,3);assert(INTRO.cardAt<INTRO.duration);
 for(const m of MAP_REGISTRY){const c=chapterIntro(m.id);assert.equal(c.map,m.id);assert.equal(c.lines.length,3);assert(c.lines.every(l=>typeof l==='string'&&l.length>4),m.id);assert.equal(c.title,m.title);}
 assert.equal(chapterIntro('nope').map,MAP_REGISTRY[0].id);
-const f0=introFrame(0);assert.equal(f0.lines,0);assert.equal(f0.card,false);assert.equal(f0.skippable,false);assert.equal(f0.done,false);
+const f0=introFrame(0);assert.equal(f0.lines,0);assert.equal(f0.card,false);assert.equal(f0.skippable,true);assert.equal(f0.done,false);
 assert.equal(introFrame(INTRO.lineAt[1]).lines,2);assert.equal(introFrame(INTRO.cardAt).card,true);assert.equal(introFrame(INTRO.minSkipDelay).skippable,true);
 const fEnd=introFrame(INTRO.duration);assert.equal(fEnd.done,true);assert.equal(fEnd.lines,3);assert(fEnd.camera.radius<.02&&fEnd.camera.height<1e-9,'camera converges on spawn');
 assert(introFrame(1).camera.radius>introFrame(5).camera.radius,'fly-by moves inward');assert.equal(introFrame(NaN).t,0);
-const clock=createIntroClock();assert.equal(clock.step(1),null,'inactive clock');clock.start();assert.equal(clock.skip(),false,'too early to skip');
-assert.equal(clock.step(.2).lines,0);assert.equal(clock.skip(),false);clock.step(.3);assert.equal(clock.skip(),true);assert.equal(clock.active,false);assert.equal(clock.ended,true);
+const clock=createIntroClock();assert.equal(clock.step(1),null,'inactive clock');clock.start();assert.equal(clock.skip(),true,'manual skip is immediate');assert.equal(clock.skip(),false,'finish only once');clock.start();
+assert.equal(clock.step(.2).lines,0);assert.equal(clock.skip(),true);assert.equal(clock.active,false);assert.equal(clock.ended,true);
 clock.start();let n=0;while(clock.active&&n<1000){clock.step(.5);n++;}assert.equal(n,INTRO.duration*2);assert.equal(clock.ended,true);
 clock.start();clock.cancel();assert.equal(clock.active,false);assert.equal(clock.ended,false);
 // play decision.

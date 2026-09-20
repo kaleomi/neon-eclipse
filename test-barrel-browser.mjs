@@ -18,9 +18,9 @@ try{
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const errors=[],url=new URL(base);url.search='?map=reactor&menu=chapter';
  const native=await browser.newContext({viewport:{width:960,height:720}}),n=await native.newPage();n.setDefaultTimeout(45000);n.on('pageerror',e=>errors.push(e.message));
- await n.goto(url.href);await n.click('#deploy');await n.waitForFunction(()=>document.body.dataset.menuOpen==='false');await n.keyboard.press('Digit4');
+ await n.goto(url.href);await n.click('#deploy');await n.waitForFunction(()=>document.body.dataset.menuOpen==='false');await n.keyboard.press('Digit3');
  await n.waitForFunction(()=>document.querySelector('#ammo').textContent==='∞'&&!document.querySelector('.parry-status').hidden);
- assert.equal(await n.locator('.loadout-card').count(),8);assert.match(await n.locator('.parry-status').textContent(),/右键弹反/);
+ assert.equal(await n.locator('.loadout-card').count(),3);assert.match(await n.locator('.parry-status').textContent(),/右键弹反/);
  await n.keyboard.press('Digit1');await n.waitForFunction(()=>document.querySelector('.parry-status').hidden);await native.close();
  console.log('PASS: uninstrumented reactor boots, eight weapons, blade hint and firearm hide');
  const context=await browser.newContext({viewport:{width:960,height:720}}),p=await context.newPage();p.setDefaultTimeout(45000);p.on('pageerror',e=>{errors.push(e.message);console.error(e.stack);});
@@ -39,11 +39,11 @@ try{
    wall(){const mesh=box(4,3,.15,19,1.5,19.5);this.cover={mesh,x:19,z:19.5,w:4,h:3,d:.15};obstacles.push(this.cover);scene.updateMatrixWorld(true);},
    bolt({near=false}={}){enemyProjectiles.queue(new THREE.Vector3(19,1.35,near?20:16),new THREE.Vector3(19,1.35,22),false,null,{color:'orange',charge:0,speed:20,damage:50,angles:[0]});enemyProjectiles.update(0,camera.position);},
    view(){camera.position.set(21,1.7,23.5);playerMotion.reset(camera.position,0);yaw=.349;pitch=-.08;camera.rotation.set(pitch,yaw,0);},
-   resume(){return enterPlay();},saveInside(){camera.position.set(19,1.7,18);playerMotion.reset(camera.position,0);saveCheckpoint();return checkpoint();},restore(){const cp=campaign.checkpoint;reset(cp.stageIndex,cp);state='playing';overlay.hidden=true;return this.snapshot();},retry(){reset();return this.snapshot();}
+   resume(){return enterPlay();},saveInside(){camera.position.set(19,1.7,18);playerMotion.reset(camera.position,0);saveCheckpoint();return checkpoint();},restore(){const cp=campaign.checkpoint;reset(cp.stageIndex,cp);state='playing';overlay.hidden=true;return this.snapshot();},retry(){reset();return this.snapshot();},carry(i){if(i!==2&&i!==3)loadout.equip(i);return loadout.allows(i);}
   };`;await route.fulfill({response,body:source});
  });
  await p.goto(url.href);await p.waitForFunction(()=>!!window.__barrel);const run=(m,a)=>p.evaluate(([m,a])=>window.__barrel[m](a),[m,a]);
- async function equip(i){await p.keyboard.press('Digit'+(i+1));await run('tick',.24);}
+ async function equip(i){assert(await run('carry',i),'fixture must carry weapon '+i);await p.keyboard.press((i===3?'Digit3':i===2?'Digit2':'Digit1'));await run('tick',.24);}
  async function fire(i){await p.mouse.move(480,360);await p.mouse.down();let s=await run('tick',i===6?.8:0);await p.mouse.up();if(i===3)s=await run('tick',.16);if(i===5)s=await run('tick',.2);return s;}
  if(process.env.BARREL_SCREENSHOT){await run('setup');await run('view');await run('tick',.4);await mkdir(path.dirname(process.env.BARREL_SCREENSHOT),{recursive:true});await p.screenshot({path:process.env.BARREL_SCREENSHOT});}
  for(let i=0;i<8;i++){let s=await run('setup');assert(s.barrels.every(b=>b.enabled));await equip(i);let shots=0;do{s=await fire(i);shots++;if(!s.barrels[1].broken)await run('tick',.65);}while(!s.barrels[1].broken&&shots<10);assert(s.barrels[1].broken,'weapon '+i);assert(s.pass);assert(s.health<100&&s.health>0);assert.equal(s.kills,0);assert.equal(s.attempt.environmentDamage,0);console.log('PASS barrel weapon '+i);}

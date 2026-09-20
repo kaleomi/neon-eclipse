@@ -1,0 +1,119 @@
+{
+  "time": "2026-09-20T02:20:19.854Z",
+  "log": ".tools/qa-aim-mode/final-1789870455905.log",
+  "results": [
+    {
+      "label": "syntax aim-input.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax controls-settings.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-aim-mode.mjs",
+      "exit": 0
+    },
+    {
+      "label": "syntax combat-ui.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax menu-ui.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax app.js",
+      "exit": 0
+    },
+    {
+      "label": "syntax test-aim-mode-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "full check/rules/integration",
+      "exit": 0
+    },
+    {
+      "label": "test-aim-mode.mjs",
+      "exit": 0
+    },
+    {
+      "label": "test-aim-mode-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "test-combat-controls-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "test-parry-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "test-ui-clean-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "test-ui-clean-layout-browser.mjs",
+      "exit": 0
+    },
+    {
+      "label": "test-loadout-terminals-browser.mjs",
+      "exit": 0
+    }
+  ],
+  "sources": {
+    "aim-input.js": "027480208f79abf9dd03c39e6b8b99dfe2d3bd3b895479c0326941d09be65b3c",
+    "controls-settings.js": "d0c60483ad100495ef9bfd42b56641f623d36a3265e20bced064f0f7220b816d",
+    "test-aim-mode.mjs": "400ec049e4a660c82a78c3fd4d6ca7642bfa1cddfd1a05e6abd834555ee08b86",
+    "combat-ui.js": "26120d53d72e4c9734539329c1487692db35847a7088616fac648992b9dd2ec4",
+    "menu-ui.js": "3117bb5ce6da60ecf729a100ab84bf7b7dc0bdf6ed6ca3a35bbdbceb4ba6eaa4",
+    "app.js": "843409a63da669b78b7047eb4f4cfec8e4d5fe1a1627c9e63449d4dbb1abebe1",
+    "combat.css": "8f774765a624f6f72bc32d247f1d1ccd4f901b344984e9a3b584a5642266a3c5",
+    "ui-clean.css": "51389fe8bcb5b7e71fd6b637430b17728603fe3072b5a885407ceb45727d074a",
+    "test-aim-mode-browser.mjs": "3bdf8e6bfaf77ad2339b7877b6c755a36d67cd90de069910ee88b714d1c3d16d"
+  },
+  "served": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "fcdee7d320b3e63925f8a28182cf4efa7e4aa13e279274ded8ec20291af350f3"
+    },
+    {
+      "path": "aim-input.js",
+      "status": 200,
+      "sha256": "027480208f79abf9dd03c39e6b8b99dfe2d3bd3b895479c0326941d09be65b3c"
+    },
+    {
+      "path": "controls-settings.js",
+      "status": 200,
+      "sha256": "d0c60483ad100495ef9bfd42b56641f623d36a3265e20bced064f0f7220b816d"
+    },
+    {
+      "path": "combat-ui.js",
+      "status": 200,
+      "sha256": "26120d53d72e4c9734539329c1487692db35847a7088616fac648992b9dd2ec4"
+    },
+    {
+      "path": "menu-ui.js",
+      "status": 200,
+      "sha256": "3117bb5ce6da60ecf729a100ab84bf7b7dc0bdf6ed6ca3a35bbdbceb4ba6eaa4"
+    },
+    {
+      "path": "app.js",
+      "status": 200,
+      "sha256": "843409a63da669b78b7047eb4f4cfec8e4d5fe1a1627c9e63449d4dbb1abebe1"
+    },
+    {
+      "path": "combat.css",
+      "status": 200,
+      "sha256": "8f774765a624f6f72bc32d247f1d1ccd4f901b344984e9a3b584a5642266a3c5"
+    },
+    {
+      "path": "ui-clean.css",
+      "status": 200,
+      "sha256": "51389fe8bcb5b7e71fd6b637430b17728603fe3072b5a885407ceb45727d074a"
+    }
+  ]
+}

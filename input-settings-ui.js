@@ -1,6 +1,6 @@
 // Settings panels for batch 8: key rebinding, gamepad status, accessibility toggles, language.
 // Mounted by menu-ui.js into the settings view; reads window.neonInput / neonA11y / neonI18n set by app.js.
-import {ACTIONS,keyLabel} from './input-bindings.js';
+import {ACTIONS,keyLabel,LOCKED_ACTIONS} from './input-bindings.js';
 import {COLOR_MODES} from './accessibility.js';
 import {LOCALE_LABELS} from './i18n/index.js';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -9,20 +9,20 @@ export function bindKeyBindings(container,bindings,{t=k=>k,notify=()=>{}}={}){
  let listening=null;
  function render(){
   const groups=['move','combat','menu'];
-  container.innerHTML=`<h4 data-i18n="bindings.title">${esc(t('bindings.title'))}</h4><p class="menu-setting-hint" data-i18n="bindings.hint">${esc(t('bindings.hint'))}</p>`+groups.map(g=>`<div class="menu-binding-group"><span class="menu-binding-group-title" data-i18n="bindings.group.${g}">${esc(t('bindings.group.'+g))}</span>${ACTIONS.filter(a=>a.group===g).map(a=>{const locked=bindings.rebind===undefined||['pause','turnLeft','turnRight'].includes(a.id);const keys=bindings.codesFor(a.id).map(keyLabel).join(' / ');return `<div class="menu-binding-row" data-action="${a.id}"><span>${esc(a.label)}</span><button type="button" class="menu-binding-key" data-bind="${a.id}" ${locked?'disabled':''} aria-label="${esc(a.label)}: ${esc(keys)}">${listening===a.id?esc(t('bindings.listening')):esc(keys)}</button>${bindings.isDefault(a.id)?'':'<i class="menu-binding-custom" title="自定义">●</i>'}</div>`;}).join('')}</div>`).join('')+`<div class="menu-binding-actions"><button type="button" class="menu-secondary" data-bindings-reset data-i18n="bindings.reset">${esc(t('bindings.reset'))}</button><span class="menu-binding-status" data-bindings-status aria-live="polite"></span></div>`;
+  container.innerHTML=`<h4 data-i18n="bindings.title">${esc(t('bindings.title'))}</h4><p class="menu-setting-hint" data-i18n="bindings.hint">${esc(t('bindings.hint'))}</p>`+groups.map(g=>`<div class="menu-binding-group"><span class="menu-binding-group-title" data-i18n="bindings.group.${g}">${esc(t('bindings.group.'+g))}</span>${ACTIONS.filter(a=>a.group===g).map(a=>{const locked=bindings.rebind===undefined||LOCKED_ACTIONS.includes(a.id);const keys=bindings.codesFor(a.id).map(keyLabel).join(' / ');return `<div class="menu-binding-row" data-action="${a.id}"><span>${esc(a.label)}</span><button type="button" class="menu-binding-key" data-bind="${a.id}" ${locked?'disabled':''} aria-label="${esc(a.label)}: ${esc(keys)}">${listening===a.id?esc(t('bindings.listening')):esc(keys)}</button>${bindings.isDefault(a.id)?'':'<i class="menu-binding-custom" title="自定义">●</i>'}</div>`;}).join('')}</div>`).join('')+`<div class="menu-binding-actions"><button type="button" class="menu-secondary" data-bindings-reset data-i18n="bindings.reset">${esc(t('bindings.reset'))}</button><span class="menu-binding-status" data-bindings-status aria-live="polite"></span></div>`;
  }
- function stop(){listening=null;document.removeEventListener('keydown',onKey,true);render();}
+ function stop({focus=false}={}){const id=listening;listening=null;document.removeEventListener('keydown',onKey,true);render();if(focus&&id)container.querySelector('[data-bind="'+id+'"]')?.focus({preventScroll:true});}
  function onKey(e){
   e.preventDefault();e.stopImmediatePropagation();
-  if(e.code==='Escape'){stop();return;}
-  const id=listening;const r=bindings.rebind(id,e.code);stop();
+  if(e.code==='Escape'){stop({focus:true});return;}
+  const id=listening;const r=bindings.rebind(id,e.code);stop({focus:true});
   const status=container.querySelector('[data-bindings-status]');
   if(!r.ok){status.textContent=r.reason==='reserved'?t('bindings.reserved'):r.reason;return;}
   status.textContent=r.conflict?t('bindings.swapped',{action:ACTIONS.find(a=>a.id===r.conflict)?.label||r.conflict}):keyLabel(e.code);
  }
  container.addEventListener('click',e=>{
   const b=e.target.closest('[data-bind]');
-  if(b){if(listening===b.dataset.bind){stop();return;}listening=b.dataset.bind;render();document.addEventListener('keydown',onKey,true);container.querySelector(`[data-bind="${listening}"]`)?.focus();return;}
+  if(b){if(listening===b.dataset.bind){stop({focus:true});return;}listening=b.dataset.bind;render();document.addEventListener('keydown',onKey,true);container.querySelector(`[data-bind="${listening}"]`)?.focus();return;}
   if(e.target.closest('[data-bindings-reset]')){stop();bindings.reset();render();}
  });
  bindings.onChange(()=>{if(!listening)render();});

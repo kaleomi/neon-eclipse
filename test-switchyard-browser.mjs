@@ -57,7 +57,7 @@ window.__switchyardFixture={
  // New isolated attempt: only the initial stages/guards are elided; actual keyboard/knife/mission paths run.
  s=await run('setup');await run('tick',.1);await run('control',0);await p.keyboard.down('e');s=await run('tick',.65);await p.keyboard.up('e');assert(s.rail.armed);
  await run('safe');s=await run('tick',6.3);assert.equal(s.phase,'exposed');assert.equal(s.hp,1200);assert.equal(s.shots.reduce((a,b)=>a+b,0),0);assert(s.challenge.eligible);assert.equal(s.challenge.shots,0);
- await run('core');await p.keyboard.press('Digit4');await run('tick',.35);
+ await run('core');await p.keyboard.press('Digit3');await run('tick',.35);
  if(process.env.SWITCHYARD_SCREENSHOT){await mkdir(path.dirname(process.env.SWITCHYARD_SCREENSHOT),{recursive:true});await p.screenshot({path:process.env.SWITCHYARD_SCREENSHOT});}
  // Native mouse attacks, original weapon damage/delay/strike window, no direct boss.hit or simulated win.
  for(let i=0;i<80;i++){
@@ -76,7 +76,7 @@ window.__switchyardFixture={
  await p.reload();await p.click('#deploy');await p.waitForFunction(()=>document.body.dataset.playState==='playing');
  for(let weapon=0;weapon<8;weapon++){
   await run('setup');await run('tick',.1);await run('control',0);await p.keyboard.down('e');s=await run('tick',.65);await p.keyboard.up('e');assert(s.rail.armed);
-  await run('safe');await run('tick',6.4);await run('core');assert(await run('equipWeapon',weapon));await p.keyboard.press('Digit'+(weapon+1));await run('tick',.4);
+  await run('safe');await run('tick',6.4);await run('core');assert(await run('equipWeapon',weapon));await p.keyboard.press((weapon===3?'Digit3':weapon===2?'Digit2':'Digit1'));await run('tick',.4);
   await p.mouse.down();s=await run('tick',weapon===6?.95:.4);await p.mouse.up();
   assert(s.hp>0&&s.hp<1200,'weapon '+weapon+' actual core damage '+JSON.stringify(s));assert(s.shots[weapon]>0);
  }

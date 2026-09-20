@@ -1,3 +1,4 @@
+import {EQUIPPED_SLOTS} from './weapon-selection.js';
 // Pure input layer: action table, rebindable key codes, gamepad mapping. No DOM, no three.
 // app.js asks `bindings.is(code,'jump')` / `bindings.held(keys,'forward')` instead of comparing
 // hard-coded `e.code`. Storage key `neon-eclipse.bindings.v1` holds only user overrides.
@@ -9,13 +10,13 @@ export const ACTIONS=Object.freeze([
  {id:'right',label:'右移',codes:['KeyD'],group:'move'},
  {id:'sprint',label:'冲刺',codes:['ShiftLeft','ShiftRight'],group:'move'},
  {id:'jump',label:'跳跃',codes:['Space'],group:'move'},
+ ...EQUIPPED_SLOTS.map(({action,label,code})=>({id:action,label,codes:[code],group:'combat'})),
  {id:'reload',label:'换弹',codes:['KeyR'],group:'combat'},
  {id:'interact',label:'交互（按住）',codes:['KeyE'],group:'combat'},
  {id:'pickup',label:'拾取',codes:['KeyF'],group:'combat'},
  {id:'grenade',label:'投掷物（按住预览）',codes:['KeyG'],group:'combat'},
  {id:'special',label:'武器特技 / 重武器',codes:['KeyH'],group:'combat'},
  {id:'execute',label:'处决',codes:['KeyV'],group:'combat'},
- {id:'ammoType',label:'弹药箱类型',codes:['KeyB'],group:'combat'},
  {id:'fieldKit',label:'野战整备',codes:['KeyT'],group:'menu'},
  {id:'loadout',label:'装备终端',codes:['KeyU'],group:'menu'},
  {id:'quality',label:'切换画质',codes:['KeyQ'],group:'menu'},
@@ -24,9 +25,9 @@ export const ACTIONS=Object.freeze([
  {id:'turnRight',label:'键盘右转',codes:['ArrowRight'],group:'move'}
 ].map(Object.freeze));
 const BY_ID=new Map(ACTIONS.map(a=>[a.id,a]));
-// Escape / arrows / digits are reserved: rebinding them silently would break menus and weapon slots.
-export const RESERVED_CODES=Object.freeze(['Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Enter','Tab']);
-export const LOCKED_ACTIONS=Object.freeze(['pause','turnLeft','turnRight']);
+// Escape / arrows / equipped-slot digits are reserved: rebinding them silently would break menus and weapon slots.
+export const RESERVED_CODES=Object.freeze(['Escape','ArrowUp','ArrowDown','ArrowLeft','ArrowRight',...EQUIPPED_SLOTS.map(slot=>slot.code),'Enter','Tab']);
+export const LOCKED_ACTIONS=Object.freeze(['pause','turnLeft','turnRight',...EQUIPPED_SLOTS.map(slot=>slot.action)]);
 export function keyLabel(code){
  if(typeof code!=='string')return '?';
  if(code.startsWith('Key'))return code.slice(3);
@@ -82,7 +83,7 @@ export function createBindings({storage=null}={}){
  return api;
 }
 // ---- Gamepad (standard mapping) ----
-export const GAMEPAD_BUTTONS=Object.freeze({0:'jump',1:'reload',2:'interact',3:'pickup',4:'execute',5:'grenade',7:'fire',6:'aim',8:'loadout',9:'pause',10:'sprint',11:'special',12:'ammoType',13:'fieldKit',14:'weaponPrev',15:'weaponNext'});
+export const GAMEPAD_BUTTONS=Object.freeze({0:'jump',1:'reload',2:'interact',3:'pickup',4:'execute',5:'grenade',7:'fire',6:'aim',8:'loadout',9:'pause',10:'sprint',11:'special',13:'fieldKit',14:'weaponPrev',15:'weaponNext'});
 export function applyDeadzone(v,dz=.18){if(!Number.isFinite(v))return 0;const a=Math.abs(v);if(a<dz)return 0;return Math.sign(v)*Math.min(1,(a-dz)/(1-dz));}
 // Snapshot: {axes:number[], buttons:{pressed:boolean,value:number}[]} → normalised frame.
 export function readGamepad(gp,{deadzone=.18,lookCurve=1.6}={}){

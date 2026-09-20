@@ -6,7 +6,7 @@ import {INTRO,chapterIntro,introFrame,createIntroClock} from './cinematic-rules.
 export function createChapterIntro({camera,mapId,onFinish=()=>{},rules=INTRO,document:doc=globalThis.document}){
  const data=chapterIntro(mapId),clock=createIntroClock(rules);
  const root=doc.createElement('section');root.className='chapter-intro';root.hidden=true;root.setAttribute('aria-live','polite');
- root.innerHTML=`<div class="chapter-intro-head"><span class="chapter-intro-code"></span><h2 class="chapter-intro-title"></h2><small class="chapter-intro-english"></small></div><ol class="chapter-intro-lines"><li></li><li></li><li></li></ol><div class="chapter-intro-card" hidden><span>OBJECTIVE / 当前目标</span><strong></strong></div><button type="button" class="chapter-intro-skip" data-intro-skip hidden>跳过开场 <kbd>Space</kbd></button>`;
+ root.innerHTML=`<div class="chapter-intro-head"><span class="chapter-intro-code"></span><h2 class="chapter-intro-title"></h2><small class="chapter-intro-english"></small></div><ol class="chapter-intro-lines"><li></li><li></li><li></li></ol><div class="chapter-intro-card" hidden><span>OBJECTIVE / 当前目标</span><strong></strong></div><button type="button" class="chapter-intro-close" data-intro-close aria-label="关闭开场">关闭 ×</button><button type="button" class="chapter-intro-skip" data-intro-skip hidden>跳过开场 <kbd>空格 / 回车</kbd></button>`;
  doc.body.append(root);
  const $=s=>root.querySelector(s);
  $('.chapter-intro-code').textContent=data.code;$('.chapter-intro-title').textContent=data.title;$('.chapter-intro-english').textContent=data.english;
@@ -14,15 +14,15 @@ export function createChapterIntro({camera,mapId,onFinish=()=>{},rules=INTRO,doc
  const lines=[...root.querySelectorAll('.chapter-intro-lines li')];lines.forEach((li,i)=>{li.textContent=data.lines[i];li.dataset.show='false';});
  const spawn=new T.Vector3(),look=new T.Vector3(),savedRotation=new T.Euler();let objective='',shownLines=0,lastFrame=null;
  function begin({objective:title=''}={}){
-  objective=title;$('.chapter-intro-card strong').textContent=objective;$('.chapter-intro-card').hidden=true;$('[data-intro-skip]').hidden=true;
+  objective=title;$('.chapter-intro-card strong').textContent=objective;$('.chapter-intro-card').hidden=true;$('[data-intro-skip]').hidden=!introFrame(0,rules).skippable;
   spawn.copy(camera.position);savedRotation.copy(camera.rotation);shownLines=0;lines.forEach(li=>{li.dataset.show='false';});
-  clock.start();root.hidden=false;doc.body.dataset.cinematic='true';place(introFrame(0,rules));
+  clock.start();root.hidden=false;root.setAttribute('aria-hidden','false');doc.body.dataset.cinematic='true';place(introFrame(0,rules));
  }
  function place(f){
   const c=f.camera;camera.position.set(spawn.x+Math.sin(c.angle)*c.radius,spawn.y+c.height-c.drop*0,spawn.z+Math.cos(c.angle)*c.radius);
   look.set(spawn.x,spawn.y-c.drop,spawn.z-6);camera.lookAt(look);
  }
- function restore(){camera.position.copy(spawn);camera.rotation.copy(savedRotation);root.hidden=true;delete doc.body.dataset.cinematic;}
+ function restore(){camera.position.copy(spawn);camera.rotation.copy(savedRotation);root.hidden=true;root.setAttribute('aria-hidden','true');delete doc.body.dataset.cinematic;}
  function end(){restore();onFinish();}
  function step(realDt){
   if(!clock.active)return null;
@@ -34,6 +34,9 @@ export function createChapterIntro({camera,mapId,onFinish=()=>{},rules=INTRO,doc
  }
  function skip(){if(!clock.skip())return false;end();return true;}
  function cancel(){if(!clock.active)return false;clock.cancel();restore();return true;}
- $('[data-intro-skip]').addEventListener('click',e=>{e.stopPropagation();skip();});
+ for(const selector of ['[data-intro-skip]','[data-intro-close]'])$(selector).addEventListener('click',e=>{e.preventDefault();e.stopPropagation();skip();});
+ // A focused menu button or remapped jump key must not swallow an active intro's dismissal.
+ const dismissKey=e=>{if(!clock.active||e.isComposing)return;if(['Space','Enter'].includes(e.code)||[' ','Enter'].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();skip();}};
+ doc.addEventListener('keydown',dismissKey,true);
  return {begin,step,skip,cancel,data,get active(){return clock.active;},get time(){return clock.time;},get frame(){return lastFrame;},element:root};
 }

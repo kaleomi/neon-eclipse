@@ -12,3 +12,5 @@
 @media(max-width:700px){.combat-feed{display:none}.damage-result{font-size:10px}.low-health{top:85px}}
 
 .mission-overlay{overflow-y:auto}@media(max-height:560px){.mission-overlay{align-items:start}.mission-card{margin:18px 0}}
+
+.aim-mode-setting{margin-top:14px}.aim-mode-setting>label{display:grid;grid-template-columns:minmax(0,1fr) minmax(110px,48%);gap:10px;align-items:center;color:#cbdce2;font:13px/1.6 'Segoe UI','Microsoft YaHei',sans-serif}.aim-mode-setting select{width:100%;min-width:0;max-width:100%;padding:8px;border:1px solid #39515f;border-radius:6px;background:#10202b;color:#dbe8ec;font:inherit}.aim-mode-setting>small{display:block;margin:8px 0;color:#93b0bd;font:11px/1.7 'Segoe UI','Microsoft YaHei',sans-serif}.aim-mode-setting>output{display:block;font:11px/1.6 'Segoe UI','Microsoft YaHei',sans-serif;color:#a2e5ce}

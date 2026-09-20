@@ -7,7 +7,7 @@ export function registerHaloWeakHit(target){
 }
 export function stepHaloMark(target,dt){if(!target.haloMark||!Number.isFinite(dt)||dt<=0)return;target.haloMark.remaining=Math.max(0,target.haloMark.remaining-dt);if(target.haloMark.remaining===0)delete target.haloMark;}
 export function haloDamageMultiplier(target){return target.haloMark?.remaining>0&&target.haloMark.stacks>=3?HALO_MARK.multiplier:1;}
-export function haloMarkText(target){const m=target.haloMark;return !m||m.remaining<=0?'':m.stacks<3?`HALO 标记 ${m.stacks}/3 · ${m.remaining.toFixed(1)}s`:`HALO 易伤 +20% · ${m.remaining.toFixed(1)}s`;}
+export function haloMarkText(target){const m=target.haloMark;return !m||m.remaining<=0?'':m.stacks<3?`光环精准步枪 标记 ${m.stacks}/3 · ${m.remaining.toFixed(1)}s`:`光环精准步枪 易伤 +20% · ${m.remaining.toFixed(1)}s`;}
 // Captures ammunition count, not a target: every emitted round uses current aim and LOS.
 // Pending rounds spend ammo only when emit succeeds. Pause is implemented by not ticking.
 export function createHaloBurst(){

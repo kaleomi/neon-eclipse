@@ -1,0 +1,269 @@
+{
+  "passes": [
+    "native 1/2/3 address carried slots; HUD follows slots; old 4-8 cannot select inventory",
+    "same three hotkeys select owned launcher, penetrator and hammer without changing stored IDs",
+    "one left-button hold chains blade swings; release ends the chain without extra queued swings",
+    "swap, pause and blur interrupt the hold; resume does not create a ghost attack",
+    "hammer holds chain complete charge/impact cycles; release cancels pending charge; no ammo consumed",
+    "melee repeat does not convert semi-auto guns or remove automatic rifle fire",
+    "one actual crate grants all four pools by 25%, ignores B and preserves magazines, locks, tools and checkpoint values",
+    "partial caps never overflow; any deficient type can collect; fully stocked crates stay on the ground",
+    "25% uses light-load capacities; independent pulse-cannon ammo is included, not throwable charges",
+    "future ammo payload is preserved verbatim and cannot consume or mutate supply"
+  ],
+  "errors": [],
+  "lastSnapshot": {
+    "state": "playing",
+    "map": "reactor",
+    "selected": 2,
+    "runtime": 2,
+    "slots": {
+      "version": 1,
+      "primary": 0,
+      "secondary": 2,
+      "melee": 3,
+      "throwable": "emp"
+    },
+    "rounds": [
+      30,
+      8,
+      15,
+      null,
+      36,
+      24,
+      1,
+      6
+    ],
+    "reserves": [
+      0,
+      0,
+      0,
+      null,
+      0,
+      0,
+      0,
+      0
+    ],
+    "pools": {
+      "light": 0,
+      "heavy": 0,
+      "energy": 0,
+      "grenade": 0
+    },
+    "cp": {
+      "stageIndex": 0,
+      "health": 100,
+      "rounds": [
+        30,
+        8,
+        15
+      ],
+      "reserves": [
+        0,
+        0,
+        0
+      ],
+      "selected": 2,
+      "tempest": {
+        "rounds": 36,
+        "reserve": 0,
+        "equipped": false
+      },
+      "halo": {
+        "rounds": 24,
+        "reserve": 0,
+        "equipped": false
+      },
+      "railspike": {
+        "rounds": 1,
+        "reserve": 0,
+        "equipped": false
+      },
+      "volt": {
+        "rounds": 6,
+        "reserve": 0,
+        "equipped": false
+      },
+      "typedAmmo": {
+        "version": 99,
+        "opaque": [
+          "keep",
+          25
+        ]
+      },
+      "weaponMods": {
+        "version": 1,
+        "weapons": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ]
+        ],
+        "heavy": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "emp": {
+        "charges": 2
+      },
+      "tactical": {
+        "version": 1,
+        "charges": {
+          "pulse": 2,
+          "decoy": 2,
+          "smoke": 2
+        }
+      },
+      "fieldKit": {
+        "version": 1,
+        "mode": "standard",
+        "slots": [
+          0,
+          2
+        ],
+        "mods": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "heavy": 2
+      },
+      "loadout": {
+        "version": 1,
+        "primary": 0,
+        "secondary": 2,
+        "melee": 3,
+        "throwable": "emp"
+      },
+      "ordnance": {
+        "version": 1,
+        "owned": [],
+        "rounds": [
+          0,
+          0,
+          0
+        ],
+        "reserve": [
+          0,
+          0,
+          0
+        ]
+      },
+      "x": -33,
+      "z": 5,
+      "yaw": 0,
+      "pitch": 0,
+      "time": 0,
+      "kills": 0,
+      "feetY": 0,
+      "collected": []
+    },
+    "ord": {
+      "version": 1,
+      "owned": [],
+      "rounds": [
+        0,
+        0,
+        0
+      ],
+      "reserve": [
+        0,
+        0,
+        0
+      ],
+      "unsupported": false,
+      "charging": false,
+      "charge": 0,
+      "reload": 0,
+      "cooldown": 0,
+      "flight": null
+    },
+    "kit": {
+      "version": 1,
+      "mode": "standard",
+      "slots": [
+        0,
+        2
+      ],
+      "mods": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "heavy": 2,
+      "busy": false,
+      "active": false,
+      "cooldown": 0,
+      "unsupported": false
+    },
+    "fieldEnabled": true,
+    "hp": null,
+    "attacks": 0,
+    "firing": false,
+    "buffer": 0,
+    "cooldown": 0,
+    "meleeRemaining": 0,
+    "collected": [],
+    "keys": [
+      "1",
+      "2",
+      "3"
+    ],
+    "crate": "ammo-west"
+  }
+}

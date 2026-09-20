@@ -17,13 +17,13 @@ export function formatBossBattleRecord(data){
  `核心暴露 ${data.windows} 轮 · 核心伤害 ${Math.round(data.coreDamage)} · 节点伤害 ${Math.round(data.nodeDamage)}`,
  `战斗期间开火：步枪 ${data.shots[0]} 发 / 霰弹 ${data.shots[1]} 发 / 手枪 ${data.shots[2]} 发 · 近战挥击 ${data.melee} 次`,
  `${data.damageLabel||'Boss 电弧'}实际扣血 ${Math.round(data.arcDamage)}（不含守卫与环境伤害）`];
- if(data.voltShots!==undefined)lines.push(`VOLT 电弧霰弹开火 ${data.voltShots} 发`);
- if(data.loadout?.volt)lines.push(`VOLT 剩余弹药 ${data.loadout.volt.rounds+data.loadout.volt.reserve}`);
- if(data.railspikeShots!==undefined)lines.push(`RAILSPIKE 磁轨开火 ${data.railspikeShots} 发`);
- if(data.loadout?.railspike)lines.push(`RAILSPIKE 剩余弹药 ${data.loadout.railspike.rounds+data.loadout.railspike.reserve}`);
- if(data.haloShots!==undefined)lines.push(`HALO 精准步枪开火 ${data.haloShots} 发`);
- if(data.loadout?.halo)lines.push(`HALO 剩余弹药 ${data.loadout.halo.rounds+data.loadout.halo.reserve}`);
- if(data.tempestShots!==undefined)lines.push(`TEMPEST 冲锋枪开火 ${data.tempestShots} 发`);
+ if(data.voltShots!==undefined)lines.push(`雷霆电弧霰弹枪 电弧霰弹开火 ${data.voltShots} 发`);
+ if(data.loadout?.volt)lines.push(`雷霆电弧霰弹枪 剩余弹药 ${data.loadout.volt.rounds+data.loadout.volt.reserve}`);
+ if(data.railspikeShots!==undefined)lines.push(`磁轨穿透枪 磁轨开火 ${data.railspikeShots} 发`);
+ if(data.loadout?.railspike)lines.push(`磁轨穿透枪 剩余弹药 ${data.loadout.railspike.rounds+data.loadout.railspike.reserve}`);
+ if(data.haloShots!==undefined)lines.push(`光环精准步枪 精准步枪开火 ${data.haloShots} 发`);
+ if(data.loadout?.halo)lines.push(`光环精准步枪 剩余弹药 ${data.loadout.halo.rounds+data.loadout.halo.reserve}`);
+ if(data.tempestShots!==undefined)lines.push(`风暴冲锋枪 冲锋枪开火 ${data.tempestShots} 发`);
  if(data.loadout?.tempest)lines.push(`冲锋枪剩余弹药 ${data.loadout.tempest.rounds+data.loadout.tempest.reserve}`);
  if(data.loadout){const l=data.loadout;lines.push(`记录时生命 ${Math.ceil(l.health)} · 剩余弹药（弹匣+备用）：${l.rounds.map((r,i)=>r+l.reserves[i]).join(' / ')}`);}
  lines.push('仅本次尝试；暂停不计时。开火数包含对守卫、节点及未命中的射击。');

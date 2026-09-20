@@ -1,4 +1,4 @@
-import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR} from './level.js';
+import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,MAP_TITLE} from './level.js';
 import * as THREE from './node_modules/three/build/three.module.js';
 import {STAGES} from './mission.js';
 export function createMissionUI(){
@@ -9,6 +9,7 @@ export function createMissionUI(){
  if(IS_TOWER){root.querySelector('.mission-tracker>span').textContent='OPERATION / CONTROL SPIRE';root.querySelector('h2').textContent='中枢隔离';}
  if(IS_TRAIN){root.querySelector('.mission-tracker>span').textContent='OPERATION / RUNAWAY FREIGHT';root.querySelector('h2').textContent='列车接管';}
  if(IS_HARBOR){root.querySelector('.mission-tracker>span').textContent='OPERATION / STORM HARBOR';root.querySelector('h2').textContent='港口撤离';}
+ root.querySelector('.mission-tracker h2').textContent=MAP_TITLE;
  const list=root.querySelector('ol');
  for(const s of STAGES){const item=document.createElement('li');item.textContent=s.title;list.append(item);}
  const marker=root.querySelector('.objective-marker'),prompt=root.querySelector('.interact-prompt'),progress=prompt.querySelector('[role=progressbar]');
@@ -16,7 +17,7 @@ export function createMissionUI(){
  function update({playing,mission,camera,yaw,target,remaining,canInteract,busy,blockedReason,markerLabel,mechanicActive=false}){
   root.hidden=!playing;if(!playing)return;
   const stage=mission.current,index=mission.state.index;const wrongFloor=stage.feetY!==undefined&&Math.abs(camera.position.y-1.7-stage.feetY)>=.7;
-  if(index!==lastIndex){lastIndex=index;[...list.children].forEach((li,i)=>{li.dataset.state=i<index?'done':i===index?'current':'locked';});}
+  if(index!==lastIndex){root.querySelector('.mission-tracker>span').textContent='当前任务 · 阶段 '+(index+1)+' / '+STAGES.length;lastIndex=index;[...list.children].forEach((li,i)=>{li.dataset.state=i<index?'done':i===index?'current':'locked';});}
   const time=Math.floor(mission.state.time);root.querySelector('.mission-timer').textContent=`${String(Math.floor(time/60)).padStart(2,'0')}:${String(time%60).padStart(2,'0')} / ${remaining} 个敌人`;
   const distance=Math.hypot(target.x-camera.position.x,target.z-camera.position.z);
   projected.copy(target).project(camera);camera.getWorldDirection(forward);

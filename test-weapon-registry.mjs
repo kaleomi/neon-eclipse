@@ -3,10 +3,10 @@ import {WEAPONS as compatible} from './combat.js';
 import {WEAPONS,WEAPON_DEFINITIONS,LEGACY_WEAPON_IDS,getWeaponDefinition,getWeaponId,getWeaponIndex,createWeaponProfile} from './weapons/registry.js';
 import {validateWeaponDefinitions} from './weapons/schema.js';
 const expected=[
- {name:'VANGUARD',cap:30,reserve:150,delay:.11,damage:26,pellets:1,spread:.009,range:70,reload:1.4,automatic:true,kick:.016,headMultiplier:1.75,falloffStart:35,minimumDamage:.8},
- {name:'BREACHER',cap:8,reserve:48,delay:.32,damage:19,pellets:8,spread:.09,range:28,reload:.55,perShell:true,automatic:true,kick:.055,headMultiplier:1.25,falloffStart:7,minimumDamage:.35},
- {name:'GHOST',cap:15,reserve:90,delay:.24,damage:43,pellets:1,spread:.005,range:65,reload:1.05,automatic:false,kick:.028,headMultiplier:2,falloffStart:30,minimumDamage:.75},
- {name:'ARC BLADE',cap:Infinity,reserve:Infinity,delay:.45,damage:95,pellets:1,spread:0,range:3.5,reload:0,automatic:false,kick:0,headMultiplier:1,falloffStart:3.5,minimumDamage:1}
+ {name:'先锋突击步枪',cap:30,reserve:150,delay:.11,damage:26,pellets:1,spread:.009,range:70,reload:1.4,automatic:true,kick:.016,headMultiplier:1.75,falloffStart:35,minimumDamage:.8},
+ {name:'破门霰弹枪',cap:8,reserve:48,delay:.32,damage:19,pellets:8,spread:.09,range:28,reload:.55,perShell:true,automatic:true,kick:.055,headMultiplier:1.25,falloffStart:7,minimumDamage:.35},
+ {name:'幽灵消音手枪',cap:15,reserve:90,delay:.24,damage:43,pellets:1,spread:.005,range:65,reload:1.05,automatic:false,kick:.028,headMultiplier:2,falloffStart:30,minimumDamage:.75},
+ {name:'电弧战刃',cap:Infinity,reserve:Infinity,delay:.45,damage:95,pellets:1,spread:0,range:3.5,reload:0,automatic:false,kick:0,headMultiplier:1,falloffStart:3.5,minimumDamage:1}
 ];
 assert.equal(compatible,WEAPONS,'existing import stays the same registry instance');
 assert.deepEqual(WEAPONS,expected,'every legacy field/value including Infinity and absent perShell is unchanged');

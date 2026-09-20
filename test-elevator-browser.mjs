@@ -50,7 +50,7 @@ window.__elevatorFixture={
  await run('pad');await run('tick',.3);await p.keyboard.press('Escape');await p.waitForFunction(()=>document.body.dataset.playState==='paused');await p.waitForTimeout(200);s=await run('snapshot');assert.equal(s.arena.charge,0);const paused=s.timer;s=await run('tick',3);assert.equal(s.timer,paused);
  await p.click('#deploy');await p.waitForFunction(()=>document.body.dataset.playState==='playing');
  console.log('PASS: last defense frame cannot skip boss, real shield shot rejected, pause clears pad hold and freezes clocks');
- await run('setup');await run('tick',10.1);await run('pad');await run('tick',.65);await p.keyboard.press('Digit4');s=await run('tick',.35);assert.equal(s.phase,'exposed');
+ await run('setup');await run('tick',10.1);await run('pad');await run('tick',.65);await p.keyboard.press('Digit3');s=await run('tick',.35);assert.equal(s.phase,'exposed');
  if(process.env.ELEVATOR_SCREENSHOT){await mkdir(path.dirname(process.env.ELEVATOR_SCREENSHOT),{recursive:true});await run('portrait');await run('tick',.05);await p.screenshot({path:process.env.ELEVATOR_SCREENSHOT});await run('pad');await run('tick',.05);}
  async function rideAndJump(goal){
   await run('board');let s=await run('snapshot');s=await run('tick',Math.abs(goal-s.lift.y)/.65+.15);assert.equal(s.lift.y,goal);assert.equal(s.feet,goal);assert.equal(s.arena.mode,'dock');
@@ -77,7 +77,7 @@ window.__elevatorFixture={
  console.log('PASS: three locks via native knife attacks, riding and W/Space jumps, E fall recovery and moving-lift pause, single credit/battle stats, stage-4 checkpoint and actual extraction');
  await p.reload();await p.click('#deploy');await p.waitForFunction(()=>document.body.dataset.playState==='playing');
  for(let weapon=0;weapon<8;weapon++){
-  await run('setup');await run('tick',.1);await run('pad');await run('tick',.65);assert(await run('equipWeapon',weapon));await p.keyboard.press('Digit'+(weapon+1));await run('tick',.4);await p.mouse.down();s=await run('tick',weapon===6?.95:.4);await p.mouse.up();assert(s.hp<1500&&s.hp>=1000,'weapon '+weapon+' damage '+JSON.stringify(s));assert(s.shots[weapon]>0);
+  await run('setup');await run('tick',.1);await run('pad');await run('tick',.65);assert(await run('equipWeapon',weapon));await p.keyboard.press((weapon===3?'Digit3':weapon===2?'Digit2':'Digit1'));await run('tick',.4);await p.mouse.down();s=await run('tick',weapon===6?.95:.4);await p.mouse.up();assert(s.hp<1500&&s.hp>=1000,'weapon '+weapon+' damage '+JSON.stringify(s));assert(s.shots[weapon]>0);
  }
  console.log('PASS: all eight weapon input/raycast/melee/burst/charge paths, per-lock damage cap');
  await run('setup');await run('tick',.1);if(process.env.ELEVATOR_SCREENSHOT){await run('view');await run('tick',10);await p.screenshot({path:process.env.ELEVATOR_SCREENSHOT.replace(/\.png$/,'-arena.png')});}

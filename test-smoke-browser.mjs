@@ -83,7 +83,7 @@ try{
   assert.ok(snap.state==='running'||snap.state==='suspended','context exists after gesture: '+snap.state);
   // Fire, reload, swing the blade; all must go through the procedural player without throwing.
   await page.mouse.move(640,360);await page.mouse.down();await page.waitForTimeout(350);await page.mouse.up();
-  await page.keyboard.press('KeyR');await page.keyboard.press('Digit4');await page.mouse.click(640,360);await page.waitForTimeout(700);
+  await page.keyboard.press('KeyR');await page.keyboard.press('Digit3');await page.mouse.click(640,360);await page.waitForTimeout(700);
   const stats=await page.evaluate(()=>({voices:window.neonAudio.sfx.stats().played,state:window.neonAudio.director?.state}));
   assert.ok(stats.voices>=3,'sfx played during play: '+stats.voices);
   assert.ok(['explore','combat','boss'].includes(stats.state),'music state while playing: '+stats.state);

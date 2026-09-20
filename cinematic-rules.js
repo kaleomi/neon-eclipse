@@ -2,7 +2,7 @@
 // between-chapter briefing. No DOM, no three.js: app/menu modules render whatever these functions return.
 import {MAP_REGISTRY} from './maps/registry.js';
 import {formatPlayTime} from './menu-state.js';
-export const INTRO=Object.freeze({duration:10,lineAt:Object.freeze([.6,3.2,5.8]),cardAt:8,minSkipDelay:.4,orbit:Object.freeze({radius:7,height:5.5,drop:1.2})});
+export const INTRO=Object.freeze({duration:10,lineAt:Object.freeze([.6,3.2,5.8]),cardAt:8,minSkipDelay:0,orbit:Object.freeze({radius:7,height:5.5,drop:1.2})});
 // Third line per chapter; the first two come from the registry so a new chapter needs no edit here.
 const CHAPTER_LINES=Object.freeze({
  reactor:'守卫已切断冷却回路，Warden 在核心层等待。',station:'末班列车停靠中，道岔仍由 SWITCHYARD 控制。',roof:'两座中继塔暴露在高压之下，监察者在楼顶巡视。',

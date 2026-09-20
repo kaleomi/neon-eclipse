@@ -27,3 +27,8 @@ body[data-cinematic=true] > :is(.topbar,.compass,.left-panel,.right-panel,footer
 .menu-briefing h4{margin:0 0 4px;font:700 11px/1 'Arial Black',sans-serif;letter-spacing:.2em;color:#8fb8c2}
 .menu-briefing p{margin:0;font:500 13px/1.4 'Noto Sans CJK SC','Microsoft YaHei',sans-serif;color:#dff6fa}
 .menu-briefing small{display:block;margin-top:4px;font-size:11px;color:#9fd8e2}
+
+/* Author display:grid must never override the HTML hidden contract. */
+.chapter-intro[hidden],.chapter-intro [hidden],body:not([data-cinematic=true]) .chapter-intro{display:none!important;pointer-events:none!important}
+.chapter-intro-close{position:fixed;right:4vw;top:5vh;pointer-events:auto;min-width:44px;min-height:40px;border:1px solid #a6cdda88;border-radius:4px;background:#09212de8;color:#d8f7ff;font:600 13px/1.2 "Microsoft YaHei",sans-serif;cursor:pointer}
+.chapter-intro-skip:focus-visible,.chapter-intro-close:focus-visible{outline:2px solid #b1f6dc;outline-offset:4px}

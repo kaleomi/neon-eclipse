@@ -19,7 +19,7 @@ try{
  const errors=[],url=new URL(base);url.search='?map=reactor&menu=chapter';
 
  const context=await browser.newContext({viewport:{width:1000,height:800}}),p=await context.newPage();p.setDefaultTimeout(60000);p.on('pageerror',e=>errors.push(e.stack));
- await p.route('**/app.js',async route=>{const response=await route.fetch();let source=await response.text();assert(source.includes("if(state==='playing')update(dt);"));source=source.replace("if(state==='playing')update(dt);",'if(false)update(dt);');source+=`
+ await p.route('**/app.js',async route=>{const response=await route.fetch();let source=await response.text();assert(source.includes("if(state==='playing')update(dt);"));source=source.replace("if(state==='playing')update(dt);",'if(false)update(dt);').replace('if(introActive)chapterIntro.step(p4RealDt);','if(false)chapterIntro.step(p4RealDt);');source+=`
  window.__env={fresh(){reset(0);state='playing';document.body.dataset.playState=state;overlay.hidden=true;for(const e of enemies)scene.remove(e.group);enemies.length=0;enemyDirector.clear();return this.snap();},
   place(type,x,z,flags={}){const profile=ENEMY_TYPES[type],group=createEnemyModel(type);group.position.set(x,0,z);scene.add(group);enemies.push({flankRoute:[],group,type,hp:profile.hp,maxHp:profile.hp,boss:false,bossState:null,speed:profile.speed,attack:0,radius:profile.radius,charge:0,seed:enemies.length,...flags});return this.snap();},
   kill(index){const e=enemies[index];e.hp=0;const before=kills;cooldown=0;reload=0;rounds[selected]=Math.max(rounds[selected],1);shoot();return {...this.snap(),killed:kills-before};},
@@ -61,7 +61,7 @@ try{
  assert.equal(await p.locator('.chapter-intro-title').textContent(),'反应堆设施');
  const el0=s.elapsed;s=await run('frame',.05,80);assert(Math.abs(s.elapsed-el0)<1e-9,'no simulation during intro');assert.equal(s.intro.lines,2,'two lines at 4 s: '+JSON.stringify(s.intro));assert.equal(s.intro.card,false);assert.equal(s.intro.skip,true);
  s=await run('frame',.05,90);assert.equal(s.intro.lines,3);assert.equal(s.intro.card,true);assert((await p.locator('.chapter-intro-card strong').textContent()).length>2,'objective card text');
- await p.keyboard.press('Space');s=await run('frame',.05,1);assert.equal(s.intro.active,false,'space skips');assert.equal(s.cinematic,null);assert.equal(s.intro.hidden,true);assert(Math.abs(s.cam.x-camSpawn.x)<1e-6&&Math.abs(s.cam.z-camSpawn.z)<1e-6&&Math.abs(s.cam.y-camSpawn.y)<1e-6,'camera restored '+JSON.stringify(s.cam));assert.equal(s.gun,true);
+ await p.keyboard.press('Space');s=await run('frame',.05,1);assert.equal(s.intro.active,false,'space skips');assert.equal(s.cinematic,null);assert.equal(s.intro.hidden,true);assert.equal(await p.locator('.chapter-intro').evaluate(e=>getComputedStyle(e).display),'none','hidden must suppress actual rendering, not just set an attribute');assert(Math.abs(s.cam.x-camSpawn.x)<1e-6&&Math.abs(s.cam.z-camSpawn.z)<1e-6&&Math.abs(s.cam.y-camSpawn.y)<1e-6,'camera restored '+JSON.stringify(s.cam));assert.equal(s.gun,true);
  s=await run('frame',.05,2);assert(s.elapsed>el0,'simulation resumes after skip');
  // full run-through without skipping ends by itself; Escape cancels and restores.
  s=await run('fresh');s=await run('intro');s=await run('frame',.05,201);assert.equal(s.intro.active,false,'auto end at 10 s');assert.equal(s.cinematic,null);

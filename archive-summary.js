@@ -3,7 +3,7 @@ import {validTelemetryRecord} from './telemetry.js';
 import {validFramePerf,summarizeFramePerf} from './frame-stats.js';
 export {summarizeFramePerf};
 export const ARCHIVE_LIMIT=2000;
-export const WEAPON_LABELS=['VANGUARD','BREACHER','GHOST','ARC BLADE','TEMPEST','HALO','RAILSPIKE','VOLT'];
+export const WEAPON_LABELS=['先锋突击步枪','破门霰弹枪','幽灵消音手枪','电弧战刃','风暴冲锋枪','光环精准步枪','磁轨穿透枪','雷霆电弧霰弹枪'];
 const finite=(v,max=1e7)=>Number.isFinite(v)&&v>=0&&v<=max;
 export function archiveRecord(r){
  try{

@@ -12,7 +12,7 @@ import {applySupply} from './mission.js';
 import {SFX,WEAPON_FIRE} from './audio/sfx-catalog.js';
 const all=createRuntimeWeapons(),t=all[4],definition=getWeaponDefinition('tempest');
 assert.deepEqual(RUNTIME_WEAPON_IDS,['vanguard','breacher','ghost','arc-blade','tempest','halo','railspike','volt']);assert.equal(all.length,8);assert.deepEqual(all.slice(0,4),WEAPONS);assert.equal(getWeaponId(4),null);assert.equal(getWeaponIndex('tempest'),-1,'not a legacy slot');
-assert.equal(t.name,'TEMPEST');assert.equal(t.cap,36);assert(t.delay<WEAPONS[0].delay&&t.damage<WEAPONS[0].damage);assert(Object.isFrozen(definition.combat));all[4].damage=1;assert.equal(createRuntimeWeapons()[4].damage,16);all[4].damage=16;
+assert.equal(t.name,'风暴冲锋枪');assert.equal(t.cap,36);assert(t.delay<WEAPONS[0].delay&&t.damage<WEAPONS[0].damage);assert(Object.isFrozen(definition.combat));all[4].damage=1;assert.equal(createRuntimeWeapons()[4].damage,16);all[4].damage=16;
 assert(Math.abs(shotSpread(t,0,0,true)/shotSpread(t,0,0,false)-1.04)<1e-10);assert(Math.abs(shotSpread(WEAPONS[0],0,0,true)/shotSpread(WEAPONS[0],0,0,false)-1.55)<1e-10);assert.equal(damageAtDistance(t,43),0);assert(damageAtDistance(t,42)<damageAtDistance(t,5));
 const running={moving:true,aiming:false,firing:false,reload:1};assert(canSprintWithWeapon(t,running));for(const w of WEAPONS)assert(!canSprintWithWeapon(w,running));for(const patch of [{moving:false},{aiming:true},{firing:true}])assert(!canSprintWithWeapon(t,{...running,...patch}));
 const r=advanceReload(.5,1.5,10,20,t);assert.equal(r.rounds,10);assert.equal(r.reserve,20);const done=advanceReload(1,r.remaining,r.rounds,r.reserve,t);assert.equal(done.rounds,30);assert.equal(done.reserve,0);assert.equal(done.remaining,0);

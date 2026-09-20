@@ -13,16 +13,16 @@ try{
   localStorage.setItem('p1-weapon-sentinel','keep');
   return {same:r.WEAPONS===c.WEAPONS,ids:r.LEGACY_WEAPON_IDS,names:r.WEAPONS.map(w=>w.name),infinite:r.WEAPONS[3].cap===Infinity};
  });
- assert.deepEqual(registry,{same:true,ids:['vanguard','breacher','ghost','arc-blade'],names:['VANGUARD','BREACHER','GHOST','ARC BLADE'],infinite:true});
+ assert.deepEqual(registry,{same:true,ids:['vanguard','breacher','ghost','arc-blade'],names:['先锋突击步枪','破门霰弹枪','幽灵消音手枪','电弧战刃'],infinite:true});
  const ammo=async expected=>{try{await page.waitForFunction(n=>document.querySelector('#ammo').textContent===n,expected,{timeout:15000});}catch(e){console.log(await page.evaluate(()=>({ammo:document.querySelector('#ammo').textContent,state:document.body.dataset.playState,health:document.querySelector('#health').textContent,menu:document.body.dataset.menuOpen})));throw e;}};
  await ammo('30');await page.mouse.click(480,360);await ammo('29');
- await equipAtTerminal(page,1);await page.keyboard.press('Digit2');await ammo('8');await page.waitForFunction(()=>document.querySelector('.dynamic-crosshair').style.opacity==='1');
+ await equipAtTerminal(page,1);await page.keyboard.press('Digit1');await ammo('8');await page.waitForFunction(()=>document.querySelector('.dynamic-crosshair').style.opacity==='1');
  await page.mouse.click(480,360);await ammo('7');await page.keyboard.press('KeyR');await ammo('8');
- await page.keyboard.press('Digit3');await ammo('15');await page.waitForFunction(()=>document.querySelector('.dynamic-crosshair').style.opacity==='1');
+ await page.keyboard.press('Digit2');await ammo('15');await page.waitForFunction(()=>document.querySelector('.dynamic-crosshair').style.opacity==='1');
  await page.mouse.click(480,360);await ammo('14');
- await page.keyboard.press('Digit4');await ammo('∞');assert.equal(await page.locator('#player-hud .ammo').getAttribute('data-weapon'),'melee');
+ await page.keyboard.press('Digit3');await ammo('∞');assert.equal(await page.locator('#player-hud .ammo').getAttribute('data-weapon'),'melee');
  await page.keyboard.press('Escape');await page.waitForFunction(()=>document.body.dataset.menuOpen==='true');
  assert.equal(await page.evaluate(()=>localStorage.getItem('p1-weapon-sentinel')),'keep');assert.deepEqual(errors,[]);
- console.log('PASS: uninstrumented game, browser registry imports, native terminal exchange and keys 1–4 legacy weapon selection, rifle/shotgun/pistol firing, shotgun shell reload, infinite blade ammo, pause and isolated save sentinel');
+ console.log('PASS: uninstrumented game, browser registry imports, native terminal exchange and keys 1/2/3 carried-slot selection (legacy IDs unchanged), rifle/shotgun/pistol firing, shotgun shell reload, infinite blade ammo, pause and isolated save sentinel');
  await context.close();
 }finally{await browser.close();}

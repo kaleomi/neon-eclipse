@@ -18,9 +18,9 @@ try{
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const errors=[],url=new URL(base);url.search='?map=reactor&menu=chapter';
  const native=await browser.newContext({viewport:{width:960,height:720}}),n=await native.newPage();n.setDefaultTimeout(45000);n.on('pageerror',e=>errors.push(e.message));
- await n.goto(url.href);await n.click('#deploy');await n.waitForFunction(()=>document.body.dataset.menuOpen==='false');await n.keyboard.press('Digit4');
+ await n.goto(url.href);await n.click('#deploy');await n.waitForFunction(()=>document.body.dataset.menuOpen==='false');await n.keyboard.press('Digit3');
  await n.waitForFunction(()=>document.querySelector('#ammo').textContent==='∞'&&!document.querySelector('.parry-status').hidden);
- assert.equal(await n.locator('.loadout-card').count(),8);assert.match(await n.locator('.parry-status').textContent(),/右键弹反/);
+ assert.equal(await n.locator('.loadout-card').count(),3);assert.match(await n.locator('.parry-status').textContent(),/右键弹反/);
  await n.keyboard.press('Digit1');await n.waitForFunction(()=>document.querySelector('.parry-status').hidden);
   await n.waitForFunction(()=>document.body.dataset.playState==='playing'&&document.querySelector('.dynamic-crosshair').style.opacity==='1'); // Let the real weapon switch finish before pausing.
   // Native integration: the two equipment dialogs must never overlap; Escape works on selects.

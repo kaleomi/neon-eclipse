@@ -35,7 +35,7 @@ window.__polish={
   for(const index of [3,4]){const cp=await p.evaluate(i=>window.__polish.seed(i),index),s=await call(p,'retry');assert.equal(s.error,null,map+' stage '+index);assert.equal(s.failed,'lost');assert.equal(s.state,'playing');assert.deepEqual(s.rounds.slice(0,3),cp.rounds);assert.equal(s.stage,index);assert.equal(s.x,cp.x);assert.equal(s.z,cp.z);assert.equal(s.feet,cp.feetY);assert.equal(s.health,77);assert.equal(s.kills,9);assert.equal(s.time,123);assert(s.count>=s.expected);assert(!s.eligible);assert.equal(s.defending,false);}
   await p.keyboard.press('Escape');await p.waitForFunction(()=>document.body.dataset.playState==='paused');await p.click('#deploy');await p.waitForFunction(()=>document.body.dataset.playState==='playing');assert.deepEqual(errors,[]);console.log('PASS',map,'stage 3/4 reset, old schema, live encounter, resource preservation and pause/resume');await p.close();
  }
- const p=await open('harbor');let s=await call(p,'setupRoute');assert.equal(s.phase,'shield');await p.keyboard.press('Digit4');await call(p,'tick',.4);
+ const p=await open('harbor');let s=await call(p,'setupRoute');assert.equal(s.phase,'shield');await p.keyboard.press('Digit3');await call(p,'tick',.4);
  async function walk(x,z,jump=false){await p.keyboard.down('w');await p.keyboard.down('Shift');if(jump)await p.keyboard.press('Space');const s=await call(p,'walkTo',[x,z,8]);await p.keyboard.up('w');await p.keyboard.up('Shift');return s;}
  for(const [x,z] of [[10,-17.6],[10,-22],[-20,-22],[-20,-16],[-10,-16],[-10,-19.8],[-4,-19.8],[-4,-16.6],[-3,-16.6]])s=await walk(x,z);
  assert.equal(s.feet,3);let hits=0;

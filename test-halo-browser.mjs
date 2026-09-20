@@ -17,7 +17,7 @@ try{
  const errors=[];
  const native=await browser.newContext({viewport:{width:1280,height:800}}),page=await native.newPage();page.setDefaultTimeout(60000);page.on('pageerror',e=>errors.push(e.message));
  const url=new URL(base);url.search='?map=reactor&menu=chapter';await page.goto(url.href);await page.click('#deploy');await page.waitForFunction(()=>document.body.dataset.menuOpen==='false');
- await equipAtTerminal(page,5);await page.keyboard.press('Digit6');await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='24');assert.equal(await page.locator('.loadout-card').count(),8);assert(await page.locator('[data-weapon=halo]').evaluate(e=>e.classList.contains('active')));
+ await equipAtTerminal(page,5);await page.keyboard.press('Digit1');await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='24');assert.equal(await page.locator('.loadout-card').count(),3);assert(await page.locator('[data-weapon=halo]').evaluate(e=>e.classList.contains('active')));
  await page.waitForFunction(()=>document.querySelector('.dynamic-crosshair').style.opacity==='1');await page.mouse.down();await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='21');await page.waitForTimeout(700);assert.equal(await page.locator('#ammo').textContent(),'21');await page.mouse.up();
  await page.keyboard.press('r');await page.waitForFunction(()=>document.querySelector('#ammo').textContent==='24');
  if(process.env.HALO_SCREENSHOT){await mkdir(path.dirname(process.env.HALO_SCREENSHOT),{recursive:true});await page.screenshot({path:process.env.HALO_SCREENSHOT});}
@@ -42,7 +42,7 @@ window.__haloFixture={
  // All subsequent weapons use the target multiplier, rather than a HALO-only bonus.
  await p.evaluate(()=>window.__haloFixture.carryRifle());await p.keyboard.press('Digit1');await tick(.4);await aim('head');const before=(await snapshot()).hp;s=await click();assert(Math.abs(before-s.hp-26*1.75*1.2)<.01,JSON.stringify({before,s}));
  // Actual reload/switch/reset cancel queued rounds without refunding the first.
- for(const action of ['r','Digit3']){await setup();await click();await p.keyboard.press(action);s=await tick(.3);assert.equal(s.pending,0);assert.equal(s.shots[5],1);assert.equal(s.rounds[5],23);}
+ for(const action of ['r','Digit2']){await setup();await click();await p.keyboard.press(action);s=await tick(.3);assert.equal(s.pending,0);assert.equal(s.shots[5],1);assert.equal(s.rounds[5],23);}
  await setup();await click();s=await p.evaluate(()=>window.__haloFixture.clear());assert.equal(s.pending,0);assert.equal(s.rounds[5],24);
  for(const ammo of [1,2]){await setup({ammo,reserve:0});await click();s=await tick(.2);assert.equal(s.shots[5],ammo);assert.equal(s.rounds[5],0);assert.equal(s.pending,0);}await setup({ammo:0,reserve:0});s=await click();assert.equal(s.shots[5],0);
  // New rounds acquire current LOS: cover inserted after round one blocks two and three.

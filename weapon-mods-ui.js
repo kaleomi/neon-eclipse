@@ -1,16 +1,17 @@
+import {organizeEquipmentPanel} from './ui-panels.js';
 import {MOD_SLOTS,MOD_OPTIONS,HEAVY_MOD_INDICES,HEAVY_MOD_OPTIONS,freshWeaponMods,validWeaponMods,modUnlocked,modsAllowed,moddedProfile,heavyProfile} from './weapon-mods-rules.js';
 import {ORDNANCE} from './ordnance-rules.js';
 const copy=v=>JSON.parse(JSON.stringify(v));
 export function createWeaponWorkshop({weapons,base,getUnlocks,disabled=false,heavySupported=false,onRestart=()=>false}){
  let draft=freshWeaponMods(),current=freshWeaponMods(),opaque;
- const root=document.createElement('details');root.className='weapon-workshop';root.innerHTML='<summary>改装工坊 / 枪口 · 弹匣 · 瞄具</summary><p>七把常规枪械与两把重武器，每槽互斥。不增加伤害、弹容量或备弹。保存仅影响本页下次章首新行动，继续/重试不换配置、不补弹。近战与重锤不改装，P4独立模式不启用本工坊。</p><p data-mod-unlocks></p><p data-mod-current></p><div data-mod-grid></div><div data-heavy-grid hidden><p>重武器改装：CINDER 发射管/引信/瞄具，LANCE 线圈/能室/瞄具。解锁门槛与常规枪相同；未领取的重武器配置仍会保存，领取后于下次章首生效。</p></div><p>某枪选择正式组件后，该枪不再叠加旧 T 试点组件；轻量库存仍有效。</p><button type="button" data-save-mods>保存下次章首改装</button><button type="button" data-start-mods>应用并从章首重开</button><output data-mod-status></output>';
+ const root=document.createElement('details');root.className='weapon-workshop';root.innerHTML='<summary>改装工坊 / 枪口 · 弹匣 · 瞄具</summary><p>七把常规枪械与两把重武器，每槽互斥。不增加伤害、弹容量或备弹。保存仅影响本页下次章首新行动，继续/重试不换配置、不补弹。近战与重锤不改装，P4独立模式不启用本工坊。</p><p data-mod-unlocks></p><p data-mod-current></p><div data-mod-grid></div><div data-heavy-grid hidden><p>重武器改装：灰烬榴弹炮 发射管/引信/瞄具，光矛穿甲炮 线圈/能室/瞄具。解锁门槛与常规枪相同；未领取的重武器配置仍会保存，领取后于下次章首生效。</p></div><p>某枪选择正式组件后，该枪不再叠加旧 T 试点组件；轻量库存仍有效。</p><button type="button" data-save-mods>保存下次章首改装</button><button type="button" data-start-mods>应用并从章首重开</button><output data-mod-status></output>';
  const grid=root.querySelector('[data-mod-grid]'),heavyGrid=root.querySelector('[data-heavy-grid]');
  function fieldset(name,options,key){const group=document.createElement('fieldset'),legend=document.createElement('legend');group.style.minWidth='0';legend.textContent=name;group.append(legend);for(const [slot,slotKey] of MOD_SLOTS.entries()){const label=document.createElement('label');label.textContent=['枪口','弹匣','瞄具'][slot];const select=document.createElement('select');select.style.cssText='max-width:100%;min-width:0;box-sizing:border-box;display:block;width:100%';select.dataset.weaponMod=key+':'+slot;options[slotKey].forEach((text,n)=>select.add(new Option(text,String(n))));label.append(select);group.append(label);}return group;}
  for(let i=0;i<weapons.length;i++){if(i===3)continue;grid.append(fieldset(weapons[i].name,MOD_OPTIONS,i));}
  for(const index of HEAVY_MOD_INDICES)heavyGrid.append(fieldset(ORDNANCE[index].name+' · 重武器',HEAVY_MOD_OPTIONS[index],'h'+index));
  heavyGrid.hidden=!heavySupported;
  root.style.cssText='margin-top:14px;border-top:1px solid #548c9b;padding-top:12px';document.querySelector('.carry-panel').append(root);
- const status=root.querySelector('[data-mod-status]'),button=root.querySelector('[data-save-mods]'),restart=root.querySelector('[data-start-mods]');let armed=false;function unarm(){armed=false;restart.textContent='应用并从章首重开';}root.addEventListener('change',unarm);
+ const status=root.querySelector('[data-mod-status]'),button=root.querySelector('[data-save-mods]'),restart=root.querySelector('[data-start-mods]');let armed=false;function unarm(){armed=false;restart.textContent='应用并从章首重开';}root.addEventListener('change',unarm);root.addEventListener('ui-workshop-leave',unarm);
  const selects=()=>root.querySelectorAll('select[data-weapon-mod]');
  const parseKey=select=>{const [k,slot]=select.dataset.weaponMod.split(':');return k.startsWith('h')?{heavy:HEAVY_MOD_INDICES.indexOf(+k.slice(1)),slot:+slot}:{weapon:+k,slot:+slot};};
  const rowOf=(value,key)=>key.heavy!==undefined?(value.heavy??[[0,0,0],[0,0,0]])[key.heavy]:value.weapons[key.weapon];
@@ -21,5 +22,6 @@ export function createWeaponWorkshop({weapons,base,getUnlocks,disabled=false,hea
  function reset(value){opaque=value!==undefined&&!validWeaponMods(value)?copy(value):undefined;current=disabled?freshWeaponMods():validWeaponMods(value)?copy(value):value===undefined&&modsAllowed(draft,getUnlocks())?copy(draft):freshWeaponMods();if(!current.heavy)current.heavy=[[0,0,0],[0,0,0]];for(let i=0;i<weapons.length;i++){delete weapons[i].zoom;if(!Object.hasOwn(base[i],'movementPenalty'))delete weapons[i].movementPenalty;if(i!==3&&current.weapons[i].some(Boolean)){const reserve=weapons[i].reserve;Object.assign(weapons[i],moddedProfile(base[i],current.weapons[i]),{reserve});}}refresh();}
  // Heavy profile consumers read this at fire time; the checkpoint keeps the row, never the derived numbers.
  function heavy(index){const j=HEAVY_MOD_INDICES.indexOf(index);return j<0?null:heavyProfile(index,disabled||opaque!==undefined||!heavySupported?[0,0,0]:current.heavy[j]);}
+ organizeEquipmentPanel(document.querySelector('.carry-panel'),root);
  return {reset,heavy,checkpoint:()=>({weaponMods:copy(opaque===undefined?current:opaque)}),snapshot:()=>({current:copy(current),draft:copy(draft),unsupported:opaque!==undefined}),refresh};
 }

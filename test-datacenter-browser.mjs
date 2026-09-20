@@ -56,7 +56,7 @@ try{
   assert.equal(wet.speedScale,.55,'water speed scale');assert.ok(wetDist<dryDist*.75,'wet walk '+wetDist+' vs dry '+dryDist);
   assert.match(await page.locator('.hazard-notice.water-notice').innerText(),/短路/);
   // Energy weapon (HALO, key 6) refuses to fire under water and shows the short-circuit notice.
-  await page.keyboard.press('Digit6');await page.waitForTimeout(700);await page.mouse.down();await page.waitForTimeout(300);await page.mouse.up();
+  await page.keyboard.press('Digit1');await page.waitForTimeout(700);await page.mouse.down();await page.waitForTimeout(300);await page.mouse.up();
   await page.waitForFunction(()=>window.__datacenterProbe().shorted===true&&/短路/.test(window.__datacenterProbe().toast),null,{timeout:5000});
   // Plinth top (1.5 m) is above HIGH water: speed scale back to 1.
   await page.evaluate(()=>window.__datacenterProbe().place(-20,20,1.5,0));await page.waitForTimeout(200);

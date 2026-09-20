@@ -79,3 +79,12 @@ const ctx={get state(){return state;},set state(v){state=v;},get reset(){return 
 - 浏览器未通过且**与本阶段无关**：`test-p4-browser.mjs` 在 survival 模式等 `装备主武器` 按钮超时、`test-expedition-browser.mjs` 在 `#expedition-difficulty` 不可见超时——用 HEAD 版 app.js 复跑结果相同（日志 `.tools/s2-p4-head.log`、`.tools/s2-expedition-head.log`），来源是基线中用户的 UI 改动。p4 链在第一个断言前已通过 `__p4Probe.snapshot().state==='playing'` 与暂停/继续，说明 `p4-bridge` 接线正常。
 - 过程中修过的两个生成器缺陷（已在最终版修复、由测试覆盖）：① `checkpoint` 作为 `requestIntro(stageIndex,checkpoint)` 参数名遮蔽了全局函数，首版把整块内的 `checkpoint()` 一律跳过导致 `ReferenceError`，改为按作用域链判断遮蔽；② `p4API` 首版未保留为绑定，P4 探针报 `p4API is not defined`。
 - 未做：清理 app.js 中 0 引用 import（`p4Damage/cinderDamage/KILL_FX/WEAPONS/STAGES/incomingDamage/...`）；`update/shoot/reset/end/pause` 仍在 app.js（它们是会话状态的主要写入者，搬出前需要真正的状态对象化）。
+
+## 8. 第三阶段：死 import 清理与结算/暂停文案外移（2026-09-20）
+
+- 范围：只做“零行为变化”的整理。`app.js` 757 → 756 行（-17/+14），未新增模块。
+- 死 import：按“导入名在非 import 行中不再出现”扫描，清掉 11 个：`createP4Runtime`、`cinderDamage`、`equippedWeaponForKey`、`CHAPTERS`、`chapterURL`、`KILL_FX`、`shouldPlayIntro`、`createChapterIntro`、`WEAPONS`、`STAGES`、`IS_STATION`（前两阶段迁出后遗留；`cinematic-*` 现由 `session-flow.js` 使用）。
+- 文案外移：`end()` 中九图胜利文案链、失败/训练文案、旅程完成文案，以及 `pause()` 文案，迁入 `session-brief.js`（`WIN_COPY`、`outcomeTitle`、`outcomeBrief`、`journeyCompleteCopy`、`pauseCopy`、`JOURNEY_SAVE_FAILED_COPY`）。字符串逐字保留；`app.js` 只保留 DOM 写入与状态变更。
+- 未做：`reset()` / `end()` / `pause()` 本体仍留在 `app.js`——它们直接读写约 40 个模块级 `let`（health/kills/rounds/state/…），迁出需要先把这些状态收进一个对象或 ctx accessor，改动面超出“整理”范畴，留待第四阶段单独设计。
+- 规则：`test-session-brief.mjs` 追加 9 条结算文案断言；check 581/581、rules 128/128、integration 50/50。
+- 浏览器：smoke 15/15、polar 4/4（含结算与旅程续档）。其余链未复跑。

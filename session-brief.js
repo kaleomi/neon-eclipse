@@ -25,3 +25,26 @@ export const SESSION_STAMPS=Object.freeze({
 });
 export function briefFor(mapId){return SESSION_BRIEFS[mapId]||DEFAULT_BRIEF;}
 export function stampFor(mapId){return SESSION_STAMPS[mapId]||DEFAULT_STAMP;}
+
+// End / pause overlay copy. Wording is unchanged from the former inline template in app.js end()/pause().
+export const WIN_COPY=Object.freeze({
+ polar:'GLACIER 已沉入冰湖，小队离开极地雷达阵列。',
+ datacenter:'ABYSS 已停机，小队离开沉没数据中心。',
+ orbital:'TETHER 已沉寂，小队离开轨道电梯基座。',
+ harbor:'小队已登船，离开风暴港口。',
+ train:'列车控制权已移交，接应队伍已登车。',
+ tower:'中枢已隔离，小队已从大厅撤离。',
+ roof:'信号已送出，小队已返回升降平台。',
+ station:'已登上末班列车，运输站行动完成。',
+});
+export const DEFAULT_WIN_COPY='反应堆已移交，撤离完成。';
+export const REPLAY_WIN_COPY='本阶段训练完成，主行动检查点未改变。';
+export const LOSS_COPY='可从阶段入口检查点重试，或重新开始行动。';
+export const JOURNEY_SAVE_FAILED_COPY='章节已完成，但战役存档写入失败。请重试保存后再继续。';
+export function outcomeTitle({win,runMode}){return win?(runMode==='replay'?'阶段<span>训练完成</span>':'行动<span>撤离成功</span>'):'信号<span>连接中断</span>';}
+export function outcomeBrief({win,runMode,mapId,kills,time,stage}){
+ const seconds=Math.floor(time),lead=win?(runMode==='replay'?REPLAY_WIN_COPY:(WIN_COPY[mapId]||DEFAULT_WIN_COPY)):LOSS_COPY;
+ return `${lead} 击破 ${kills} 个目标 · 用时 ${Math.floor(seconds/60)}分${seconds%60}秒 · 阶段 ${stage}/5。`;
+}
+export function journeyCompleteCopy(results){return {title:'港口撤离<span>战役完成</span>',brief:'反应堆、地下运输站、天穹通讯枢纽、多层中枢塔、疾驰货运列车、风暴港口：六章行动全部完成。共击破 '+results.reduce((n,r)=>n+r.kills,0)+' 个目标。可继续单章训练，或重新开始战役。'};}
+export function pauseCopy(objectiveTitle){return {title:'行动<span>已暂停</span>',brief:'战场已冻结。当前目标：'+objectiveTitle+'。',deploy:'继续当前战斗 ↗'};}

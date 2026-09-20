@@ -4,14 +4,14 @@ import {createTypedAmmo,AMMO_NAMES} from './typed-ammo.js';
 import {createTypedAmmoUI} from './typed-ammo-ui.js';
 import {createWeaponWorkshop} from './weapon-mods-ui.js';
 import {freshWeaponMods} from './weapon-mods-rules.js';
-import {createP4Runtime,p4Requested,p4MemoryStorage,p4AchievementStub,p4Damage} from './p4-runtime.js';
+import {p4Requested,p4MemoryStorage,p4AchievementStub,p4Damage} from './p4-runtime.js';
 let p4=null;
 const p4Incoming=n=>incomingDamage(n,p4?.difficulty)*(p4?.params.incoming??1)/(p4?.params.health??1);
 const p4Outgoing=(n,zone)=>p4Damage(outgoingDamage(n,p4?.difficulty),p4?.params,zone);
 const p4Cooldown=n=>attackCooldown(n,p4?.difficulty)*(p4?.params.enemyCooldown??1);
 import {haloDamageMultiplier} from './weapons/halo-rules.js';
 import {createOrdnance} from './ordnance-world.js';
-import {ORDNANCE,cinderDamage,interruptBreakerBoss} from './ordnance-rules.js';
+import {ORDNANCE,interruptBreakerBoss} from './ordnance-rules.js';
 import {createMortarMarkers} from './mortar-world.js';
 import {rusherBlastDamage,mortarStrike,RUSHER} from './squad.js';
 import {createTacticalThrowables as createEmpSystem} from './tactical-system.js';
@@ -37,7 +37,7 @@ import {DEFAULT_LOADOUT,createLoadoutState} from './loadout-rules.js';
 import {createLoadoutWorld} from './loadout-world.js';
 import {createWeaponDrops} from './weapon-drops.js';
 import {weaponName} from './weapon-display.js';
-import {equippedWeaponIndices,equippedWeaponForKey,nextEquippedWeapon,createWeaponWheel} from './weapon-selection.js';
+import {equippedWeaponIndices,nextEquippedWeapon,createWeaponWheel} from './weapon-selection.js';
 import {weaponAmmoGauge} from './weapon-hud-rules.js';
 import {createEquippedWeaponHUD} from './weapon-hud.js';
 import {BARREL,blastDamage,blastVisible} from './barrel-rules.js';
@@ -66,10 +66,9 @@ import {sprintPose} from './action-poses.js';
 import {createLookInput} from './look-input.js';
 import {createChapterCues,chapterSnapshot} from './chapter-cues.js';
 import {createPlayerMotion} from './player-motion.js';
-import {createJourneyStore,CHAPTERS} from './journey.js';
+import {createJourneyStore} from './journey.js';
 import {createGameMenu} from './menu-ui.js';
-import {chapterURL} from './menu-state.js';
-import {IS_STATION,IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,IS_ORBITAL,IS_DATACENTER,IS_POLAR,IS_JOURNEY,MAP_ID,createLevelMenu} from './level.js';
+import {IS_ROOF,IS_TOWER,IS_TRAIN,IS_HARBOR,IS_ORBITAL,IS_DATACENTER,IS_POLAR,IS_JOURNEY,MAP_ID,createLevelMenu} from './level.js';
 import * as THREE from './node_modules/three/build/three.module.js';
 import { createWeapons } from './weapon-models.js';
 import { ENEMY_TYPES, BOSS_PHASES, roleForStage, createBossState, resolveEnemyDamage } from './enemy-rules.js';
@@ -83,16 +82,14 @@ import {createAttackBudget} from './attack-budget.js';
 import {createInteractionWorld} from './interaction-world.js';
 import {resolveWeather,weatherModifiers} from './weather-rules.js';
 import {createWeatherWorld} from './weather-world.js';
-import {KILL_FX,createSlowmo,killKind,loadFxSettings,saveFxSettings} from './kill-fx-rules.js';
+import {createSlowmo,killKind,loadFxSettings,saveFxSettings} from './kill-fx-rules.js';
 import {createKillFxWorld} from './kill-fx-world.js';
-import {shouldPlayIntro} from './cinematic-rules.js';
-import {createChapterIntro} from './cinematic-world.js';
 import {bindPresentationFx} from './presentation-fx-ui.js';
 import {INTERACTION_LAYOUTS} from './interaction-layouts.js';
 import {VENT} from './interaction-rules.js';
-import { WEAPONS, createHandling, damageAtDistance, shotSpread, advanceReload, meleePose } from './combat.js';
+import { createHandling, damageAtDistance, shotSpread, advanceReload, meleePose } from './combat.js';
 import { createCombatUI } from './combat-ui.js';
-import { STAGES, SUPPLIES, createMission, applySupply, chooseEncounterSpawns } from './mission.js';
+import { SUPPLIES, createMission, applySupply, chooseEncounterSpawns } from './mission.js';
 import { createMissionWorld } from './mission-world.js';
 import { createMissionUI } from './mission-ui.js';
 import { createCampaignStore, STAGE_ENTRIES } from './campaign.js';
@@ -101,6 +98,7 @@ import { createBindings, createGamepadInput } from './input-bindings.js';
 import { createAccessibility, createSubtitles, shapeFor } from './accessibility.js';
 import { createI18n } from './i18n/index.js';
 import {createSessionChrome} from './session-chrome.js';
+import {outcomeTitle,outcomeBrief,journeyCompleteCopy,pauseCopy,JOURNEY_SAVE_FAILED_COPY} from './session-brief.js';
 /* Legacy mount markup contract for ui-clean tests */
 // overlay.innerHTML = `<div class="mission-card"><span id="session-eyebrow" class="eyebrow">NEON ECLIPSE / SECTOR K-19</span><h2 id="session-title">突破<span>暗影封锁</span></h2><p id="brief">启动西侧冷却装置，取得东侧权限，解除反应堆封锁。击败 Warden 后返回南部撤离。橙色突击、紫色远程、金色重装：识别敌人，选择打法。</p><div class="controls"><span><b>W A S D</b>移动</span><span><b>鼠标</b>瞄准 / 左键射击</span><span><b>1 / 2 / 3 · 滚轮</b>主武器 / 副武器 / 近战</span><span><b>R / SHIFT</b>换弹 / 冲刺</span><span><b>SPACE / ESC</b>跳跃 / 暂停</span><span><b>右键 / E</b>瞄准 / 按住交互</span></div><button id="deploy">开始行动 ↗</button><small id="lock-note">G 按住预览 / 松开投掷无伤害 EMP · SPACE 跳跃 · 步枪连射 / 近战连击均可按住左键 · E 交互 · 红色加号补给恢复生命，子弹标识补给补充弹药</small></div>`;
 import {createMapArt,createMapOverseer,createMapEnemyNavigation,mapSpawn,HAS_BOSS_RECORD} from './map-world.js';
@@ -350,15 +348,14 @@ function reset(stageIndex=0,snapshot=null){
 }
 function end(win){if(p4?.gameEnd(win))return;ordnance.clear();mortarMarkers.clear();weaponDrops.reset();loadoutWorld.hide();execution.cancel();fieldKit.clear();fieldKit.hide();parry.reset();emp.clear();engineerDirector.clear();enemyDirector.clear?.();haloBurst.cancel();cancelRail();if(!win){fieldRecord.die(camera.position);achievementUI.attempt.die();}achievementUI.finish(win&&mission.state.complete&&runMode!=='replay');
  if(telemetryAttempt){const attempt=telemetryAttempt;telemetryAttempt=null;telemetry.record({attempt,won:win,stages:fieldRecord.records,kills,time:mission.state.time,weaponShots:telemetryShots,perf:frameStats.finish(),endStage:runMode==='replay'?replayEntry.stageIndex:mission.state.index}).catch(()=>{});}if(overseer?.battle.summary.status==='active')overseer.battle.finish(win?'won':'lost',bossLoadout());bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;enemyProjectiles.clear();state=win?'won':'lost';document.body.dataset.playState=state;gameAudio.play(win?'mission.won':'mission.lost');if(!win)gameAudio.play('player.death');document.exitPointerLock?.();overlay.hidden=false;
- $('#session-title').innerHTML=win?(runMode==='replay'?'阶段<span>训练完成</span>':'行动<span>撤离成功</span>'):'信号<span>连接中断</span>';
- const seconds=Math.floor(mission.state.time);
- $('#brief').textContent=`${win?(runMode==='replay'?'本阶段训练完成，主行动检查点未改变。':(IS_POLAR?'GLACIER 已沉入冰湖，小队离开极地雷达阵列。':IS_DATACENTER?'ABYSS 已停机，小队离开沉没数据中心。':IS_ORBITAL?'TETHER 已沉寂，小队离开轨道电梯基座。':IS_HARBOR?'小队已登船，离开风暴港口。':IS_TRAIN?'列车控制权已移交，接应队伍已登车。':IS_TOWER?'中枢已隔离，小队已从大厅撤离。':IS_ROOF?'信号已送出，小队已返回升降平台。':IS_STATION?'已登上末班列车，运输站行动完成。':'反应堆已移交，撤离完成。')):'可从阶段入口检查点重试，或重新开始行动。'} 击破 ${kills} 个目标 · 用时 ${Math.floor(seconds/60)}分${seconds%60}秒 · 阶段 ${runMode==='replay'?replayEntry.stageIndex+1:Math.min(5,mission.state.index+1)}/5。`;
+ $('#session-title').innerHTML=outcomeTitle({win,runMode});
+ $('#brief').textContent=outcomeBrief({win,runMode,mapId:MAP_ID,kills,time:mission.state.time,stage:runMode==='replay'?replayEntry.stageIndex+1:Math.min(5,mission.state.index+1)});
  if(win&&runMode==='campaign')campaign.complete();
- if(win&&runMode==='journey'){pendingJourneyResult={time:mission.state.time,kills};if(journey.finish(MAP_ID,pendingJourneyResult))pendingJourneyResult=null;else $('#brief').textContent='章节已完成，但战役存档写入失败。请重试保存后再继续。';}
- if(win&&runMode==='journey'&&journey.data?.status==='complete'){$('#session-title').innerHTML='港口撤离<span>战役完成</span>';$('#brief').textContent='反应堆、地下运输站、天穹通讯枢纽、多层中枢塔、疾驰货运列车、风暴港口：六章行动全部完成。共击破 '+journey.data.results.reduce((n,r)=>n+r.kills,0)+' 个目标。可继续单章训练，或重新开始战役。';}
+ if(win&&runMode==='journey'){pendingJourneyResult={time:mission.state.time,kills};if(journey.finish(MAP_ID,pendingJourneyResult))pendingJourneyResult=null;else $('#brief').textContent=JOURNEY_SAVE_FAILED_COPY;}
+ if(win&&runMode==='journey'&&journey.data?.status==='complete'){const done=journeyCompleteCopy(journey.data.results);$('#session-title').innerHTML=done.title;$('#brief').textContent=done.brief;}
  $('#deploy').textContent='开始新行动 ↗';firing=false;fireBuffer=0;clearAim();keys.clear();campaignUI.refresh(state,runMode);flow.refreshJourney();}
 function pause(){if(chapterIntro?.active){chapterIntro.cancel();camera.rotation.set(pitch,yaw,0);gun.visible=true;}execution.cancel();ordnance.cancelCharge();emp.cancelAim();lookInput.reset();if(state!=='playing')return;parry.cancel();cancelRail();bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';overseer?.update(0,camera.position,playerMotion.state.y,false);document.body.dataset.playState=state;gameAudio.play('ui.pause');gameAudio.pause();firing=false;fireBuffer=0;clearAim();keys.clear();overlay.hidden=false;
- $('#session-title').innerHTML='行动<span>已暂停</span>';$('#brief').textContent='战场已冻结。当前目标：'+mission.current.title+'。';$('#deploy').textContent='继续当前战斗 ↗';campaignUI.refresh(state,runMode);flow.refreshJourney();}
+ const paused=pauseCopy(mission.current.title);$('#session-title').innerHTML=paused.title;$('#brief').textContent=paused.brief;$('#deploy').textContent=paused.deploy;campaignUI.refresh(state,runMode);flow.refreshJourney();}
 function bossLoadout(){return {health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),...tempestCheckpoint(rounds,reserves,selected),...haloCheckpoint(rounds,reserves,selected),...railspikeCheckpoint(rounds,reserves,selected),...voltCheckpoint(rounds,reserves,selected)};}
 function checkpoint(){
  syncTypedAmmo();

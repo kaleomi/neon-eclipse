@@ -79,3 +79,14 @@
 4. §2.1 GLB 压缩、§3.1 音乐码率、§4.1 封面重编码：都改变资产内容，**必须由用户目视/试听验收**，逐项单独提交。
 
 未做：任何源码或资产改动；未测量真实网络下的首屏时间（只有静态体积与 gzip 估算）。
+
+## 8. 落地记录（2026-09-20，用户选定：§6 方案 B + 第一类四项；第二类不做；不做英文 i18n）
+
+- **§6 方案 B**：`.gitignore` 加 `.tools/`，`git rm --cached` 撤销 243 个文件的追踪（磁盘保留）。提交 `4ee8760`。历史 pack 不变。
+- **章首模型预热**：新 `asset-preload.js`——`chapterEnemyTypes(STAGES)` 按本章阶段名单（`roles` 或反应堆 `ROLE_SETS` 回退）求出敌人类型集合，`warmModels()` 用运行时同一批带缓存的加载器（`loadGuardVariantAsset` / `loadRangedGuardAsset` / `loadEngineerAsset` / `loadCommanderAsset` / `loadSniperAsset` / `loadShieldAsset` / `loadRosterUnit`）在菜单期启动拉取；失败只计数不抛出（attach 路径本来就会回退到程序化网格）。P4 模式自带名单，保持懒加载。`app.js` 挂 `window.__assetWarmup` 供测试读。
+- **SFX 按图子集**：`createSfxPlayer({preloadFiles})` 新增可选子集，默认仍是全量（载具页、旧测试行为不变）；`createGameAudio({preloadFiles})` 透传；`app.js` 传 `sfxFilesForMap(MAP_ID)`。只有雪地/碎石脚步和港口舰炮是分图事件，其余共享。未预热的文件首次播放时由 bank 按需拉取。
+- **音乐单轨预取**：`recorded-music.js start()` 只预取当前状态那一轨，另一轨由 `loops.update()` 首次切换时拉取（0.7 s 淡入覆盖）。
+- **modulepreload**：`index.html` 加 7 条（three、GLTFLoader、menu-ui、enemy-model、weapon-models、session-flow、map-world）。
+- 规则：新增 `test-asset-preload.mjs`；check 602/602、rules 131/131、integration 53/54——唯一失败 `test-swarm-world.mjs` 来自用户工作区未提交的 `swarm-model.js` 改动（stash 后通过，已复原），与本批无关。
+- 浏览器：新增 `test-asset-warmup-browser.mjs`（reactor / polar 真实页面：菜单期发出 7 / 5 个 GLB 请求、`__assetWarmup.failed` 为空、对方地图脚步样本不在 loaded/pending、7 条 modulepreload）EXIT=0；`test-recorded-audio-browser` 23 项、smoke 15/15、polar 4/4、frame-perf EXIT=0。
+- 未做：真实网络下首屏计时对比（本地服务器无法体现）；第二类资产改动（GLB 压缩、音乐码率、封面重编码）按用户决定不做。

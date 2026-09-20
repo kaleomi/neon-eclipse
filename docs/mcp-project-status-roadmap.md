@@ -18,6 +18,12 @@
 
 > 本节是当前进度唯一摘要入口。下方历次批次为历史快照；旧批次中的“下一步”“未实现”、测试数量和版本号只对当时有效，不可覆盖本节。总体方案不是完成清单；Git 提交也不是功能验收证据。用户说明此前提交系误触，本轮仅按新授权建立可回退的源码整理批次，不改写既有历史。
 
+### 资源懒加载落地 + .tools 停止追踪（2026-09-20）
+
+- 源码接线：新 `asset-preload.js`——菜单期按本章敌人名单预热 GLB（复用运行时缓存加载器，P4 除外）、SFX 按地图子集预热（`createSfxPlayer({preloadFiles})`，默认仍全量）、音乐只预取当前轨、`index.html` 7 条 modulepreload。`.gitignore` 加 `.tools/`，243 个 QA 截图/探针文件撤销追踪（`4ee8760`）。
+- 规则：新增 `test-asset-preload.mjs`；check 602/602、rules 131/131、integration 53/54（唯一失败 `test-swarm-world` 来自用户未提交的 `swarm-model.js`，stash 后通过）。
+- 浏览器：新增 `test-asset-warmup-browser.mjs` EXIT=0；recorded-audio 23 项、smoke 15/15、polar 4/4、frame-perf EXIT=0。用户决定：不做 GLB 压缩/音乐码率/封面重编码，不做英文 i18n。详见 `docs/mcp-asset-size-audit.md` §8。
+
 ### 资源体积与懒加载审计（2026-09-20，仅分析）
 
 - 源码接线：无。模型 5.3 MB（七守卫 GLB 各 0.5–0.9 MB，已按类型懒加载、无贴图、几何未压缩）、录音 2.6 MB（两轨音乐各 0.84 MB；SFX 在总线解锁后全量 preload）、封面 2.6 MB（13 张 1376×768，CSS 按当前章节懒取，首屏 1 张）、JS 0.59 MB gzip 全静态 import 无 modulepreload。

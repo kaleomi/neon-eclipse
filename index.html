@@ -27,6 +27,14 @@
   <link rel="stylesheet" href="halo.css" /><link rel="stylesheet" href="railspike.css"><link rel="stylesheet" href="volt.css"><link rel="stylesheet" href="swarm-coordination.css">
   <link rel="stylesheet" href="weapon-hud.css" />
   <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+  <!-- Warm the deepest/heaviest modules in parallel with app.js instead of discovering them layer by layer. -->
+  <link rel="modulepreload" href="./node_modules/three/build/three.module.js">
+  <link rel="modulepreload" href="./menu-ui.js">
+  <link rel="modulepreload" href="./enemy-model.js">
+  <link rel="modulepreload" href="./weapon-models.js">
+  <link rel="modulepreload" href="./session-flow.js">
+  <link rel="modulepreload" href="./map-world.js">
+  <link rel="modulepreload" href="./node_modules/three/examples/jsm/loaders/GLTFLoader.js">
 <link rel="stylesheet" href="./ui-clean.css">
 </head>
 <body class="ui-clean" data-ui-page="fps">

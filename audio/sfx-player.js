@@ -17,10 +17,12 @@ export function spatialize(listener,source,occluded=false,hearDistance=HEAR_DIST
  const cutoff=occluded?1100:Math.max(1800,20000-dist*280);
  return {pan,gain,cutoff,distance:dist};
 }
-export function createSfxPlayer(bus,{catalog=SFX,random=Math.random}={}){
+// `preloadFiles`: optional subset of recorded sample ids to warm on unlock (default: whole bank). Anything not
+// warmed is still fetched on first play by the bank, so a narrower subset only trades bandwidth for first-hit latency.
+export function createSfxPlayer(bus,{catalog=SFX,random=Math.random,preloadFiles=null}={}){
  const last=new Map();let active=0,played=0,dropped=0;
  const bank=recordedBank(bus),sampleVoices=new Set(),synthVoices=new Set();let recorded=0;
- const preload=()=>bank.preload(Object.values(RECORDED_EVENTS).flatMap(r=>r.files));
+ const preload=(files=preloadFiles)=>bank.preload(files||Object.values(RECORDED_EVENTS).flatMap(r=>r.files));
  bus.subscribe?.(()=>{if(bank.supported())void preload();});
  function play(name,{pitch=1,gain=1,at=null,position=null,listener=null,occluded=false}={}){
   const sample=RECORDED_EVENTS[name];

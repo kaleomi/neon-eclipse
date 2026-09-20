@@ -12,8 +12,8 @@ export function createStreak({window=4}={}){
  let count=0,timer=0;
  return {get count(){return count;},update(dt){if(count>0){timer-=dt;if(timer<=0){count=0;timer=0;}}},kill(){count++;timer=window;return STREAK_STEPS.includes(count)?count:0;},reset(){count=0;timer=0;}};
 }
-export function createGameAudio({storage,bus=createAudioBus({storage}),music=true}={}){
- const sfx=createSfxPlayer(bus);
+export function createGameAudio({storage,bus=createAudioBus({storage}),music=true,preloadFiles=null}={}){
+ const sfx=createSfxPlayer(bus,{preloadFiles});
  const ambience=createRecordedLoops(bus);let previousPosition=null,stepDistance=0;
  const director=music?createRecordedMusicDirector(bus):null;
  const streak=createStreak(),pendingStreak=new Set();

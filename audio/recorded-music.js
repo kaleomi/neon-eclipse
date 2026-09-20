@@ -7,7 +7,8 @@ export function createRecordedMusicDirector(bus){
  let state='idle',running=false,combatHold=0;
  const isCombat=s=>['combat','boss','extract'].includes(s);
  function sync(){if(running)loops.update({[isCombat(state)?MUSIC_TRACKS.combat:MUSIC_TRACKS.explore]:{gain:state==='lost'?.18:isCombat(state)?.48:.34}});}
- function start(){running=true;void loops.bank.preload(Object.values(MUSIC_TRACKS));sync();return true;}
+ // Only the track for the current state is prefetched; the other one is fetched by loops.update() on first switch.
+ function start(){running=true;void loops.bank.preload([isCombat(state)?MUSIC_TRACKS.combat:MUSIC_TRACKS.explore]);sync();return true;}
  function stop(){running=false;loops.reset();}
  function reset(){loops.reset();state='idle';combatHold=0;}
  return {start,stop,reset,get state(){return state;},get running(){return running;},stats:()=>({state,running,...loops.stats()}),

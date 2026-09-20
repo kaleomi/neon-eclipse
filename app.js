@@ -89,7 +89,7 @@ import {INTERACTION_LAYOUTS} from './interaction-layouts.js';
 import {VENT} from './interaction-rules.js';
 import { createHandling, damageAtDistance, shotSpread, advanceReload, meleePose } from './combat.js';
 import { createCombatUI } from './combat-ui.js';
-import { SUPPLIES, createMission, applySupply, chooseEncounterSpawns } from './mission.js';
+import { STAGES, SUPPLIES, createMission, applySupply, chooseEncounterSpawns } from './mission.js';
 import { createMissionWorld } from './mission-world.js';
 import { createMissionUI } from './mission-ui.js';
 import { createCampaignStore, STAGE_ENTRIES } from './campaign.js';
@@ -106,6 +106,15 @@ import {installTestProbes} from './app-probes.js';
 import {createSessionFlow} from './session-flow.js';
 import {bindSessionInput} from './session-input.js';
 import {createP4Bridge} from './p4-bridge.js';
+import {chapterEnemyTypes,warmModels,sfxFilesForMap} from './asset-preload.js';
+import {loadGuardVariantAsset} from './characters/guard-variants-runtime.js';
+import {loadRangedGuardAsset} from './characters/ranged-guard-runtime.js';
+import {loadEngineerAsset} from './characters/engineer-guard-runtime.js';
+import {loadCommanderAsset} from './characters/commander-guard-runtime.js';
+import {loadSniperAsset} from './characters/sniper-guard-runtime.js';
+import {loadShieldAsset} from './characters/shield-guard-runtime.js';
+import {loadRosterUnit} from './characters/roster-runtime.js';
+import {ROSTER_UNITS} from './characters/roster-units.js';
 
 const fieldRecord=createFieldRecord();
 const telemetry=createTelemetry(),frameStats=createFrameStats();let telemetryAttempt=null,telemetryShots=[0,0,0,0,0,0,0,0];
@@ -123,6 +132,13 @@ installTestProbes({get playerMotion(){return playerMotion;},get camera(){return 
 const handling=createHandling();
 const combatUI=createCombatUI();
 const mission=createMission();
+// Chapter warm-up: start the GLB loaders for every enemy type this chapter's roster can spawn while the menu is up,
+// so the first appearance of each type no longer waits on network + decode. Same cached loaders the attach path uses;
+// P4 modes build their own rosters and are left to lazy loading.
+const assetWarmup=p4Requested()?Promise.resolve(null):warmModels(chapterEnemyTypes(STAGES),{
+ guardVariant:loadGuardVariantAsset,ranged:loadRangedGuardAsset,engineer:loadEngineerAsset,commander:loadCommanderAsset,
+ sniper:loadSniperAsset,shield:loadShieldAsset,roster:loadRosterUnit,rosterTypes:new Set(Object.keys(ROSTER_UNITS)),
+});window.__assetWarmup=assetWarmup;
 const missionUI=createMissionUI();
 const enemyUI=createEnemyUI();
 const harborCombatUI=IS_HARBOR?createHarborCombatUI():null;
@@ -209,7 +225,7 @@ const keys=new Set(), enemies=[], effects=[], ray=new THREE.Raycaster();
 const interactionRay=new THREE.Raycaster();
 const lookInput=createLookInput();
 let rounds=[], reserves=[],ammoHudKey='';
-const gameAudio=createGameAudio({storage:localStorage});window.neonAudio=gameAudio;
+const gameAudio=createGameAudio({storage:localStorage,preloadFiles:sfxFilesForMap(MAP_ID)});window.neonAudio=gameAudio;
 const bindings=createBindings({storage:localStorage}),gamepad=createGamepadInput({getGamepads:()=>navigator.getGamepads?.()||[]});window.neonInput={bindings,gamepad};
 const a11y=createAccessibility({storage:localStorage}),subtitles=createSubtitles({a11y});subtitles.attach(gameAudio);window.neonA11y=a11y;window.neonShape=shapeFor;
 const i18n=createI18n({storage:localStorage,languages:navigator.languages});window.neonI18n=i18n;

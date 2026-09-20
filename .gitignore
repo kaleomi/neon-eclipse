@@ -16,3 +16,6 @@ release-desktop/builder-effective-config.yaml
 .DS_Store
 Thumbs.db
 nul
+
+# QA screenshots / probe scripts / scratch output (kept on disk, not tracked; see docs/mcp-asset-size-audit.md section 6)
+.tools/

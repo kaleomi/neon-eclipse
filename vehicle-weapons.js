@@ -6,6 +6,8 @@ import {forward,right} from './vehicle-rules.js';
 import {clamp} from './maritime-rules.js';
 export const ROOF_GUN=Object.freeze({interval:.09,damage:6,range:150,belt:120,reload:2.4,spread:.012,cruiseSeconds:3,pitchMin:-.3,pitchMax:.75,mountHeight:2.35,muzzleForward:.9});
 export const PLANE_GUN=Object.freeze({interval:.11,damage:9,range:280,belt:160,reload:3,spread:.006,muzzleForward:4.2,muzzleDown:.2});
+// Helicopter chin gun: fixed forward, slightly depressed; fires only airborne. Shares the rocket pod rules with the plane.
+export const HELI_GUN=Object.freeze({interval:.1,damage:8,range:240,belt:140,reload:2.8,spread:.009,muzzleForward:3.2,muzzleDown:1.1,depression:.14});
 export const ROCKET=Object.freeze({count:2,speed:120,damage:70,splash:14,life:3.5,interval:.5,rearmSeconds:5});
 export const TARGET_KINDS=Object.freeze({plate:'靶板',balloon:'气球靶',drone:'无人机'});
 // Static layout. Drones orbit a centre; balloons and plates are fixed. Nothing sits on mission routes.
@@ -63,14 +65,16 @@ function jitter(dir,spread,random){
  const out={x:dir.x+s.x*a+u.x*b,y:dir.y+s.y*a+u.y*b,z:dir.z+s.z*a+u.z*b},l=Math.hypot(out.x,out.y,out.z)||1;return {x:out.x/l,y:out.y/l,z:out.z/l};
 }
 export function createWeaponState(kind='roof'){
- const spec=kind==='plane'?PLANE_GUN:ROOF_GUN;
- return {kind,ammo:spec.belt,belt:spec.belt,reload:0,cooldown:0,rocketCooldown:0,rockets:kind==='plane'?ROCKET.count:0,shots:0,hits:0,kills:0,rocketShots:0,flash:0,effects:[],projectiles:[],serial:0,gunner:false,cruise:0,cruiseSpeed:0,aimYaw:0,aimPitch:0,rearm:0,rearming:false};
+ const spec=specFor(kind);
+ return {kind,ammo:spec.belt,belt:spec.belt,reload:0,cooldown:0,rocketCooldown:0,rockets:hasRockets(kind)?ROCKET.count:0,shots:0,hits:0,kills:0,rocketShots:0,flash:0,effects:[],projectiles:[],serial:0,gunner:false,cruise:0,cruiseSpeed:0,aimYaw:0,aimPitch:0,rearm:0,rearming:false};
 }
+export function specFor(kind){return kind==='plane'?PLANE_GUN:kind==='heli'?HELI_GUN:ROOF_GUN;}
+export const hasRockets=kind=>kind==='plane'||kind==='heli';
 function pushEffect(w,effect){w.effects.push(effect);if(w.effects.length>24)w.effects.shift();}
 function tickTimers(w,h){for(const key of ['cooldown','rocketCooldown','flash'])w[key]=Math.max(0,w[key]-h);w.effects=w.effects.filter(e=>(e.life-=h)>0);}
 function tickReload(w,h){
  if(w.reload>0){w.reload=Math.max(0,w.reload-h);if(w.reload===0)w.ammo=w.belt;return true;}
- if(w.ammo<=0){w.reload=w.kind==='plane'?PLANE_GUN.reload:ROOF_GUN.reload;return true;}
+ if(w.ammo<=0){w.reload=specFor(w.kind).reload;return true;}
  return false;
 }
 function fireHitscan(w,origin,dir,spec,range,boxes,random){
@@ -110,6 +114,23 @@ export function stepPlaneGun(w,plane,input,dt,range,boxes=[],{paused=false,rando
  if(!input.fire||w.cooldown>0)return null;
  return fireHitscan(w,planeMuzzle(plane),dir,PLANE_GUN,range,boxes,random);
 }
+// Helicopter chin gun. Aim follows the fuselage heading with a fixed depression plus body pitch (nose-down = aim lower).
+// Grounded or unpowered craft cannot fire; rockets inherit the plane pod (count/rearm) and add the helicopter's own velocity.
+export function heliMuzzle(h){const f=forward(h.yaw);return {x:h.x+f.x*HELI_GUN.muzzleForward,y:h.y-HELI_GUN.muzzleDown,z:h.z+f.z*HELI_GUN.muzzleForward};}
+export function heliAim(h){return aimDirection(h.yaw,-HELI_GUN.depression-(Number(h.pitch)||0));}
+export function stepHeliGun(w,h,input,dt,range,boxes=[],{paused=false,random=Math.random}={}){
+ if(paused||!Number.isFinite(dt)||dt<=0)return null;const step=Math.min(dt,.25);tickTimers(w,step);
+ stepRockets(w,step,range,boxes);
+ if(h.grounded||!h.powered||h.status==='crashed')return null;
+ const dir=heliAim(h);
+ if(input.rocket&&w.rockets>0&&w.rocketCooldown===0){
+  const m=heliMuzzle(h);w.projectiles.push({id:++w.serial,x:m.x,y:m.y,z:m.z,vx:dir.x*ROCKET.speed+(h.vx||0),vy:dir.y*ROCKET.speed+(h.vy||0),vz:dir.z*ROCKET.speed+(h.vz||0),life:ROCKET.life});
+  w.rockets--;w.rocketShots++;w.rocketCooldown=ROCKET.interval;w.flash=.1;pushEffect(w,{kind:'launch',from:m,life:.2});
+ }
+ if(tickReload(w,step))return null;
+ if(!input.fire||w.cooldown>0)return null;
+ return fireHitscan(w,heliMuzzle(h),dir,HELI_GUN,range,boxes,random);
+}
 function segmentSphere(a,b,c,r){const dx=b.x-a.x,dy=b.y-a.y,dz=b.z-a.z,l=Math.hypot(dx,dy,dz);if(l<1e-9)return Math.hypot(a.x-c.x,a.y-c.y,a.z-c.z)<=r?0:null;const t=raySphere(a,{x:dx/l,y:dy/l,z:dz/l},c,r);return t!==null&&t<=l?t/l:null;}
 function explode(w,range,x,y,z){
  pushEffect(w,{kind:'blast',at:{x,y,z},life:.5});let killed=0;
@@ -136,13 +157,13 @@ export function stepRockets(w,h,range,boxes=[]){
 export function stepRearm(w,vehicle,dt,station,{paused=false,stopped=null}={}){
  if(paused||!Number.isFinite(dt)||dt<=0)return false;
  const still=stopped??Math.abs(Number(vehicle.speed)||0)<=.6,inside=!!station&&Math.hypot(vehicle.x-station.x,vehicle.z-station.z)<=station.radius;
- const full=w.ammo===w.belt&&w.reload===0&&(w.kind!=='plane'||w.rockets===ROCKET.count);
+ const full=w.ammo===w.belt&&w.reload===0&&(!hasRockets(w.kind)||w.rockets===ROCKET.count);
  if(!inside||!still||full){w.rearm=0;w.rearming=false;return false;}
  w.rearming=true;w.rearm+=Math.min(dt,.25);if(w.rearm+1e-9<ROCKET.rearmSeconds)return false;
- w.rearm=0;w.rearming=false;w.reload=0;w.ammo=w.belt;if(w.kind==='plane')w.rockets=ROCKET.count;return true;
+ w.rearm=0;w.rearming=false;w.reload=0;w.ammo=w.belt;if(hasRockets(w.kind))w.rockets=ROCKET.count;return true;
 }
 export function weaponSummary(w){
- return {ammo:w.ammo,belt:w.belt,reloading:w.reload>0,reloadPercent:w.reload>0?Math.round((1-w.reload/(w.kind==='plane'?PLANE_GUN.reload:ROOF_GUN.reload))*100):100,rockets:w.rockets,shots:w.shots,hits:w.hits,kills:w.kills,accuracy:w.shots?Math.round(w.hits/w.shots*100):0,gunner:w.gunner,cruise:w.cruise,rearming:w.rearming,rearmPercent:Math.min(100,Math.round(w.rearm/ROCKET.rearmSeconds*100))};
+ return {ammo:w.ammo,belt:w.belt,reloading:w.reload>0,reloadPercent:w.reload>0?Math.round((1-w.reload/specFor(w.kind).reload)*100):100,rockets:w.rockets,shots:w.shots,hits:w.hits,kills:w.kills,accuracy:w.shots?Math.round(w.hits/w.shots*100):0,gunner:w.gunner,cruise:w.cruise,rearming:w.rearming,rearmPercent:Math.min(100,Math.round(w.rearm/ROCKET.rearmSeconds*100))};
 }
 export function rangeSummary(range){const alive=range.targets.filter(t=>t.alive).length;return {alive,total:range.targets.length,kills:range.kills,shots:range.shots,hits:range.hits};}
 export function nearestTarget(range,origin,maxRange=Infinity,type=null){let best=null;for(const t of aliveTargets(range,type)){const d=Math.hypot(t.x-origin.x,(t.y??0)-(origin.y??0),t.z-origin.z);if(d<=maxRange&&(!best||d<best.distance))best={target:t,distance:d};}return best;}

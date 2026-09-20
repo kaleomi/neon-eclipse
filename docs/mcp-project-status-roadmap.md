@@ -12,6 +12,12 @@
 
 > 本节是当前进度唯一摘要入口。下方历次批次为历史快照；旧批次中的“下一步”“未实现”、测试数量和版本号只对当时有效，不可覆盖本节。总体方案不是完成清单；Git 提交也不是功能验收证据。用户说明此前提交系误触，本轮仅按新授权建立可回退的源码整理批次，不改写既有历史。
 
+### 直升机武装：机头机炮 + 火箭吊舱（2026-09-20）
+
+- 源码接线：`vehicle-weapons.js` `HELI_GUN`/`specFor`/`hasRockets`/`heliAim`/`stepHeliGun`；`vehicle-app.js` `heliGun` 步进、最近停机坪补给、武器 HUD 与操作提示直升机分支、dataset `heli*`、曳光/音频复用。
+- 规则：`test-helicopter-gun.mjs` 新增，`test-session-lifecycle.mjs` 覆盖 heliGun；check 504/504、rules 117/117、integration 43/43。
+- 浏览器：`test-helicopter-field-browser.mjs` 新增空中射击 + 火箭 + HUD 断言 EXIT=0。未做：吊挂、直升机专属任务。详见 `docs/mcp-p3-helicopter-armament.md`。
+
 ### 先遣队 6–8 表现音效（2026-09-20）
 
 - 源码接线：`frontier-missions.js` 特效计数 `effectCounts`；`audio/vehicle-audio.js` 新事件 frontierExplosions→`kill.boss`、frontierCollapses→`vehicle.impact`、mechSteps→`player.land`（增益表，脚步每帧合 1 次）；`vehicle-app.js` 计数器接入。

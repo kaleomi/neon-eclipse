@@ -37,6 +37,16 @@ await page.waitForFunction(()=>Number(document.body.dataset.heliY)>4,{},{timeout
 await page.screenshot({path:`${shots}/heli-airborne.png`});
 const air=await page.evaluate(()=>window.__heliFixture.heli());assert(air.y>4&&air.status==='running'&&!air.grounded,'airborne '+JSON.stringify(air));
 assert.equal(await page.getAttribute('body','data-vehicle-kind'),'helicopter');
+// Chin gun: airborne left-click fires and consumes the belt; right-click launches a rocket; weapon HUD shows the helicopter belt.
+{
+ const ammo0=Number(await page.getAttribute('body','data-heli-ammo'));
+ await page.mouse.move(640,450);await page.mouse.down({button:'left'});await page.waitForTimeout(500);await page.mouse.up({button:'left'});
+ await page.waitForFunction(a=>Number(document.body.dataset.heliShots)>0&&Number(document.body.dataset.heliAmmo)<a,ammo0,{timeout:5000});
+ await page.mouse.down({button:'right'});await page.waitForTimeout(150);await page.mouse.up({button:'right'});
+ await page.waitForFunction(()=>Number(document.body.dataset.heliRockets)<2,{},{timeout:5000});
+ const ammoText=await page.locator('#vw-ammo').textContent();assert.match(ammoText,/\d+ \/ 140|装填/,'weapon HUD shows the helicopter belt: '+ammoText);
+ await page.screenshot({path:`${shots}/heli-gun.png`});
+}
 // Hold Space (brake) then descend gently with Ctrl; expect a landing, not a crash.
 await page.keyboard.down('Space');await page.waitForTimeout(800);await page.keyboard.up('Space');
 await page.keyboard.down('ControlLeft');await page.waitForFunction(()=>document.body.dataset.heliGrounded==='true',{},{timeout:45000});await page.keyboard.up('ControlLeft');
@@ -60,4 +70,4 @@ const island=await page.evaluate(()=>window.__heliFixture.heli());assert(Math.hy
 assert.equal(await page.getAttribute('body','data-lighthouse-stage'),'board');
 assert.deepEqual(errors,[],'no page errors');
 await browser.close();
-console.log('PASS: helicopter field browser — shore pad spawn, door boarding, cold-engine gate, I engine toggle, Shift lift-off, Ctrl landing, shutdown/exit, native W walk blocked by the parked fuselage, recovery park, lighthouse island pad. Screenshots: '+shots);
+console.log('PASS: helicopter field browser — shore pad spawn, door boarding, cold-engine gate, I engine toggle, Shift lift-off, Ctrl landing, shutdown/exit, native W walk blocked by the parked fuselage, chin gun fire + rocket while airborne, recovery park, lighthouse island pad. Screenshots: '+shots);

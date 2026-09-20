@@ -22,7 +22,7 @@ function fixture(){
   overlay:element('overlay'),canvas:{focus(){}},document:{exitPointerLock(){}},window:{addEventListener:(k,f)=>events.set(k,f)},
   vehicleAudio:{pause(){},resume(){},unlock(){},reset(){}},expeditionUI:{detach(){}},flightUI:{reset(){}},updateHUD(){},updateCamera(){},notify(){},
   joint:{status:'idle'},chase:{status:'idle'},sortie:{status:'idle'},escort:{status:'idle'},lighthouse:{status:'idle'},rover:{speed:0},plane:{speed:0,yaw:0},yacht:{speed:0},
-  roofGun:createWeaponState('roof'),planeGun:createWeaponState('plane'),wear:{rover:{hull:100},yacht:{hull:100}},player:{x:7,z:8},
+  roofGun:createWeaponState('roof'),planeGun:createWeaponState('plane'),heliGun:createWeaponState('heli'),wear:{rover:{hull:100},yacht:{hull:100}},player:{x:7,z:8},
   TEST_SPAWN:{x:0,z:0},createRover:()=>({speed:0}),createPlane:()=>({speed:0,yaw:0}),createYacht:()=>({speed:0}),
   createJointMission:active=>({status:active?'active':'idle',runId:'joint-'+ ++serial}),createFlightMission:()=>({status:'idle'}),createSeaChase:()=>({status:'idle'}),createEscort:()=>({status:'idle'}),createLighthouseMission:()=>({status:'idle'}),heli:{status:'ready'},parkHelicopter(){},HELI_PADS:{shore:{}},frontier:{status:'idle'},frontierArmed:null,createFrontierMission:()=>({status:'idle'}),rifle:{},createRifle:()=>({}),
   createDriveTrial:()=>({index:0,elapsed:0}),createDurability:()=>({hull:100}),createWeaponState,
@@ -66,9 +66,9 @@ await test('pause/resume clears latched controls and time debt, but preserves th
 });
 await test('recover resets weapon projectiles/timers, held controls, missions and route state',()=>{
  const {c}=fixture();c.keys.add('KeyW');c.fire=c.drag=c.rocketKey=true;c.accumulator=.08;c.recovery=1;c.joint.status=c.chase.status=c.sortie.status=c.escort.status='active';
- for(const w of [c.roofGun,c.planeGun]){w.projectiles.push({life:3});w.effects.push({life:1});w.cooldown=2;w.reload=1;w.shots=9;}
+ for(const w of [c.roofGun,c.planeGun,c.heliGun]){w.projectiles.push({life:3});w.effects.push({life:1});w.cooldown=2;w.reload=1;w.shots=9;}
  c.recover();assert.equal(c.keys.size,0);assert.equal(c.fire||c.drag||c.rocketKey,false);assert.equal(c.accumulator,0);assert.equal(c.recovery,0);
- for(const w of [c.roofGun,c.planeGun]){assert.equal(w.projectiles.length,0);assert.equal(w.effects.length,0);assert.equal(w.cooldown,0);assert.equal(w.reload,0);assert.equal(w.shots,0);}
+ for(const w of [c.roofGun,c.planeGun,c.heliGun]){assert.equal(w.projectiles.length,0);assert.equal(w.effects.length,0);assert.equal(w.cooldown,0);assert.equal(w.reload,0);assert.equal(w.shots,0);}
  for(const name of ['joint','chase','sortie','escort'])assert.equal(c[name].status,'idle');for(const name of ['trial','airTrial','seaTrial'])assert.equal(c[name].index,0);
 });
 await test('normal launch and storage rejection still work; a newer task wins over old dispatch',async()=>{

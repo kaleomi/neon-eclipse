@@ -12,6 +12,11 @@
 
 > 本节是当前进度唯一摘要入口。下方历次批次为历史快照；旧批次中的“下一步”“未实现”、测试数量和版本号只对当时有效，不可覆盖本节。总体方案不是完成清单；Git 提交也不是功能验收证据。用户说明此前提交系误触，本轮仅按新授权建立可回退的源码整理批次，不改写既有历史。
 
+### CI 工作流首次本地演练（2026-09-20）
+
+- 干净克隆 HEAD `0fd39f3` 按 `.github/workflows/ci.yml` 逐步执行：`npm ci` OK；check 497/497、rules 119/119、integration 42/42；smoke 15/15、expedition、archive 均 EXIT=0。
+- 未在真实 GitHub Actions / Linux 上运行；workflow 未改。首轮 smoke 因孤儿浏览器进程争抢 CPU 超时，清理后重跑全绿。详见 `docs/mcp-ci-dry-run.md`。
+
 ### 直升机吊挂 + 触屏判定修正（2026-09-20）
 
 - 源码接线：新 `helicopter-sling.js` / `helicopter-sling-world.js`（挂钩门、缆绳悬挂、弹簧摆动、触地/送达/摔坏/区外判定）；`vehicle-app.js` F 挂脱钩、每帧步进、提示与 dataset；`vehicle-touch.js` 显示判定改为主指针 coarse 且有触点，修复桌面触摸屏吃掉鼠标开火。

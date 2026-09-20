@@ -14,6 +14,7 @@ import {RADAR_STATION} from './frontier-site.js';
  assert.equal(d.wreckY,14,'wreck rests on the ground callback height');assert(d.wreck>5,'wreck age accumulates');
  assert(m.effects.every(e=>e.age<e.ttl),'expired effects are dropped');assert(m.effects.length<=24,'effect ring capped');
  assert.equal(m.effectSerial,2,'exactly two explosions: air + ground impact');
+ assert.deepEqual(m.effectCounts,{explode:2,collapse:0,step:0},'per-type effect counters for audio');assert.equal(m.lastEffect.type,'explode');
  // Live drones never carry wreck state.
  assert(m.hostiles.slice(1).every(h=>!h.wrecked&&h.wreck===0));
 }

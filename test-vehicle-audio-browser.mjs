@@ -11,7 +11,7 @@ try{
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader','--autoplay-policy=no-user-gesture-required']});
  const context=await browser.newContext({viewport:{width:1280,height:900}}),page=await context.newPage(),errors=[];
  page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());page.setDefaultTimeout(45000);
- await page.route('**/vehicle-app.js',async route=>{const body=await (await route.fetch()).text();route.fulfill({body:body+`\nwindow.__heliAudioFixture={async walkToDoor(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;}};`,headers:{'content-type':'text/javascript'}});});
+ await page.route('**/vehicle-app.js',async route=>{const body=await (await route.fetch()).text();route.fulfill({body:body+`\nwindow.__heliAudioFixture={async killDrone(){const {spawnDrones,FRONTIER_SITES}=await import('./frontier-missions.js');const {damageTarget}=await import('./vehicle-weapons.js');frontier.stage='snipe';frontier.completed=['drive','park','climb'];frontier.gate=3;spawnDrones(frontier);const h=frontier.hostiles[0];while(h.alive)damageTarget({hits:0,kills:0},h,99);const names=[];const orig=vehicleAudio.events;vehicleAudio.events=c=>{const out=orig(c);for(const e of out)for(let i=0;i<e.count;i++)names.push(e.name);return out;};window.__sfxNames=names;window.__fxState=()=>({counts:frontier.effectCounts,steps:frontier.mechSteps,status:frontier.status,stage:frontier.stage});},async walkToDoor(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;}};`,headers:{'content-type':'text/javascript'}});});
  await page.goto(`${server.base}/vehicle.html`);
  await page.waitForFunction(()=>!!document.querySelector('canvas')&&!!window.neonVehicleAudio);
  await step('vehicle audio facade present, no AudioContext before a gesture',async()=>{
@@ -50,6 +50,14 @@ try{
   const warm=await page.evaluate(()=>window.neonVehicleAudio.bed());assert.ok(warm.slap>cold.slap&&warm.whineGain>0,'spool-up audible: '+JSON.stringify(warm));
   await page.keyboard.press('KeyI');await page.waitForFunction(()=>document.body.dataset.heliPowered==='false');
   await page.waitForFunction(g=>{const b=window.neonVehicleAudio.bed();return b&&b.gain<g;},warm.gain,{timeout:20000});
+ });
+ await step('frontier drone kill plays the explosion cue (air burst + ground impact)',async()=>{
+  await page.keyboard.press('Escape');await page.waitForFunction(()=>document.body.dataset.driveActive==='false');
+  await page.click('#start-windfarm');await page.click('#start-windfarm');await page.waitForFunction(()=>document.body.dataset.frontierStatus==='active'&&document.body.dataset.driveActive==='true');
+  await page.waitForTimeout(400);// let the post-reset audio baseline frame pass so both explosions are diffs, not baseline
+  await page.evaluate(()=>window.__heliAudioFixture.killDrone());
+  await page.waitForFunction(()=>window.__sfxNames&&window.__sfxNames.filter(n=>n==='kill.boss').length>=2,null,{timeout:15000}).catch(async e=>{throw new Error(e.message+' state='+JSON.stringify(await page.evaluate(()=>({fx:window.__fxState(),names:window.__sfxNames}))));});
+  const st=await page.evaluate(()=>window.__fxState());assert.equal(st.counts.explode,2,'air burst + ground impact counted: '+JSON.stringify(st.counts));
  });
  await step('pause suspends the vehicle bus, resume releases it',async()=>{
   await page.keyboard.press('Escape');await page.waitForFunction(()=>document.body.dataset.driveActive==='false');

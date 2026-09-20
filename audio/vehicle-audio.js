@@ -107,14 +107,17 @@ export const VEHICLE_EVENT_SFX=Object.freeze({
  seaShots:'cannon.fire',seaHits:'cannon.hit',seaSplashes:'cannon.splash',repairs:'supply.health',rearms:'supply.ammo',
  landings:'vehicle.touchdown',checkpoints:'vehicle.checkpoint',hullHits:'vehicle.impact',waves:'telegraph.orange',houndKills:'kill',
  // Frontier (expedition 6–8): on-foot rifle, hostile kills and player health hits share the existing catalogue entries.
- rifleShots:'fire.vanguard',rifleKills:'kill',frontierKills:'kill',frontierHits:'vehicle.impact'
+ rifleShots:'fire.vanguard',rifleKills:'kill',frontierKills:'kill',frontierHits:'vehicle.impact',
+ // Frontier presentation (drone air/ground explosions, turret/dish/mech collapse, mech footsteps) reuse boss/player cues at reduced gain.
+ frontierExplosions:'kill.boss',frontierCollapses:'vehicle.impact',mechSteps:'player.land'
 });
+const EVENT_GAIN=Object.freeze({hullHits:.9,frontierHits:.9,frontierExplosions:.7,frontierCollapses:.8,mechSteps:.45});
 export function vehicleAudioEvents(prev,next){
  if(!prev||!next)return [];
  const out=[];
  for(const key of Object.keys(VEHICLE_EVENT_SFX)){
   const a=Number(prev[key])||0,b=Number(next[key])||0;
-  if(b>a)out.push({name:VEHICLE_EVENT_SFX[key],opts:key==='hullHits'||key==='frontierHits'?{gain:.9}:undefined,count:b-a});
+  if(b>a)out.push({name:VEHICLE_EVENT_SFX[key],opts:EVENT_GAIN[key]?{gain:EVENT_GAIN[key]}:undefined,count:Math.min(b-a,key==='mechSteps'?1:b-a)});
  }
  return out;
 }

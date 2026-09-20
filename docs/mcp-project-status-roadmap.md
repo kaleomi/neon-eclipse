@@ -12,6 +12,12 @@
 
 > 本节是当前进度唯一摘要入口。下方历次批次为历史快照；旧批次中的“下一步”“未实现”、测试数量和版本号只对当时有效，不可覆盖本节。总体方案不是完成清单；Git 提交也不是功能验收证据。用户说明此前提交系误触，本轮仅按新授权建立可回退的源码整理批次，不改写既有历史。
 
+### 先遣队 6–8 表现音效（2026-09-20）
+
+- 源码接线：`frontier-missions.js` 特效计数 `effectCounts`；`audio/vehicle-audio.js` 新事件 frontierExplosions→`kill.boss`、frontierCollapses→`vehicle.impact`、mechSteps→`player.land`（增益表，脚步每帧合 1 次）；`vehicle-app.js` 计数器接入。
+- 规则：`test-audio.mjs`、`test-frontier-presentation.mjs` 扩展 PASS；check 500/500、rules 111/115（4 FAIL 为用户未提交武器改动）、integration 43/43。
+- 浏览器：`test-vehicle-audio-browser.mjs` 5/5，新步骤验证击落无人机触发两次 `kill.boss`。未做：事件音效 3D 定位、专用爆炸配方。详见 `docs/mcp-p3-frontier-audio.md`。
+
 ### 先遣队 6–8 敌对表现 + 直升机/飞机碰撞（2026-09-20）
 
 - 源码接线：无人机爆炸→坠落→落地二次爆炸，炮塔/雷达倾倒，机甲伤害泛红与脚步扬尘（`frontier-missions.js` 表现层状态 + `frontier-world.js` 特效池）；停放飞机/越野车为直升机障碍，着地直升机为飞机滑跑障碍（`helicopter-field.js`、`vehicle-app.js`）。

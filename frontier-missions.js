@@ -57,7 +57,7 @@ export function createFrontierMission(id='windfarm',difficulty='normal',active=f
  if(!FRONTIER_IDS.includes(id))id='windfarm';
  const profile=FRONTIER_PROFILES[id][normalizeFrontier(id,difficulty)];
  return {id,runId:active?newRunId():null,recovered:false,status:active?'active':'idle',stage:FRONTIER_STAGES[id][0],profile,elapsed:0,hold:0,reason:'',completed:[],
-  gate:0,health:100,hurtCooldown:0,fuse:null,hostiles:[],mech:null,kills:0,lastMessage:null,effects:[],effectSerial:0,mechSteps:0};
+  gate:0,health:100,hurtCooldown:0,fuse:null,hostiles:[],mech:null,kills:0,lastMessage:null,effects:[],effectSerial:0,effectCounts:{explode:0,collapse:0,step:0},mechSteps:0};
 }
 // ---- Hostiles. Compatible with vehicle-weapons damageTarget: {alive,hp,maxHp,r,respawn}. respawn=Infinity keeps them dead.
 function hostile(type,id,x,y,z,r,hp){return {id,type,x,y,z,r,hp,maxHp:hp,alive:true,respawn:Infinity,respawnIn:0,flash:0,orbit:null,angle:0,wreck:0,wreckY:null,wrecked:false};}
@@ -65,7 +65,7 @@ function hostile(type,id,x,y,z,r,hp){return {id,type,x,y,z,r,hp,maxHp:hp,alive:t
 // effects: short-lived {id,type:'explode'|'step'|'collapse',x,y,z,age,ttl}; capped ring so a long fight never grows the array.
 export const FRONTIER_EFFECT_TTL=Object.freeze({explode:1.1,collapse:1.6,step:.5});
 const EFFECT_CAP=24,DRONE_FALL=9,MECH_STRIDE=3.2;
-function pushEffect(m,type,x,y,z){if(!m.effects)m.effects=[];m.effects.push({id:++m.effectSerial,type,x,y,z,age:0,ttl:FRONTIER_EFFECT_TTL[type]});if(m.effects.length>EFFECT_CAP)m.effects.splice(0,m.effects.length-EFFECT_CAP);}
+function pushEffect(m,type,x,y,z){if(!m.effects)m.effects=[];if(!m.effectCounts)m.effectCounts={explode:0,collapse:0,step:0};m.effectCounts[type]=(m.effectCounts[type]||0)+1;m.lastEffect={type,x,y,z};m.effects.push({id:++m.effectSerial,type,x,y,z,age:0,ttl:FRONTIER_EFFECT_TTL[type]});if(m.effects.length>EFFECT_CAP)m.effects.splice(0,m.effects.length-EFFECT_CAP);}
 export function stepFrontierPresentation(m,dt,groundAt=()=>0){
  if(!m||!(dt>0))return;
  if(m.effects){for(const e of m.effects)e.age+=dt;let w=0;for(const e of m.effects)if(e.age<e.ttl)m.effects[w++]=e;m.effects.length=w;}

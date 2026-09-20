@@ -12,6 +12,12 @@
 
 > 本节是当前进度唯一摘要入口。下方历次批次为历史快照；旧批次中的“下一步”“未实现”、测试数量和版本号只对当时有效，不可覆盖本节。总体方案不是完成清单；Git 提交也不是功能验收证据。用户说明此前提交系误触，本轮仅按新授权建立可回退的源码整理批次，不改写既有历史。
 
+### 载具场触屏控制（2026-09-20）
+
+- 源码接线：新 `vehicle-touch.js`（显示判定、虚拟摇杆、指针状态机、自建 DOM 覆盖层，poll 契约同手柄）；`vehicle-app.js` `pollTouch()`、`syncRocket()` 统一鼠标/手柄/触屏/键盘火箭键。
+- 规则：`test-vehicle-touch.mjs` PASS；check 510/510、rules 119/119、integration 43/43。
+- 浏览器：`test-vehicle-touch-browser.mjs` 5/5。未做：真机验收、情境隐藏按钮、主游戏触屏。详见 `docs/mcp-p3-vehicle-touch.md`。
+
 ### 载具场手柄支持（2026-09-20）
 
 - 源码接线：新 `vehicle-gamepad.js`（标准布局 → 键码/look/fire/rocket，轮询器只释放自己注入的键）；`vehicle-app.js` 每帧 `pollGamepad()`，edge 键回放到 keydown 处理，`applyLook` 抽出复用，`dataset.gamepad`。

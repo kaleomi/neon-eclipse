@@ -17,6 +17,7 @@ import {SITE_VEHICLE_BOXES,SITE_HELI_OBSTACLES,FRONTIER_HELIPADS,siteHeight,site
 import {buildFrontierWorld,drawFrontierOnRadar} from './frontier-world.js';
 import {bindVehicleGuidance} from './vehicle-guidance.js';
 import {createVehicleGamepad,VEHICLE_PAD_HELP} from './vehicle-gamepad.js';
+import {shouldShowTouch,mountVehicleTouch} from './vehicle-touch.js';
 import {buildReconWorld} from './recon-world.js';
 import {createFlightMission,stepFlightMission,FLIGHT_PHASES,flightGoal,flightTitle,flightPhase,flightProgress,flightCourse} from './flight-mission.js';
 import {bindFlightMissionUI} from './flight-mission-ui.js';
@@ -52,7 +53,8 @@ let expeditionUI=null,missionIntent=0;
 const EXPEDITION_RESULT_NOTE=' 本轮属于先遣队，请在上方先遣队面板查看保存状态并继续/重试；不写入原 FPS 战役或单项飞行成绩。';
 // P3: target range, vehicle weapons and wear. Rules live in vehicle-weapons.js / vehicle-durability.js; nothing here is persisted.
 const range=createRange(),roofGun=createWeaponState('roof'),planeGun=createWeaponState('plane'),heliGun=createWeaponState('heli'),wear={rover:createDurability('rover'),yacht:createDurability('yacht')};
-let gunner=false,fire=false,rocketKey=false;
+let gunner=false,fire=false,rocketKey=false,mouseRocket=false,padRocket=false,touchRocket=false;
+const syncRocket=()=>{rocketKey=mouseRocket||padRocket||touchRocket||held('KeyG');};
 // Phase 2 debt: vehicle audio (engine beds + one-shot events from gameplay counters). Fails soft without WebAudio.
 const vehicleAudio=createVehicleAudio({storage:localStorage});window.neonVehicleAudio=vehicleAudio;let audioLandings=0,audioCheckpoints=0,audioHullHits=0,audioWaves=0,audioRearms=0,audioFrontierKills=0;
 let escort=createEscort(),escortArmed=false;const ESCORT_KEY='neon-eclipse.escort-difficulty.v1';
@@ -99,7 +101,7 @@ let player={x:TEST_SPAWN.x-3.3,z:TEST_SPAWN.z+1.3,yaw:Math.atan2(3.3,1.3)},trial
 const raycaster=new T.Raycaster(),desired=new T.Vector3(),focus=new T.Vector3(),direction=new T.Vector3();
 const held=(...codes)=>codes.some(code=>keys.has(code)),entity=()=>kind==='plane'?plane:kind==='yacht'?yacht:kind==='rover'?rover:kind==='helicopter'?heli:player;
 function notify(text){message.textContent=text;message.classList.add('visible');messageTime=4;}
-function clearInput(){keys.clear();drag=false;fire=false;rocketKey=false;recovery=0;accumulator=0;}
+function clearInput(){keys.clear();drag=false;fire=false;rocketKey=false;mouseRocket=padRocket=touchRocket=false;recovery=0;accumulator=0;}
 // Suspending or explicitly resuming supersedes any dispatch still waiting for storage.
 function pause(){++missionIntent;if(!active)return;active=false;vehicleAudio.pause();clearInput();overlay.hidden=false;document.exitPointerLock?.();$('#drive-overlay-title').textContent='联合试验已暂停';$('#drive-overlay-copy').textContent='载具、波浪与路线计时已冻结。继续会回到原位置；试验调度会回收全部载具并重置三条路线。';$('#resume-drive').textContent='继续试验 →';$('#resume-drive').focus();updateHUD();}
 function resume(){if(frontier.status==='won'||frontier.status==='lost'||lighthouse.status==='won'||lighthouse.status==='lost'||joint.status==='won'||joint.status==='lost'||chase.status==='won'||chase.status==='lost'||sortie.status==='won'||sortie.status==='lost'||escort.status==='won'||escort.status==='lost'){notify('请选择重试任务，或返回自由试驾。');return;}++missionIntent;active=true;started=true;vehicleAudio.resume();vehicleAudio.unlock();clearInput();overlay.hidden=true;last=performance.now();recoveryArmed=false;armedStation=null;$('#recover-drive').textContent='回收全部载具并重置路线';canvas.focus();updateHUD();}
@@ -232,20 +234,32 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('keyup',e=>{keys.delete(e.code);if(e.code==='KeyG')rocketKey=false;});
 // Gamepad: polled once per frame; held buttons/sticks are injected as key codes, taps are replayed through the keydown handler.
 const gamepad=createVehicleGamepad({getGamepads:()=>navigator.getGamepads?.()||[]});window.neonVehicleGamepad=gamepad;let padFire=false,padLook={x:0,y:0},padSeen=false;
+// Touch: same injection contract as the gamepad. Mounted only on coarse pointers or ?touch=1.
+const touchEnabled=shouldShowTouch({matchMedia:window.matchMedia?.bind(window),search:location.search,maxTouchPoints:navigator.maxTouchPoints||0});
+const touch=touchEnabled?mountVehicleTouch(document):null;document.body.dataset.touchControls=String(touchEnabled);window.neonVehicleTouch=touch;let touchFire=false;
+function pollTouch(){
+ if(!touch)return;const f=touch.poll();
+ for(const code of f.edges){if(code==='Escape'){if(active)pause();else if(started)resume();continue;}if(!active)continue;window.dispatchEvent(new KeyboardEvent('keydown',{code,bubbles:true}));window.dispatchEvent(new KeyboardEvent('keyup',{code,bubbles:true}));}
+ if(!active){for(const c of touch.reset())keys.delete(c);if(touchFire){touchFire=false;fire=false;}return;}
+ for(const c of f.release)keys.delete(c);for(const c of f.press)keys.add(c);
+ if(f.fire!==touchFire){touchFire=f.fire;fire=f.fire;}
+ touchRocket=f.rocket;syncRocket();
+ if(f.look.x||f.look.y)applyLook(f.look.x,f.look.y);
+}
 function pollGamepad(){
  const f=gamepad.poll();
- if(!gamepad.connected){if(padFire){padFire=false;fire=false;}return;}
+ if(!gamepad.connected){if(padFire){padFire=false;fire=false;}if(padRocket){padRocket=false;syncRocket();}return;}
  if(!padSeen){padSeen=true;notify(VEHICLE_PAD_HELP);}
  for(const code of f.edges){if(code==='Escape'){if(active)pause();else if(started)resume();continue;}if(!active)continue;window.dispatchEvent(new KeyboardEvent('keydown',{code,bubbles:true}));window.dispatchEvent(new KeyboardEvent('keyup',{code,bubbles:true}));}
  if(!active){for(const c of gamepad.reset())keys.delete(c);return;}
  for(const c of f.release)keys.delete(c);for(const c of f.press)keys.add(c);
  if(f.fire!==padFire){padFire=f.fire;fire=f.fire;}
- rocketKey=f.rocket||held('KeyG');
+ padRocket=f.rocket;syncRocket();
  padLook=f.look;
  if(padLook.x||padLook.y)applyLook(padLook.x,padLook.y);
 }window.addEventListener('blur',pause);document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();});
 canvas.addEventListener('click',()=>{if(active&&document.pointerLockElement!==canvas){try{const request=canvas.requestPointerLock?.();request?.catch(()=>notify('鼠标锁定不可用，可按住左键拖动视角。'));}catch{notify('可按住左键拖动视角。');}}});
-canvas.addEventListener('mousedown',e=>{if(!active)return;if(e.button===0){drag=true;fire=true;}if(e.button===2){if(kind==='yacht')drag=true;else rocketKey=true;}});window.addEventListener('mouseup',e=>{drag=kind==='yacht'?!!(e.buttons&3):false;if(e.button===0)fire=false;if(e.button===2)rocketKey=false;});canvas.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('pointerlockchange',()=>{const was=locked;locked=document.pointerLockElement===canvas;if(was&&!locked&&active)pause();});document.addEventListener('pointerlockerror',()=>notify('鼠标锁定不可用，可按住左键拖动视角。'));
+canvas.addEventListener('mousedown',e=>{if(!active)return;if(e.button===0){drag=true;fire=true;}if(e.button===2){if(kind==='yacht')drag=true;else mouseRocket=rocketKey=true;}});window.addEventListener('mouseup',e=>{drag=kind==='yacht'?!!(e.buttons&3):false;if(e.button===0)fire=false;if(e.button===2)mouseRocket=rocketKey=false;});canvas.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('pointerlockchange',()=>{const was=locked;locked=document.pointerLockElement===canvas;if(was&&!locked&&active)pause();});document.addEventListener('pointerlockerror',()=>notify('鼠标锁定不可用，可按住左键拖动视角。'));
 function applyLook(mx,my){if(kind==='rover'&&gunner){aimTurret(roofGun,mx*.003,-my*.003);return;}if(kind==='yacht'){turnNavalAim(navalAim,mx,my);return;}if(kind==='plane'){flightHeading=moveFlightHeading(flightHeading,plane.yaw,mx*.003);orbit=wrapHeading(flightHeading-plane.yaw);}else if(kind)orbit=Math.max(-1.35,Math.min(1.35,orbit+mx*.003));else player.yaw+=mx*.003;pitch=Math.max(-.8,Math.min(.8,pitch-my*.003));}
 window.addEventListener('mousemove',e=>{if(!active||(!locked&&!drag))return;applyLook(Math.max(-200,Math.min(200,e.movementX||0)),Math.max(-200,Math.min(200,e.movementY||0)));});
 window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
@@ -416,7 +430,7 @@ function updateWeaponHUD(){
  $('#vw-hint').textContent=!live?'任务进行中 · 武器与靶场统计暂停':escorting()&&kind==='rover'?(gunner?'自动跟随卡车 · 猎犬机预警时优先射击'+(ws.reloading?' · 装填中':''):'F 回炮手位后车辆自动跟随'):kind==='rover'?(gunner?(ws.cruise>0?'直行保持 '+ws.cruise.toFixed(1)+' 秒':'车辆滑行中 · 空格刹车')+(ws.rearming?' · 补弹 '+ws.rearmPercent+'%':''):'F 切换炮手位 · 靶板在场地北/东/南侧，低空无人机绕中央盘旋'):kind==='plane'?(plane.onGround?(ws.rearming?'机库补给 '+ws.rearmPercent+'%':'起飞后左键机炮、右键火箭 · 气球与高空无人机在机场西北'):'左键机炮 · 右键/G 火箭 · 火箭有溅射，落地爆炸'):kind==='helicopter'?(heli.grounded?(ws.rearming?'停机坪补给 '+ws.rearmPercent+'%':'起飞后左键机头机炮、右键火箭 · 机炮固定朝前微向下，用机身俯仰修正'):'左键机炮 · 右键/G 火箭 · 前倾压低弹道'):'撞击损伤船体 · 停回码头泊位自动维修';
  panel.dataset.tier=dur?dur.tier:'normal';panel.dataset.gunner=String(gunner);
 }
-function frame(now){const dt=Math.max(0,Math.min((now-last)/1000,.1));last=now;pollGamepad();if(active){time+=dt;accumulator+=dt;while(accumulator>=1/120&&active){updatePhysics(1/120);accumulator=Math.max(0,accumulator-1/120);}
+function frame(now){const dt=Math.max(0,Math.min((now-last)/1000,.1));last=now;pollGamepad();pollTouch();if(active){time+=dt;accumulator+=dt;while(accumulator>=1/120&&active){updatePhysics(1/120);accumulator=Math.max(0,accumulator-1/120);}
   const s=entity(),fleet=chase.naval?navalSummary(chase):null;
   vehicleAudio.update(dt,{kind,speed:s.speed||0,rpm:heli.rpm,collective:heli.collective,throttle:kind==='plane'?plane.throttle:kind==='helicopter'?heli.collective*heli.rpm:kind?(Number(held('KeyW','ArrowUp'))-Number(held('KeyS','ArrowDown'))):0,onGround:kind==='helicopter'?heli.grounded:plane.onGround,stall:kind==='helicopter'?false:plane.stall,crashed:kind==='helicopter'?heli.status==='crashed':plane.crashed,impacts:kind?s.impacts:0,active:true,nearWater:!kind&&Math.hypot(player.x-yacht.x,player.z-yacht.z)<40});
   vehicleAudio.events({roofShots:roofGun.shots,planeShots:planeGun.shots+heliGun.shots,rocketShots:planeGun.rocketShots+heliGun.rocketShots,roofHits:roofGun.hits,planeHits:planeGun.hits+heliGun.hits,seaShots:fleet?.shots||0,seaHits:fleet?.hits||0,repairs:wear.rover.repairs+wear.yacht.repairs,rearms:audioRearms,landings:audioLandings,checkpoints:audioCheckpoints,hullHits:audioHullHits,waves:audioWaves,houndKills:escort.killed||0,rifleShots:rifle.shots,frontierKills:audioFrontierKills,frontierExplosions:frontier.effectCounts?.explode||0,frontierCollapses:frontier.effectCounts?.collapse||0,mechSteps:frontier.mechSteps||0});if(messageTime>0){messageTime-=dt;if(messageTime<=0)message.classList.remove('visible');}}

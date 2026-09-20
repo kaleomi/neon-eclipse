@@ -23,6 +23,7 @@
 - 源码接线：新 `asset-preload.js`——菜单期按本章敌人名单预热 GLB（复用运行时缓存加载器，P4 除外）、SFX 按地图子集预热（`createSfxPlayer({preloadFiles})`，默认仍全量）、音乐只预取当前轨、`index.html` 7 条 modulepreload。`.gitignore` 加 `.tools/`，243 个 QA 截图/探针文件撤销追踪（`4ee8760`）。
 - 规则：新增 `test-asset-preload.mjs`；check 602/602、rules 131/131、integration 53/54（唯一失败 `test-swarm-world` 来自用户未提交的 `swarm-model.js`，stash 后通过）。
 - 浏览器：新增 `test-asset-warmup-browser.mjs` EXIT=0；recorded-audio 23 项、smoke 15/15、polar 4/4、frame-perf EXIT=0。用户决定：不做 GLB 压缩/音乐码率/封面重编码，不做英文 i18n。详见 `docs/mcp-asset-size-audit.md` §8。
+- 追加（同日）：首次真实 GitHub Actions 运行暴露 `app.js` 预热代码引用了用户工作区尚未提交的 `characters/roster-runtime.js` / `shield-guard-runtime.js`，干净检出下整页无法加载（smoke 15 步全部超时）。已从预热接线中移除这两类加载器（`loaderForType` 对 shield / roster 类型跳过），并新增 `test-import-graph.mjs`：从六个页面入口遍历静态 import，任何未被 Git 追踪的模块即失败；干净检出 307 模块全部追踪。用户工作区当前会报 12 个未提交模块，属预期，提交后即过。
 
 ### 资源体积与懒加载审计（2026-09-20，仅分析）
 

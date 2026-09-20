@@ -17,7 +17,7 @@
 - 源码接线：无（仅测试脚本）。基线 `e929dea` 之后，主菜单把章节/训练入口移入 `#menu-new` 的“准备”子页，`vehicle.html` 由 `ui-navigation.js createViewDeck` 组织为 overview/campaign/missions/settings/records 页签（任务页内再嵌一层任务页签），`loadout-world.js` 携带终端按钮改名“应用携带配置”。
 - 测试修正：`test-polar-browser.mjs` / `test-orbital-browser.mjs` / `test-datacenter-browser.mjs` 首领训练步先点 `#menu-new`；`test-p4-browser.mjs` 生存流程按钮名改为“应用携带配置”；`test-expedition-browser.mjs` 新增 `campaign(selector)` 辅助，按 `aria-controls` 自外向内打开控件所属的隐藏 `.ui-tab-page` 页签（含嵌套任务页签、`#frontier-difficulty-select`、窄屏截图段与干净页截图）。
 - 浏览器：串行复测 smoke 15/15、archive EXIT=0、polar 4/4、orbital 4/4、datacenter 4/4、p4 25 场景 EXIT=0、expedition 三步 EXIT=0（日志 `.tools/b2-*.log`）。失败记录：修正前 p4 / expedition EXIT=1，三章 3/4，均为 UI 结构变化导致的选择器失效，非玩法回归。
-- 未做：`test-menu-polish-browser.mjs`、`test-menu-polish-native-browser.mjs` 仍直接点击 `#menu-levels`，未在本轮复测；受控夹具不等于自然通关。
+- 追加（同日）：`test-menu-polish-browser.mjs` / `test-menu-polish-native-browser.mjs` 同样改为先点 `#menu-new`；主页四按钮固定顺序、以 `data-home-primary` 标记主操作（不再重排），Tab 顺序改为 准备页 `#menu-begin` → `#menu-levels`，新游戏计数改在 `#menu-begin`；两链复测 EXIT=0。首次复测 native 链在 `#menu-new` 点击超时一次（同机残留 Chrome 争抢，重跑通过），记录在案。未做：受控夹具不等于自然通关。
 
 ### app.js 拆分第二阶段（2026-09-20）
 

@@ -20,7 +20,7 @@ try{
  await page.goto(server.base+'/index.html?map=reactor&intro=0');
  await page.waitForFunction(()=>document.body.dataset.uiReady==='true');
  assert(await page.locator('#menu-continue').isDisabled());await shot('native-home');
- await page.click('#menu-levels');assert.equal(await page.locator('.menu-chapter-grid>a').count(),9);await shot('native-chapters');
+ await page.click('#menu-new');await page.click('#menu-levels');assert.equal(await page.locator('.menu-chapter-grid>a').count(),9);await shot('native-chapters');
  await page.locator('.menu-chapter-grid>a[data-map=reactor]').click();await page.click('#deploy');
  await page.waitForFunction(()=>document.body.dataset.playState==='playing');
  await page.keyboard.press('Escape');await page.waitForFunction(()=>document.body.dataset.playState==='paused');

@@ -28,10 +28,10 @@ try{
   await p.setViewportSize({width,height});await p.evaluate(()=>window.__cleanUI.menu.home());
   await p.locator('.menu-home').waitFor({state:'visible'});
   await p.evaluate(()=>{document.querySelector('.menu-views').scrollTop=0;});
-  const home=await p.locator('.menu-views').evaluate(e=>({scroll:e.scrollWidth,width:e.clientWidth,height:e.clientHeight,scrollHeight:e.scrollHeight,button:getComputedStyle(document.querySelector('#menu-new')).cssText,rects:Object.fromEntries(['.menu-home','.menu-home-copy','.menu-home-actions','#menu-new','.menu-mobile-actions','.menu-footer'].map(s=>{const n=document.querySelector(s),r=n.getBoundingClientRect(),c=getComputedStyle(n);return [s,{top:r.top,bottom:r.bottom,height:r.height,padding:c.padding,minHeight:c.minHeight,font:c.font,lineHeight:c.lineHeight,flex:c.flex}];}))}));
+  const home=await p.locator('.menu-views').evaluate(e=>({scroll:e.scrollWidth,width:e.clientWidth,height:e.clientHeight,scrollHeight:e.scrollHeight,button:getComputedStyle(document.querySelector('#menu-new')).cssText,rects:Object.fromEntries(['.menu-home','.menu-home-copy','.menu-home-actions','#menu-new','.menu-mobile-actions','.menu-footer'].filter(s=>document.querySelector(s)).map(s=>{const n=document.querySelector(s),r=n.getBoundingClientRect(),c=getComputedStyle(n);return [s,{top:r.top,bottom:r.bottom,height:r.height,padding:c.padding,minHeight:c.minHeight,font:c.font,lineHeight:c.lineHeight,flex:c.flex}];}))}));
   if(!process.env.MENU_POLISH_BEFORE) assert(home.scroll<=home.width+2,`home overflow ${width}: ${JSON.stringify(home)}`);
   await p.screenshot({path:`${out}/home-${width}x${height}.png`});
-  await p.click('#menu-levels');assert.equal(await p.locator('.menu-chapter-grid>a').count(),9);
+  await p.click('#menu-new');await p.click('#menu-levels');assert.equal(await p.locator('.menu-chapter-grid>a').count(),9);
   const levels=await p.locator('.menu-views').evaluate(e=>({scroll:e.scrollWidth,width:e.clientWidth}));
   if(!process.env.MENU_POLISH_BEFORE)assert(levels.scroll<=levels.width+2,`chapter overflow ${width}`);
   for(const a of await p.locator('.menu-chapter-grid>a').all()){
@@ -43,25 +43,26 @@ try{
  }
  if(!process.env.MENU_POLISH_BEFORE){
   await p.setViewportSize({width:1440,height:900});await p.evaluate(()=>window.__cleanUI.menu.home());
-  assert.equal(await p.locator('.menu-home-actions>button').first().getAttribute('id'),'menu-new');
-  await p.locator('#menu-new').focus();await p.keyboard.press('Tab');assert.equal(await p.evaluate(()=>document.activeElement.id),'menu-levels');
+  // Simplified home keeps a fixed order (继续/新游戏/设置/成就) and marks the primary action with data-home-primary instead of reordering.
+  assert.equal(await p.locator('.menu-home-actions>button').first().getAttribute('id'),'menu-continue');assert.equal(await p.locator('#menu-new').getAttribute('data-home-primary'),'true');
+  await p.click('#menu-new');await p.locator('#menu-begin').focus();await p.keyboard.press('Tab');assert.equal(await p.evaluate(()=>document.activeElement.id),'menu-levels');
   const focus=await p.locator('#menu-levels').evaluate(e=>({width:getComputedStyle(e).outlineWidth,style:getComputedStyle(e).outlineStyle}));assert.equal(focus.width,'2px');assert.equal(focus.style,'solid');
   await p.keyboard.press('Enter');assert(await p.locator('[data-view=levels]').isVisible());
   await p.locator('.menu-chapter-grid>a').last().focus();
   await p.screenshot({path:`${out}/chapter-keyboard-focus.png`});
-  await p.keyboard.press('Escape');assert(await p.locator('[data-view=home]').isVisible());
-  await p.click('#menu-levels');await p.locator('.menu-chapter-grid>a[aria-current=page]').click();assert(await p.locator('[data-view=context]').isVisible());
+  await p.keyboard.press('Escape');assert(await p.locator('[data-view=prepare]').isVisible());await p.keyboard.press('Escape');assert(await p.locator('[data-view=home]').isVisible());
+  await p.click('#menu-new');await p.click('#menu-levels');await p.locator('.menu-chapter-grid>a[aria-current=page]').click();assert(await p.locator('[data-view=context]').isVisible());
   await p.evaluate(()=>{window.__cleanUI.setState('paused');window.__cleanUI.menu.home();});
-  assert.equal(await p.locator('.menu-home-actions>button').first().getAttribute('id'),'menu-continue');
+  assert.equal(await p.locator('#menu-continue').getAttribute('data-home-primary'),'true');
   assert.equal(await p.locator('#menu-continue').getAttribute('data-home-primary'),'true');
   await p.screenshot({path:`${out}/home-resume.png`});
   await p.click('#menu-continue');assert.equal(await p.evaluate(()=>window.__cleanUI.counts.resume),1);
   assert.equal(await p.evaluate(()=>window.__cleanUI.snapshot().state),'playing');
   await p.evaluate(()=>{window.__cleanUI.setState('ready');window.__cleanUI.menu.home();});
-  await p.click('#menu-new');assert.equal(await p.evaluate(()=>window.__cleanUI.counts.newGame),1);
+  await p.click('#menu-new');await p.click('#menu-begin');assert.equal(await p.evaluate(()=>window.__cleanUI.counts.newGame),1);
   await p.emulateMedia({reducedMotion:'reduce'});
   await p.evaluate(()=>{window.__cleanUI.setState('ready');window.__cleanUI.menu.home();});
-  await p.click('#menu-levels');assert.equal(await p.locator('.menu-chapter-grid>a').first().evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
+  await p.click('#menu-new');await p.click('#menu-levels');assert.equal(await p.locator('.menu-chapter-grid>a').first().evaluate(e=>getComputedStyle(e).transitionDuration),'0s');
   assert.equal(await p.evaluate(()=>JSON.stringify({...localStorage})),saved,'menu browsing and mock actions preserve storage');
  }
  assert.deepEqual(errors,[]);await writeFile(out+'/results.json',JSON.stringify({results,errors},null,2));

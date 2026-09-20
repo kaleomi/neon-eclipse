@@ -12,6 +12,12 @@
 
 > 本节是当前进度唯一摘要入口。下方历次批次为历史快照；旧批次中的“下一步”“未实现”、测试数量和版本号只对当时有效，不可覆盖本节。总体方案不是完成清单；Git 提交也不是功能验收证据。用户说明此前提交系误触，本轮仅按新授权建立可回退的源码整理批次，不改写既有历史。
 
+### 载具场界面英文化（2026-09-20）
+
+- 源码接线：`i18n/` 新增 63 个 `vehicle.*` 键；新 `vehicle-i18n.js`（选择器映射 + 语言选择器，不改标记）；`vehicle-app.js` 启动时绑定。运行时 HUD/提示/开始按钮文案仍为中文。
+- 规则：`test-vehicle-i18n.mjs` PASS，`test-i18n.mjs` parity 108；check 513/513、rules 120/120、integration 43/43。
+- 浏览器：`test-vehicle-i18n-browser.mjs` 4/4。未做：运行时文案、主游戏战斗内文案、用户 ui-shell 版 vehicle.html 选择器核对。详见 `docs/mcp-p3-vehicle-i18n.md`。
+
 ### 载具场触屏控制（2026-09-20）
 
 - 源码接线：新 `vehicle-touch.js`（显示判定、虚拟摇杆、指针状态机、自建 DOM 覆盖层，poll 契约同手柄）；`vehicle-app.js` `pollTouch()`、`syncRocket()` 统一鼠标/手柄/触屏/键盘火箭键。

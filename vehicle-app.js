@@ -18,6 +18,7 @@ import {buildFrontierWorld,drawFrontierOnRadar} from './frontier-world.js';
 import {bindVehicleGuidance} from './vehicle-guidance.js';
 import {createVehicleGamepad,VEHICLE_PAD_HELP} from './vehicle-gamepad.js';
 import {shouldShowTouch,mountVehicleTouch} from './vehicle-touch.js';
+import {bindVehicleI18n} from './vehicle-i18n.js';
 import {buildReconWorld} from './recon-world.js';
 import {createFlightMission,stepFlightMission,FLIGHT_PHASES,flightGoal,flightTitle,flightPhase,flightProgress,flightCourse} from './flight-mission.js';
 import {bindFlightMissionUI} from './flight-mission-ui.js';
@@ -42,6 +43,8 @@ import {createEscort,stepEscort,escortGoal,escortFollowInput,truckBlocks,escortS
 import {buildEscortWorld,drawEscortOnRadar} from './escort-world.js';
 import {buildSeaAirField,createAircraftModel,createYachtModel} from './sea-air-world.js';
 const $=selector=>document.querySelector(selector),keys=new Set(),overlay=$('#drive-overlay'),message=$('#drive-message');
+// Chrome translation (menu/briefs/buttons only); runtime copy stays zh-CN. Bound before any HUD writes so its selectors see the source markup.
+const vehicleI18n=bindVehicleI18n({doc:document,storage:localStorage,languages:navigator.languages||[]});window.neonVehicleI18n=vehicleI18n;
 let active=false,started=false,kind=null,drag=false,locked=false,cameraMode='chase',orbit=0,pitch=0,accumulator=0,last=performance.now(),time=0,recovery=0,recoveryArmed=false,messageTime=0,hudTimer=0,armedStation=null,flightHeading=0;
 let sortie=createFlightMission(),joint=createJointMission(),jointArmed=false,lighthouse=createLighthouseMission(),lighthouseArmed=false;
 // Missions 6–8 share one slot: only one frontier mission runs at a time.

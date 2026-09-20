@@ -70,7 +70,7 @@ try{
   const {page,errors}=await newPage(context);
   await page.goto(`${base}/index.html?map=datacenter`);await menuOpen(page);
   await page.evaluate(()=>localStorage.setItem('neon-eclipse.datacenter.v1',JSON.stringify({version:1,unlocked:4,checkpoint:null})));await page.reload();await menuOpen(page);
-  await page.click('#menu-levels');await page.click('.menu-view[data-view="levels"] .menu-training > summary');await page.click('#menu-training-slot .campaign-menu details > summary');await page.waitForSelector('.stage-choices button[data-stage="3"]:not([disabled])');await page.click('.stage-choices button[data-stage="3"]');await playing(page);
+  await page.click('#menu-new');await page.click('#menu-levels');await page.click('.menu-view[data-view="levels"] .menu-training > summary');await page.click('#menu-training-slot .campaign-menu details > summary');await page.waitForSelector('.stage-choices button[data-stage="3"]:not([disabled])');await page.click('.stage-choices button[data-stage="3"]');await playing(page);
   const panel=page.locator('.boss-mechanic:not([hidden])');
   await page.waitForFunction(()=>[...document.querySelectorAll('.boss-mechanic')].some(p=>!p.hidden&&/ABYSS/.test(p.textContent)));
   assert.match(await panel.innerText(),/1500/);

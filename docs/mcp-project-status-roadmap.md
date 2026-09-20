@@ -12,6 +12,13 @@
 
 > 本节是当前进度唯一摘要入口。下方历次批次为历史快照；旧批次中的“下一步”“未实现”、测试数量和版本号只对当时有效，不可覆盖本节。总体方案不是完成清单；Git 提交也不是功能验收证据。用户说明此前提交系误触，本轮仅按新授权建立可回退的源码整理批次，不改写既有历史。
 
+### 浏览器回归链跟进简化菜单 / 载具页签（2026-09-20）
+
+- 源码接线：无（仅测试脚本）。基线 `e929dea` 之后，主菜单把章节/训练入口移入 `#menu-new` 的“准备”子页，`vehicle.html` 由 `ui-navigation.js createViewDeck` 组织为 overview/campaign/missions/settings/records 页签（任务页内再嵌一层任务页签），`loadout-world.js` 携带终端按钮改名“应用携带配置”。
+- 测试修正：`test-polar-browser.mjs` / `test-orbital-browser.mjs` / `test-datacenter-browser.mjs` 首领训练步先点 `#menu-new`；`test-p4-browser.mjs` 生存流程按钮名改为“应用携带配置”；`test-expedition-browser.mjs` 新增 `campaign(selector)` 辅助，按 `aria-controls` 自外向内打开控件所属的隐藏 `.ui-tab-page` 页签（含嵌套任务页签、`#frontier-difficulty-select`、窄屏截图段与干净页截图）。
+- 浏览器：串行复测 smoke 15/15、archive EXIT=0、polar 4/4、orbital 4/4、datacenter 4/4、p4 25 场景 EXIT=0、expedition 三步 EXIT=0（日志 `.tools/b2-*.log`）。失败记录：修正前 p4 / expedition EXIT=1，三章 3/4，均为 UI 结构变化导致的选择器失效，非玩法回归。
+- 未做：`test-menu-polish-browser.mjs`、`test-menu-polish-native-browser.mjs` 仍直接点击 `#menu-levels`，未在本轮复测；受控夹具不等于自然通关。
+
 ### app.js 拆分第二阶段（2026-09-20）
 
 - 源码接线：`app.js` 885 → 757 行；新增 `session-flow.js`（战役/旅程/训练入口与进入战斗）、`session-input.js`（键鼠/指针锁监听，顺序不变）、`p4-bridge.js`（P4 门面与运行时接线）。通过惰性访问器 `ctx` 共享 app.js 内 78 个绑定，代码逐字搬移并按作用域改写标识符。

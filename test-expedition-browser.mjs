@@ -45,12 +45,14 @@ try{
   const sentinel={'neon-eclipse.journey.v6':'expedition-keep','neon-eclipse.chapter-achievements.v1':'achievements-keep','neon-eclipse.naval-difficulty.v1':'easy','neon-eclipse.escort-difficulty.v1':'normal'};
   await context.addInitScript(s=>{for(const [k,v] of Object.entries(s))if(localStorage.getItem(k)===null)localStorage.setItem(k,v);},sentinel);
   await page.goto(server.base+'/vehicle.html');await page.waitForFunction(()=>document.body.dataset.expeditionState==='ready');
-  const twice=async selector=>{await page.click(selector);await page.click(selector);};
+  // Vehicle menu controls live on tab pages (.ui-tab-page); open the tab that owns a control before clicking it.
+  const campaign=async(selector='#expedition-new')=>{const tabs=await page.evaluate(sel=>{const ids=[];let el=document.querySelector(sel)?.closest('.ui-tab-page');while(el){if(el.hidden){const b=document.querySelector('[aria-controls="'+el.id+'"]');if(b?.id)ids.unshift(b.id);}el=el.parentElement?.closest('.ui-tab-page');}return ids;},selector);for(const id of tabs)await page.click('#'+id);};
+  const twice=async selector=>{await campaign(selector);await page.click(selector);await page.click(selector);};
   const running=id=>page.waitForFunction(id=>document.body.dataset.expeditionMission===id&&document.body.dataset.expeditionState==='playing',id);
   const progress=(n,records=n)=>page.waitForFunction(([n,records])=>document.body.dataset.expeditionCompleted===String(n)&&document.body.dataset.expeditionRecords===String(records)&&document.body.dataset.expeditionState==='ready',[n,records]);
   const win=async(id,options={})=>page.evaluate(([id,options])=>window.__p3Fixture.win(id,options),[id,options]);
-  await page.selectOption('#expedition-difficulty','hard');await page.click('#expedition-new');assert.equal(await page.getAttribute('body','data-escort-status'),'idle','first click only arms');
-  await page.click('#expedition-new');await running('escort');assert.equal(await page.getAttribute('body','data-escort-difficulty'),'hard');
+  await campaign();await page.selectOption('#expedition-difficulty','hard');await campaign();await page.click('#expedition-new');assert.equal(await page.getAttribute('body','data-escort-status'),'idle','first click only arms');
+  await campaign();await page.click('#expedition-new');await running('escort');assert.equal(await page.getAttribute('body','data-escort-difficulty'),'hard');
   await page.keyboard.press('Escape');assert.equal(await page.getAttribute('body','data-drive-active'),'false');assert.equal(await page.getAttribute('body','data-expedition-mission'),'escort');
   await page.evaluate(()=>window.__p3Fixture.lose('escort'));await progress(0);
   await twice('#expedition-continue');await running('escort');await win('escort',{invalid:true});await progress(0);assert.match(await page.locator('#expedition-feedback').textContent(),/未满足/);
@@ -73,8 +75,8 @@ try{
   assert.equal(await page.getAttribute('[data-task="recon"][data-rules="recon-v1"]','data-count'),'1','campaign recon must not enter standalone flight archive');
   await twice('#expedition-continue');await running('joint');assert.equal(await page.getAttribute('body','data-joint-stage'),'pickup');
   await page.keyboard.press('Escape');assert((await page.evaluate(()=>window.__p3Fixture.seedJointCheckpoint())).ok);
-  await page.click('#refresh-joint-checkpoint');await page.waitForFunction(()=>!document.querySelector('#resume-joint-checkpoint').disabled);
-  await page.click('#resume-joint-checkpoint');await page.waitForFunction(()=>document.body.dataset.jointRecovered==='true');
+  await campaign('#refresh-joint-checkpoint');await page.click('#refresh-joint-checkpoint');await page.waitForFunction(()=>!document.querySelector('#resume-joint-checkpoint').disabled);
+  await campaign('#resume-joint-checkpoint');await page.click('#resume-joint-checkpoint');await page.waitForFunction(()=>document.body.dataset.jointRecovered==='true');
   assert.equal(await page.getAttribute('body','data-expedition-mission'),'none');await win('joint');await progress(3);
   await twice('#expedition-continue');await running('joint');assert.equal(await page.getAttribute('body','data-joint-recovered'),'false');
   await win('joint');await progress(4);assert(!(await page.locator('#expedition-continue').isDisabled()),'fifth mission is now open');assert.match(await page.locator('#expedition-status').textContent(),/灯塔岛登陆/);
@@ -98,7 +100,7 @@ try{
   assert.equal(await page.getAttribute('.expedition-record-row[data-mission="lighthouse"][data-difficulty="hard"]','data-count'),'0');
   assert(await page.locator('#expedition-checkpoint').isDisabled(),'node retired after completion');
   // Fresh campaign for the remaining clean-run assertions below.
-  await page.selectOption('#expedition-difficulty','hard');await twice('#expedition-new');await running('escort');await win('escort');await progress(1,6);
+  await campaign();await page.selectOption('#expedition-difficulty','hard');await twice('#expedition-new');await running('escort');await win('escort');await progress(1,6);
   await twice('#expedition-continue');await running('naval');await win('naval');await progress(2,7);
   await twice('#expedition-continue');await running('recon');await win('recon');await progress(3,8);
   await twice('#expedition-continue');await running('joint');await win('joint');await progress(4,9);
@@ -121,7 +123,7 @@ try{
   await twice('#expedition-continue');await running('platform');const shorePos=await page.evaluate(()=>[Number(document.body.dataset.heliX),Number(document.body.dataset.heliZ)]);assert(Math.hypot(shorePos[0]-196,shorePos[1]-120)<1,'helicopter parked on the shore pad for the platform raid '+shorePos);await win('platform',{invalid:true});await progress(6,11);
   await twice('#expedition-continue');await running('platform');await win('platform');await progress(7,12);assert.equal(await page.getAttribute('body','data-expedition-title'),'false');
   // Standalone frontier start detaches the campaign and does not count.
-  await page.keyboard.press('Escape');await page.selectOption('#frontier-difficulty-select','easy');await twice('#start-radar');await page.waitForFunction(()=>document.body.dataset.frontierStatus==='active'&&document.body.dataset.driveActive==='true');
+  await page.keyboard.press('Escape');await campaign('#frontier-difficulty-select');await page.selectOption('#frontier-difficulty-select','easy');await twice('#start-radar');await page.waitForFunction(()=>document.body.dataset.frontierStatus==='active'&&document.body.dataset.driveActive==='true');
   assert.equal(await page.getAttribute('body','data-expedition-mission'),'none','standalone frontier detaches the campaign');assert.equal(await page.getAttribute('body','data-frontier-difficulty'),'easy');await win('radar');await progress(7,12);
   await twice('#expedition-continue');await running('radar');await win('radar');await progress(8,13);assert(await page.locator('#expedition-continue').isDisabled());
   assert.equal(await page.getAttribute('body','data-expedition-title'),'true','title after eight in one campaign');assert.match(await page.locator('#expedition-title').textContent(),/先遣队/);
@@ -133,12 +135,12 @@ try{
   assert.equal(await page.getAttribute('.expedition-record-row[data-mission="recon"][data-difficulty="fixed"]','data-count'),'2','two campaigns');
   assert.equal(await page.getAttribute('.expedition-record-row[data-mission="joint"][data-difficulty="fixed"]','data-count'),'2','two campaigns');
   assert.deepEqual(await page.evaluate(s=>Object.fromEntries(Object.keys(s).map(k=>[k,localStorage.getItem(k)])),sentinel),sentinel);
-  for(const [width,height] of [[1280,900],[390,780],[320,700]]){await page.setViewportSize({width,height});await page.locator('#expedition-panel').scrollIntoViewIfNeeded();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no horizontal overflow '+width);}
+  for(const [width,height] of [[1280,900],[390,780],[320,700]]){await page.setViewportSize({width,height});await campaign();await page.locator('#expedition-panel').scrollIntoViewIfNeeded();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'no horizontal overflow '+width);}
   assert.deepEqual(errors,[]);await context.close();
   console.log('PASS step 3: fixed-rule recon/joint, separate records, legacy checkpoint detachment, fifth mission (lighthouse) and missions 6–8 (windfarm real-rule safe node save-lose-resume-recovered win, platform invalid refusal + shore pad, radar standalone detachment), eight-record completion + 先遣队 title + reload, grouped results, saved-data isolation and narrow layouts');
   // Screenshot a clean, unmodified production page, not the synthetic completion fixture.
   const clean=await browser.newContext({viewport:{width:1280,height:900}}),cleanPage=await clean.newPage();
-  await cleanPage.goto(server.base+'/vehicle.html');await cleanPage.waitForFunction(()=>document.body.dataset.expeditionState==='ready');
+  await cleanPage.goto(server.base+'/vehicle.html');await cleanPage.waitForFunction(()=>document.body.dataset.expeditionState==='ready');await cleanPage.click('#vehicle-tab-campaign');
   await cleanPage.locator('#expedition-panel').scrollIntoViewIfNeeded();await cleanPage.screenshot({path:path.join(shots,'p3-expedition-menu.png')});
   await cleanPage.setViewportSize({width:390,height:780});await cleanPage.locator('#expedition-panel').scrollIntoViewIfNeeded();await cleanPage.screenshot({path:path.join(shots,'p3-expedition-mobile.png')});await clean.close();
   console.log('PASS: eight-mission UI and score wiring. Terminal-state fixtures are not full natural/human playthroughs. Screenshots: '+shots);

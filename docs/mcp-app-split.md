@@ -1,6 +1,6 @@
-# app.js 拆分（第一阶段）：装配壳 + 四个职责模块
+# app.js 拆分：装配壳 + 职责模块（第一、二阶段）
 
-状态：第一阶段已实施并验收，见第 5 节。基线提交 `52aa1c9`（用户本地改动整体入库），拆分在其上进行。
+状态：两个阶段均已实施并验收，见第 5 节与第 7 节。基线提交 `52aa1c9`（用户本地改动整体入库），拆分在其上进行。
 
 ## 1. 动机与边界
 
@@ -49,8 +49,33 @@
 - 浏览器 smoke：`test-smoke-browser.mjs` 13/15。失败两步「audio: unlock…」「settings: save hub…」在 `#menu-settings` 后等待 `#menu-audio [data-audio-bus=music]` / `#menu-save-hub [data-save-export]` 可见超时（元素存在但 hidden）。**用 HEAD 版 app.js 复跑结果相同 13/15**（日志 `.tools/split-smoke-head.log`），即失败来自基线里用户对 `menu-ui.js` 设置页的改动（设置页分组/分页），与拆分无关；九章 boot、start/pause/retry、journey 迁移、telemetry、vehicle 页均通过。该两步需要随设置页新结构更新测试选择器，未在本批处理。
 - 未做：第二阶段（会话状态对象化、P4 桥、输入监听搬出、清理 0 引用 import）。
 
-## 6. 第二阶段候选（未做）
+## 6. 第二阶段设计
 
-- 会话状态对象化（`state/health/kills/selected/yaw/pitch/...` → `session`），之后才能搬 `reset/end/pause/checkpoint` 与输入监听。
-- P4 API 块独立成 `p4-bridge.js`。
-- 清理 0 引用 import。
+第一阶段结论里「先把会话状态对象化才能搬流程/输入」被放弃：把 40 个顶层 `let` 全改成对象字段会触碰 `update/shoot/reset` 等 600 行热路径，回归面太大。改用**惰性访问器 `ctx`**：
+
+```js
+const ctx={get state(){return state;},set state(v){state=v;},get reset(){return reset;},...};
+```
+
+- `ctx` 在 `let gameMenu` 之后、所有 `const` 之前构造；getter 惰性求值，不触发 TDZ。
+- 只暴露被搬出模块实际引用的 78 个名字（由 AST 扫描生成，非手写）；`let` 带 setter，`const`/函数只读。
+- 被搬出的代码用 acorn 做**作用域感知**的标识符改写（`state` → `ctx.state`，简写属性 `{state}` → `{state:ctx.state}`；局部参数/声明同名者不改），文本其余部分逐字保留。
+
+| 新文件 | 内容 | 对 app.js 的接口 |
+| --- | --- | --- |
+| `session-flow.js` | `saveCheckpoint/refreshJourney/openMenuChapter/startJourney/continueJourney/startSingleChapter/enterPlay/requestIntro/beginChapterIntro/continueCampaign/retryStage/startReplay`；私有 `navigating`、`introRequested` | `const flow=createSessionFlow(ctx)`；app.js 内 12 处调用改为 `flow.X`，菜单 `navigating:flow.navigating` |
+| `session-input.js` | pointerlockchange / blur / mousemove / 画布 mousedown+leave / 捕获 keydown / 冒泡 keydown / keyup / mousedown / mouseup / contextmenu，顺序不变 | `bindSessionInput(ctx)` 放在原监听器位置 |
+| `p4-bridge.js` | `p4API` 门面、`createP4Runtime`、`registerHit/hurt` 包装、boot 或 hub 链接 | `const p4API=createP4Bridge(ctx)`；**`p4API` 必须保留为 app.js 绑定**——`test-p4-browser.mjs` 会把探针追加到 app.js 末尾并按名字读 `p4API/enemies/loadout/overseer/p4/end/health/update/shoot` |
+
+其它改动：`toastTime=.6`（交互提示短 toast）改为 `chrome.notify(hint,.6)`，`session-chrome.notify` 增加可选秒数参数。
+
+## 7. 第二阶段验收（2026-09-20）
+
+- 起点 `b9ed5f7`；用户同时在改 `reactor-arena.js`（GLTF/PMREM）、`index.html`（importmap）、`session-chrome.js`（`overlay.dataset.map`）、`app.js`（音频 update 参数）等，未提交；本阶段基于其工作树版本生成，未回退任何用户改动。
+- 结果：`app.js` 885 → 757 行；新增 `session-flow.js`（84 行）、`session-input.js`（51）、`p4-bridge.js`（34）。
+- 源码接线：`node --check` OK；`get_diagnostics` 四文件均 0；AST 自由变量扫描：四文件无未声明标识符。
+- 规则：新增 `test-session-flow.mjs`（continue/start/replay/retry/navigating 守卫/journey 分支）PASS；check 533/533、rules 125/125、integration 43/43。
+- 浏览器：smoke 13/15（与基线相同的两步 settings 选择器失败；`start / pause / retry loop`、九章 boot、journey 迁移、telemetry、vehicle 全过）；polar 4/4。
+- 浏览器未通过且**与本阶段无关**：`test-p4-browser.mjs` 在 survival 模式等 `装备主武器` 按钮超时、`test-expedition-browser.mjs` 在 `#expedition-difficulty` 不可见超时——用 HEAD 版 app.js 复跑结果相同（日志 `.tools/s2-p4-head.log`、`.tools/s2-expedition-head.log`），来源是基线中用户的 UI 改动。p4 链在第一个断言前已通过 `__p4Probe.snapshot().state==='playing'` 与暂停/继续，说明 `p4-bridge` 接线正常。
+- 过程中修过的两个生成器缺陷（已在最终版修复、由测试覆盖）：① `checkpoint` 作为 `requestIntro(stageIndex,checkpoint)` 参数名遮蔽了全局函数，首版把整块内的 `checkpoint()` 一律跳过导致 `ReferenceError`，改为按作用域链判断遮蔽；② `p4API` 首版未保留为绑定，P4 探针报 `p4API is not defined`。
+- 未做：清理 app.js 中 0 引用 import（`p4Damage/cinderDamage/KILL_FX/WEAPONS/STAGES/incomingDamage/...`）；`update/shoot/reset/end/pause` 仍在 app.js（它们是会话状态的主要写入者，搬出前需要真正的状态对象化）。

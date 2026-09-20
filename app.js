@@ -103,13 +103,20 @@ import { createI18n } from './i18n/index.js';
 import {createSessionChrome} from './session-chrome.js';
 import {createMapArt,createMapOverseer,createMapEnemyNavigation,mapSpawn,HAS_BOSS_RECORD} from './map-world.js';
 import {installTestProbes} from './app-probes.js';
+import {createSessionFlow} from './session-flow.js';
+import {bindSessionInput} from './session-input.js';
+import {createP4Bridge} from './p4-bridge.js';
 
 const fieldRecord=createFieldRecord();
 const telemetry=createTelemetry(),frameStats=createFrameStats();let telemetryAttempt=null,telemetryShots=[0,0,0,0,0,0,0,0];
 window.neonTelemetry=telemetry;
 const meleeSweep=createMeleeSweep(),meleeStrike=createMeleeStrike(),haloBurst=createHaloBurst(),railCharge=createRailCharge();let railCue=0;
 function cancelRail(){railCharge.cancel();railCue=0;}
-let gameMenu=null,navigating=false;
+let gameMenu=null;
+// Shared accessor object for the extracted session modules (session-flow / session-input / p4-bridge). Getters are
+// lazy, so constructing it before the consts below is safe; lets are exposed with setters so the modules can write them.
+const ctx={get $(){return $;},get aimInput(){return aimInput;},get aiming(){return aiming;},set aiming(v){aiming=v;},get bindings(){return bindings;},get camera(){return camera;},get campaign(){return campaign;},get cancelRail(){return cancelRail;},get changeWeapon(){return changeWeapon;},get chapterIntro(){return chapterIntro;},set chapterIntro(v){chapterIntro=v;},get checkpoint(){return checkpoint;},get clearAim(){return clearAim;},get combatUI(){return combatUI;},get cooldown(){return cooldown;},set cooldown(v){cooldown=v;},get emp(){return emp;},get empReady(){return empReady;},get enemies(){return enemies;},get enemyProjectiles(){return enemyProjectiles;},get enterPlay(){return flow.enterPlay;},get execution(){return execution;},get executionTarget(){return executionTarget;},get fieldKit(){return fieldKit;},get fieldLayout(){return fieldLayout;},get fieldRecord(){return fieldRecord;},get fireBuffer(){return fireBuffer;},set fireBuffer(v){fireBuffer=v;},get fireEquippedSpecial(){return fireEquippedSpecial;},get firing(){return firing;},set firing(v){firing=v;},get fxSettings(){return fxSettings;},get gameAudio(){return gameAudio;},get gameMenu(){return gameMenu;},set gameMenu(v){gameMenu=v;},get gun(){return gun;},get handling(){return handling;},get health(){return health;},set health(v){health=v;},get hud(){return hud;},get journey(){return journey;},get jumpRequested(){return jumpRequested;},set jumpRequested(v){jumpRequested=v;},get keys(){return keys;},get kills(){return kills;},set kills(v){kills=v;},get lineOfSight(){return lineOfSight;},get loadout(){return loadout;},get loadoutWorld(){return loadoutWorld;},get lookInput(){return lookInput;},get meleePending(){return meleePending;},set meleePending(v){meleePending=v;},get meleeRemaining(){return meleeRemaining;},set meleeRemaining(v){meleeRemaining=v;},get mission(){return mission;},get navigation(){return navigation;},get notify(){return notify;},get obstacles(){return obstacles;},get ordnance(){return ordnance;},get overlay(){return overlay;},get p4(){return p4;},set p4(v){p4=v;},get parry(){return parry;},get pause(){return pause;},get pendingJourneyResult(){return pendingJourneyResult;},set pendingJourneyResult(v){pendingJourneyResult=v;},get pitch(){return pitch;},set pitch(v){pitch=v;},get playerMotion(){return playerMotion;},get reload(){return reload;},set reload(v){reload=v;},get renderer(){return renderer;},set renderer(v){renderer=v;},get replayEntry(){return replayEntry;},set replayEntry(v){replayEntry=v;},get reserves(){return reserves;},set reserves(v){reserves=v;},get reset(){return reset;},get roofEnemyNavigation(){return roofEnemyNavigation;},get rounds(){return rounds;},set rounds(v){rounds=v;},get runMode(){return runMode;},set runMode(v){runMode=v;},get scene(){return scene;},get selected(){return selected;},set selected(v){selected=v;},get selectedSpecial(){return selectedSpecial;},set selectedSpecial(v){selectedSpecial=v;},get spawnEncounter(){return spawnEncounter;},get startReload(){return startReload;},get state(){return state;},set state(v){state=v;},get telemetryAttempt(){return telemetryAttempt;},set telemetryAttempt(v){telemetryAttempt=v;},get toggleQuality(){return toggleQuality;},get weaponDrops(){return weaponDrops;},get weapons(){return weapons;},get yaw(){return yaw;},set yaw(v){yaw=v;}};
+const flow=createSessionFlow(ctx);
 const chrome=createSessionChrome({mapId:MAP_ID}),$=chrome.$,{overlay,toast,hit}=chrome;
 createLevelMenu();chrome.applyBrief();
 installTestProbes({get playerMotion(){return playerMotion;},get camera(){return camera;},get mission(){return mission;},get art(){return art;},get overseer(){return overseer;},get scene(){return scene;},toast,health:()=>health,selected:()=>selected,setYaw(v){yaw=v;},heal(){health=100;hud();}});
@@ -121,8 +128,8 @@ const enemyUI=createEnemyUI();
 const harborCombatUI=IS_HARBOR?createHarborCombatUI():null;
 const campaign=createCampaignStore(p4Requested()?p4MemoryStorage():undefined);
 const journey=createJourneyStore(p4Requested()?p4MemoryStorage():undefined);
-const campaignUI=createCampaignUI(campaign,{continue:continueCampaign,retry:retryStage,replay:startReplay});
-const achievementUI=p4Requested()?p4AchievementStub():createAchievementUI(MAP_ID,()=>{if(pendingJourneyResult){gameMenu?.error('本章结果尚未保存，请先返回结算重试保存。');return;}startSingleChapter();});
+const campaignUI=createCampaignUI(campaign,{continue:flow.continueCampaign,retry:flow.retryStage,replay:flow.startReplay});
+const achievementUI=p4Requested()?p4AchievementStub():createAchievementUI(MAP_ID,()=>{if(pendingJourneyResult){gameMenu?.error('本章结果尚未保存，请先返回结算重试保存。');return;}flow.startSingleChapter();});
 chrome.mount();
 let renderer;
 try { renderer = new THREE.WebGLRenderer({ antialias: true }); }
@@ -209,7 +216,7 @@ const i18n=createI18n({storage:localStorage,languages:navigator.languages});wind
 let padLook={x:0,y:0},padMove={x:0,z:0},padHeld=new Set();
 const energyNodes=fieldLayout?.nodes.length?createEnergyNodes(scene,obstacles,fieldLayout.nodes,{enemies,projectiles:enemyProjectiles,onTopologyChange:()=>navigation.invalidate(),onPulse:n=>{gameAudio.play('hit.armor');notify('EMP节点放电 // '+n+'个机械目标瘫痪3秒');}}):null;
 const execution=createExecution(),executionStagger=createExecutionStagger(e=>{enemyProjectiles.cancelOwner(e.group);e.charge=0;});let executionHint='',executionHintTime=0;
-const fieldKit=createFieldKit({scene,camera,gun,weapons,enabled:!!fieldLayout,onRestart:()=>startSingleChapter(),getTargets:()=>enemies.filter(e=>e.hp>0).flatMap(e=>e.group.children).concat(obstacles.map(o=>o.mesh),overseer?.targets||[]),onFire:()=>{p4?.shot(8);fieldRecord.shot();achievementUI.attempt.shot(8);gameAudio.play('fire.railspike');},onImpact:(point)=>{
+const fieldKit=createFieldKit({scene,camera,gun,weapons,enabled:!!fieldLayout,onRestart:()=>flow.startSingleChapter(),getTargets:()=>enemies.filter(e=>e.hp>0).flatMap(e=>e.group.children).concat(obstacles.map(o=>o.mesh),overseer?.targets||[]),onFire:()=>{p4?.shot(8);fieldRecord.shot();achievementUI.attempt.shot(8);gameAudio.play('fire.railspike');},onImpact:(point)=>{
  const cover=obstacles.slice();const props=cover.filter(o=>barrels?.isTarget(o.mesh)||energyNodes?.isTarget(o.mesh)).map(o=>({mesh:o.mesh,damage:blastVisible(point,o.mesh.position,cover,o.mesh)?blastDamage(point,o.mesh.position):0}));
  applyBarrelBlast(point,{player:true,weapon:8,p4Direct:true},cover);for(const p of props){barrels?.hit(p.mesh,p.damage,{player:true,weapon:8});energyNodes?.hit(p.mesh,p.damage);}
 }});
@@ -217,7 +224,7 @@ const ordnance=createOrdnance({reserveSource:typedAmmo,getProfile:index=>worksho
 const loadout=createLoadoutState({heavySupported:!!fieldLayout,canEquipHeavy:index=>ordnance.owns(index)});
 const loadoutBusy=()=>emp.active||emp.aiming||ordnance.active||ordnance.busy||fieldKit.active||fieldKit.busy||execution.active||meleePending||reload>0||cooldown>0||haloBurst.active||railCharge.progress>0;
 const loadoutWorld=createLoadoutWorld({scene,camera,entries:STAGE_ENTRIES,loadout,weapons,heavySupported:!!fieldLayout,ordnance,getState:()=>state,hasSight:lineOfSight,isNoticeVisible:chrome.noticeVisible,isBusy:loadoutBusy,getThrowableStock:()=>({...emp.snapshot().charges,emp:emp.checkpoint().emp.charges}),onEquip:()=>{emp.cancelAim();if(!loadout.allows(selected))changeWeapon(loadout.first());hud();p4?.equipmentChanged?.();}});
-const workshop=createWeaponWorkshop({weapons,base:createRuntimeWeapons(),disabled:p4Requested(),heavySupported:!!fieldLayout,onRestart:()=>startSingleChapter(),getUnlocks:()=>({stars:starWorld.store?.collected.length||0,awards:achievementUI.store?.read().awards?.length||0})});
+const workshop=createWeaponWorkshop({weapons,base:createRuntimeWeapons(),disabled:p4Requested(),heavySupported:!!fieldLayout,onRestart:()=>flow.startSingleChapter(),getUnlocks:()=>({stars:starWorld.store?.collected.length||0,awards:achievementUI.store?.read().awards?.length||0})});
 const weaponDrops=createWeaponDrops({scene,camera,loadout,weapons,hasSight:lineOfSight,isNoticeVisible:chrome.noticeVisible||ordnance.cacheInReach,isBusy:loadoutBusy,notify,onEquip:index=>changeWeapon(index)});
 function selectedCarriedWeapon(){if(selectedSpecial!==null&&loadout.state.primary!==selectedSpecial)selectedSpecial=null;return selected===3?loadout.state.melee:selectedSpecial??selected;}
 function shownCarriedWeapon(){return fieldKit.busy?8:ordnance.busy&&loadout.state.primary>=9&&selected!==3?loadout.state.primary:selectedCarriedWeapon();}
@@ -347,129 +354,16 @@ function end(win){if(p4?.gameEnd(win))return;ordnance.clear();mortarMarkers.clea
  if(win&&runMode==='campaign')campaign.complete();
  if(win&&runMode==='journey'){pendingJourneyResult={time:mission.state.time,kills};if(journey.finish(MAP_ID,pendingJourneyResult))pendingJourneyResult=null;else $('#brief').textContent='章节已完成，但战役存档写入失败。请重试保存后再继续。';}
  if(win&&runMode==='journey'&&journey.data?.status==='complete'){$('#session-title').innerHTML='港口撤离<span>战役完成</span>';$('#brief').textContent='反应堆、地下运输站、天穹通讯枢纽、多层中枢塔、疾驰货运列车、风暴港口：六章行动全部完成。共击破 '+journey.data.results.reduce((n,r)=>n+r.kills,0)+' 个目标。可继续单章训练，或重新开始战役。';}
- $('#deploy').textContent='开始新行动 ↗';firing=false;fireBuffer=0;clearAim();keys.clear();campaignUI.refresh(state,runMode);refreshJourney();}
+ $('#deploy').textContent='开始新行动 ↗';firing=false;fireBuffer=0;clearAim();keys.clear();campaignUI.refresh(state,runMode);flow.refreshJourney();}
 function pause(){if(chapterIntro?.active){chapterIntro.cancel();camera.rotation.set(pitch,yaw,0);gun.visible=true;}execution.cancel();ordnance.cancelCharge();emp.cancelAim();lookInput.reset();if(state!=='playing')return;parry.cancel();cancelRail();bossRecordUI?.show(overseer?.battle.summary);jumpRequested=false;state='paused';overseer?.update(0,camera.position,playerMotion.state.y,false);document.body.dataset.playState=state;gameAudio.play('ui.pause');gameAudio.pause();firing=false;fireBuffer=0;clearAim();keys.clear();overlay.hidden=false;
- $('#session-title').innerHTML='行动<span>已暂停</span>';$('#brief').textContent='战场已冻结。当前目标：'+mission.current.title+'。';$('#deploy').textContent='继续当前战斗 ↗';campaignUI.refresh(state,runMode);refreshJourney();}
+ $('#session-title').innerHTML='行动<span>已暂停</span>';$('#brief').textContent='战场已冻结。当前目标：'+mission.current.title+'。';$('#deploy').textContent='继续当前战斗 ↗';campaignUI.refresh(state,runMode);flow.refreshJourney();}
 function bossLoadout(){return {health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),...tempestCheckpoint(rounds,reserves,selected),...haloCheckpoint(rounds,reserves,selected),...railspikeCheckpoint(rounds,reserves,selected),...voltCheckpoint(rounds,reserves,selected)};}
 function checkpoint(){
  syncTypedAmmo();
  return {stageIndex:mission.state.index,health,rounds:rounds.slice(0,3),reserves:reserves.slice(0,3),selected:legacySelected(selected),...tempestCheckpoint(rounds,reserves,selected),...haloCheckpoint(rounds,reserves,selected),...railspikeCheckpoint(rounds,reserves,selected),...voltCheckpoint(rounds,reserves,selected),...typedAmmo.checkpoint(),...workshop.checkpoint(),...emp.checkpoint(),...fieldKit.checkpoint(),...loadout.checkpoint(),...ordnance.checkpoint(),x:camera.position.x,z:camera.position.z,yaw,pitch,time:mission.state.time,kills,feetY:playerMotion.state.y,collected:missionWorld.collected,...(IS_TRAIN?{trainTime:art.trainTime}:{}),...(IS_TOWER?{towerLiftTime:art.liftTime}:{}),...(IS_DATACENTER?{waterTime:art.time}:{}),...(IS_POLAR?{stormTime:art.time,warmth:art.warmth}:{}),...(transport?{transportTime:transport.time,transportTrip:transport.tripCompleted}:{})};
 }
-function saveCheckpoint(){if(p4?.active)return;if(runMode==='campaign')campaign.save(checkpoint());if(runMode==='journey'&&!journey.save(MAP_ID,checkpoint()))notify('战役检查点写入失败 // 请勿关闭页面');}
-function refreshJourney(){
- document.body.dataset.playMode=runMode;
- gameMenu?.update(state);gameMenu?.refresh();
-}
-function openMenuChapter(map,mode='campaign',entry='chapter'){
- if(navigating)return false;
- const destination=chapterURL(map,mode,entry);
- navigating=true;gameMenu?.refresh();location.href=destination;return true;
-}
-function startJourney(){
- if(navigating)return false;
- if(!journey.start()){gameMenu?.error('无法保存新战役。请允许浏览器存储后重试，或在选择关卡中体验单章模式。');return false;}
- pendingJourneyResult=null;
- if(MAP_ID!=='reactor')return openMenuChapter('reactor','journey');
- runMode='journey';reset();requestIntro(0,null);
- if(!journey.save(MAP_ID,checkpoint())){state='ready';refreshJourney();gameMenu?.error('新战役入口已创建，但检查点写入失败。请重试继续游戏。');return false;}
- return enterPlay();
-}
-function continueJourney(){
- if(navigating)return false;
- if(pendingJourneyResult){
-  if(!journey.finish(MAP_ID,pendingJourneyResult)){gameMenu?.error('章节结果仍无法保存，请勿关闭页面。保存成功后才会进入下一关。');return false;}
-  pendingJourneyResult=null;
- }
- const d=journey.data;
- if(!d){gameMenu?.error('没有可继续的战役，请从主菜单开始新游戏。');return false;}
- if(d.status==='complete'){refreshJourney();return true;}
- if(d.status==='between'){
-  if(!journey.advance()){gameMenu?.error('无法保存下一关入口，章节结算仍保留。请点击进入下一关重试。');return false;}
-  return openMenuChapter(CHAPTERS[d.chapter+1].map,'journey');
- }
- const chapter=CHAPTERS[d.chapter];
- if(MAP_ID!==chapter.map)return openMenuChapter(chapter.map,'journey','continue');
- runMode='journey';reset(d.checkpoint?.stageIndex||0,d.checkpoint);requestIntro(d.checkpoint?.stageIndex||0,d.checkpoint);
- if(!d.checkpoint&&!journey.save(MAP_ID,checkpoint())){state='ready';refreshJourney();gameMenu?.error('无法保存本章入口检查点，请允许浏览器存储后重试。');return false;}
- return enterPlay();
-}
-function startSingleChapter(){
- if(navigating)return false;
- if(pendingJourneyResult){gameMenu?.error('本章结果尚未保存，请先返回结算重试保存。');return false;}
- runMode='campaign';reset();requestIntro(0,null);saveCheckpoint();return enterPlay();
-}
-async function enterPlay(){
- loadoutWorld.hide();fieldKit.hide();
- try{await gameAudio.unlock();}catch{}
- gameAudio.resume();gameAudio.play('ui.resume');
- lookInput.reset();state='playing';document.body.dataset.playState=state;overlay.hidden=true;
- if(introRequested){introRequested=false;beginChapterIntro();}
- try{await renderer.domElement.requestPointerLock();}catch{notify('鼠标锁定不可用：按住左键拖动瞄准，方向键也可转向');}
-}
-let introRequested=false;
-function requestIntro(stageIndex,checkpoint){introRequested=!p4Requested()&&shouldPlayIntro({stageIndex,checkpoint,setting:fxSettings.intro,webdriver:Boolean(navigator.webdriver),search:location.search});return introRequested;}
-function beginChapterIntro(){if(!chapterIntro)chapterIntro=createChapterIntro({camera,mapId:MAP_ID,onFinish:()=>{camera.rotation.set(pitch,yaw,0);lookInput.reset();keys.clear();firing=false;gun.visible=true;}});chapterIntro.begin({objective:mission.current.title});gun.visible=false;}
-function continueCampaign(){
- if(navigating)return false;
- if(pendingJourneyResult){gameMenu?.error('本章结果尚未保存，请先返回结算重试保存。');return false;}
- const saved=campaign.checkpoint;runMode='campaign';
- if(saved){reset(saved.stageIndex,saved);notify('已读取阶段入口检查点');}else{reset();requestIntro(0,null);saveCheckpoint();}
- return enterPlay();
-}
-function retryStage(){
- if(navigating||pendingJourneyResult)return false;
- const saved=runMode==='replay'?replayEntry:runMode==='journey'?journey.data?.checkpoint:campaign.checkpoint;if(!saved)return false;
- reset(saved.stageIndex,saved);notify('阶段已重置');return enterPlay();
-}
-function startReplay(index){
- if(navigating||pendingJourneyResult){gameMenu?.error('请先完成当前章节结果保存，再开始训练。');return false;}
- if(!Number.isInteger(index)||index<0||index>campaign.unlocked)return;
- runMode='replay';reset(index);replayEntry=checkpoint();notify('阶段训练 // 不覆盖主行动检查点');enterPlay();
-}
 $('#deploy').addEventListener('click',()=>gameMenu?.activatePrimary());
-document.addEventListener('pointerlockchange',()=>{lookInput.reset();if(document.pointerLockElement!==renderer.domElement)pause();});
-window.addEventListener('blur',()=>{pause();if(document.pointerLockElement)document.exitPointerLock();});
-document.addEventListener('mousemove',e=>{
- if(state!=='playing'||chapterIntro?.active)return;
- const delta=lookInput.sample(e,document.pointerLockElement===renderer.domElement);if(!delta)return;
- const sensitivity=.0022*combatUI.sensitivity*(1-handling.state.ads*.35);
- yaw-=delta.x*sensitivity;pitch=THREE.MathUtils.clamp(pitch-delta.y*sensitivity,-1.35,1.35);
-});
-renderer.domElement.addEventListener('mousedown',e=>{if(state==='playing'&&e.button===0&&document.pointerLockElement!==renderer.domElement)lookInput.begin(e.clientX,e.clientY);});
-renderer.domElement.addEventListener('mouseleave',()=>lookInput.end());
-// Capture only the equipment shortcuts: the paused menu traps bubbling keys.
-document.addEventListener('keydown',e=>{
- if(e.code==='Escape'&&(loadoutWorld.open||fieldKit.open)){e.preventDefault();e.stopPropagation();loadoutWorld.hide();fieldKit.hide();queueMicrotask(()=>{if(!loadoutWorld.open&&!fieldKit.open)$('#deploy').focus({preventScroll:true});});return;}
- const typing=e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||e.target instanceof HTMLTextAreaElement||e.target.isContentEditable;
- if(p4?.active&&bindings.is(e.code,'fieldKit')&&!typing){e.preventDefault();e.stopImmediatePropagation();notify('P4 使用波间整备；T 试点不会重开挑战，U 装备终端仍可使用');return;}
- if(bindings.is(e.code,'fieldKit')&&!e.repeat&&!typing&&fieldLayout){e.preventDefault();e.stopPropagation();if(state==='playing'){pause();document.exitPointerLock?.();}loadoutWorld.hide();if(fieldKit.open){fieldKit.hide();$('#deploy').focus();}else fieldKit.show();return;}
- if(bindings.is(e.code,'loadout')&&!e.repeat&&!typing){e.preventDefault();e.stopPropagation();if(loadoutWorld.open)loadoutWorld.hide();else{if(state==='playing'){pause();document.exitPointerLock?.();}fieldKit.hide();loadoutWorld.show();}}
-},true);
-document.addEventListener('keydown',e=>{
- if(e.target instanceof HTMLInputElement||e.target instanceof HTMLSelectElement||e.target instanceof HTMLTextAreaElement||e.target.isContentEditable)return;
- if(state==='playing'&&['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
- if(bindings.is(e.code,'quality')&&!e.repeat){toggleQuality();return;}
- if(e.code==='Escape'){pause();document.exitPointerLock?.();}
- if(state!=='playing')return;
- if(chapterIntro?.active){if(e.code==='Space'||e.code==='Enter'){e.preventDefault();chapterIntro.skip();}return;}
- keys.add(e.code);
- if(bindings.is(e.code,'pickup')&&!e.repeat){if(!ordnance.pick())weaponDrops.pick();return;}
- if(bindings.is(e.code,'grenade')){e.preventDefault();if(!e.repeat&&!parry.busy&&empReady()&&!emp.begin())notify(emp.charges?'投掷物引信正在运行':'当前投掷物已耗尽 · 本章不补充');return;}
- if(p4?.params.headshotsOnly&&bindings.is(e.code,'execute')){notify('弱点协议：处决关闭，请攻击头部、弱点或机关');return;}
- if(bindings.is(e.code,'execute')&&!e.repeat&&loadout.state.melee===3&&selected===3&&!execution.active&&!fieldKit.busy&&!ordnance.busy&&!parry.busy&&!meleePending&&cooldown<=0&&reload<=0&&handling.state.switchRemaining<=0){const target=executionTarget();if(execution.begin(target)){emp.cancelAim();cooldown=EXECUTION.cooldown;fireBuffer=0;firing=false;gameAudio.play('melee.swing');}return;}
- if(bindings.is(e.code,'special')&&!e.repeat){fireEquippedSpecial();return;}
- if(bindings.is(e.code,'jump')&&!e.repeat)jumpRequested=true;
- if(!e.repeat&&!e.ctrlKey&&!e.metaKey&&!e.altKey){const index=equippedWeaponForKey(e.code,loadout.state);if(index!==null){changeWeapon(index);return;}}
- if(bindings.is(e.code,'reload'))startReload();
-});
-document.addEventListener('keyup',e=>{keys.delete(e.code);if(bindings.is(e.code,'special'))ordnance.cancelCharge();if(bindings.is(e.code,'grenade')){if(empReady()){camera.rotation.set(pitch,yaw,0);emp.release();}else emp.cancelAim();}});
-document.addEventListener('mousedown',e=>{if(state!=='playing')return;if(chapterIntro?.active){if(e.button===0)chapterIntro.skip();return;}if(e.button===0){if(selectedSpecial!==null){fireEquippedSpecial();return;}emp.cancelAim();firing=true;fireBuffer=.18;}if(e.button===2){
- if(selected===3&&loadout.state.melee===11){clearAim();return;}
- if(selected===3){clearAim();emp.cancelAim();if(parry.press({ready:!ordnance.busy&&!execution.active&&!fieldKit.busy&&cooldown<=0&&handling.state.switchRemaining<=0&&meleeRemaining<=0&&reload<=0})){fireBuffer=0;firing=false;gameAudio.play('weapon.switch');}}
- else aiming=aimInput.pressMouse();
-}});
-document.addEventListener('mouseup',e=>{if(e.button===0){firing=false;ordnance.cancelCharge();if(selected===6)cancelRail();lookInput.end();}if(e.button===2){aiming=aimInput.releaseMouse();parry.release();}});
-document.addEventListener('contextmenu',e=>e.preventDefault());
+bindSessionInput(ctx);
 function changeWeapon(index){
  if(!loadout.allows(index)){notify('未携带此武器 // U 查看清单 · 返回青色装备终端换装，不丢弃库存');return false;}
  const special=index>=8&&index<=10?index:null,runtime=special!==null?2:index===11?3:index;
@@ -716,7 +610,7 @@ function update(dt){
  emp.update(dt);
  engineerDirector.update(dt);
  if(!p4?.range)enemyFireGate=enemyDirector.update(dt,elapsed,enemyFireGate);
- if(interactions){const hint=interactions.prompt(camera.position,playerMotion.state.y);if(hint&&chrome.timers().toastTime<=0.05&&!mission.state.defending){notify(hint);toastTime=.6;}interactions.update(dt,{player:camera.position,feetY:playerMotion.state.y,held:(bindings.held(keys,'interact')||padHeld.has('interact')),busy:moving||firing||reload>0||handling.state.switchRemaining>0||meleeRemaining>0||emp.aiming||!playerMotion.state.grounded});
+ if(interactions){const hint=interactions.prompt(camera.position,playerMotion.state.y);if(hint&&chrome.timers().toastTime<=0.05&&!mission.state.defending){chrome.notify(hint,.6);}interactions.update(dt,{player:camera.position,feetY:playerMotion.state.y,held:(bindings.held(keys,'interact')||padHeld.has('interact')),busy:moving||firing||reload>0||handling.state.switchRemaining>0||meleeRemaining>0||emp.aiming||!playerMotion.state.grounded});
   if(interactions.vent.state.active>0){if(interactions.vent.inZone(camera.position,playerMotion.state.y))environmentHurt(VENT.dps*dt,new THREE.Vector3(interactions.vent.zone.x,camera.position.y,interactions.vent.zone.z));for(const e of enemies){if(e.hp<=0||e.boss||!interactions.vent.inZone(e.group.position,e.group.position.y))continue;e.hp-=VENT.dps*dt;if(e.hp<=0){e.hp=0;achievementUI.attempt.environmentHit(1);}}
    for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&!enemies[i].boss&&interactions.vent.inZone(enemies[i].group.position,enemies[i].group.position.y)){enemyProjectiles.cancelOwner(enemies[i].group);killPresentation(enemies[i]);weaponDrops.drop(enemies[i]);disposeGroup(enemies[i].group);enemies.splice(i,1);kills++;}}}
  for(let i=enemies.length-1;i>=0;i--)if(enemies[i].hp<=0&&enemies[i].type==='rusher'){enemyProjectiles.cancelOwner(enemies[i].group);disposeGroup(enemies[i].group);enemies.splice(i,1);}
@@ -759,7 +653,7 @@ function update(dt){
    haloBurst.cancel();cancelRail();enemyProjectiles.clear();keys.delete('KeyE');firing=false;fireBuffer=0;enemyFireGate=0;
    notify(event.finished.message);gameAudio.play(event.complete?'objective.extract':'objective.complete');
    if(event.complete||(runMode==='replay'&&!p4?.continuous)){end(true);return;}
-   emp.clear();engineerDirector.clear();spawnEncounter(event.next);saveCheckpoint();campaignUI.announce(event.next);hud();
+   emp.clear();engineerDirector.clear();spawnEncounter(event.next);flow.saveCheckpoint();campaignUI.announce(event.next);hud();
   }
  }
 
@@ -787,37 +681,15 @@ if(!p4Requested())bindPresentationFx(document.querySelector('.presentation-contr
 gameMenu=p4Requested()?{update(){},refresh(){},error(){}}:createGameMenu({overlay,journey,campaign,
  getSession:()=>({state,mode:runMode,map:MAP_ID,stage:mission.state.index,stageCount:STAGE_ENTRIES.length,stageTitle:mission.current.title,time:mission.state.time,kills,
   checkpoint:runMode==='replay'?replayEntry:runMode==='journey'?journey.data?.checkpoint:campaign.checkpoint,
-  pending:Boolean(pendingJourneyResult),navigating}),
- actions:{newGame:startJourney,continueJourney,continueSingle:continueCampaign,startSingle:startSingleChapter,
-  resume:()=>enterPlay(),retry:retryStage,openChapter:openMenuChapter,
+  pending:Boolean(pendingJourneyResult),navigating:flow.navigating}),
+ actions:{newGame:flow.startJourney,continueJourney:flow.continueJourney,continueSingle:flow.continueCampaign,startSingle:flow.startSingleChapter,
+  resume:()=>flow.enterPlay(),retry:flow.retryStage,openChapter:flow.openMenuChapter,
    equipment:()=>{fieldKit.hide();loadoutWorld.show();},fieldKitEnabled:!!fieldLayout,fieldKit:()=>{loadoutWorld.hide();fieldKit.show();},
   quality:value=>{if(![0,1,2].includes(value))return;for(let i=0;i<3&&Number(document.body.dataset.renderQuality)!==value;i++)toggleQuality();}}
 });
-campaignUI.refresh(state,runMode);refreshJourney();
+campaignUI.refresh(state,runMode);flow.refreshJourney();
 // P4 integration seam: native combat implementation remains the single source of truth.
-const p4BaseWeapons=createRuntimeWeapons(),p4LightBase=new Map();scene.traverse(o=>{if(o.isLight)p4LightBase.set(o,o.intensity);});
-const p4API={map:MAP_ID,scene,camera,enemies,obstacles,meleeRange:weapons[3].range,
- invalidate(){navigation.invalidate();roofEnemyNavigation?.invalidate?.();},canOccupy:(x,z,y)=>playerMotion.canOccupy(x,z,y),
- snapshot(){return {state,telemetryId:telemetryAttempt?.id,position:{x:camera.position.x,y:camera.position.y,z:camera.position.z},yaw,pitch,selected,health,kills,stage:mission.state.index,damage:fieldRecord.records.reduce((n,r)=>n+r.damage,0),difficulty:currentDifficulty().id,input:['KeyW','KeyS','KeyA','KeyD','Space','ShiftLeft','KeyE','KeyR'].reduce((n,k,i)=>n+(keys.has(k)?1<<i:0),0)+(firing?256:0)+(aiming?512:0)};},
- carry(){return {...loadout.checkpoint(),...ordnance.checkpoint(),...emp.checkpoint(),...fieldKit.checkpoint(),selected,health,rounds:rounds.map(n=>Number.isFinite(n)?n:null),reserves:reserves.map(n=>Number.isFinite(n)?n:null)};},
- parameters(params){for(let i=0;i<weapons.length;i++){const b=p4BaseWeapons[i];weapons[i].spread=b.spread*params.spread;weapons[i].kick=b.kick*params.recoil;weapons[i].reload=b.reload*params.reload;weapons[i].reserve=Number.isFinite(b.reserve)?Math.floor(b.reserve*params.ammo):b.reserve;}},
- environment(params){if(params.fog>.014&&scene.fog)scene.fog.density=Math.max(scene.fog.density,params.fog);if(params.light!==1)for(const [light,base] of p4LightBase)light.intensity=base*params.light;},
- start(stage,primary,carry){runMode='replay';reset(stage);p4API.parameters(p4.params);replayEntry=checkpoint();if(carry?.loadout){ordnance.reset(carry.ordnance);loadout.reset(carry.loadout);emp.reset(carry.emp,carry.tactical,{checkpoint:true});fieldKit.reset(carry.fieldKit);}else loadout.equip(primary);selected=carry&&Number.isInteger(carry.selected)&&weapons[carry.selected]&&loadout.allows(carry.selected)?carry.selected:loadout.first();handling.reset();
-  if(carry&&Number.isFinite(carry.health)&&carry.health>0&&carry.health<=100)health=carry.health;
-  rounds=weapons.map((w,i)=>i===3?Infinity:Math.max(0,Math.min(w.cap,carry&&Number.isFinite(carry.rounds?.[i])?carry.rounds[i]:w.cap)));
-  reserves=weapons.map((w,i)=>i===3?Infinity:Math.max(0,Math.min(w.reserve,carry&&Number.isFinite(carry.reserves?.[i])?carry.reserves[i]:w.reserve)));
-  hud();},
- inventoryOpen:()=>loadoutWorld.open,play:()=>enterPlay(),stop(){pause();enemyProjectiles.clear();document.exitPointerLock?.();},
- heal(amount){health=Math.min(100,health+Math.max(0,amount));hud();},resupply(type){if(type==='health')health=Math.min(100,health+35);else reserves=weapons.map(w=>w.reserve);hud();},
- makeRange(){for(let i=0;i<enemies.length;i++){const e=enemies[i],angle=(i-(enemies.length-1)/2)*.5,feet=camera.position.y-1.7;for(const radius of [10,8,6,4]){const x=camera.position.x+Math.sin(angle)*radius,z=camera.position.z-Math.cos(angle)*radius;if(playerMotion.canOccupy(x,z,feet)&&lineOfSight(new THREE.Vector3(x,feet+1.2,z))){e.group.position.set(x,feet,z);break;}}e.p4Target=true;e.speed=0;e.attack=Infinity;e.hp=250;e.maxHp=250;}},rangeSupplies(){reserves=weapons.map(w=>w.reserve);},
- moveRange(t,origins){for(let i=0;i<enemies.length;i++){const e=enemies[i],o=origins.get(e);if(!o)continue;const x=o.x+Math.sin(t*(.55+i*.15)+i)*2;if(playerMotion.canOccupy(x,o.z,e.group.position.y))e.group.position.x=x;e.group.rotation.y=Math.atan2(camera.position.x-e.group.position.x,camera.position.z-e.group.position.z);}},
- replenishRange(){spawnEncounter(mission.current);p4API.makeRange();}
-};
-p4=createP4Runtime(p4API);
-const p4HitBase=combatUI.registerHit;combatUI.registerHit=(damage,head,count,source)=>{p4.hit(damage,head,count,source);p4HitBase(damage,head,count);};
-const p4HurtBase=fieldRecord.hurt;fieldRecord.hurt=n=>{p4.hurt?.(n);p4HurtBase(n);};
-if(p4.active){overlay.style.setProperty('display','none','important');p4.boot();}
-else {const link=document.createElement('a');link.href='./p4-hub.html';link.textContent='行动中枢 / P4 ↗';link.className='p4-home-link';link.style.cssText='position:fixed;top:68px;right:28px;z-index:140;padding:10px 18px;color:#a2f5da;background:linear-gradient(135deg,#12343eee,#081820ee);border:1px solid #497c87;text-decoration:none;font:13px sans-serif;box-shadow:0 8px 24px #0008,inset 0 1px #abfff833';document.body.append(link);const hideStyle=document.createElement('style');hideStyle.textContent='body[data-play-state="playing"] .p4-home-link{display:none}';document.head.append(hideStyle);}
+const p4API=createP4Bridge(ctx);// p4API stays a module binding: test-p4-browser.mjs appends a probe that reads it by name.
 
 let last=performance.now();
 // Gamepad → same action ids as keyboard; buttons are dispatched as synthetic keydown/keyup with the action's primary code.
@@ -873,7 +745,7 @@ function frame(now){
  chrome.setHeading(yaw);
  for(let i=effects.length-1;i>=0;i--){effects[i].life-=dt;if(effects[i].life<=0){const m=effects[i].mesh;scene.remove(m);m.geometry.dispose();m.material.dispose();effects.splice(i,1);}}
  chrome.update(dt);
- gameAudio.setListener(camera.position.x,camera.position.z,yaw);gameAudio.update(dt,{playState:state,health,enemiesNear:enemies.reduce((n,e)=>n+(e.group.position.distanceToSquared(camera.position)<45*45?1:0),0),bossActive:Boolean(overseer?.blocking||enemies.some(e=>e.boss)),defending:mission.state.defending===true,extracting:mission.state.extracting===true});
+ gameAudio.setListener(camera.position.x,camera.position.z,yaw);gameAudio.update(dt,{playState:state,map:MAP_ID,grounded:playerMotion.state.grounded,health,enemiesNear:enemies.reduce((n,e)=>n+(e.group.position.distanceToSquared(camera.position)<45*45?1:0),0),bossActive:Boolean(overseer?.blocking||enemies.some(e=>e.boss)),defending:mission.state.defending===true,extracting:mission.state.extracting===true});
  {const shown=$('#fps').textContent,fps=frameStats.sample(now);if(fps&&String(fps)!==shown)$('#fps').textContent=fps;}
  achievementUI.update(state);
  presentation.update(dt,yaw,pitch,state);subtitles.update(dt,{listener:camera.position,yaw});

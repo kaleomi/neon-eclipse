@@ -12,6 +12,12 @@
 
 > 本节是当前进度唯一摘要入口。下方历次批次为历史快照；旧批次中的“下一步”“未实现”、测试数量和版本号只对当时有效，不可覆盖本节。总体方案不是完成清单；Git 提交也不是功能验收证据。用户说明此前提交系误触，本轮仅按新授权建立可回退的源码整理批次，不改写既有历史。
 
+### app.js 拆分第二阶段（2026-09-20）
+
+- 源码接线：`app.js` 885 → 757 行；新增 `session-flow.js`（战役/旅程/训练入口与进入战斗）、`session-input.js`（键鼠/指针锁监听，顺序不变）、`p4-bridge.js`（P4 门面与运行时接线）。通过惰性访问器 `ctx` 共享 app.js 内 78 个绑定，代码逐字搬移并按作用域改写标识符。
+- 规则：新增 `test-session-flow.mjs`；check 533/533、rules 125/125、integration 43/43；诊断 0。
+- 浏览器：smoke 13/15（与基线相同的 settings 两步）、polar 4/4；p4 与 expedition 链失败在 HEAD 版 app.js 上同样复现（基线 UI 改动所致，非拆分）。未做：0 引用 import 清理、`update/shoot/reset` 搬出。详见 `docs/mcp-app-split.md`。
+
 ### app.js 拆分第一阶段（2026-09-20）
 
 - 源码接线：`app.js` 982 → 885 行，抽出 `session-brief.js`（每图简报/图章数据）、`session-chrome.js`（overlay/stamp/罗盘/toast/受击/连击横幅与四个瞬时计时）、`reactor-arena.js`（第一章几何）、`map-world.js`（按图选 art/首领/导航/出生点）、`app-probes.js`（测试探针）；行为与 DOM 顺序不变。

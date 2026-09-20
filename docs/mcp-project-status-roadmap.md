@@ -12,6 +12,12 @@
 
 > 本节是当前进度唯一摘要入口。下方历次批次为历史快照；旧批次中的“下一步”“未实现”、测试数量和版本号只对当时有效，不可覆盖本节。总体方案不是完成清单；Git 提交也不是功能验收证据。用户说明此前提交系误触，本轮仅按新授权建立可回退的源码整理批次，不改写既有历史。
 
+### app.js 拆分第一阶段（2026-09-20）
+
+- 源码接线：`app.js` 982 → 885 行，抽出 `session-brief.js`（每图简报/图章数据）、`session-chrome.js`（overlay/stamp/罗盘/toast/受击/连击横幅与四个瞬时计时）、`reactor-arena.js`（第一章几何）、`map-world.js`（按图选 art/首领/导航/出生点）、`app-probes.js`（测试探针）；行为与 DOM 顺序不变。
+- 规则：新增 `test-session-brief.mjs`、`test-session-chrome.mjs`；check 527/527、rules 124/124、integration 43/43。
+- 浏览器：polar 4/4、datacenter 4/4、orbital 4/4；smoke 13/15，两步 settings 选择器失败在 HEAD 版 app.js 上同样复现（来自基线 `menu-ui.js` 设置页改动，非拆分导致）。未做：会话状态对象化、P4 桥、输入监听搬出。详见 `docs/mcp-app-split.md`。
+
 ### CI 工作流首次本地演练（2026-09-20）
 
 - 干净克隆 HEAD `0fd39f3` 按 `.github/workflows/ci.yml` 逐步执行：`npm ci` OK；check 497/497、rules 119/119、integration 42/42；smoke 15/15、expedition、archive 均 EXIT=0。
@@ -562,3 +568,11 @@
 - 新增本报告：`docs/mcp-project-status-roadmap.md`。
 - 未修改玩法、武器数值、关卡路线、挑战条件或存档逻辑；未安装依赖、初始化 Git、启动新的游戏服务或覆盖用户存档。
 - 本报告是后续开发建议，不表示上述待办已经实现。
+
+
+## 2026-09-20：操作设置新增长按／点按开镜
+
+- 「设置 → 操作 → 开镜方式」可在长按右键与点按切换之间选择，默认长按；与灵敏度一起保存在 `neon-eclipse.controls.v1`，旧偏好不被重写，未来／损坏数据保持只读。
+- 鼠标与手柄为独立输入源，手柄 LT 始终长按；切枪、暂停、失焦、指针锁丢失、结束与重置都会清理开镜状态，近战右键弹反不变。
+- 520项语法、122项规则、43项集成，以及新增7+10组、步战控制10组、弹反、界面20组、布局33例、终端8组全部通过；诊断0；入口与7个生产资源HTTP 200字节一致。
+- 隧道地址更换后重建会话并重跑；详情见 `docs/mcp-controls-aim-mode-2026-09-20.md`。

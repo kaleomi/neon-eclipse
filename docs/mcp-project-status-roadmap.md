@@ -24,6 +24,7 @@
 - 规则：新增 `test-asset-preload.mjs`；check 602/602、rules 131/131、integration 53/54（唯一失败 `test-swarm-world` 来自用户未提交的 `swarm-model.js`，stash 后通过）。
 - 浏览器：新增 `test-asset-warmup-browser.mjs` EXIT=0；recorded-audio 23 项、smoke 15/15、polar 4/4、frame-perf EXIT=0。用户决定：不做 GLB 压缩/音乐码率/封面重编码，不做英文 i18n。详见 `docs/mcp-asset-size-audit.md` §8。
 - 追加（同日）：首次真实 GitHub Actions 运行暴露 `app.js` 预热代码引用了用户工作区尚未提交的 `characters/roster-runtime.js` / `shield-guard-runtime.js`，干净检出下整页无法加载（smoke 15 步全部超时）。已从预热接线中移除这两类加载器（`loaderForType` 对 shield / roster 类型跳过），并新增 `test-import-graph.mjs`：从六个页面入口遍历静态 import，任何未被 Git 追踪的模块即失败；干净检出 307 模块全部追踪。用户工作区当前会报 12 个未提交模块，属预期，提交后即过。
+- CI：`4256b35` 在真实 GitHub Actions（ubuntu-24.04）首次全绿：node-tests 与 browser-smoke 15/15 均 success（run 35535553441）。此前两次运行失败原因：① 47f0f3e 音频步在慢 runner 上 700 ms 内未攒够 3 次 SFX 且失败步泄漏页面拖垮后续步；② 0845a50 未提交模块被引用。均已修。
 
 ### 资源体积与懒加载审计（2026-09-20，仅分析）
 

@@ -25,15 +25,15 @@ async function startServer(){
 
 const server=await startServer();
 const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
-const results=[];
-async function step(name,fn){const t=Date.now();try{await fn();results.push({name,ok:true,ms:Date.now()-t});log('ok  ',name);}catch(e){results.push({name,ok:false,ms:Date.now()-t,error:e});log('FAIL',name,'\n',e?.stack||e);}}
+const results=[];let context=null;
+async function step(name,fn){const t=Date.now();try{await fn();results.push({name,ok:true,ms:Date.now()-t});log('ok  ',name);}catch(e){results.push({name,ok:false,ms:Date.now()-t,error:e});log('FAIL',name,'\n',e?.stack||e);for(const p of context?.pages()||[])await p.close().catch(()=>{});}}
 async function newPage(context){const page=await context.newPage();page.setDefaultTimeout(45000);const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/WebGL|GPU|swiftshader|Automatic fallback/i.test(m.text()))errors.push('console: '+m.text());});return {page,errors};}
 const menuOpen=page=>page.waitForFunction(()=>document.body.dataset.menuOpen==='true');
 const playing=page=>page.waitForFunction(()=>document.body.dataset.menuOpen==='false');
 async function confirmIfShown(page){const dialog=page.locator('.menu-confirm');if(await dialog.isVisible().catch(()=>false))await page.click('#menu-confirm-ok');}
 
 try{
- const context=await browser.newContext({viewport:{width:1280,height:850}});
+ context=await browser.newContext({viewport:{width:1280,height:850}});
  const SENTINEL='smoke-real-save-sentinel';
 
  // 1. Every registered chapter boots: menu, WebGL canvas, chapter attribute, no page errors.
@@ -83,7 +83,8 @@ try{
   assert.ok(snap.state==='running'||snap.state==='suspended','context exists after gesture: '+snap.state);
   // Fire, reload, swing the blade; all must go through the procedural player without throwing.
   await page.mouse.move(640,360);await page.mouse.down();await page.waitForTimeout(350);await page.mouse.up();
-  await page.keyboard.press('KeyR');await page.keyboard.press('Digit3');await page.mouse.click(640,360);await page.waitForTimeout(700);
+  await page.keyboard.press('KeyR');await page.keyboard.press('Digit3');await page.mouse.click(640,360);
+  await page.waitForFunction(()=>window.neonAudio.sfx.stats().played>=3,null,{timeout:15000}).catch(()=>{});
   const stats=await page.evaluate(()=>({voices:window.neonAudio.sfx.stats().played,state:window.neonAudio.director?.state}));
   assert.ok(stats.voices>=3,'sfx played during play: '+stats.voices);
   assert.ok(['explore','combat','boss'].includes(stats.state),'music state while playing: '+stats.state);

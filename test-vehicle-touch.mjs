@@ -3,8 +3,9 @@ import {shouldShowTouch,stickToKeys,createTouchState,TOUCH_STICK,TOUCH_BUTTONS,T
 // Gate: coarse pointer, multi-touch or ?touch=1; ?touch=0 forces off.
 {
  assert.equal(shouldShowTouch({}),false);
- assert.equal(shouldShowTouch({matchMedia:q=>({matches:q.includes('coarse')})}),true);
- assert.equal(shouldShowTouch({maxTouchPoints:5}),true);
+ assert.equal(shouldShowTouch({matchMedia:q=>({matches:q.includes('coarse')})}),false,'coarse alone (headless/desktop without pointer) is not enough');
+ assert.equal(shouldShowTouch({matchMedia:q=>({matches:q.includes('coarse')}),maxTouchPoints:1}),true,'coarse + a digitiser shows');
+ assert.equal(shouldShowTouch({maxTouchPoints:10,matchMedia:q=>({matches:q.includes('fine')})}),false,'desktop with touchscreen keeps mouse');
  assert.equal(shouldShowTouch({search:'?a=1&touch=1'}),true);
  assert.equal(shouldShowTouch({search:'?touch=0',maxTouchPoints:5,matchMedia:()=>({matches:true})}),false);
 }

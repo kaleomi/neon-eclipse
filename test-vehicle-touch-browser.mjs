@@ -37,6 +37,10 @@ try{
   assert.equal(await page.getAttribute('[data-touch="brake"]','data-on'),'false','reset clears button highlight');
   await tap('[data-touch="pause"]');await page.waitForFunction(()=>document.body.dataset.driveActive==='true',{},{timeout:5000});
  });
+ await step('a plain (non-touch) context never mounts the overlay even if the UA reports a coarse pointer',async()=>{
+  const ctx2=await browser.newContext({viewport:{width:1100,height:700}});const p3=await ctx2.newPage();await p3.goto(`${server.base}/vehicle.html`,{waitUntil:'domcontentloaded'});await p3.waitForFunction(()=>'touchControls' in document.body.dataset,{},{timeout:30000});
+  assert.equal(await p3.getAttribute('body','data-touch-controls'),'false');assert.equal(await p3.locator('#touch-controls').count(),0);await ctx2.close();
+ });
  await step('?touch=0 on a touch device hides the overlay',async()=>{
   const p2=await context.newPage();await p2.goto(`${server.base}/vehicle.html?touch=0`,{waitUntil:'domcontentloaded'});await p2.waitForFunction(()=>'touchControls' in document.body.dataset,{},{timeout:30000});
   assert.equal(await p2.getAttribute('body','data-touch-controls'),'false');assert.equal(await p2.locator('#touch-controls').count(),0);await p2.close();

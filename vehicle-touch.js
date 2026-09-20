@@ -18,8 +18,10 @@ export const TOUCH_BUTTONS=Object.freeze([
 ]);
 export function shouldShowTouch({matchMedia=null,search='',maxTouchPoints=0}={}){
  if(/[?&]touch=1\b/.test(search))return true;if(/[?&]touch=0\b/.test(search))return false;
+ // Primary pointer must be coarse AND a digitiser must exist: a Windows desktop with a touchscreen reports
+ // maxTouchPoints=10 but a fine primary pointer, and must keep mouse look/fire on the canvas.
  const coarse=typeof matchMedia==='function'?!!matchMedia('(pointer: coarse)')?.matches:false;
- return coarse||maxTouchPoints>1;
+ return coarse&&maxTouchPoints>0;
 }
 // Stick offset (px) → normalised vector + held WASD codes.
 export function stickToKeys(dx,dy,cfg=TOUCH_STICK){
@@ -58,7 +60,7 @@ body[data-touch-controls="false"] #touch-controls{display:none}`;
  doc.head.appendChild(style);doc.body.appendChild(root);
  const knob=root.querySelector('.touch-stick b');
  const zoneOf=t=>{const z=t.closest?.('[data-zone]');if(z)return z.dataset.zone;return t.closest?.('[data-touch]')?'button':null;};
- root.addEventListener('pointerdown',e=>{const zone=zoneOf(e.target);if(!zone)return;e.preventDefault();const btn=zone==='button'?byId.get(e.target.dataset.touch):null;state.down(e.pointerId,zone,e.clientX,e.clientY,btn);if(btn)e.target.dataset.on='true';try{e.target.setPointerCapture?.(e.pointerId);}catch{}});
+ root.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&!e.target.closest?.('[data-touch]'))return;const zone=zoneOf(e.target);if(!zone)return;e.preventDefault();const btn=zone==='button'?byId.get(e.target.dataset.touch):null;state.down(e.pointerId,zone,e.clientX,e.clientY,btn);if(btn)e.target.dataset.on='true';try{e.target.setPointerCapture?.(e.pointerId);}catch{}});
  root.addEventListener('pointermove',e=>{state.move(e.pointerId,e.clientX,e.clientY);});
  const end=e=>{state.up(e.pointerId);if(e.target?.dataset?.touch)e.target.dataset.on='false';};
  root.addEventListener('pointerup',end);root.addEventListener('pointercancel',end);

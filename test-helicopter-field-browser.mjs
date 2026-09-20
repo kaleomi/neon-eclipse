@@ -12,7 +12,7 @@ const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshade
 const context=await browser.newContext({viewport:{width:1280,height:800}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
 await page.route('**/vehicle-app.js',async route=>{
  const body=await (await route.fetch()).text();
- const hook=`\nwindow.__heliFixture={async walkToPad(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;},player:()=>({x:player.x,z:player.z,yaw:player.yaw}),faceHeli(){player.yaw=Math.atan2(heli.x-player.x,-(heli.z-player.z));},heli:()=>({x:heli.x,y:heli.y,z:heli.z,status:heli.status,powered:heli.powered,grounded:heli.grounded,rpm:heli.rpm}),player:()=>({...player})};`;
+ const hook=`\nwindow.__heliFixture={backToPad(){heli.x=196;heli.z=120;heli.vx=heli.vz=0;},async lowerForRelease(){const {SLING}=await import('./helicopter-sling.js');const {HELICOPTER}=await import('./helicopter-rules.js');heli.y=HELICOPTER.height*.35+SLING.cable+SLING.cargoHeight+.3;heli.vy=0;},async overCrate(){const {SLING_CARGO,SLING}=await import('./helicopter-sling.js');const {HELICOPTER}=await import('./helicopter-rules.js');heli.x=SLING_CARGO.x;heli.z=SLING_CARGO.z;heli.y=SLING.cargoHeight+HELICOPTER.height*.35+SLING.cable+2;heli.vx=heli.vz=heli.vy=0;},async walkToPad(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;},player:()=>({x:player.x,z:player.z,yaw:player.yaw}),faceHeli(){player.yaw=Math.atan2(heli.x-player.x,-(heli.z-player.z));},heli:()=>({x:heli.x,y:heli.y,z:heli.z,status:heli.status,powered:heli.powered,grounded:heli.grounded,rpm:heli.rpm}),player:()=>({...player})};`;
  route.fulfill({body:body+hook,headers:{'content-type':'text/javascript'}});
 });
 await page.goto(url);await page.waitForSelector('#vehicle-scene canvas');
@@ -47,6 +47,18 @@ assert.equal(await page.getAttribute('body','data-vehicle-kind'),'helicopter');
  const ammoText=await page.locator('#vw-ammo').textContent();assert.match(ammoText,/\d+ \/ 140|装填/,'weapon HUD shows the helicopter belt: '+ammoText);
  await page.screenshot({path:`${shots}/heli-gun.png`});
 }
+// Sling load: hover over the crate at hook height, F hooks (dataset + cable), F again releases; crate stays intact from a low release.
+{
+ await page.evaluate(()=>window.__heliFixture.overCrate());await page.waitForTimeout(150);
+ await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.slingHooked==='true',{},{timeout:5000});
+ await page.waitForFunction(()=>Number(document.body.dataset.slingCargoY)>1,{},{timeout:5000});
+ await page.screenshot({path:`${shots}/heli-sling.png`});
+ await page.evaluate(()=>window.__heliFixture.lowerForRelease());await page.waitForFunction(()=>Number(document.body.dataset.slingCargoY)<.6,{},{timeout:5000});
+ await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.slingHooked==='false',{},{timeout:5000});
+ await page.waitForFunction(()=>Number(document.body.dataset.slingCargoY)<.05,{},{timeout:5000});
+ assert.equal(await page.getAttribute('body','data-sling-damaged'),'0','low release keeps the crate intact');
+ await page.evaluate(()=>window.__heliFixture.backToPad());await page.waitForTimeout(100);
+}
 // Hold Space (brake) then descend gently with Ctrl; expect a landing, not a crash.
 await page.keyboard.down('Space');await page.waitForTimeout(800);await page.keyboard.up('Space');
 await page.keyboard.down('ControlLeft');await page.waitForFunction(()=>document.body.dataset.heliGrounded==='true',{},{timeout:45000});await page.keyboard.up('ControlLeft');
@@ -70,4 +82,4 @@ const island=await page.evaluate(()=>window.__heliFixture.heli());assert(Math.hy
 assert.equal(await page.getAttribute('body','data-lighthouse-stage'),'board');
 assert.deepEqual(errors,[],'no page errors');
 await browser.close();
-console.log('PASS: helicopter field browser — shore pad spawn, door boarding, cold-engine gate, I engine toggle, Shift lift-off, Ctrl landing, shutdown/exit, native W walk blocked by the parked fuselage, chin gun fire + rocket while airborne, recovery park, lighthouse island pad. Screenshots: '+shots);
+console.log('PASS: helicopter field browser — shore pad spawn, door boarding, cold-engine gate, I engine toggle, Shift lift-off, Ctrl landing, shutdown/exit, native W walk blocked by the parked fuselage, chin gun fire + rocket while airborne, sling hook/release, recovery park, lighthouse island pad. Screenshots: '+shots);

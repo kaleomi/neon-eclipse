@@ -1,0 +1,10 @@
+{
+  "characters/ranged-guard.js": "f9bd2c9d404f7b9f6f712d74039408a511e11699125be91d2f0e22aad58c08b0",
+  "characters/ranged-guard-runtime.js": "76a3bfdd19d1a2b2f2e1fa75dd36a269edd7b3d4fb69a144d46e17401e5181cd",
+  "scripts/build-ranged-guard.mjs": "4c88ae6bfb4c2e71becf7dc91a186e4f30c748b912afae6fe809aa0fca74df0a",
+  "enemy-ranged-preview.html": "599b164c7d2aa27a981d87dca2711d17e5a182d21c4a56db394854a47d6efe51",
+  "enemy-ranged-preview.js": "759131de9783aff07ec979347aba413a09e33167309d6f9ce4d7d8451de24d88",
+  "models/ranged-guard-r07.glb": "18fd9cc4fa2716076a2f30c6e7eff46ca88fa664e8401194167b1bc59c59b177",
+  "models/ranged-guard-r07.manifest.json": "8c0589dc093effe7a384f01d04175bf335dce9e6477510db6f361f05280c66ec",
+  "enemy-rules.js": "6b9ba070afef4495514f41576eaf72e81a1b4dbee120929f17ee8ea1a8cbfee0"
+}

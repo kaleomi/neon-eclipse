@@ -1,4 +1,6 @@
 import * as THREE from './node_modules/three/build/three.module.js';
+import {RoomEnvironment} from './node_modules/three/examples/jsm/environments/RoomEnvironment.js';
+import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import {createArt} from './art.js';
 import {ARENA} from './arena.js';
 // Chapter 01 reactor arena geometry, moved out of app.js unchanged: floor + grid, perimeter walls, cyan walkways,
@@ -32,9 +34,25 @@ export function buildReactorArena({scene,renderer,obstacles,playerCeilings}){
  }
  reactor = new THREE.Group(); reactor.position.set(0,0,-16); scene.add(reactor);
  solid(5,3,5,0,-16,dark);
- const core = new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,6,12),cyan); core.position.y=4; reactor.add(core);
+ const placeholderCore = new THREE.Group();
+ const core = new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,6,12),cyan); core.position.y=4; placeholderCore.add(core);
  for(let y=1;y<8;y+=2) {
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.5,.14,8,48),steel); ring.rotation.x=Math.PI/2; ring.position.y=y; reactor.add(ring);
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.5,.14,8,48),steel); ring.rotation.x=Math.PI/2; ring.position.y=y; placeholderCore.add(ring);
+ }
+ reactor.add(placeholderCore);
+ if(typeof window !== 'undefined'){
+  // Setup HDR PBR PMREM Environment Reflection for true metallic/roughness highlights
+  if(renderer && !scene.environment){
+   try{
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+   }catch(e){}
+  }
+  const loader = new GLTFLoader();
+  loader.load('./models/reactor-core.glb', gltf=>{
+   placeholderCore.visible = false;
+   reactor.add(gltf.scene);
+  }, undefined, ()=>{});
  }
  const lamp=new THREE.PointLight(0x16eaff,45,20); lamp.position.set(0,5,-16); scene.add(lamp);
  for(const x of [-37,37]) for(const z of [-34,34]) { box(1,6,1,x,3,z,dark); box(1.03,1,1.03,x,5,z,orange); }

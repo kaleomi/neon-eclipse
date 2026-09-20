@@ -31,7 +31,7 @@ window.__engineerFixture={
  rail(){loadout.equip(6);changeWeapon(6);handling.update(1,false);cooldown=0;this.aim();},
  aimTurret(){const e=enemies.find(e=>e.type==='sentry');scene.updateMatrixWorld(true);const target=e.group.userData.parts.core.getWorldPosition(new THREE.Vector3());camera.position.copy(target).add(new THREE.Vector3(2,0,-3));camera.position.y=1.7;playerMotion.reset(camera.position,0);camera.lookAt(target);yaw=camera.rotation.y;pitch=camera.rotation.x;camera.updateMatrixWorld(true);loadout.equip(6);changeWeapon(6);handling.update(1,false);cooldown=0;},
  ownerRear(){camera.position.copy(this.actor.group.position).add(new THREE.Vector3(3,1.7,-3));playerMotion.reset(camera.position,0);this.rail();},
- save(){saveCheckpoint();return checkpoint();},restore(){const cp=campaign.checkpoint;reset(cp.stageIndex,cp);state='playing';overlay.hidden=true;return this.snapshot();},finish(){end(false);return this.snapshot();},resume(){return enterPlay();}
+ save(){flow.saveCheckpoint();return checkpoint();},restore(){const cp=campaign.checkpoint;reset(cp.stageIndex,cp);state='playing';overlay.hidden=true;return this.snapshot();},finish(){end(false);return this.snapshot();},resume(){return flow.enterPlay();}
 };`;await route.fulfill({response,body:source});});
  await p.goto(url.href);await p.waitForFunction(()=>!!window.__engineerFixture);
  const run=(method,arg)=>p.evaluate(([m,a])=>window.__engineerFixture[m](a),[method,arg]);

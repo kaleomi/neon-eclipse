@@ -1,3 +1,4 @@
+import {mountDeployment, deploymentFromSearch} from './menu-deployment.js';
 import {createViewDeck} from './ui-navigation.js';
 import {bindCombatDifficulty} from './combat-difficulty.js';
 import {bindFlightPitchSetting} from './flight-settings.js';
@@ -36,34 +37,38 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     <aside class="menu-rail" aria-label="菜单目录"><p class="ui-nav-caption">行动终端</p>
       <button type="button" data-open="home">${menuIcon('resume')}<span>总览</span></button>
       <button type="button" data-open="levels">${menuIcon('levels')}<span>章节行动</span></button>
-      <button type="button" id="menu-equipment">${menuIcon('play')}<span>装备管理</span><kbd>U</kbd></button>
+      <button type="button" data-open="prepare">${menuIcon('play')}<span>新游戏 / 战备</span></button>
       <button type="button" data-open="settings">${menuIcon('settings')}<span>设置</span></button>
-      <button type="button" data-open="records">${menuIcon('resume')}<span>战斗记录</span></button>
       <button type="button" data-open="achievements">${menuIcon('star')}<span>成就与收藏</span></button>
-      <div class="menu-rail-bottom"><p class="ui-nav-caption">其他行动</p><button type="button" data-menu-route="vehicle">海陆空先遣 <span>↗</span></button><button type="button" data-menu-route="p4">行动中枢 <span>↗</span></button><button type="button" data-menu-route="archive">行动档案 <span>↗</span></button></div>
     </aside>
     <div class="menu-toolbar" hidden><button type="button" id="menu-back">${menuIcon('back')}<span>返回主菜单</span></button><span class="menu-breadcrumb"></span></div>
     <main class="menu-views">
     <div id="menu-notice" role="alert" hidden></div>
       <section class="menu-view menu-home" data-view="home" aria-label="主菜单">
         <div class="menu-home-copy">
-          <p class="menu-eyebrow"><span></span> 部署就绪 · 九章战役</p>
+          <p class="menu-eyebrow"><span></span> NEON ECLIPSE / 九章战役</p>
           <h1>穿越长夜，<br><span>让信号重返黎明。</span></h1>
-          <p class="menu-home-intro">选择下一次行动。进度、装备与偏好，分别管理。</p>
+          <p class="menu-home-intro">穿过失联的工业前线，重新接通信号。</p>
           <nav class="menu-home-actions" aria-label="游戏主菜单">
             ${HOME_MENU_ITEMS.map(item => `<button type="button" id="${item.id}" aria-label="${item.label}">${menuIcon(item.icon)}<span><b>${item.label}</b><small${item.id === 'menu-continue' ? ' id="menu-resume-description"' : ''}>${item.hint}</small></span>${menuIcon('arrow')}</button>`).join('')}
           </nav>
-          <div class="menu-mobile-actions"><small>其他行动</small><button type="button" data-menu-route="vehicle">海陆空先遣 ↗</button><button type="button" data-menu-route="p4">行动中枢 ↗</button><button type="button" data-menu-route="archive">行动档案 ↗</button></div>
         </div>
-        <div class="menu-home-scene" aria-hidden="true">
-          <div class="menu-home-art">${chapterArtwork(getSession().map)}</div>
+        <div class="menu-home-scene" aria-hidden="true" data-map="${getSession().map}">
+          <div class="menu-home-art" data-map="${getSession().map}">${chapterArtwork(getSession().map)}</div>
           <div class="menu-scene-caption"><span>THE CAMPAIGN</span><strong>长夜未尽，行动继续。</strong><p>从反应堆到极地前线 · 九个独立战场</p></div>
         </div>
       </section>
+      <section class="menu-view menu-subpage menu-prepare" data-view="prepare" aria-labelledby="menu-prepare-title" hidden>
+        <div class="menu-page-heading"><div><p class="menu-eyebrow">PREPARE / 01</p><h2 id="menu-prepare-title" tabindex="-1">准备出发</h2></div><p>先选战备，再开始。返回不会覆盖任何战役进度。</p></div>
+        <div class="menu-deployment-brief"><span>九章连续战役</span><strong>从反应堆开始，穿越整条前线。</strong><p>主武器与投掷物由你选择，副武器和近战随队携带。</p></div>
+        <div id="menu-deployment"></div>
+        <div class="menu-deployment-actions"><button type="button" id="menu-begin" class="menu-primary">开始游戏 ${menuIcon('arrow')}</button><button type="button" id="menu-levels" class="menu-secondary">选择关卡 ${menuIcon('levels')}</button></div>
+        <p class="ui-muted">选择关卡：独立章节、海陆空先遣与行动中枢。战备选择用于上方的新战役。</p>
+      </section>
       <section class="menu-view menu-subpage" data-view="levels" aria-labelledby="menu-levels-title" hidden>
         <div class="menu-page-heading"><div><p class="menu-eyebrow">CHAPTER SELECT</p><h2 id="menu-levels-title" tabindex="-1">选择关卡</h2></div><p>选择一章开始。单章模式与连续战役分别保存。</p></div>
-        <div id="menu-level-grid"></div>
-        <div class="menu-level-footer"><p><strong>海陆空先遣 / 载具试验</strong><br>1.2 公里联合试验区 · 越野车 / 固定翼飞机 / 游艇 · 不影响章节存档</p><button type="button" id="menu-rover" class="menu-secondary">进入驾驶试验区 →</button></div>
+        <div class="menu-mode-grid" aria-label="其他行动模式"><button type="button" id="menu-rover" class="menu-mode-card"><small>FRONTIER / 海陆空</small><strong>海陆空先遣 ${menuIcon('arrow')}</strong><span>先遣队战役 · 独立任务 · 自由试驾</span></button><button type="button" data-menu-route="p4" class="menu-mode-card"><small>OPERATIONS / 挑战</small><strong>行动中枢 ${menuIcon('arrow')}</strong><span>重玩模式 · 挑战与个人档案</span></button></div>
+        <h3 class="menu-section-label">主线战役 <span>九个独立章节</span></h3><div id="menu-level-grid"></div>
         <div class="menu-level-footer"><p>隐藏星星与荣誉跨重玩保留。探索路线不会阻挡主线。</p><button type="button" data-open="achievements" class="menu-text-button">${menuIcon('star')} 收藏与单章挑战</button></div>
         <details class="menu-training"><summary>当前关卡的阶段训练 <span>独立训练，不覆盖战役</span></summary><div id="menu-training-slot"></div></details>
       </section>
@@ -104,6 +109,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
       </section>
       <section class="menu-view menu-subpage" data-view="achievements" aria-labelledby="menu-achievements-title" hidden>
         <div class="menu-page-heading"><div><p class="menu-eyebrow">HONORS & COLLECTIBLES</p><h2 id="menu-achievements-title" tabindex="-1">成就</h2></div><p>记录每一次突破。已获得的荣誉与星星跨重玩保留。</p></div>
+        <div class="menu-archive-links"><button type="button" data-menu-route="archive" class="menu-secondary">行动档案 ${menuIcon('arrow')}</button><button type="button" data-open="records" class="menu-text-button">本次战斗记录 ${menuIcon('resume')}</button></div>
         <div class="menu-achievements-grid">
           <section class="menu-achievements-overview"><div class="menu-achievements-emblem" aria-hidden="true">${menuIcon('star')}</div><h3>星星收藏</h3><p class="menu-achievements-intro">每章寻找一颗隐藏星星，点亮「群星归航」。原有四星、五星版本已经获得的荣誉仍保留。</p><div id="menu-stars-slot"></div><div class="menu-challenge-map"><span>当前挑战关卡</span><strong id="menu-achievements-map"></strong><p>从本章起点一命完成，才计入单章挑战。选择其他章节不会清除已获得的荣誉。</p><button type="button" data-open="levels" class="menu-secondary">选择挑战关卡 ${menuIcon('arrow')}</button></div></section>
           <section class="menu-achievements-challenges"><h3>单章挑战</h3><div id="menu-achievements-slot"></div></section>
@@ -136,7 +142,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     link.style.setProperty('--chapter-color', chapter.color);
     link.setAttribute('aria-label', '第' + chapter.number + '章 ' + chapter.name);
     if (chapter.map === map) link.setAttribute('aria-current', 'page');
-    link.innerHTML = `<div class="menu-level-art">${chapterArtwork(chapter.map)}<span>${chapter.sector}</span></div><div class="menu-level-copy"><small>CHAPTER ${chapter.number}</small><strong>${chapter.name}</strong><p>${chapter.features}</p>${menuIcon('arrow')}</div>`;
+    link.innerHTML = `<div class="menu-level-art">${chapterArtwork(chapter.map)}<span>${chapter.sector}</span></div><div class="menu-level-copy"><small>CHAPTER ${chapter.number}${chapter.map === map ? '<em>当前关卡</em>' : ''}</small><strong>${chapter.name}</strong><p>${chapter.features}</p>${menuIcon('arrow')}</div>`;
     link.addEventListener('click', event => { event.preventDefault(); openChapter(chapter.map); });
     original.levels.append(link);
   }
@@ -145,7 +151,8 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   let slots = [], confirmation = null, previousFocus = null, previousQuality = null, artMap = null;
   let storage; try { storage = globalThis.localStorage; } catch { storage = null; }
   const views = [...card.querySelectorAll('[data-view]')];
-  const labels = {home: '主菜单', levels: '选择关卡', settings: '设置', context: '行动界面', records: '战斗记录', achievements: '成就', saves: '继续游戏'};
+  const deployment = mountDeployment($('#menu-deployment'));
+  const labels = {home: '主菜单', prepare: '新游戏 / 战备', levels: '选择关卡', settings: '设置', context: '行动界面', records: '战斗记录', achievements: '成就', saves: '继续游戏'};
   function snapshot() {
     const session = {...getSession(), journey: journey.data};
     if (intent === 'single') return {...session, state: 'ready', mode: 'campaign', checkpoint: campaign.checkpoint};
@@ -197,13 +204,15 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     $('#menu-confirm-cancel').focus();
   }
   function requestNewGame() {
-    const start = () => perform(actions.newGame);
+    if (getSession().pending) { show('context', {intent:null}); error('请先保存当前章节结果，再开始新游戏。'); return; }
+    const choice = deployment.value();
+    const start = () => perform(() => actions.newGame(choice));
     if (journey.data || getSession().pending || hasJourneyRecord()) {
       confirm('开始新的战役？', '这会替换当前九章战役进度。各关独立检查点、隐藏星星和已获得的荣誉不会重置。', start, '开始新游戏');
     } else start();
   }
   function hasJourneyRecord() {
-    try { return [5, 4, 3, 2, 1].some(version => storage?.getItem('neon-eclipse.journey.v' + version) != null); }
+    try { return [7, 6, 5, 4, 3, 2, 1].some(version => storage?.getItem('neon-eclipse.journey.v' + version) != null); }
     catch { return false; }
   }
   function openChapter(target, entry = 'chapter') {
@@ -237,9 +246,13 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     } else confirm('从头重玩本关？', '这会替换本关独立检查点；连续战役、星星与荣誉记录不受影响。', () => perform(actions.startSingle), '从头开始本关');
   }
   function activatePrimary() {
+    if (!$('.menu-confirm').hidden || view !== 'context') {
+      if (view === 'home') continueGame();
+      return;
+    }
     const action = primaryAction(snapshot(), intent === 'single');
     if (action.kind === 'home') { show('home'); return; }
-    if (action.kind === 'new-game') { requestNewGame(); return; }
+    if (action.kind === 'new-game') { show('prepare'); return; }
     if (action.kind === 'start-single') { perform(actions.startSingle); return; }
     if (action.kind === 'next-single') { perform(() => actions.openChapter(action.map, 'campaign', 'chapter')); return; }
     if (action.kind === 'restart') { perform(() => getSession().mode === 'journey' ? actions.continueJourney() : actions.startSingle()); return; }
@@ -257,6 +270,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     const complete = s.mode === 'journey' && s.journey?.status === 'complete' && !s.pending;
     const paused = s.state === 'paused', lost = s.state === 'lost', training = s.mode === 'replay';
     const finished = advancing || complete || s.state === 'won';
+    $('.menu-context').dataset.presentationState=s.pending?'pending':paused?'paused':lost?'lost':finished?'won':'ready';
     let kicker = (s.mode === 'journey' ? '连续战役' : '独立关卡') + ' / CHAPTER ' + target.number;
     let title = target.name, description = target.brief;
     if (advancing) {
@@ -275,7 +289,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     let time = result?.time ?? s.time, kills = result?.kills ?? s.kills;
     if (complete) { time = s.journey.results.reduce((sum, item) => sum + item.time, 0); kills = s.journey.results.reduce((sum, item) => sum + item.kills, 0); }
     const stats = $('#menu-result-stats'); stats.hidden = !finished && !paused && !lost;
-    stats.innerHTML = `<div><span>${complete ? '总行动用时' : '行动用时'}</span><strong>${formatPlayTime(time)}</strong></div><div><span>击破目标</span><strong>${Math.max(0, kills || 0)}<small>个</small></strong></div><div><span>${paused || lost ? '当前阶段' : '行动状态'}</span><strong class="menu-status-value">${paused || lost ? String(s.stage + 1).padStart(2, '0') + ' / ' + String(s.stageCount||5).padStart(2,'0') : complete ? MENU_CHAPTERS.length+' / '+MENU_CHAPTERS.length : training ? '训练完成' : '已完成'}</strong></div>`;
+    stats.innerHTML = `<div><span>${complete ? '总行动用时' : '行动用时'}</span><strong>${formatPlayTime(time)}</strong></div><div><span>击破目标</span><strong>${Math.max(0, kills || 0)}<small>个</small></strong></div><div><span>${s.pending ? '保存状态' : paused || lost ? '当前阶段' : '行动状态'}</span><strong class="menu-status-value">${s.pending ? '待保存' : paused || lost ? String(s.stage + 1).padStart(2, '0') + ' / ' + String(s.stageCount||5).padStart(2,'0') : complete ? MENU_CHAPTERS.length+' / '+MENU_CHAPTERS.length : training ? '训练完成' : '已完成'}</strong></div>`;
     const brief = $('#menu-briefing'), briefData = advancing ? briefing({mode: s.mode, journey: s.journey, current, next: target, result: result || {time: s.time, kills: s.kills}}) : null;
     brief.hidden = !briefData;
     if (briefData) {
@@ -292,6 +306,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     });
     if (artMap !== target.map) { $('#menu-context-art').innerHTML = chapterArtwork(target.map); artMap = target.map; }
     $('.menu-context-preview').style.setProperty('--chapter-color', target.color);
+    $('.menu-context-preview').dataset.map = target.map;
     $('#menu-preview-tag').textContent = (advancing ? 'UP NEXT' : paused || lost ? 'CURRENT OPERATION' : complete ? 'CAMPAIGN COMPLETE' : 'OPERATION BRIEF') + ' / ' + target.sector;
     $('#menu-preview-name').textContent = target.name;
     $('#menu-preview-features').textContent = target.features;
@@ -324,7 +339,10 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     resume = continueTarget({...session, journey: journey.data, checkpoint: campaign.checkpoint, slots});
     $('#menu-continue').disabled = !resume;
     $('#menu-resume-description').textContent = resume?.label || (discovered.error || !journey.persistent ? '存档暂不可读取 · 可先选择独立关卡' : journey.data?.status === 'complete' ? '战役已完成 · 可选择关卡重玩' : '暂无存档 · 请先开始新游戏');
-    $('.menu-home-actions').dataset.hasSave = String(!!resume);
+    const homeActions = $('.menu-home-actions');
+    homeActions.dataset.hasSave = String(!!resume);
+    for (const button of homeActions.querySelectorAll('button')) button.dataset.homePrimary = String(button.id === (resume ? 'menu-continue' : 'menu-new'));
+    $('#menu-begin').disabled = busy || !!session.navigating;
     views.forEach(section => { section.hidden = section.dataset.view !== view; section.inert = section.hidden; });
     $('.menu-toolbar').hidden = view === 'home';
     $('#menu-back').hidden = false;
@@ -362,7 +380,8 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     else refresh();
   }
 
-  $('#menu-new').addEventListener('click', requestNewGame);
+  $('#menu-new').addEventListener('click', () => show('prepare'));
+  $('#menu-begin').addEventListener('click', requestNewGame);
   $('#menu-continue').addEventListener('click', continueGame);
   $('#menu-levels').addEventListener('click', () => show('levels'));
   $('#menu-rover').addEventListener('click', () => {
@@ -386,7 +405,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   settingsDeck=createViewDeck({host:$('#menu-settings-deck'),id:'settings',orientation:'vertical',label:'设置分类',beforeChange:cancelListening,items:[
     ['graphics','画面','质量与场景表现'],['audio','声音','音乐与音效'],['controls','操作','鼠标、键位与手柄'],['interface','界面与语言','HUD 与显示语言'],['accessibility','辅助功能','色彩、形状与字幕'],['gameplay','游戏','难度与装备'],['data','存档与数据','备份与本地记录']
   ].map(([id,label,hint])=>({id,label,hint,content:$('[data-settings-content="'+id+'"]')}))});
-  const equipment=()=>{cancelListening();actions.equipment?.();};$('#menu-equipment').addEventListener('click',equipment);$('[data-menu-gear]').addEventListener('click',equipment);
+  const equipment=()=>{cancelListening();actions.equipment?.();};card.querySelectorAll('#menu-equipment, [data-open-gear], [data-menu-gear]').forEach(btn=>btn.addEventListener('click',equipment));
   $('#menu-field-kit').disabled=!actions.fieldKitEnabled;$('#menu-field-kit').title=actions.fieldKitEnabled?'旧版战地整备试点，沿用原有生效规则':'本章未提供该试点';$('#menu-field-kit').addEventListener('click',()=>{cancelListening();actions.fieldKit?.();});
   card.querySelectorAll('[data-menu-route]').forEach(button=>button.addEventListener('click',()=>{
     cancelListening();if(button.dataset.menuRoute==='vehicle'){$('#menu-rover').click();return;}
@@ -435,7 +454,12 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
     view = 'context'; intent = getSession().mode === 'journey' ? 'journey' : 'single';
   }
   if(entry==='settings'){view='settings';intent=null;settingsDeck.select(new URLSearchParams(location.search).get('category')||'graphics');}
+  if (entry === 'levels' || entry === 'achievements') view = entry;
+  if (entry === 'prepare') view = 'prepare';
+  const arrivingDeployment = entry === 'deploy' && deploymentFromSearch(location.search);
+  if (arrivingDeployment && map === 'reactor' && journey.data?.chapter === 0 && journey.data?.status === 'active' && !journey.data?.checkpoint) { view = 'context'; intent = 'journey'; }
   refresh();
+  if (arrivingDeployment && view === 'context') queueMicrotask(() => perform(actions.continueJourney));
   (view === 'context' ? original.deploy : view==='settings'?$('#menu-settings-title'):resume ? $('#menu-continue') : $('#menu-new')).focus({preventScroll: true});
   return {refresh, update, error, activatePrimary, home: () => show('home')};
 }

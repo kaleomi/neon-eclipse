@@ -36,8 +36,8 @@ try {
   const page = await context.newPage();
   page.setDefaultTimeout(20000);
   page.on('pageerror', error => errors.push(error.message));
-  const source = await readFile('app.js', 'utf8');
-  const overlay = source.match(/overlay\.innerHTML = `([\s\S]*?)`;/)?.[1];
+  const source = await readFile('session-chrome.js', 'utf8');
+  const overlay = source.match(/overlay\.innerHTML\s*=\s*`([\s\S]*?)`;/)?.[1];
   assert(overlay, 'Read the actual mount markup, not a hand-authored menu substitute');
   await page.route('**/app.js', route => route.fulfill({
     contentType: 'text/javascript',
@@ -48,12 +48,11 @@ try {
 
   async function configure(density, primary = '0', melee = '3') {
     await page.evaluate(() => { window.__cleanUI.setState('ready'); window.__cleanUI.menu.home(); });
-    await page.click('#menu-equipment');
+    await page.click('#menu-settings');await page.click('#settings-tab-gameplay');await page.click('[data-menu-gear]');
     await page.selectOption('.carry-panel [data-primary]', primary);
     await page.selectOption('.carry-panel [data-melee]', melee);
     await page.click('.carry-panel [data-equip]');
     await page.click('.carry-panel [data-close]');
-    await page.click('#menu-settings');
     await page.click('#settings-tab-interface');
     await page.selectOption('#hud-density', density);
     await page.evaluate(() => window.__cleanUI.setState('playing'));

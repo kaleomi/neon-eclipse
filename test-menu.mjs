@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import {HOME_MENU_ITEMS, MENU_CHAPTERS, chapterInfo, nextChapter, chapterURL, formatPlayTime, readSingleSlots, continueTarget, primaryAction} from './menu-state.js';
 import {CHAPTERS} from './journey.js';
 
-assert.deepEqual(HOME_MENU_ITEMS.map(item => item.label), ['新游戏', '继续游戏', '选择关卡', '成就', '设置']);
-assert.equal(new Set(HOME_MENU_ITEMS.map(item => item.id)).size, 5);
+assert.deepEqual(HOME_MENU_ITEMS.map(item => item.label), ['继续游戏', '新游戏', '设置', '成就']);
+assert.equal(new Set(HOME_MENU_ITEMS.map(item => item.id)).size, 4);
 assert(HOME_MENU_ITEMS.some(item => item.id === 'menu-achievements' && item.icon === 'star'));
 assert(Object.isFrozen(HOME_MENU_ITEMS) && HOME_MENU_ITEMS.every(Object.isFrozen));
 
@@ -67,4 +67,4 @@ assert.equal(readSingleSlots(storage).error, true, 'map-specific supply validati
 assert.equal(readSingleSlots(null).error, true);
 assert.equal(readSingleSlots({getItem() { throw new Error('denied'); }}).error, true);
 assert.equal(writes, 0, 'menu discovery never mutates saves');
-console.log('PASS: five-entry menu including achievements, empty/active/between/complete saves, pause vs checkpoint, one clear next-chapter action, pending-save protection, training/single isolation, final chapter, safe links and read-only map-specific save discovery');
+console.log('PASS: four-entry menu including achievements, empty/active/between/complete saves, pause vs checkpoint, one clear next-chapter action, pending-save protection, training/single isolation, final chapter, safe links and read-only map-specific save discovery');

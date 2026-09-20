@@ -58,7 +58,7 @@ try{
   const {page,errors}=await newPage(context);
   await page.goto(`${server.base}/index.html`);await menuOpen(page);
   await page.evaluate(k=>localStorage.setItem(k,'keep'),SENTINEL);
-  await page.click('#menu-new');await confirmIfShown(page);await playing(page);
+  await page.click('#menu-new');await page.click('#menu-begin');await confirmIfShown(page);await playing(page);
   assert.equal(await page.getAttribute('body','data-play-state'),'playing');
   await page.waitForTimeout(600);
   await page.keyboard.press('Escape');await menuOpen(page);
@@ -77,7 +77,7 @@ try{
   const {page,errors}=await newPage(context);
   await page.goto(`${server.base}/index.html`);await menuOpen(page);
   assert.equal(await page.evaluate(()=>window.neonAudio?.bus.snapshot().state),'none','no AudioContext before a gesture');
-  await page.click('#menu-new');await confirmIfShown(page);await playing(page);
+  await page.click('#menu-new');await page.click('#menu-begin');await confirmIfShown(page);await playing(page);
   await page.waitForTimeout(400);
   const snap=await page.evaluate(()=>window.neonAudio.bus.snapshot());
   assert.ok(snap.state==='running'||snap.state==='suspended','context exists after gesture: '+snap.state);
@@ -92,12 +92,12 @@ try{
   assert.ok(paused.suspendedBy.includes('paused'),'bus held while paused: '+JSON.stringify(paused));
   // Settings live on the home page of the menu, not the pause context page.
   await page.reload();await menuOpen(page);
-  await page.click('#menu-settings');await page.waitForSelector('#menu-audio [data-audio-bus="music"]');
+  await page.click('#menu-settings');await page.click('#settings-tab-audio');await page.waitForSelector('#menu-audio [data-audio-bus="music"]');
   await page.locator('#menu-audio [data-audio-bus="music"]').fill('20');
   await page.locator('#menu-audio [data-audio-mute]').check();
   const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem('neon-eclipse.audio.v1')));
   assert.equal(stored.music,.2);assert.equal(stored.muted,true);
-  await page.reload();await menuOpen(page);await page.click('#menu-settings');await page.waitForSelector('#menu-audio [data-audio-bus="music"]');
+  await page.reload();await menuOpen(page);await page.click('#menu-settings');await page.click('#settings-tab-audio');await page.waitForSelector('#menu-audio [data-audio-bus="music"]');
   assert.equal(await page.locator('#menu-audio [data-audio-bus="music"]').inputValue(),'20','music slider restored');
   assert.equal(await page.locator('#menu-audio [data-audio-mute]').isChecked(),true,'mute restored');
   await page.locator('#menu-audio [data-audio-mute]').uncheck();
@@ -129,7 +129,7 @@ try{
   await page.goto(`${server.base}/index.html`);await menuOpen(page);
   await page.evaluate(()=>{localStorage.setItem('neon-eclipse.combat-difficulty.v1','hard');localStorage.setItem('neon-eclipse.stars.v1',JSON.stringify({version:3,stars:['reactor'],legacyRequired:0}));});
   await page.reload();await menuOpen(page);
-  await page.click('#menu-settings');
+  await page.click('#menu-settings');await page.click('#settings-tab-data');
   await page.waitForSelector('#menu-save-hub [data-save-export]');
   const health=await page.locator('#menu-save-hub .menu-save-hub-group span').allTextContents();
   assert.ok(health.some(t=>/主线战斗难度 · 正常/.test(t)),'difficulty slot healthy: '+health.join('|'));
@@ -158,6 +158,7 @@ try{
   await page.waitForFunction(()=>/不是 NEON ECLIPSE/.test(document.querySelector('#menu-save-hub [data-save-status]').textContent));
   assert.equal(await page.evaluate(()=>localStorage.getItem('neon-eclipse.combat-difficulty.v1')),'hard');
   // Telemetry toggle persists.
+  await page.locator('.ui-telemetry-disclosure > summary').click();
   const toggle=page.locator('#menu-telemetry [data-telemetry-toggle]');
   assert.equal(await toggle.isChecked(),true);
   await toggle.uncheck();
@@ -193,7 +194,7 @@ try{
  await step('vehicle page boots and menu entry exists',async()=>{
   const {page,errors}=await newPage(context);
   await page.goto(`${server.base}/index.html`);await menuOpen(page);
-  await page.click('#menu-levels');
+  await page.click('#menu-new');await page.click('#menu-levels');
   assert.ok(await page.locator('#menu-rover').isVisible(),'vehicle entry visible on level select');
   await page.click('#menu-rover');
   assert.ok(await page.locator('.menu-confirm').isVisible(),'vehicle entry asks for confirmation');

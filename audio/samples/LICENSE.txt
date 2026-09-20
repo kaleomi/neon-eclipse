@@ -1,0 +1,6 @@
+Sonniss GameAudioGDC 2019 free bundle
+Source: https://sonniss.com/gameaudiogdc/
+License: https://sonniss.com/gdc-bundle-license/
+Commercial game synchronization permitted; attribution not required. Do not redistribute recordings as a standalone sound library. No AI/ML training. Full terms: official license URL above.
+Individual creators, original archive paths, download URLs and hashes: sources.json.
+Game derivatives: mono 44.1 kHz Vorbis, trimmed, peak normalized, loop crossfades. Original recordings retained in the separate local audition directory.

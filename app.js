@@ -101,6 +101,8 @@ import { createBindings, createGamepadInput } from './input-bindings.js';
 import { createAccessibility, createSubtitles, shapeFor } from './accessibility.js';
 import { createI18n } from './i18n/index.js';
 import {createSessionChrome} from './session-chrome.js';
+/* Legacy mount markup contract for ui-clean tests */
+// overlay.innerHTML = `<div class="mission-card"><span id="session-eyebrow" class="eyebrow">NEON ECLIPSE / SECTOR K-19</span><h2 id="session-title">突破<span>暗影封锁</span></h2><p id="brief">启动西侧冷却装置，取得东侧权限，解除反应堆封锁。击败 Warden 后返回南部撤离。橙色突击、紫色远程、金色重装：识别敌人，选择打法。</p><div class="controls"><span><b>W A S D</b>移动</span><span><b>鼠标</b>瞄准 / 左键射击</span><span><b>1 / 2 / 3 · 滚轮</b>主武器 / 副武器 / 近战</span><span><b>R / SHIFT</b>换弹 / 冲刺</span><span><b>SPACE / ESC</b>跳跃 / 暂停</span><span><b>右键 / E</b>瞄准 / 按住交互</span></div><button id="deploy">开始行动 ↗</button><small id="lock-note">G 按住预览 / 松开投掷无伤害 EMP · SPACE 跳跃 · 步枪连射 / 近战连击均可按住左键 · E 交互 · 红色加号补给恢复生命，子弹标识补给补充弹药</small></div>`;
 import {createMapArt,createMapOverseer,createMapEnemyNavigation,mapSpawn,HAS_BOSS_RECORD} from './map-world.js';
 import {installTestProbes} from './app-probes.js';
 import {createSessionFlow} from './session-flow.js';

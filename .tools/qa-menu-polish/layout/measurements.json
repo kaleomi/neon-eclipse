@@ -1,0 +1,4466 @@
+[
+  {
+    "name": "compact-1280x800",
+    "width": 1280,
+    "height": 800,
+    "scale": 1,
+    "density": "compact",
+    "rack": {
+      "left": 1001,
+      "top": 80,
+      "right": 1256,
+      "bottom": 406.4375,
+      "width": 255,
+      "height": 326.4375
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 1001,
+          "top": 102.59375,
+          "right": 1256,
+          "bottom": 186.59375,
+          "width": 255,
+          "height": 84
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1013,
+              "top": 111.59375,
+              "right": 1245,
+              "bottom": 142.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1013,
+              "top": 147.59375,
+              "right": 1245,
+              "bottom": 173.59375,
+              "width": 232,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1013,
+              "top": 153.59375,
+              "right": 1245,
+              "bottom": 166.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1013,
+              "top": 170.59375,
+              "right": 1245,
+              "bottom": 173.59375,
+              "width": 232,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 1001,
+          "top": 193.59375,
+          "right": 1256,
+          "bottom": 277.59375,
+          "width": 255,
+          "height": 84
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1013,
+              "top": 202.59375,
+              "right": 1245,
+              "bottom": 233.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1013,
+              "top": 238.59375,
+              "right": 1245,
+              "bottom": 264.59375,
+              "width": 232,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1013,
+              "top": 244.59375,
+              "right": 1245,
+              "bottom": 257.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1013,
+              "top": 261.59375,
+              "right": 1245,
+              "bottom": 264.59375,
+              "width": 232,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 1001,
+          "top": 284.59375,
+          "right": 1256,
+          "bottom": 368.59375,
+          "width": 255,
+          "height": 84
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1013,
+              "top": 293.59375,
+              "right": 1245,
+              "bottom": 324.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1013,
+              "top": 329.59375,
+              "right": 1245,
+              "bottom": 355.59375,
+              "width": 232,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1013,
+              "top": 335.59375,
+              "right": 1245,
+              "bottom": 348.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1013,
+              "top": 352.59375,
+              "right": 1245,
+              "bottom": 355.59375,
+              "width": 232,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "standard-1440x960-scale-0.8",
+    "width": 1440,
+    "height": 960,
+    "scale": 0.8,
+    "density": "standard",
+    "rack": {
+      "left": 1252.800048828125,
+      "top": 80,
+      "right": 1416,
+      "bottom": 319.3699951171875,
+      "width": 163.199951171875,
+      "height": 239.3699951171875
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 1252.800048828125,
+          "top": 94.45999908447266,
+          "right": 1416,
+          "bottom": 155.6400146484375,
+          "width": 163.199951171875,
+          "height": 61.180015563964844
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 100.22000122070312,
+              "right": 1408.9600830078125,
+              "bottom": 120.05999755859375,
+              "width": 148.47998046875,
+              "height": 19.839996337890625
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 123.26000213623047,
+              "right": 1408.9600830078125,
+              "bottom": 149.8800048828125,
+              "width": 148.47998046875,
+              "height": 26.62000274658203
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 127.10000610351562,
+              "right": 1408.9600830078125,
+              "bottom": 135.42001342773438,
+              "width": 148.47998046875,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 137.98001098632812,
+              "right": 1408.9600830078125,
+              "bottom": 139.90000915527344,
+              "width": 148.47998046875,
+              "height": 1.9199981689453125
+            }
+          },
+          {
+            "className": "weapon-ammo-detail",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 142.4600067138672,
+              "right": 1408.9600830078125,
+              "bottom": 149.8800048828125,
+              "width": 148.47998046875,
+              "height": 7.4199981689453125
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 1252.800048828125,
+          "top": 160.1199951171875,
+          "right": 1416,
+          "bottom": 221.3000030517578,
+          "width": 163.199951171875,
+          "height": 61.18000793457031
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 165.8800048828125,
+              "right": 1408.9600830078125,
+              "bottom": 185.72000122070312,
+              "width": 148.47998046875,
+              "height": 19.839996337890625
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 188.92001342773438,
+              "right": 1408.9600830078125,
+              "bottom": 215.54000854492188,
+              "width": 148.47998046875,
+              "height": 26.6199951171875
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 192.760009765625,
+              "right": 1408.9600830078125,
+              "bottom": 201.08001708984375,
+              "width": 148.47998046875,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 203.6400146484375,
+              "right": 1408.9600830078125,
+              "bottom": 205.55999755859375,
+              "width": 148.47998046875,
+              "height": 1.91998291015625
+            }
+          },
+          {
+            "className": "weapon-ammo-detail",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 208.12001037597656,
+              "right": 1408.9600830078125,
+              "bottom": 215.54000854492188,
+              "width": 148.47998046875,
+              "height": 7.4199981689453125
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 1252.800048828125,
+          "top": 225.78001403808594,
+          "right": 1416,
+          "bottom": 286.96002197265625,
+          "width": 163.199951171875,
+          "height": 61.18000793457031
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 231.54000854492188,
+              "right": 1408.9600830078125,
+              "bottom": 251.3800048828125,
+              "width": 148.47998046875,
+              "height": 19.839996337890625
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 254.58001708984375,
+              "right": 1408.9600830078125,
+              "bottom": 281.20001220703125,
+              "width": 148.47998046875,
+              "height": 26.6199951171875
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 258.4200134277344,
+              "right": 1408.9600830078125,
+              "bottom": 266.7400207519531,
+              "width": 148.47998046875,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 269.3000183105469,
+              "right": 1408.9600830078125,
+              "bottom": 271.22003173828125,
+              "width": 148.47998046875,
+              "height": 1.920013427734375
+            }
+          },
+          {
+            "className": "weapon-ammo-detail",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 273.780029296875,
+              "right": 1408.9600830078125,
+              "bottom": 281.20001220703125,
+              "width": 148.47998046875,
+              "height": 7.41998291015625
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "standard-1440x960-scale-1",
+    "width": 1440,
+    "height": 960,
+    "scale": 1,
+    "density": "standard",
+    "rack": {
+      "left": 1161,
+      "top": 80,
+      "right": 1416,
+      "bottom": 454.015625,
+      "width": 255,
+      "height": 374.015625
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 1161,
+          "top": 102.59375,
+          "right": 1416,
+          "bottom": 198.1875,
+          "width": 255,
+          "height": 95.59375
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1173,
+              "top": 111.59375,
+              "right": 1405,
+              "bottom": 142.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1173,
+              "top": 147.59375,
+              "right": 1405,
+              "bottom": 189.1875,
+              "width": 232,
+              "height": 41.59375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1173,
+              "top": 153.59375,
+              "right": 1405,
+              "bottom": 166.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1173,
+              "top": 170.59375,
+              "right": 1405,
+              "bottom": 173.59375,
+              "width": 232,
+              "height": 3
+            }
+          },
+          {
+            "className": "weapon-ammo-detail",
+            "rect": {
+              "left": 1173,
+              "top": 177.59375,
+              "right": 1405,
+              "bottom": 189.1875,
+              "width": 232,
+              "height": 11.59375
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 1161,
+          "top": 205.1875,
+          "right": 1416,
+          "bottom": 300.78125,
+          "width": 255,
+          "height": 95.59375
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1173,
+              "top": 214.1875,
+              "right": 1405,
+              "bottom": 245.1875,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1173,
+              "top": 250.1875,
+              "right": 1405,
+              "bottom": 291.78125,
+              "width": 232,
+              "height": 41.59375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1173,
+              "top": 256.1875,
+              "right": 1405,
+              "bottom": 269.1875,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1173,
+              "top": 273.1875,
+              "right": 1405,
+              "bottom": 276.1875,
+              "width": 232,
+              "height": 3
+            }
+          },
+          {
+            "className": "weapon-ammo-detail",
+            "rect": {
+              "left": 1173,
+              "top": 280.1875,
+              "right": 1405,
+              "bottom": 291.78125,
+              "width": 232,
+              "height": 11.59375
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 1161,
+          "top": 307.78125,
+          "right": 1416,
+          "bottom": 403.375,
+          "width": 255,
+          "height": 95.59375
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1173,
+              "top": 316.78125,
+              "right": 1405,
+              "bottom": 347.78125,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1173,
+              "top": 352.78125,
+              "right": 1405,
+              "bottom": 394.375,
+              "width": 232,
+              "height": 41.59375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1173,
+              "top": 358.78125,
+              "right": 1405,
+              "bottom": 371.78125,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1173,
+              "top": 375.78125,
+              "right": 1405,
+              "bottom": 378.78125,
+              "width": 232,
+              "height": 3
+            }
+          },
+          {
+            "className": "weapon-ammo-detail",
+            "rect": {
+              "left": 1173,
+              "top": 382.78125,
+              "right": 1405,
+              "bottom": 394.375,
+              "width": 232,
+              "height": 11.59375
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "standard-1440x960-scale-1.15",
+    "width": 1440,
+    "height": 960,
+    "scale": 1.15,
+    "density": "standard",
+    "rack": {
+      "left": 1078.762451171875,
+      "top": 80,
+      "right": 1416,
+      "bottom": 574.6356201171875,
+      "width": 337.237548828125,
+      "height": 494.6356201171875
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 1078.762451171875,
+          "top": 109.88023376464844,
+          "right": 1416,
+          "bottom": 236.30296325683594,
+          "width": 337.237548828125,
+          "height": 126.4227294921875
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 121.78273010253906,
+              "right": 1401.452392578125,
+              "bottom": 162.78024291992188,
+              "width": 306.8199462890625,
+              "height": 40.99751281738281
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 169.39273071289062,
+              "right": 1401.452392578125,
+              "bottom": 224.4004669189453,
+              "width": 306.8199462890625,
+              "height": 55.00773620605469
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 177.32772827148438,
+              "right": 1401.452392578125,
+              "bottom": 194.52023315429688,
+              "width": 306.8199462890625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 199.81024169921875,
+              "right": 1401.452392578125,
+              "bottom": 203.77774047851562,
+              "width": 306.8199462890625,
+              "height": 3.967498779296875
+            }
+          },
+          {
+            "className": "weapon-ammo-detail",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 209.06773376464844,
+              "right": 1401.452392578125,
+              "bottom": 224.4004669189453,
+              "width": 306.8199462890625,
+              "height": 15.332733154296875
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 1078.762451171875,
+          "top": 245.5604705810547,
+          "right": 1416,
+          "bottom": 371.98321533203125,
+          "width": 337.237548828125,
+          "height": 126.42274475097656
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 257.46295166015625,
+              "right": 1401.452392578125,
+              "bottom": 298.46044921875,
+              "width": 306.8199462890625,
+              "height": 40.99749755859375
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 305.0729675292969,
+              "right": 1401.452392578125,
+              "bottom": 360.0806884765625,
+              "width": 306.8199462890625,
+              "height": 55.007720947265625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 313.0079650878906,
+              "right": 1401.452392578125,
+              "bottom": 330.2004699707031,
+              "width": 306.8199462890625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 335.490478515625,
+              "right": 1401.452392578125,
+              "bottom": 339.4579772949219,
+              "width": 306.8199462890625,
+              "height": 3.967498779296875
+            }
+          },
+          {
+            "className": "weapon-ammo-detail",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 344.7479553222656,
+              "right": 1401.452392578125,
+              "bottom": 360.0806884765625,
+              "width": 306.8199462890625,
+              "height": 15.332733154296875
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 1078.762451171875,
+          "top": 381.2406921386719,
+          "right": 1416,
+          "bottom": 507.6634216308594,
+          "width": 337.237548828125,
+          "height": 126.4227294921875
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 393.1431884765625,
+              "right": 1401.452392578125,
+              "bottom": 434.14068603515625,
+              "width": 306.8199462890625,
+              "height": 40.99749755859375
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 440.7532043457031,
+              "right": 1401.452392578125,
+              "bottom": 495.76092529296875,
+              "width": 306.8199462890625,
+              "height": 55.007720947265625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 448.6882019042969,
+              "right": 1401.452392578125,
+              "bottom": 465.8807067871094,
+              "width": 306.8199462890625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 471.17071533203125,
+              "right": 1401.452392578125,
+              "bottom": 475.1382141113281,
+              "width": 306.8199462890625,
+              "height": 3.967498779296875
+            }
+          },
+          {
+            "className": "weapon-ammo-detail",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 480.4281921386719,
+              "right": 1401.452392578125,
+              "bottom": 495.76092529296875,
+              "width": 306.8199462890625,
+              "height": 15.332733154296875
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "standard-1024x640-scale-0.8",
+    "width": 1024,
+    "height": 640,
+    "scale": 0.8,
+    "density": "standard",
+    "rack": {
+      "left": 862,
+      "top": 74,
+      "right": 1006,
+      "bottom": 252.8400115966797,
+      "width": 144,
+      "height": 178.8400115966797
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 862,
+          "top": 87.18000030517578,
+          "right": 1006,
+          "bottom": 132.6199951171875,
+          "width": 144,
+          "height": 45.43999481201172
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 91.66000366210938,
+              "right": 999.5999755859375,
+              "bottom": 108.30000305175781,
+              "width": 130.55999755859375,
+              "height": 16.639999389648438
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 110.22000122070312,
+              "right": 999.5999755859375,
+              "bottom": 125.58000183105469,
+              "width": 130.55999755859375,
+              "height": 15.360000610351562
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 112.77999877929688,
+              "right": 999.5999755859375,
+              "bottom": 121.10000610351562,
+              "width": 130.55999755859375,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 123.66000366210938,
+              "right": 999.5999755859375,
+              "bottom": 125.58000183105469,
+              "width": 130.55999755859375,
+              "height": 1.9199981689453125
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 862,
+          "top": 135.82000732421875,
+          "right": 1006,
+          "bottom": 181.260009765625,
+          "width": 144,
+          "height": 45.44000244140625
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 140.3000030517578,
+              "right": 999.5999755859375,
+              "bottom": 156.94000244140625,
+              "width": 130.55999755859375,
+              "height": 16.639999389648438
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 158.86001586914062,
+              "right": 999.5999755859375,
+              "bottom": 174.22000122070312,
+              "width": 130.55999755859375,
+              "height": 15.3599853515625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 161.42001342773438,
+              "right": 999.5999755859375,
+              "bottom": 169.74000549316406,
+              "width": 130.55999755859375,
+              "height": 8.319992065429688
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 172.30001831054688,
+              "right": 999.5999755859375,
+              "bottom": 174.22000122070312,
+              "width": 130.55999755859375,
+              "height": 1.91998291015625
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 862,
+          "top": 184.4600067138672,
+          "right": 1006,
+          "bottom": 229.90000915527344,
+          "width": 144,
+          "height": 45.44000244140625
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 188.94000244140625,
+              "right": 999.5999755859375,
+              "bottom": 205.5800018310547,
+              "width": 130.55999755859375,
+              "height": 16.639999389648438
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 207.50001525878906,
+              "right": 999.5999755859375,
+              "bottom": 222.86001586914062,
+              "width": 130.55999755859375,
+              "height": 15.360000610351562
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 210.0600128173828,
+              "right": 999.5999755859375,
+              "bottom": 218.3800048828125,
+              "width": 130.55999755859375,
+              "height": 8.319992065429688
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 220.9400177001953,
+              "right": 999.5999755859375,
+              "bottom": 222.86001586914062,
+              "width": 130.55999755859375,
+              "height": 1.9199981689453125
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "standard-1024x640-scale-1",
+    "width": 1024,
+    "height": 640,
+    "scale": 1,
+    "density": "standard",
+    "rack": {
+      "left": 781,
+      "top": 74,
+      "right": 1006,
+      "bottom": 353.4375,
+      "width": 225,
+      "height": 279.4375
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 781,
+          "top": 94.59375,
+          "right": 1006,
+          "bottom": 165.59375,
+          "width": 225,
+          "height": 71
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 792,
+              "top": 101.59375,
+              "right": 996,
+              "bottom": 127.59375,
+              "width": 204,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 792,
+              "top": 130.59375,
+              "right": 996,
+              "bottom": 154.59375,
+              "width": 204,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 792,
+              "top": 134.59375,
+              "right": 996,
+              "bottom": 147.59375,
+              "width": 204,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 792,
+              "top": 151.59375,
+              "right": 996,
+              "bottom": 154.59375,
+              "width": 204,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 781,
+          "top": 170.59375,
+          "right": 1006,
+          "bottom": 241.59375,
+          "width": 225,
+          "height": 71
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 792,
+              "top": 177.59375,
+              "right": 996,
+              "bottom": 203.59375,
+              "width": 204,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 792,
+              "top": 206.59375,
+              "right": 996,
+              "bottom": 230.59375,
+              "width": 204,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 792,
+              "top": 210.59375,
+              "right": 996,
+              "bottom": 223.59375,
+              "width": 204,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 792,
+              "top": 227.59375,
+              "right": 996,
+              "bottom": 230.59375,
+              "width": 204,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 781,
+          "top": 246.59375,
+          "right": 1006,
+          "bottom": 317.59375,
+          "width": 225,
+          "height": 71
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 792,
+              "top": 253.59375,
+              "right": 996,
+              "bottom": 279.59375,
+              "width": 204,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 792,
+              "top": 282.59375,
+              "right": 996,
+              "bottom": 306.59375,
+              "width": 204,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 792,
+              "top": 286.59375,
+              "right": 996,
+              "bottom": 299.59375,
+              "width": 204,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 792,
+              "top": 303.59375,
+              "right": 996,
+              "bottom": 306.59375,
+              "width": 204,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "standard-1024x640-scale-1.15",
+    "width": 1024,
+    "height": 640,
+    "scale": 1.15,
+    "density": "standard",
+    "rack": {
+      "left": 708.4375,
+      "top": 74,
+      "right": 1006,
+      "bottom": 443.55609130859375,
+      "width": 297.5625,
+      "height": 369.55609130859375
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 708.4375,
+          "top": 101.2352294921875,
+          "right": 1006,
+          "bottom": 195.1327362060547,
+          "width": 297.5625,
+          "height": 93.89750671386719
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 110.49273681640625,
+              "right": 992.7750244140625,
+              "bottom": 144.8777313232422,
+              "width": 269.7900390625,
+              "height": 34.38499450683594
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 148.84523010253906,
+              "right": 992.7750244140625,
+              "bottom": 180.58523559570312,
+              "width": 269.7900390625,
+              "height": 31.740005493164062
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 154.13522338867188,
+              "right": 992.7750244140625,
+              "bottom": 171.32772827148438,
+              "width": 269.7900390625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 176.61773681640625,
+              "right": 992.7750244140625,
+              "bottom": 180.58523559570312,
+              "width": 269.7900390625,
+              "height": 3.967498779296875
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 708.4375,
+          "top": 201.7452392578125,
+          "right": 1006,
+          "bottom": 295.6427307128906,
+          "width": 297.5625,
+          "height": 93.89749145507812
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 211.0027313232422,
+              "right": 992.7750244140625,
+              "bottom": 245.38772583007812,
+              "width": 269.7900390625,
+              "height": 34.38499450683594
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 249.35523986816406,
+              "right": 992.7750244140625,
+              "bottom": 281.09521484375,
+              "width": 269.7900390625,
+              "height": 31.739974975585938
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 254.64523315429688,
+              "right": 992.7750244140625,
+              "bottom": 271.8377380371094,
+              "width": 269.7900390625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 277.12774658203125,
+              "right": 992.7750244140625,
+              "bottom": 281.09521484375,
+              "width": 269.7900390625,
+              "height": 3.96746826171875
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 708.4375,
+          "top": 302.2552490234375,
+          "right": 1006,
+          "bottom": 396.1527404785156,
+          "width": 297.5625,
+          "height": 93.89749145507812
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 311.5127258300781,
+              "right": 992.7750244140625,
+              "bottom": 345.8977355957031,
+              "width": 269.7900390625,
+              "height": 34.385009765625
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 349.865234375,
+              "right": 992.7750244140625,
+              "bottom": 381.605224609375,
+              "width": 269.7900390625,
+              "height": 31.739990234375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 355.1552429199219,
+              "right": 992.7750244140625,
+              "bottom": 372.34771728515625,
+              "width": 269.7900390625,
+              "height": 17.192474365234375
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 377.6377258300781,
+              "right": 992.7750244140625,
+              "bottom": 381.605224609375,
+              "width": 269.7900390625,
+              "height": 3.967498779296875
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "standard-390x844-scale-0.8",
+    "width": 390,
+    "height": 844,
+    "scale": 0.8,
+    "density": "standard",
+    "rack": {
+      "left": 269.1999816894531,
+      "top": 552.199951171875,
+      "right": 378,
+      "bottom": 731,
+      "width": 108.80001831054688,
+      "height": 178.800048828125
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 269.1999816894531,
+          "top": 563.8399658203125,
+          "right": 378,
+          "bottom": 609.9199829101562,
+          "width": 108.80001831054688,
+          "height": 46.08001708984375
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 568.3199462890625,
+              "right": 372.8800048828125,
+              "bottom": 585.5999755859375,
+              "width": 97.92001342773438,
+              "height": 17.280029296875
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 587.5199584960938,
+              "right": 372.8800048828125,
+              "bottom": 602.8799438476562,
+              "width": 97.92001342773438,
+              "height": 15.3599853515625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 590.0799560546875,
+              "right": 372.8800048828125,
+              "bottom": 598.3999633789062,
+              "width": 97.92001342773438,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 600.9599609375,
+              "right": 372.8800048828125,
+              "bottom": 602.8799438476562,
+              "width": 97.92001342773438,
+              "height": 1.91998291015625
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 269.1999816894531,
+          "top": 614.3999633789062,
+          "right": 378,
+          "bottom": 660.47998046875,
+          "width": 108.80001831054688,
+          "height": 46.08001708984375
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 618.8799438476562,
+              "right": 372.8800048828125,
+              "bottom": 636.1599731445312,
+              "width": 97.92001342773438,
+              "height": 17.280029296875
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 638.0799560546875,
+              "right": 372.8800048828125,
+              "bottom": 653.43994140625,
+              "width": 97.92001342773438,
+              "height": 15.3599853515625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 640.6399536132812,
+              "right": 372.8800048828125,
+              "bottom": 648.9599609375,
+              "width": 97.92001342773438,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 651.5199584960938,
+              "right": 372.8800048828125,
+              "bottom": 653.43994140625,
+              "width": 97.92001342773438,
+              "height": 1.91998291015625
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 269.1999816894531,
+          "top": 664.9599609375,
+          "right": 378,
+          "bottom": 711.0399780273438,
+          "width": 108.80001831054688,
+          "height": 46.08001708984375
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 669.43994140625,
+              "right": 372.8800048828125,
+              "bottom": 686.719970703125,
+              "width": 97.92001342773438,
+              "height": 17.280029296875
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 688.6399536132812,
+              "right": 372.8800048828125,
+              "bottom": 704,
+              "width": 97.92001342773438,
+              "height": 15.36004638671875
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 691.199951171875,
+              "right": 372.8800048828125,
+              "bottom": 699.5199584960938,
+              "width": 97.92001342773438,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 702.0799560546875,
+              "right": 372.8800048828125,
+              "bottom": 704,
+              "width": 97.92001342773438,
+              "height": 1.9200439453125
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "standard-390x844-scale-1",
+    "width": 390,
+    "height": 844,
+    "scale": 1,
+    "density": "standard",
+    "rack": {
+      "left": 208,
+      "top": 451.625,
+      "right": 378,
+      "bottom": 731,
+      "width": 170,
+      "height": 279.375
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 208,
+          "top": 469.8125,
+          "right": 378,
+          "bottom": 541.8125,
+          "width": 170,
+          "height": 72
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 217,
+              "top": 476.8125,
+              "right": 370,
+              "bottom": 503.8125,
+              "width": 153,
+              "height": 27
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 217,
+              "top": 506.8125,
+              "right": 370,
+              "bottom": 530.8125,
+              "width": 153,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 217,
+              "top": 510.8125,
+              "right": 370,
+              "bottom": 523.8125,
+              "width": 153,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 217,
+              "top": 527.8125,
+              "right": 370,
+              "bottom": 530.8125,
+              "width": 153,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 208,
+          "top": 548.8125,
+          "right": 378,
+          "bottom": 620.8125,
+          "width": 170,
+          "height": 72
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 217,
+              "top": 555.8125,
+              "right": 370,
+              "bottom": 582.8125,
+              "width": 153,
+              "height": 27
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 217,
+              "top": 585.8125,
+              "right": 370,
+              "bottom": 609.8125,
+              "width": 153,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 217,
+              "top": 589.8125,
+              "right": 370,
+              "bottom": 602.8125,
+              "width": 153,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 217,
+              "top": 606.8125,
+              "right": 370,
+              "bottom": 609.8125,
+              "width": 153,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 208,
+          "top": 627.8125,
+          "right": 378,
+          "bottom": 699.8125,
+          "width": 170,
+          "height": 72
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 217,
+              "top": 634.8125,
+              "right": 370,
+              "bottom": 661.8125,
+              "width": 153,
+              "height": 27
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 217,
+              "top": 664.8125,
+              "right": 370,
+              "bottom": 688.8125,
+              "width": 153,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 217,
+              "top": 668.8125,
+              "right": 370,
+              "bottom": 681.8125,
+              "width": 153,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 217,
+              "top": 685.8125,
+              "right": 370,
+              "bottom": 688.8125,
+              "width": 153,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "standard-390x844-scale-1.15",
+    "width": 390,
+    "height": 844,
+    "scale": 1.15,
+    "density": "standard",
+    "rack": {
+      "left": 153.1750030517578,
+      "top": 361.52655029296875,
+      "right": 378,
+      "bottom": 731,
+      "width": 224.8249969482422,
+      "height": 369.47344970703125
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 153.1750030517578,
+          "top": 385.57952880859375,
+          "right": 378,
+          "bottom": 480.79949951171875,
+          "width": 224.8249969482422,
+          "height": 95.219970703125
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 394.8370056152344,
+              "right": 367.41998291015625,
+              "bottom": 430.5445251464844,
+              "width": 202.3424835205078,
+              "height": 35.70751953125
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 434.51202392578125,
+              "right": 367.41998291015625,
+              "bottom": 466.25201416015625,
+              "width": 202.3424835205078,
+              "height": 31.739990234375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 439.802001953125,
+              "right": 367.41998291015625,
+              "bottom": 456.9945068359375,
+              "width": 202.3424835205078,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 462.2845153808594,
+              "right": 367.41998291015625,
+              "bottom": 466.25201416015625,
+              "width": 202.3424835205078,
+              "height": 3.967498779296875
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 153.1750030517578,
+          "top": 490.0570068359375,
+          "right": 378,
+          "bottom": 585.2770385742188,
+          "width": 224.8249969482422,
+          "height": 95.22003173828125
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 499.31451416015625,
+              "right": 367.41998291015625,
+              "bottom": 535.0220336914062,
+              "width": 202.3424835205078,
+              "height": 35.70751953125
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 538.989501953125,
+              "right": 367.41998291015625,
+              "bottom": 570.7294921875,
+              "width": 202.3424835205078,
+              "height": 31.739990234375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 544.279541015625,
+              "right": 367.41998291015625,
+              "bottom": 561.4720458984375,
+              "width": 202.3424835205078,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 566.7620239257812,
+              "right": 367.41998291015625,
+              "bottom": 570.7294921875,
+              "width": 202.3424835205078,
+              "height": 3.96746826171875
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 153.1750030517578,
+          "top": 594.5345458984375,
+          "right": 378,
+          "bottom": 689.7545166015625,
+          "width": 224.8249969482422,
+          "height": 95.219970703125
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 603.7919921875,
+              "right": 367.41998291015625,
+              "bottom": 639.49951171875,
+              "width": 202.3424835205078,
+              "height": 35.70751953125
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 643.467041015625,
+              "right": 367.41998291015625,
+              "bottom": 675.20703125,
+              "width": 202.3424835205078,
+              "height": 31.739990234375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 648.7570190429688,
+              "right": 367.41998291015625,
+              "bottom": 665.9495239257812,
+              "width": 202.3424835205078,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 671.239501953125,
+              "right": 367.41998291015625,
+              "bottom": 675.20703125,
+              "width": 202.3424835205078,
+              "height": 3.967529296875
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-1440x960-scale-0.8",
+    "width": 1440,
+    "height": 960,
+    "scale": 0.8,
+    "density": "compact",
+    "rack": {
+      "left": 1252.800048828125,
+      "top": 80,
+      "right": 1416,
+      "bottom": 288.9200134277344,
+      "width": 163.199951171875,
+      "height": 208.92001342773438
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 1252.800048828125,
+          "top": 94.45999908447266,
+          "right": 1416,
+          "bottom": 148.22000122070312,
+          "width": 163.199951171875,
+          "height": 53.76000213623047
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 100.22000122070312,
+              "right": 1408.9600830078125,
+              "bottom": 120.05999755859375,
+              "width": 148.47998046875,
+              "height": 19.839996337890625
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 123.26000213623047,
+              "right": 1408.9600830078125,
+              "bottom": 139.90000915527344,
+              "width": 148.47998046875,
+              "height": 16.64000701904297
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 127.10000610351562,
+              "right": 1408.9600830078125,
+              "bottom": 135.42001342773438,
+              "width": 148.47998046875,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 137.98001098632812,
+              "right": 1408.9600830078125,
+              "bottom": 139.90000915527344,
+              "width": 148.47998046875,
+              "height": 1.9199981689453125
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 1252.800048828125,
+          "top": 152.70001220703125,
+          "right": 1416,
+          "bottom": 206.4600067138672,
+          "width": 163.199951171875,
+          "height": 53.75999450683594
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 158.4600067138672,
+              "right": 1408.9600830078125,
+              "bottom": 178.30001831054688,
+              "width": 148.47998046875,
+              "height": 19.840011596679688
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 181.5,
+              "right": 1408.9600830078125,
+              "bottom": 198.1400146484375,
+              "width": 148.47998046875,
+              "height": 16.6400146484375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 185.33999633789062,
+              "right": 1408.9600830078125,
+              "bottom": 193.66000366210938,
+              "width": 148.47998046875,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 196.22000122070312,
+              "right": 1408.9600830078125,
+              "bottom": 198.1400146484375,
+              "width": 148.47998046875,
+              "height": 1.920013427734375
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 1252.800048828125,
+          "top": 210.94000244140625,
+          "right": 1416,
+          "bottom": 264.70001220703125,
+          "width": 163.199951171875,
+          "height": 53.760009765625
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 216.70001220703125,
+              "right": 1408.9600830078125,
+              "bottom": 236.54000854492188,
+              "width": 148.47998046875,
+              "height": 19.839996337890625
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 239.74000549316406,
+              "right": 1408.9600830078125,
+              "bottom": 256.3800048828125,
+              "width": 148.47998046875,
+              "height": 16.639999389648438
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 243.58001708984375,
+              "right": 1408.9600830078125,
+              "bottom": 251.90000915527344,
+              "width": 148.47998046875,
+              "height": 8.319992065429688
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1260.4801025390625,
+              "top": 254.4600067138672,
+              "right": 1408.9600830078125,
+              "bottom": 256.3800048828125,
+              "width": 148.47998046875,
+              "height": 1.9199981689453125
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-1440x960-scale-1",
+    "width": 1440,
+    "height": 960,
+    "scale": 1,
+    "density": "compact",
+    "rack": {
+      "left": 1161,
+      "top": 80,
+      "right": 1416,
+      "bottom": 406.4375,
+      "width": 255,
+      "height": 326.4375
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 1161,
+          "top": 102.59375,
+          "right": 1416,
+          "bottom": 186.59375,
+          "width": 255,
+          "height": 84
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1173,
+              "top": 111.59375,
+              "right": 1405,
+              "bottom": 142.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1173,
+              "top": 147.59375,
+              "right": 1405,
+              "bottom": 173.59375,
+              "width": 232,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1173,
+              "top": 153.59375,
+              "right": 1405,
+              "bottom": 166.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1173,
+              "top": 170.59375,
+              "right": 1405,
+              "bottom": 173.59375,
+              "width": 232,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 1161,
+          "top": 193.59375,
+          "right": 1416,
+          "bottom": 277.59375,
+          "width": 255,
+          "height": 84
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1173,
+              "top": 202.59375,
+              "right": 1405,
+              "bottom": 233.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1173,
+              "top": 238.59375,
+              "right": 1405,
+              "bottom": 264.59375,
+              "width": 232,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1173,
+              "top": 244.59375,
+              "right": 1405,
+              "bottom": 257.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1173,
+              "top": 261.59375,
+              "right": 1405,
+              "bottom": 264.59375,
+              "width": 232,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 1161,
+          "top": 284.59375,
+          "right": 1416,
+          "bottom": 368.59375,
+          "width": 255,
+          "height": 84
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1173,
+              "top": 293.59375,
+              "right": 1405,
+              "bottom": 324.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1173,
+              "top": 329.59375,
+              "right": 1405,
+              "bottom": 355.59375,
+              "width": 232,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1173,
+              "top": 335.59375,
+              "right": 1405,
+              "bottom": 348.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1173,
+              "top": 352.59375,
+              "right": 1405,
+              "bottom": 355.59375,
+              "width": 232,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-1440x960-scale-1.15",
+    "width": 1440,
+    "height": 960,
+    "scale": 1.15,
+    "density": "compact",
+    "rack": {
+      "left": 1078.762451171875,
+      "top": 80,
+      "right": 1416,
+      "bottom": 511.7135925292969,
+      "width": 337.237548828125,
+      "height": 431.7135925292969
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 1078.762451171875,
+          "top": 109.88023376464844,
+          "right": 1416,
+          "bottom": 220.97023010253906,
+          "width": 337.237548828125,
+          "height": 111.08999633789062
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 121.78273010253906,
+              "right": 1401.452392578125,
+              "bottom": 162.78024291992188,
+              "width": 306.8199462890625,
+              "height": 40.99751281738281
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 169.39273071289062,
+              "right": 1401.452392578125,
+              "bottom": 203.77774047851562,
+              "width": 306.8199462890625,
+              "height": 34.385009765625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 177.32772827148438,
+              "right": 1401.452392578125,
+              "bottom": 194.52023315429688,
+              "width": 306.8199462890625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 199.81024169921875,
+              "right": 1401.452392578125,
+              "bottom": 203.77774047851562,
+              "width": 306.8199462890625,
+              "height": 3.967498779296875
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 1078.762451171875,
+          "top": 230.2277374267578,
+          "right": 1416,
+          "bottom": 341.3177185058594,
+          "width": 337.237548828125,
+          "height": 111.08998107910156
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 242.13023376464844,
+              "right": 1401.452392578125,
+              "bottom": 283.12774658203125,
+              "width": 306.8199462890625,
+              "height": 40.99751281738281
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 289.740234375,
+              "right": 1401.452392578125,
+              "bottom": 324.125244140625,
+              "width": 306.8199462890625,
+              "height": 34.385009765625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 297.67523193359375,
+              "right": 1401.452392578125,
+              "bottom": 314.86773681640625,
+              "width": 306.8199462890625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 320.15771484375,
+              "right": 1401.452392578125,
+              "bottom": 324.125244140625,
+              "width": 306.8199462890625,
+              "height": 3.967529296875
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 1078.762451171875,
+          "top": 350.5752258300781,
+          "right": 1416,
+          "bottom": 461.66522216796875,
+          "width": 337.237548828125,
+          "height": 111.08999633789062
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 362.47772216796875,
+              "right": 1401.452392578125,
+              "bottom": 403.4752197265625,
+              "width": 306.8199462890625,
+              "height": 40.99749755859375
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 410.0877380371094,
+              "right": 1401.452392578125,
+              "bottom": 444.47271728515625,
+              "width": 306.8199462890625,
+              "height": 34.384979248046875
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 418.0227355957031,
+              "right": 1401.452392578125,
+              "bottom": 435.2152404785156,
+              "width": 306.8199462890625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1094.6324462890625,
+              "top": 440.5052185058594,
+              "right": 1401.452392578125,
+              "bottom": 444.47271728515625,
+              "width": 306.8199462890625,
+              "height": 3.967498779296875
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-1024x640-scale-0.8",
+    "width": 1024,
+    "height": 640,
+    "scale": 0.8,
+    "density": "compact",
+    "rack": {
+      "left": 862,
+      "top": 74,
+      "right": 1006,
+      "bottom": 252.8400115966797,
+      "width": 144,
+      "height": 178.8400115966797
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 862,
+          "top": 87.18000030517578,
+          "right": 1006,
+          "bottom": 132.6199951171875,
+          "width": 144,
+          "height": 45.43999481201172
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 91.66000366210938,
+              "right": 999.5999755859375,
+              "bottom": 108.30000305175781,
+              "width": 130.55999755859375,
+              "height": 16.639999389648438
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 110.22000122070312,
+              "right": 999.5999755859375,
+              "bottom": 125.58000183105469,
+              "width": 130.55999755859375,
+              "height": 15.360000610351562
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 112.77999877929688,
+              "right": 999.5999755859375,
+              "bottom": 121.10000610351562,
+              "width": 130.55999755859375,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 123.66000366210938,
+              "right": 999.5999755859375,
+              "bottom": 125.58000183105469,
+              "width": 130.55999755859375,
+              "height": 1.9199981689453125
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 862,
+          "top": 135.82000732421875,
+          "right": 1006,
+          "bottom": 181.260009765625,
+          "width": 144,
+          "height": 45.44000244140625
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 140.3000030517578,
+              "right": 999.5999755859375,
+              "bottom": 156.94000244140625,
+              "width": 130.55999755859375,
+              "height": 16.639999389648438
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 158.86001586914062,
+              "right": 999.5999755859375,
+              "bottom": 174.22000122070312,
+              "width": 130.55999755859375,
+              "height": 15.3599853515625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 161.42001342773438,
+              "right": 999.5999755859375,
+              "bottom": 169.74000549316406,
+              "width": 130.55999755859375,
+              "height": 8.319992065429688
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 172.30001831054688,
+              "right": 999.5999755859375,
+              "bottom": 174.22000122070312,
+              "width": 130.55999755859375,
+              "height": 1.91998291015625
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 862,
+          "top": 184.4600067138672,
+          "right": 1006,
+          "bottom": 229.90000915527344,
+          "width": 144,
+          "height": 45.44000244140625
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 188.94000244140625,
+              "right": 999.5999755859375,
+              "bottom": 205.5800018310547,
+              "width": 130.55999755859375,
+              "height": 16.639999389648438
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 207.50001525878906,
+              "right": 999.5999755859375,
+              "bottom": 222.86001586914062,
+              "width": 130.55999755859375,
+              "height": 15.360000610351562
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 210.0600128173828,
+              "right": 999.5999755859375,
+              "bottom": 218.3800048828125,
+              "width": 130.55999755859375,
+              "height": 8.319992065429688
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 869.0399780273438,
+              "top": 220.9400177001953,
+              "right": 999.5999755859375,
+              "bottom": 222.86001586914062,
+              "width": 130.55999755859375,
+              "height": 1.9199981689453125
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-1024x640-scale-1",
+    "width": 1024,
+    "height": 640,
+    "scale": 1,
+    "density": "compact",
+    "rack": {
+      "left": 781,
+      "top": 74,
+      "right": 1006,
+      "bottom": 353.4375,
+      "width": 225,
+      "height": 279.4375
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 781,
+          "top": 94.59375,
+          "right": 1006,
+          "bottom": 165.59375,
+          "width": 225,
+          "height": 71
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 792,
+              "top": 101.59375,
+              "right": 996,
+              "bottom": 127.59375,
+              "width": 204,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 792,
+              "top": 130.59375,
+              "right": 996,
+              "bottom": 154.59375,
+              "width": 204,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 792,
+              "top": 134.59375,
+              "right": 996,
+              "bottom": 147.59375,
+              "width": 204,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 792,
+              "top": 151.59375,
+              "right": 996,
+              "bottom": 154.59375,
+              "width": 204,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 781,
+          "top": 170.59375,
+          "right": 1006,
+          "bottom": 241.59375,
+          "width": 225,
+          "height": 71
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 792,
+              "top": 177.59375,
+              "right": 996,
+              "bottom": 203.59375,
+              "width": 204,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 792,
+              "top": 206.59375,
+              "right": 996,
+              "bottom": 230.59375,
+              "width": 204,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 792,
+              "top": 210.59375,
+              "right": 996,
+              "bottom": 223.59375,
+              "width": 204,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 792,
+              "top": 227.59375,
+              "right": 996,
+              "bottom": 230.59375,
+              "width": 204,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 781,
+          "top": 246.59375,
+          "right": 1006,
+          "bottom": 317.59375,
+          "width": 225,
+          "height": 71
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 792,
+              "top": 253.59375,
+              "right": 996,
+              "bottom": 279.59375,
+              "width": 204,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 792,
+              "top": 282.59375,
+              "right": 996,
+              "bottom": 306.59375,
+              "width": 204,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 792,
+              "top": 286.59375,
+              "right": 996,
+              "bottom": 299.59375,
+              "width": 204,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 792,
+              "top": 303.59375,
+              "right": 996,
+              "bottom": 306.59375,
+              "width": 204,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-1024x640-scale-1.15",
+    "width": 1024,
+    "height": 640,
+    "scale": 1.15,
+    "density": "compact",
+    "rack": {
+      "left": 708.4375,
+      "top": 74,
+      "right": 1006,
+      "bottom": 443.55609130859375,
+      "width": 297.5625,
+      "height": 369.55609130859375
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 708.4375,
+          "top": 101.2352294921875,
+          "right": 1006,
+          "bottom": 195.1327362060547,
+          "width": 297.5625,
+          "height": 93.89750671386719
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 110.49273681640625,
+              "right": 992.7750244140625,
+              "bottom": 144.8777313232422,
+              "width": 269.7900390625,
+              "height": 34.38499450683594
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 148.84523010253906,
+              "right": 992.7750244140625,
+              "bottom": 180.58523559570312,
+              "width": 269.7900390625,
+              "height": 31.740005493164062
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 154.13522338867188,
+              "right": 992.7750244140625,
+              "bottom": 171.32772827148438,
+              "width": 269.7900390625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 176.61773681640625,
+              "right": 992.7750244140625,
+              "bottom": 180.58523559570312,
+              "width": 269.7900390625,
+              "height": 3.967498779296875
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 708.4375,
+          "top": 201.7452392578125,
+          "right": 1006,
+          "bottom": 295.6427307128906,
+          "width": 297.5625,
+          "height": 93.89749145507812
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 211.0027313232422,
+              "right": 992.7750244140625,
+              "bottom": 245.38772583007812,
+              "width": 269.7900390625,
+              "height": 34.38499450683594
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 249.35523986816406,
+              "right": 992.7750244140625,
+              "bottom": 281.09521484375,
+              "width": 269.7900390625,
+              "height": 31.739974975585938
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 254.64523315429688,
+              "right": 992.7750244140625,
+              "bottom": 271.8377380371094,
+              "width": 269.7900390625,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 277.12774658203125,
+              "right": 992.7750244140625,
+              "bottom": 281.09521484375,
+              "width": 269.7900390625,
+              "height": 3.96746826171875
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 708.4375,
+          "top": 302.2552490234375,
+          "right": 1006,
+          "bottom": 396.1527404785156,
+          "width": 297.5625,
+          "height": 93.89749145507812
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 311.5127258300781,
+              "right": 992.7750244140625,
+              "bottom": 345.8977355957031,
+              "width": 269.7900390625,
+              "height": 34.385009765625
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 349.865234375,
+              "right": 992.7750244140625,
+              "bottom": 381.605224609375,
+              "width": 269.7900390625,
+              "height": 31.739990234375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 355.1552429199219,
+              "right": 992.7750244140625,
+              "bottom": 372.34771728515625,
+              "width": 269.7900390625,
+              "height": 17.192474365234375
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 722.9849853515625,
+              "top": 377.6377258300781,
+              "right": 992.7750244140625,
+              "bottom": 381.605224609375,
+              "width": 269.7900390625,
+              "height": 3.967498779296875
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-390x844-scale-0.8",
+    "width": 390,
+    "height": 844,
+    "scale": 0.8,
+    "density": "compact",
+    "rack": {
+      "left": 269.1999816894531,
+      "top": 552.199951171875,
+      "right": 378,
+      "bottom": 731,
+      "width": 108.80001831054688,
+      "height": 178.800048828125
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 269.1999816894531,
+          "top": 563.8399658203125,
+          "right": 378,
+          "bottom": 609.9199829101562,
+          "width": 108.80001831054688,
+          "height": 46.08001708984375
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 568.3199462890625,
+              "right": 372.8800048828125,
+              "bottom": 585.5999755859375,
+              "width": 97.92001342773438,
+              "height": 17.280029296875
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 587.5199584960938,
+              "right": 372.8800048828125,
+              "bottom": 602.8799438476562,
+              "width": 97.92001342773438,
+              "height": 15.3599853515625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 590.0799560546875,
+              "right": 372.8800048828125,
+              "bottom": 598.3999633789062,
+              "width": 97.92001342773438,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 600.9599609375,
+              "right": 372.8800048828125,
+              "bottom": 602.8799438476562,
+              "width": 97.92001342773438,
+              "height": 1.91998291015625
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 269.1999816894531,
+          "top": 614.3999633789062,
+          "right": 378,
+          "bottom": 660.47998046875,
+          "width": 108.80001831054688,
+          "height": 46.08001708984375
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 618.8799438476562,
+              "right": 372.8800048828125,
+              "bottom": 636.1599731445312,
+              "width": 97.92001342773438,
+              "height": 17.280029296875
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 638.0799560546875,
+              "right": 372.8800048828125,
+              "bottom": 653.43994140625,
+              "width": 97.92001342773438,
+              "height": 15.3599853515625
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 640.6399536132812,
+              "right": 372.8800048828125,
+              "bottom": 648.9599609375,
+              "width": 97.92001342773438,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 651.5199584960938,
+              "right": 372.8800048828125,
+              "bottom": 653.43994140625,
+              "width": 97.92001342773438,
+              "height": 1.91998291015625
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 269.1999816894531,
+          "top": 664.9599609375,
+          "right": 378,
+          "bottom": 711.0399780273438,
+          "width": 108.80001831054688,
+          "height": 46.08001708984375
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 669.43994140625,
+              "right": 372.8800048828125,
+              "bottom": 686.719970703125,
+              "width": 97.92001342773438,
+              "height": 17.280029296875
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 688.6399536132812,
+              "right": 372.8800048828125,
+              "bottom": 704,
+              "width": 97.92001342773438,
+              "height": 15.36004638671875
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 691.199951171875,
+              "right": 372.8800048828125,
+              "bottom": 699.5199584960938,
+              "width": 97.92001342773438,
+              "height": 8.32000732421875
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 274.9599914550781,
+              "top": 702.0799560546875,
+              "right": 372.8800048828125,
+              "bottom": 704,
+              "width": 97.92001342773438,
+              "height": 1.9200439453125
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-390x844-scale-1",
+    "width": 390,
+    "height": 844,
+    "scale": 1,
+    "density": "compact",
+    "rack": {
+      "left": 208,
+      "top": 451.625,
+      "right": 378,
+      "bottom": 731,
+      "width": 170,
+      "height": 279.375
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 208,
+          "top": 469.8125,
+          "right": 378,
+          "bottom": 541.8125,
+          "width": 170,
+          "height": 72
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 217,
+              "top": 476.8125,
+              "right": 370,
+              "bottom": 503.8125,
+              "width": 153,
+              "height": 27
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 217,
+              "top": 506.8125,
+              "right": 370,
+              "bottom": 530.8125,
+              "width": 153,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 217,
+              "top": 510.8125,
+              "right": 370,
+              "bottom": 523.8125,
+              "width": 153,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 217,
+              "top": 527.8125,
+              "right": 370,
+              "bottom": 530.8125,
+              "width": 153,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 208,
+          "top": 548.8125,
+          "right": 378,
+          "bottom": 620.8125,
+          "width": 170,
+          "height": 72
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 217,
+              "top": 555.8125,
+              "right": 370,
+              "bottom": 582.8125,
+              "width": 153,
+              "height": 27
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 217,
+              "top": 585.8125,
+              "right": 370,
+              "bottom": 609.8125,
+              "width": 153,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 217,
+              "top": 589.8125,
+              "right": 370,
+              "bottom": 602.8125,
+              "width": 153,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 217,
+              "top": 606.8125,
+              "right": 370,
+              "bottom": 609.8125,
+              "width": 153,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 208,
+          "top": 627.8125,
+          "right": 378,
+          "bottom": 699.8125,
+          "width": 170,
+          "height": 72
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 217,
+              "top": 634.8125,
+              "right": 370,
+              "bottom": 661.8125,
+              "width": 153,
+              "height": 27
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 217,
+              "top": 664.8125,
+              "right": 370,
+              "bottom": 688.8125,
+              "width": 153,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 217,
+              "top": 668.8125,
+              "right": 370,
+              "bottom": 681.8125,
+              "width": 153,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 217,
+              "top": 685.8125,
+              "right": 370,
+              "bottom": 688.8125,
+              "width": 153,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-390x844-scale-1.15",
+    "width": 390,
+    "height": 844,
+    "scale": 1.15,
+    "density": "compact",
+    "rack": {
+      "left": 153.1750030517578,
+      "top": 361.52655029296875,
+      "right": 378,
+      "bottom": 731,
+      "width": 224.8249969482422,
+      "height": 369.47344970703125
+    },
+    "cards": [
+      {
+        "name": "先锋突击步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 153.1750030517578,
+          "top": 385.57952880859375,
+          "right": 378,
+          "bottom": 480.79949951171875,
+          "width": 224.8249969482422,
+          "height": 95.219970703125
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 394.8370056152344,
+              "right": 367.41998291015625,
+              "bottom": 430.5445251464844,
+              "width": 202.3424835205078,
+              "height": 35.70751953125
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 434.51202392578125,
+              "right": 367.41998291015625,
+              "bottom": 466.25201416015625,
+              "width": 202.3424835205078,
+              "height": 31.739990234375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 439.802001953125,
+              "right": 367.41998291015625,
+              "bottom": 456.9945068359375,
+              "width": 202.3424835205078,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 462.2845153808594,
+              "right": 367.41998291015625,
+              "bottom": 466.25201416015625,
+              "width": 202.3424835205078,
+              "height": 3.967498779296875
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 153.1750030517578,
+          "top": 490.0570068359375,
+          "right": 378,
+          "bottom": 585.2770385742188,
+          "width": 224.8249969482422,
+          "height": 95.22003173828125
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 499.31451416015625,
+              "right": 367.41998291015625,
+              "bottom": 535.0220336914062,
+              "width": 202.3424835205078,
+              "height": 35.70751953125
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 538.989501953125,
+              "right": 367.41998291015625,
+              "bottom": 570.7294921875,
+              "width": 202.3424835205078,
+              "height": 31.739990234375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 544.279541015625,
+              "right": 367.41998291015625,
+              "bottom": 561.4720458984375,
+              "width": 202.3424835205078,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 566.7620239257812,
+              "right": 367.41998291015625,
+              "bottom": 570.7294921875,
+              "width": 202.3424835205078,
+              "height": 3.96746826171875
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 153.1750030517578,
+          "top": 594.5345458984375,
+          "right": 378,
+          "bottom": 689.7545166015625,
+          "width": 224.8249969482422,
+          "height": 95.219970703125
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 603.7919921875,
+              "right": 367.41998291015625,
+              "bottom": 639.49951171875,
+              "width": 202.3424835205078,
+              "height": 35.70751953125
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 643.467041015625,
+              "right": 367.41998291015625,
+              "bottom": 675.20703125,
+              "width": 202.3424835205078,
+              "height": 31.739990234375
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 648.7570190429688,
+              "right": 367.41998291015625,
+              "bottom": 665.9495239257812,
+              "width": 202.3424835205078,
+              "height": 17.1925048828125
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 165.07749938964844,
+              "top": 671.239501953125,
+              "right": 367.41998291015625,
+              "bottom": 675.20703125,
+              "width": 202.3424835205078,
+              "height": 3.967529296875
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "compact-halo-1280x800",
+    "width": 1280,
+    "height": 800,
+    "scale": 1,
+    "density": "compact",
+    "rack": {
+      "left": 1001,
+      "top": 80,
+      "right": 1256,
+      "bottom": 436.4375,
+      "width": 255,
+      "height": 356.4375
+    },
+    "cards": [
+      {
+        "name": "光环精准步枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 1001,
+          "top": 107.59375,
+          "right": 1256,
+          "bottom": 191.59375,
+          "width": 255,
+          "height": 84
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1013,
+              "top": 116.59375,
+              "right": 1245,
+              "bottom": 147.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1013,
+              "top": 152.59375,
+              "right": 1245,
+              "bottom": 178.59375,
+              "width": 232,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1013,
+              "top": 158.59375,
+              "right": 1245,
+              "bottom": 171.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1013,
+              "top": 175.59375,
+              "right": 1245,
+              "bottom": 178.59375,
+              "width": 232,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "88%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 1001,
+          "top": 208.59375,
+          "right": 1256,
+          "bottom": 292.59375,
+          "width": 255,
+          "height": 84
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1013,
+              "top": 217.59375,
+              "right": 1245,
+              "bottom": 248.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1013,
+              "top": 253.59375,
+              "right": 1245,
+              "bottom": 279.59375,
+              "width": 232,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1013,
+              "top": 259.59375,
+              "right": 1245,
+              "bottom": 272.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1013,
+              "top": 276.59375,
+              "right": 1245,
+              "bottom": 279.59375,
+              "width": 232,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 1001,
+          "top": 309.59375,
+          "right": 1256,
+          "bottom": 393.59375,
+          "width": 255,
+          "height": 84
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 1013,
+              "top": 318.59375,
+              "right": 1245,
+              "bottom": 349.59375,
+              "width": 232,
+              "height": 31
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 1013,
+              "top": 354.59375,
+              "right": 1245,
+              "bottom": 380.59375,
+              "width": 232,
+              "height": 26
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 1013,
+              "top": 360.59375,
+              "right": 1245,
+              "bottom": 373.59375,
+              "width": 232,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 1013,
+              "top": 377.59375,
+              "right": 1245,
+              "bottom": 380.59375,
+              "width": 232,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "long-name-390x844",
+    "width": 390,
+    "height": 844,
+    "scale": 1,
+    "density": "standard",
+    "rack": {
+      "left": 208,
+      "top": 433.625,
+      "right": 378,
+      "bottom": 731,
+      "width": 170,
+      "height": 297.375
+    },
+    "cards": [
+      {
+        "name": "雷霆电弧霰弹枪",
+        "kind": "finite",
+        "active": true,
+        "rect": {
+          "left": 208,
+          "top": 454.8125,
+          "right": 378,
+          "bottom": 526.8125,
+          "width": 170,
+          "height": 72
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 217,
+              "top": 461.8125,
+              "right": 370,
+              "bottom": 488.8125,
+              "width": 153,
+              "height": 27
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 217,
+              "top": 491.8125,
+              "right": 370,
+              "bottom": 515.8125,
+              "width": 153,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 217,
+              "top": 495.8125,
+              "right": 370,
+              "bottom": 508.8125,
+              "width": 153,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 217,
+              "top": 512.8125,
+              "right": 370,
+              "bottom": 515.8125,
+              "width": 153,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "48%"
+      },
+      {
+        "name": "幽灵消音手枪",
+        "kind": "finite",
+        "active": false,
+        "rect": {
+          "left": 208,
+          "top": 539.8125,
+          "right": 378,
+          "bottom": 611.8125,
+          "width": 170,
+          "height": 72
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 217,
+              "top": 546.8125,
+              "right": 370,
+              "bottom": 573.8125,
+              "width": 153,
+              "height": 27
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 217,
+              "top": 576.8125,
+              "right": 370,
+              "bottom": 600.8125,
+              "width": 153,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 217,
+              "top": 580.8125,
+              "right": 370,
+              "bottom": 593.8125,
+              "width": 153,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 217,
+              "top": 597.8125,
+              "right": 370,
+              "bottom": 600.8125,
+              "width": 153,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "93%"
+      },
+      {
+        "name": "电弧战刃",
+        "kind": "melee",
+        "active": false,
+        "rect": {
+          "left": 208,
+          "top": 624.8125,
+          "right": 378,
+          "bottom": 696.8125,
+          "width": 170,
+          "height": 72
+        },
+        "parts": [
+          {
+            "className": "weapon-card-main",
+            "rect": {
+              "left": 217,
+              "top": 631.8125,
+              "right": 370,
+              "bottom": 658.8125,
+              "width": 153,
+              "height": 27
+            }
+          },
+          {
+            "className": "weapon-card-ammo",
+            "rect": {
+              "left": 217,
+              "top": 661.8125,
+              "right": 370,
+              "bottom": 685.8125,
+              "width": 153,
+              "height": 24
+            }
+          },
+          {
+            "className": "weapon-ammo-caption",
+            "rect": {
+              "left": 217,
+              "top": 665.8125,
+              "right": 370,
+              "bottom": 678.8125,
+              "width": 153,
+              "height": 13
+            }
+          },
+          {
+            "className": "weapon-ammo-track",
+            "rect": {
+              "left": 217,
+              "top": 682.8125,
+              "right": 370,
+              "bottom": 685.8125,
+              "width": 153,
+              "height": 3
+            }
+          }
+        ],
+        "percentage": "∞"
+      }
+    ]
+  },
+  {
+    "name": "context-paused-1440x960",
+    "width": 1440,
+    "height": 960,
+    "button": {
+      "top": 690.203125,
+      "bottom": 757.703125,
+      "left": 344,
+      "right": 814
+    },
+    "view": {
+      "top": 153,
+      "bottom": 861,
+      "left": 316,
+      "right": 1309
+    },
+    "hit": true,
+    "headingSize": 31
+  },
+  {
+    "name": "context-won-1440x960",
+    "width": 1440,
+    "height": 960,
+    "button": {
+      "top": 690.203125,
+      "bottom": 757.703125,
+      "left": 344,
+      "right": 814
+    },
+    "view": {
+      "top": 153,
+      "bottom": 861,
+      "left": 316,
+      "right": 1309
+    },
+    "hit": true,
+    "headingSize": 31
+  },
+  {
+    "name": "context-lost-1440x960",
+    "width": 1440,
+    "height": 960,
+    "button": {
+      "top": 690.203125,
+      "bottom": 757.703125,
+      "left": 344,
+      "right": 814
+    },
+    "view": {
+      "top": 153,
+      "bottom": 861,
+      "left": 316,
+      "right": 1309
+    },
+    "hit": true,
+    "headingSize": 31
+  },
+  {
+    "name": "context-paused-1024x640",
+    "width": 1024,
+    "height": 640,
+    "button": {
+      "top": 424.203125,
+      "bottom": 491.703125,
+      "left": 191,
+      "right": 661
+    },
+    "view": {
+      "top": 105,
+      "bottom": 591,
+      "left": 171,
+      "right": 1011
+    },
+    "hit": true,
+    "headingSize": 27
+  },
+  {
+    "name": "context-won-1024x640",
+    "width": 1024,
+    "height": 640,
+    "button": {
+      "top": 424.203125,
+      "bottom": 491.703125,
+      "left": 191,
+      "right": 661
+    },
+    "view": {
+      "top": 105,
+      "bottom": 591,
+      "left": 171,
+      "right": 1011
+    },
+    "hit": true,
+    "headingSize": 27
+  },
+  {
+    "name": "context-lost-1024x640",
+    "width": 1024,
+    "height": 640,
+    "button": {
+      "top": 424.203125,
+      "bottom": 491.703125,
+      "left": 191,
+      "right": 661
+    },
+    "view": {
+      "top": 105,
+      "bottom": 591,
+      "left": 171,
+      "right": 1011
+    },
+    "hit": true,
+    "headingSize": 27
+  },
+  {
+    "name": "context-paused-390x844",
+    "width": 390,
+    "height": 844,
+    "button": {
+      "top": 628.203125,
+      "bottom": 701.703125,
+      "left": 24,
+      "right": 366
+    },
+    "view": {
+      "top": 144,
+      "bottom": 799,
+      "left": 9,
+      "right": 381
+    },
+    "hit": true,
+    "headingSize": 25
+  },
+  {
+    "name": "context-won-390x844",
+    "width": 390,
+    "height": 844,
+    "button": {
+      "top": 628.203125,
+      "bottom": 701.703125,
+      "left": 24,
+      "right": 366
+    },
+    "view": {
+      "top": 144,
+      "bottom": 799,
+      "left": 9,
+      "right": 381
+    },
+    "hit": true,
+    "headingSize": 25
+  },
+  {
+    "name": "context-lost-390x844",
+    "width": 390,
+    "height": 844,
+    "button": {
+      "top": 628.203125,
+      "bottom": 701.703125,
+      "left": 24,
+      "right": 366
+    },
+    "view": {
+      "top": 144,
+      "bottom": 799,
+      "left": 9,
+      "right": 381
+    },
+    "hit": true,
+    "headingSize": 25
+  },
+  {
+    "name": "context-paused-1024x640-notice",
+    "width": 1024,
+    "height": 640,
+    "button": {
+      "top": 424.203125,
+      "bottom": 491.703125,
+      "left": 191,
+      "right": 661
+    },
+    "view": {
+      "top": 105,
+      "bottom": 591,
+      "left": 171,
+      "right": 1011
+    },
+    "hit": true,
+    "headingSize": 27
+  },
+  {
+    "name": "context-won-1024x640-notice",
+    "width": 1024,
+    "height": 640,
+    "button": {
+      "top": 424.203125,
+      "bottom": 491.703125,
+      "left": 191,
+      "right": 661
+    },
+    "view": {
+      "top": 105,
+      "bottom": 591,
+      "left": 171,
+      "right": 1011
+    },
+    "hit": true,
+    "headingSize": 27
+  },
+  {
+    "name": "context-lost-1024x640-notice",
+    "width": 1024,
+    "height": 640,
+    "button": {
+      "top": 424.203125,
+      "bottom": 491.703125,
+      "left": 191,
+      "right": 661
+    },
+    "view": {
+      "top": 105,
+      "bottom": 591,
+      "left": 171,
+      "right": 1011
+    },
+    "hit": true,
+    "headingSize": 27
+  }
+]

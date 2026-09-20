@@ -1,13 +1,18 @@
+import {attachSniperGuard,animateSniperGuard} from './characters/sniper-guard-runtime.js';
+import {attachCommanderGuard,animateCommanderGuard} from './characters/commander-guard-runtime.js';
+import {attachEngineerGuard,animateEngineerGuard} from './characters/engineer-guard-runtime.js';
+import {attachRangedGuard,animateRangedGuard} from './characters/ranged-guard-runtime.js';
+import {attachGuardVariant,animateGuardVariant} from './characters/guard-variants-runtime.js';
 import {createSentryModel} from './sentry-model.js';
 import {createSwarmModel,animateSwarm} from './swarm-model.js';
 import * as THREE from './node_modules/three/build/three.module.js';
 import {ENEMY_TYPES} from './enemy-rules.js';
-const steel=new THREE.MeshStandardMaterial({color:0x66808c,roughness:.5,metalness:.3});
-const dark=new THREE.MeshStandardMaterial({color:0x22313e,roughness:.65,metalness:.2});
+const steel=new THREE.MeshStandardMaterial({color:0x758a98,roughness:.32,metalness:.78});
+const dark=new THREE.MeshStandardMaterial({color:0x18242c,roughness:.42,metalness:.82});
 function box(g,w,h,d,x,y,z,material,zone='body'){
  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.userData.hitZone=zone;g.add(m);return m;
 }
-export function createEnemyModel(type){
+export function createEnemyModel(type,{rangedSample=true,loadRangedAsset,guardBatch=true,loadGuardAsset,engineerSample=true,loadEngineerAsset,commanderSample=true,loadCommanderAsset,sniperSample=true,loadSniperAsset}={}){
  if(type==='sentry')return createSentryModel();
  if(type==='swarmDrone')return createSwarmModel();
  const profile=ENEMY_TYPES[type],g=new THREE.Group(),heavy=type==='heavy'||type==='harborElite'||type==='shield',boss=type==='warden';
@@ -94,7 +99,13 @@ export function createEnemyModel(type){
   const coreFrame=new THREE.Mesh(new THREE.TorusGeometry(.31,.045,6,24),steel);coreFrame.position.set(0,1.32,.49);g.add(coreFrame);
   const crown=new THREE.Mesh(new THREE.TorusGeometry(.44,.045,6,28),accent);crown.position.set(0,2.18,0);crown.rotation.x=Math.PI/2;g.add(crown);
  }
- g.userData.parts={legs,arms,accent,coreMaterial,core,shield:g.userData.partsShield||null,fade:type==='stalker'?g.children.map(o=>o.material):null};return g;
+ g.userData.parts={legs,arms,accent,coreMaterial,core,shield:g.userData.partsShield||null,fade:type==='stalker'?g.children.map(o=>o.material):null};
+ if(type==='ranged'&&rangedSample)attachRangedGuard(g,{loadAsset:loadRangedAsset});
+ if(guardBatch&&(type==='assault'||type==='heavy'))attachGuardVariant(g,type,{loadAsset:loadGuardAsset});
+ if(type==='engineer'&&engineerSample)attachEngineerGuard(g,{loadAsset:loadEngineerAsset});
+ if(type==='commander'&&commanderSample)attachCommanderGuard(g,{loadAsset:loadCommanderAsset});
+ if(type==='sniper'&&sniperSample)attachSniperGuard(g,{loadAsset:loadSniperAsset});
+ return g;
 }
 export function stalkerOpacity(distance,stealth){if(!stealth)return 1;if(distance<=stealth.near)return 1;if(distance>=stealth.far)return .08;return 1-(distance-stealth.near)/(stealth.far-stealth.near)*.92;}
 export function animateEnemy(enemy,time,walking,playerDistance=0){
@@ -106,6 +117,11 @@ export function animateEnemy(enemy,time,walking,playerDistance=0){
  p.accent.emissiveIntensity=enemy.charge>0?2.3+Math.sin(time*22)*.8:1;
  if(enemy.type==='harborElite'){const open=enemy.eliteState?.ventRemaining>0;p.coreMaterial.color.setHex(open?0x72ffe0:0xe4aa55);p.coreMaterial.emissive.setHex(open?0x32d6b0:0x986122);p.coreMaterial.emissiveIntensity=open?1.5:.5;p.core.scale.setScalar(open?1.35:1);p.core.rotation.y=time;}
  if(enemy.commanderSource&&enemy.charge<=0)p.accent.emissiveIntensity=1.6;
+ if(p.guard)animateRangedGuard(enemy,time,walking);
+ if(p.variantModel)animateGuardVariant(enemy,time,walking);
+ if(p.engineerModel)animateEngineerGuard(enemy,time,walking);
+ if(p.commanderModel)animateCommanderGuard(enemy,time,walking);
+ if(p.sniperModel)animateSniperGuard(enemy,time,walking);
  if(enemy.group.userData.commandRing)enemy.group.userData.commandRing.material.opacity=enemy.commanderRecipients>0?.16+.035*Math.sin(time*3):.06;
  if(enemy.type==='rusher'&&enemy.group.userData.rusherDome){const b=enemy.rusherBlink||0;enemy.group.userData.rusherDome.material.emissiveIntensity=1+Math.max(0,Math.sin(time*(6+b*30)))*(1.5+b*3);}
  if(enemy.type==='artilleryMech'){const open=(enemy.artillery?.exposed||0)>0,hatch=enemy.group.userData.artilleryHatch;if(hatch)hatch.visible=!open;p.coreMaterial.emissiveIntensity=open?2.4+Math.sin(time*10)*.5:1.4;if(p.core)p.core.scale.setScalar(open?1.3:1);}

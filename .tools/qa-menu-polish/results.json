@@ -1,0 +1,467 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "height": 900,
+      "home": {
+        "scroll": 1178,
+        "width": 1178,
+        "height": 744,
+        "scrollHeight": 744,
+        "button": "",
+        "rects": {
+          ".menu-home": {
+            "top": 119,
+            "bottom": 799,
+            "height": 680,
+            "padding": "0px",
+            "minHeight": "560px",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "1 1 0%"
+          },
+          ".menu-home-copy": {
+            "top": 119,
+            "bottom": 799,
+            "height": 680,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-home-actions": {
+            "top": 332.328125,
+            "bottom": 693.328125,
+            "height": 361,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          "#menu-new": {
+            "top": 332.328125,
+            "bottom": 388.328125,
+            "height": 56,
+            "padding": "7px 14px",
+            "minHeight": "56px",
+            "font": "500 14px / 21px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "21px",
+            "flex": "0 1 auto"
+          },
+          ".menu-mobile-actions": {
+            "top": 713.328125,
+            "bottom": 786.921875,
+            "height": 73.59375,
+            "padding": "16px 0px 0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-footer": {
+            "top": 831,
+            "bottom": 869,
+            "height": 38,
+            "padding": "9px 22px",
+            "minHeight": "0px",
+            "font": "9px / 13.5px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "13.5px",
+            "flex": "0 1 auto"
+          }
+        }
+      },
+      "levels": {
+        "scroll": 993,
+        "width": 993
+      }
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "home": {
+        "scroll": 1178,
+        "width": 1178,
+        "height": 744,
+        "scrollHeight": 744,
+        "button": "",
+        "rects": {
+          ".menu-home": {
+            "top": 209,
+            "bottom": 889,
+            "height": 680,
+            "padding": "0px",
+            "minHeight": "560px",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "1 1 0%"
+          },
+          ".menu-home-copy": {
+            "top": 209,
+            "bottom": 889,
+            "height": 680,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-home-actions": {
+            "top": 422.328125,
+            "bottom": 783.328125,
+            "height": 361,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          "#menu-new": {
+            "top": 422.328125,
+            "bottom": 478.328125,
+            "height": 56,
+            "padding": "7px 14px",
+            "minHeight": "56px",
+            "font": "500 14px / 21px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "21px",
+            "flex": "0 1 auto"
+          },
+          ".menu-mobile-actions": {
+            "top": 803.328125,
+            "bottom": 876.921875,
+            "height": 73.59375,
+            "padding": "16px 0px 0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-footer": {
+            "top": 921,
+            "bottom": 959,
+            "height": 38,
+            "padding": "9px 22px",
+            "minHeight": "0px",
+            "font": "9px / 13.5px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "13.5px",
+            "flex": "0 1 auto"
+          }
+        }
+      },
+      "levels": {
+        "scroll": 993,
+        "width": 993
+      }
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "home": {
+        "scroll": 1178,
+        "width": 1178,
+        "height": 602,
+        "scrollHeight": 630,
+        "button": "",
+        "rects": {
+          ".menu-home": {
+            "top": 91,
+            "bottom": 649,
+            "height": 558,
+            "padding": "0px",
+            "minHeight": "510px",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "1 1 0%"
+          },
+          ".menu-home-copy": {
+            "top": 91,
+            "bottom": 698.90625,
+            "height": 607.90625,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-home-actions": {
+            "top": 256.75,
+            "bottom": 615.3125,
+            "height": 358.5625,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          "#menu-new": {
+            "top": 256.75,
+            "bottom": 312.34375,
+            "height": 55.59375,
+            "padding": "7px 14px",
+            "minHeight": "48px",
+            "font": "500 14px / 21px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "21px",
+            "flex": "0 1 auto"
+          },
+          ".menu-mobile-actions": {
+            "top": 629.3125,
+            "bottom": 698.90625,
+            "height": 69.59375,
+            "padding": "12px 0px 0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-footer": {
+            "top": 671,
+            "bottom": 707,
+            "height": 36,
+            "padding": "9px 22px",
+            "minHeight": "0px",
+            "font": "9px / 13.5px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "13.5px",
+            "flex": "0 1 auto"
+          }
+        }
+      },
+      "levels": {
+        "scroll": 993,
+        "width": 993
+      }
+    },
+    {
+      "width": 1024,
+      "height": 640,
+      "home": {
+        "scroll": 998,
+        "width": 998,
+        "height": 522,
+        "scrollHeight": 586,
+        "button": "",
+        "rects": {
+          ".menu-home": {
+            "top": 91,
+            "bottom": 601,
+            "height": 510,
+            "padding": "0px",
+            "minHeight": "510px",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "1 1 0%"
+          },
+          ".menu-home-copy": {
+            "top": 91,
+            "bottom": 655.140625,
+            "height": 564.140625,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-home-actions": {
+            "top": 253.75,
+            "bottom": 571.546875,
+            "height": 317.796875,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          "#menu-new": {
+            "top": 253.75,
+            "bottom": 301.75,
+            "height": 48,
+            "padding": "7px 14px",
+            "minHeight": "48px",
+            "font": "500 14px / 21px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "21px",
+            "flex": "0 1 auto"
+          },
+          ".menu-mobile-actions": {
+            "top": 585.546875,
+            "bottom": 655.140625,
+            "height": 69.59375,
+            "padding": "12px 0px 0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-footer": {
+            "top": 591,
+            "bottom": 627,
+            "height": 36,
+            "padding": "9px 22px",
+            "minHeight": "0px",
+            "font": "9px / 13.5px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "13.5px",
+            "flex": "0 1 auto"
+          }
+        }
+      },
+      "levels": {
+        "scroll": 840,
+        "width": 840
+      }
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "home": {
+        "scroll": 718,
+        "width": 718,
+        "height": 744,
+        "scrollHeight": 744,
+        "button": "",
+        "rects": {
+          ".menu-home": {
+            "top": 175,
+            "bottom": 867,
+            "height": 692,
+            "padding": "0px",
+            "minHeight": "560px",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "1 1 0%"
+          },
+          ".menu-home-copy": {
+            "top": 208.078125,
+            "bottom": 833.921875,
+            "height": 625.84375,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-home-actions": {
+            "top": 379.328125,
+            "bottom": 740.328125,
+            "height": 361,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          "#menu-new": {
+            "top": 379.328125,
+            "bottom": 435.328125,
+            "height": 56,
+            "padding": "7px 14px",
+            "minHeight": "56px",
+            "font": "500 14px / 21px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "21px",
+            "flex": "0 1 auto"
+          },
+          ".menu-mobile-actions": {
+            "top": 760.328125,
+            "bottom": 833.921875,
+            "height": 73.59375,
+            "padding": "16px 0px 0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-footer": {
+            "top": 893,
+            "bottom": 931,
+            "height": 38,
+            "padding": "9px 22px",
+            "minHeight": "0px",
+            "font": "9px / 13.5px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "13.5px",
+            "flex": "0 1 auto"
+          }
+        }
+      },
+      "levels": {
+        "scroll": 560,
+        "width": 560
+      }
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "home": {
+        "scroll": 372,
+        "width": 372,
+        "height": 737,
+        "scrollHeight": 937,
+        "button": "",
+        "rects": {
+          ".menu-home": {
+            "top": 86,
+            "bottom": 775,
+            "height": 689,
+            "padding": "0px",
+            "minHeight": "0px",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "1 1 0%"
+          },
+          ".menu-home-copy": {
+            "top": 86,
+            "bottom": 714.84375,
+            "height": 628.84375,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-home-actions": {
+            "top": 257.25,
+            "bottom": 618.25,
+            "height": 361,
+            "padding": "0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          "#menu-new": {
+            "top": 257.25,
+            "bottom": 313.25,
+            "height": 56,
+            "padding": "7px 14px",
+            "minHeight": "56px",
+            "font": "500 14px / 21px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "21px",
+            "flex": "0 1 auto"
+          },
+          ".menu-mobile-actions": {
+            "top": 638.25,
+            "bottom": 714.84375,
+            "height": 76.59375,
+            "padding": "16px 0px 0px",
+            "minHeight": "auto",
+            "font": "16px \"Segoe UI\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", Arial, sans-serif",
+            "lineHeight": "normal",
+            "flex": "0 1 auto"
+          },
+          ".menu-footer": {
+            "top": 799,
+            "bottom": 835,
+            "height": 36,
+            "padding": "7px 13px",
+            "minHeight": "0px",
+            "font": "8px / 12px \"Segoe UI\", \"Microsoft YaHei\", sans-serif",
+            "lineHeight": "12px",
+            "flex": "0 1 auto"
+          }
+        }
+      },
+      "levels": {
+        "scroll": 372,
+        "width": 372
+      }
+    }
+  ],
+  "errors": []
+}

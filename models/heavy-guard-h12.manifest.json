@@ -1,0 +1,56 @@
+{
+  "asset": "heavy-guard-h12.glb",
+  "version": "h12-v1",
+  "type": "heavy",
+  "code": "H–12",
+  "name": "BASTION",
+  "label": "重装守卫",
+  "description": "Original rigid articulated armor; not a skinned human; visual-only geometry.",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "displayScale": 1.12,
+  "meshes": 68,
+  "triangles": 7972,
+  "materials": 7,
+  "rigidJoints": 13,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 14
+    },
+    {
+      "name": "Patrol",
+      "seconds": 1.25,
+      "tracks": 14
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 14
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 14
+    }
+  ],
+  "coreSocket": {
+    "node": "H12_CoreSocket",
+    "position": [
+      0,
+      1.28,
+      -0.6
+    ],
+    "radius": 0.21,
+    "animated": false
+  },
+  "bytes": 703604,
+  "sha256": "51599737bcdc8621292e6a8a43e88d16fa437484cb925fb752df775a1cc6dcbf",
+  "sourceHashes": {
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e",
+    "characters/guard-variants.js": "ca2aad0bf2d5bc0ebdccda8fb60fcdc47d1d36164fa44f934a5b8014c3a0cd74"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

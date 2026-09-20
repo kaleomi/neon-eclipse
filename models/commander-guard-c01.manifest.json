@@ -1,0 +1,51 @@
+{
+  "asset": "commander-guard-c01.glb",
+  "version": "c01-v1",
+  "role": "commander",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "description": "Original VECTOR tactical commander; rigid segmented mantle, dual communications blades and tactical terminal. Not a skinned human.",
+  "meshes": 79,
+  "triangles": 7100,
+  "materials": 7,
+  "articulatedNodes": 18,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.6,
+      "tracks": 19
+    },
+    {
+      "name": "Patrol",
+      "seconds": 1.05,
+      "tracks": 19
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 19
+    },
+    {
+      "name": "Command",
+      "seconds": 2.6,
+      "tracks": 19
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 19
+    }
+  ],
+  "bytes": 720228,
+  "sha256": "f18ba848af1cc0164526b08a44ce601cc0a4dce2127c795d7e6f909bd8c3bdc5",
+  "sourceHashes": {
+    "characters/commander-guard.js": "4ef6cbe8f13b124385cb5fe13422225caab2e43769762baf137bd4eeb0dae301",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

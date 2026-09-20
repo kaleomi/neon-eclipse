@@ -1,0 +1,39 @@
+{
+  "assetSha256": "3440e9d08fc157b713bd63908ef5af317dc5d7be0f49d6ab314e5ce325b67751",
+  "uri": "assault-guard-a03.glb",
+  "mimeType": "model/gltf-binary",
+  "validatorVersion": "2.0.0-dev.3.10",
+  "validatedAt": "2026-09-20T13:57:53.078Z",
+  "issues": {
+    "numErrors": 0,
+    "numWarnings": 0,
+    "numInfos": 0,
+    "numHints": 0,
+    "messages": [],
+    "truncated": false
+  },
+  "info": {
+    "version": "2.0",
+    "generator": "THREE.GLTFExporter r186",
+    "resources": [
+      {
+        "pointer": "/buffers/0",
+        "mimeType": "application/gltf-buffer",
+        "storage": "glb",
+        "byteLength": 481932
+      }
+    ],
+    "animationCount": 4,
+    "materialCount": 6,
+    "hasMorphTargets": false,
+    "hasSkins": false,
+    "hasTextures": false,
+    "hasDefaultScene": true,
+    "drawCallCount": 68,
+    "totalVertexCount": 17976,
+    "totalTriangleCount": 5992,
+    "maxUVs": 0,
+    "maxInfluences": 0,
+    "maxAttributes": 2
+  }
+}

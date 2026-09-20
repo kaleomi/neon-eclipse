@@ -30,44 +30,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 1013,
+              "left": 1014,
               "top": 111.59375,
               "right": 1245,
               "bottom": 142.59375,
-              "width": 232,
+              "width": 231,
               "height": 31
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 1013,
+              "left": 1014,
               "top": 147.59375,
               "right": 1245,
               "bottom": 173.59375,
-              "width": 232,
+              "width": 231,
               "height": 26
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 1013,
+              "left": 1014,
               "top": 153.59375,
               "right": 1245,
               "bottom": 166.59375,
-              "width": 232,
+              "width": 231,
               "height": 13
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 1013,
+              "left": 1014,
               "top": 170.59375,
               "right": 1245,
               "bottom": 173.59375,
-              "width": 232,
+              "width": 231,
               "height": 3
             }
           }
@@ -227,55 +227,55 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 1260.4801025390625,
+              "left": 1261.1199951171875,
               "top": 100.22000122070312,
               "right": 1408.9600830078125,
               "bottom": 120.05999755859375,
-              "width": 148.47998046875,
+              "width": 147.840087890625,
               "height": 19.839996337890625
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 1260.4801025390625,
+              "left": 1261.1199951171875,
               "top": 123.26000213623047,
               "right": 1408.9600830078125,
               "bottom": 149.8800048828125,
-              "width": 148.47998046875,
+              "width": 147.840087890625,
               "height": 26.62000274658203
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 1260.4801025390625,
+              "left": 1261.1199951171875,
               "top": 127.10000610351562,
               "right": 1408.9600830078125,
               "bottom": 135.42001342773438,
-              "width": 148.47998046875,
+              "width": 147.840087890625,
               "height": 8.32000732421875
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 1260.4801025390625,
+              "left": 1261.1199951171875,
               "top": 137.98001098632812,
               "right": 1408.9600830078125,
               "bottom": 139.90000915527344,
-              "width": 148.47998046875,
+              "width": 147.840087890625,
               "height": 1.9199981689453125
             }
           },
           {
             "className": "weapon-ammo-detail",
             "rect": {
-              "left": 1260.4801025390625,
+              "left": 1261.1199951171875,
               "top": 142.4600067138672,
               "right": 1408.9600830078125,
               "bottom": 149.8800048828125,
-              "width": 148.47998046875,
+              "width": 147.840087890625,
               "height": 7.4199981689453125
             }
           }
@@ -457,55 +457,55 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 1173,
+              "left": 1174,
               "top": 111.59375,
               "right": 1405,
               "bottom": 142.59375,
-              "width": 232,
+              "width": 231,
               "height": 31
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 1173,
+              "left": 1174,
               "top": 147.59375,
               "right": 1405,
               "bottom": 189.1875,
-              "width": 232,
+              "width": 231,
               "height": 41.59375
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 1173,
+              "left": 1174,
               "top": 153.59375,
               "right": 1405,
               "bottom": 166.59375,
-              "width": 232,
+              "width": 231,
               "height": 13
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 1173,
+              "left": 1174,
               "top": 170.59375,
               "right": 1405,
               "bottom": 173.59375,
-              "width": 232,
+              "width": 231,
               "height": 3
             }
           },
           {
             "className": "weapon-ammo-detail",
             "rect": {
-              "left": 1173,
+              "left": 1174,
               "top": 177.59375,
               "right": 1405,
               "bottom": 189.1875,
-              "width": 232,
+              "width": 231,
               "height": 11.59375
             }
           }
@@ -687,55 +687,55 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 1094.6324462890625,
+              "left": 1095.9549560546875,
               "top": 121.78273010253906,
               "right": 1401.452392578125,
               "bottom": 162.78024291992188,
-              "width": 306.8199462890625,
+              "width": 305.4974365234375,
               "height": 40.99751281738281
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 1094.6324462890625,
+              "left": 1095.9549560546875,
               "top": 169.39273071289062,
               "right": 1401.452392578125,
               "bottom": 224.4004669189453,
-              "width": 306.8199462890625,
+              "width": 305.4974365234375,
               "height": 55.00773620605469
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 1094.6324462890625,
+              "left": 1095.9549560546875,
               "top": 177.32772827148438,
               "right": 1401.452392578125,
               "bottom": 194.52023315429688,
-              "width": 306.8199462890625,
+              "width": 305.4974365234375,
               "height": 17.1925048828125
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 1094.6324462890625,
+              "left": 1095.9549560546875,
               "top": 199.81024169921875,
               "right": 1401.452392578125,
               "bottom": 203.77774047851562,
-              "width": 306.8199462890625,
+              "width": 305.4974365234375,
               "height": 3.967498779296875
             }
           },
           {
             "className": "weapon-ammo-detail",
             "rect": {
-              "left": 1094.6324462890625,
+              "left": 1095.9549560546875,
               "top": 209.06773376464844,
               "right": 1401.452392578125,
               "bottom": 224.4004669189453,
-              "width": 306.8199462890625,
+              "width": 305.4974365234375,
               "height": 15.332733154296875
             }
           }
@@ -917,44 +917,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 869.0399780273438,
+              "left": 869.6799926757812,
               "top": 91.66000366210938,
               "right": 999.5999755859375,
               "bottom": 108.30000305175781,
-              "width": 130.55999755859375,
+              "width": 129.91998291015625,
               "height": 16.639999389648438
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 869.0399780273438,
+              "left": 869.6799926757812,
               "top": 110.22000122070312,
               "right": 999.5999755859375,
               "bottom": 125.58000183105469,
-              "width": 130.55999755859375,
+              "width": 129.91998291015625,
               "height": 15.360000610351562
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 869.0399780273438,
+              "left": 869.6799926757812,
               "top": 112.77999877929688,
               "right": 999.5999755859375,
               "bottom": 121.10000610351562,
-              "width": 130.55999755859375,
+              "width": 129.91998291015625,
               "height": 8.32000732421875
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 869.0399780273438,
+              "left": 869.6799926757812,
               "top": 123.66000366210938,
               "right": 999.5999755859375,
               "bottom": 125.58000183105469,
-              "width": 130.55999755859375,
+              "width": 129.91998291015625,
               "height": 1.9199981689453125
             }
           }
@@ -1114,44 +1114,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 792,
+              "left": 793,
               "top": 101.59375,
               "right": 996,
               "bottom": 127.59375,
-              "width": 204,
+              "width": 203,
               "height": 26
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 792,
+              "left": 793,
               "top": 130.59375,
               "right": 996,
               "bottom": 154.59375,
-              "width": 204,
+              "width": 203,
               "height": 24
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 792,
+              "left": 793,
               "top": 134.59375,
               "right": 996,
               "bottom": 147.59375,
-              "width": 204,
+              "width": 203,
               "height": 13
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 792,
+              "left": 793,
               "top": 151.59375,
               "right": 996,
               "bottom": 154.59375,
-              "width": 204,
+              "width": 203,
               "height": 3
             }
           }
@@ -1311,44 +1311,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 722.9849853515625,
+              "left": 724.3074951171875,
               "top": 110.49273681640625,
               "right": 992.7750244140625,
               "bottom": 144.8777313232422,
-              "width": 269.7900390625,
+              "width": 268.467529296875,
               "height": 34.38499450683594
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 722.9849853515625,
+              "left": 724.3074951171875,
               "top": 148.84523010253906,
               "right": 992.7750244140625,
               "bottom": 180.58523559570312,
-              "width": 269.7900390625,
+              "width": 268.467529296875,
               "height": 31.740005493164062
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 722.9849853515625,
+              "left": 724.3074951171875,
               "top": 154.13522338867188,
               "right": 992.7750244140625,
               "bottom": 171.32772827148438,
-              "width": 269.7900390625,
+              "width": 268.467529296875,
               "height": 17.1925048828125
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 722.9849853515625,
+              "left": 724.3074951171875,
               "top": 176.61773681640625,
               "right": 992.7750244140625,
               "bottom": 180.58523559570312,
-              "width": 269.7900390625,
+              "width": 268.467529296875,
               "height": 3.967498779296875
             }
           }
@@ -1508,44 +1508,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 274.9599914550781,
+              "left": 275.5999755859375,
               "top": 568.3199462890625,
               "right": 372.8800048828125,
               "bottom": 585.5999755859375,
-              "width": 97.92001342773438,
+              "width": 97.280029296875,
               "height": 17.280029296875
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 274.9599914550781,
+              "left": 275.5999755859375,
               "top": 587.5199584960938,
               "right": 372.8800048828125,
               "bottom": 602.8799438476562,
-              "width": 97.92001342773438,
+              "width": 97.280029296875,
               "height": 15.3599853515625
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 274.9599914550781,
+              "left": 275.5999755859375,
               "top": 590.0799560546875,
               "right": 372.8800048828125,
               "bottom": 598.3999633789062,
-              "width": 97.92001342773438,
+              "width": 97.280029296875,
               "height": 8.32000732421875
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 274.9599914550781,
+              "left": 275.5999755859375,
               "top": 600.9599609375,
               "right": 372.8800048828125,
               "bottom": 602.8799438476562,
-              "width": 97.92001342773438,
+              "width": 97.280029296875,
               "height": 1.91998291015625
             }
           }
@@ -1705,44 +1705,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 476.8125,
               "right": 370,
               "bottom": 503.8125,
-              "width": 153,
+              "width": 152,
               "height": 27
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 506.8125,
               "right": 370,
               "bottom": 530.8125,
-              "width": 153,
+              "width": 152,
               "height": 24
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 510.8125,
               "right": 370,
               "bottom": 523.8125,
-              "width": 153,
+              "width": 152,
               "height": 13
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 527.8125,
               "right": 370,
               "bottom": 530.8125,
-              "width": 153,
+              "width": 152,
               "height": 3
             }
           }
@@ -1902,44 +1902,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 165.07749938964844,
+              "left": 166.40000915527344,
               "top": 394.8370056152344,
               "right": 367.41998291015625,
               "bottom": 430.5445251464844,
-              "width": 202.3424835205078,
+              "width": 201.0199737548828,
               "height": 35.70751953125
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 165.07749938964844,
+              "left": 166.40000915527344,
               "top": 434.51202392578125,
               "right": 367.41998291015625,
               "bottom": 466.25201416015625,
-              "width": 202.3424835205078,
+              "width": 201.0199737548828,
               "height": 31.739990234375
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 165.07749938964844,
+              "left": 166.40000915527344,
               "top": 439.802001953125,
               "right": 367.41998291015625,
               "bottom": 456.9945068359375,
-              "width": 202.3424835205078,
+              "width": 201.0199737548828,
               "height": 17.1925048828125
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 165.07749938964844,
+              "left": 166.40000915527344,
               "top": 462.2845153808594,
               "right": 367.41998291015625,
               "bottom": 466.25201416015625,
-              "width": 202.3424835205078,
+              "width": 201.0199737548828,
               "height": 3.967498779296875
             }
           }
@@ -2099,44 +2099,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 1260.4801025390625,
+              "left": 1261.1199951171875,
               "top": 100.22000122070312,
               "right": 1408.9600830078125,
               "bottom": 120.05999755859375,
-              "width": 148.47998046875,
+              "width": 147.840087890625,
               "height": 19.839996337890625
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 1260.4801025390625,
+              "left": 1261.1199951171875,
               "top": 123.26000213623047,
               "right": 1408.9600830078125,
               "bottom": 139.90000915527344,
-              "width": 148.47998046875,
+              "width": 147.840087890625,
               "height": 16.64000701904297
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 1260.4801025390625,
+              "left": 1261.1199951171875,
               "top": 127.10000610351562,
               "right": 1408.9600830078125,
               "bottom": 135.42001342773438,
-              "width": 148.47998046875,
+              "width": 147.840087890625,
               "height": 8.32000732421875
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 1260.4801025390625,
+              "left": 1261.1199951171875,
               "top": 137.98001098632812,
               "right": 1408.9600830078125,
               "bottom": 139.90000915527344,
-              "width": 148.47998046875,
+              "width": 147.840087890625,
               "height": 1.9199981689453125
             }
           }
@@ -2296,44 +2296,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 1173,
+              "left": 1174,
               "top": 111.59375,
               "right": 1405,
               "bottom": 142.59375,
-              "width": 232,
+              "width": 231,
               "height": 31
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 1173,
+              "left": 1174,
               "top": 147.59375,
               "right": 1405,
               "bottom": 173.59375,
-              "width": 232,
+              "width": 231,
               "height": 26
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 1173,
+              "left": 1174,
               "top": 153.59375,
               "right": 1405,
               "bottom": 166.59375,
-              "width": 232,
+              "width": 231,
               "height": 13
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 1173,
+              "left": 1174,
               "top": 170.59375,
               "right": 1405,
               "bottom": 173.59375,
-              "width": 232,
+              "width": 231,
               "height": 3
             }
           }
@@ -2493,44 +2493,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 1094.6324462890625,
+              "left": 1095.9549560546875,
               "top": 121.78273010253906,
               "right": 1401.452392578125,
               "bottom": 162.78024291992188,
-              "width": 306.8199462890625,
+              "width": 305.4974365234375,
               "height": 40.99751281738281
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 1094.6324462890625,
+              "left": 1095.9549560546875,
               "top": 169.39273071289062,
               "right": 1401.452392578125,
               "bottom": 203.77774047851562,
-              "width": 306.8199462890625,
+              "width": 305.4974365234375,
               "height": 34.385009765625
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 1094.6324462890625,
+              "left": 1095.9549560546875,
               "top": 177.32772827148438,
               "right": 1401.452392578125,
               "bottom": 194.52023315429688,
-              "width": 306.8199462890625,
+              "width": 305.4974365234375,
               "height": 17.1925048828125
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 1094.6324462890625,
+              "left": 1095.9549560546875,
               "top": 199.81024169921875,
               "right": 1401.452392578125,
               "bottom": 203.77774047851562,
-              "width": 306.8199462890625,
+              "width": 305.4974365234375,
               "height": 3.967498779296875
             }
           }
@@ -2690,44 +2690,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 869.0399780273438,
+              "left": 869.6799926757812,
               "top": 91.66000366210938,
               "right": 999.5999755859375,
               "bottom": 108.30000305175781,
-              "width": 130.55999755859375,
+              "width": 129.91998291015625,
               "height": 16.639999389648438
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 869.0399780273438,
+              "left": 869.6799926757812,
               "top": 110.22000122070312,
               "right": 999.5999755859375,
               "bottom": 125.58000183105469,
-              "width": 130.55999755859375,
+              "width": 129.91998291015625,
               "height": 15.360000610351562
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 869.0399780273438,
+              "left": 869.6799926757812,
               "top": 112.77999877929688,
               "right": 999.5999755859375,
               "bottom": 121.10000610351562,
-              "width": 130.55999755859375,
+              "width": 129.91998291015625,
               "height": 8.32000732421875
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 869.0399780273438,
+              "left": 869.6799926757812,
               "top": 123.66000366210938,
               "right": 999.5999755859375,
               "bottom": 125.58000183105469,
-              "width": 130.55999755859375,
+              "width": 129.91998291015625,
               "height": 1.9199981689453125
             }
           }
@@ -2887,44 +2887,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 792,
+              "left": 793,
               "top": 101.59375,
               "right": 996,
               "bottom": 127.59375,
-              "width": 204,
+              "width": 203,
               "height": 26
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 792,
+              "left": 793,
               "top": 130.59375,
               "right": 996,
               "bottom": 154.59375,
-              "width": 204,
+              "width": 203,
               "height": 24
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 792,
+              "left": 793,
               "top": 134.59375,
               "right": 996,
               "bottom": 147.59375,
-              "width": 204,
+              "width": 203,
               "height": 13
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 792,
+              "left": 793,
               "top": 151.59375,
               "right": 996,
               "bottom": 154.59375,
-              "width": 204,
+              "width": 203,
               "height": 3
             }
           }
@@ -3084,44 +3084,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 722.9849853515625,
+              "left": 724.3074951171875,
               "top": 110.49273681640625,
               "right": 992.7750244140625,
               "bottom": 144.8777313232422,
-              "width": 269.7900390625,
+              "width": 268.467529296875,
               "height": 34.38499450683594
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 722.9849853515625,
+              "left": 724.3074951171875,
               "top": 148.84523010253906,
               "right": 992.7750244140625,
               "bottom": 180.58523559570312,
-              "width": 269.7900390625,
+              "width": 268.467529296875,
               "height": 31.740005493164062
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 722.9849853515625,
+              "left": 724.3074951171875,
               "top": 154.13522338867188,
               "right": 992.7750244140625,
               "bottom": 171.32772827148438,
-              "width": 269.7900390625,
+              "width": 268.467529296875,
               "height": 17.1925048828125
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 722.9849853515625,
+              "left": 724.3074951171875,
               "top": 176.61773681640625,
               "right": 992.7750244140625,
               "bottom": 180.58523559570312,
-              "width": 269.7900390625,
+              "width": 268.467529296875,
               "height": 3.967498779296875
             }
           }
@@ -3281,44 +3281,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 274.9599914550781,
+              "left": 275.5999755859375,
               "top": 568.3199462890625,
               "right": 372.8800048828125,
               "bottom": 585.5999755859375,
-              "width": 97.92001342773438,
+              "width": 97.280029296875,
               "height": 17.280029296875
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 274.9599914550781,
+              "left": 275.5999755859375,
               "top": 587.5199584960938,
               "right": 372.8800048828125,
               "bottom": 602.8799438476562,
-              "width": 97.92001342773438,
+              "width": 97.280029296875,
               "height": 15.3599853515625
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 274.9599914550781,
+              "left": 275.5999755859375,
               "top": 590.0799560546875,
               "right": 372.8800048828125,
               "bottom": 598.3999633789062,
-              "width": 97.92001342773438,
+              "width": 97.280029296875,
               "height": 8.32000732421875
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 274.9599914550781,
+              "left": 275.5999755859375,
               "top": 600.9599609375,
               "right": 372.8800048828125,
               "bottom": 602.8799438476562,
-              "width": 97.92001342773438,
+              "width": 97.280029296875,
               "height": 1.91998291015625
             }
           }
@@ -3478,44 +3478,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 476.8125,
               "right": 370,
               "bottom": 503.8125,
-              "width": 153,
+              "width": 152,
               "height": 27
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 506.8125,
               "right": 370,
               "bottom": 530.8125,
-              "width": 153,
+              "width": 152,
               "height": 24
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 510.8125,
               "right": 370,
               "bottom": 523.8125,
-              "width": 153,
+              "width": 152,
               "height": 13
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 527.8125,
               "right": 370,
               "bottom": 530.8125,
-              "width": 153,
+              "width": 152,
               "height": 3
             }
           }
@@ -3675,44 +3675,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 165.07749938964844,
+              "left": 166.40000915527344,
               "top": 394.8370056152344,
               "right": 367.41998291015625,
               "bottom": 430.5445251464844,
-              "width": 202.3424835205078,
+              "width": 201.0199737548828,
               "height": 35.70751953125
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 165.07749938964844,
+              "left": 166.40000915527344,
               "top": 434.51202392578125,
               "right": 367.41998291015625,
               "bottom": 466.25201416015625,
-              "width": 202.3424835205078,
+              "width": 201.0199737548828,
               "height": 31.739990234375
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 165.07749938964844,
+              "left": 166.40000915527344,
               "top": 439.802001953125,
               "right": 367.41998291015625,
               "bottom": 456.9945068359375,
-              "width": 202.3424835205078,
+              "width": 201.0199737548828,
               "height": 17.1925048828125
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 165.07749938964844,
+              "left": 166.40000915527344,
               "top": 462.2845153808594,
               "right": 367.41998291015625,
               "bottom": 466.25201416015625,
-              "width": 202.3424835205078,
+              "width": 201.0199737548828,
               "height": 3.967498779296875
             }
           }
@@ -3872,44 +3872,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 1013,
+              "left": 1014,
               "top": 116.59375,
               "right": 1245,
               "bottom": 147.59375,
-              "width": 232,
+              "width": 231,
               "height": 31
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 1013,
+              "left": 1014,
               "top": 152.59375,
               "right": 1245,
               "bottom": 178.59375,
-              "width": 232,
+              "width": 231,
               "height": 26
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 1013,
+              "left": 1014,
               "top": 158.59375,
               "right": 1245,
               "bottom": 171.59375,
-              "width": 232,
+              "width": 231,
               "height": 13
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 1013,
+              "left": 1014,
               "top": 175.59375,
               "right": 1245,
               "bottom": 178.59375,
-              "width": 232,
+              "width": 231,
               "height": 3
             }
           }
@@ -4069,44 +4069,44 @@
           {
             "className": "weapon-card-main",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 461.8125,
               "right": 370,
               "bottom": 488.8125,
-              "width": 153,
+              "width": 152,
               "height": 27
             }
           },
           {
             "className": "weapon-card-ammo",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 491.8125,
               "right": 370,
               "bottom": 515.8125,
-              "width": 153,
+              "width": 152,
               "height": 24
             }
           },
           {
             "className": "weapon-ammo-caption",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 495.8125,
               "right": 370,
               "bottom": 508.8125,
-              "width": 153,
+              "width": 152,
               "height": 13
             }
           },
           {
             "className": "weapon-ammo-track",
             "rect": {
-              "left": 217,
+              "left": 218,
               "top": 512.8125,
               "right": 370,
               "bottom": 515.8125,
-              "width": 153,
+              "width": 152,
               "height": 3
             }
           }
@@ -4240,14 +4240,14 @@
     "width": 1440,
     "height": 960,
     "button": {
-      "top": 666.203125,
-      "bottom": 733.703125,
+      "top": 690.203125,
+      "bottom": 757.703125,
       "left": 344,
       "right": 814
     },
     "view": {
-      "top": 187,
-      "bottom": 837,
+      "top": 153,
+      "bottom": 861,
       "left": 316,
       "right": 1309
     },
@@ -4259,14 +4259,14 @@
     "width": 1440,
     "height": 960,
     "button": {
-      "top": 666.203125,
-      "bottom": 733.703125,
+      "top": 690.203125,
+      "bottom": 757.703125,
       "left": 344,
       "right": 814
     },
     "view": {
-      "top": 187,
-      "bottom": 837,
+      "top": 153,
+      "bottom": 861,
       "left": 316,
       "right": 1309
     },
@@ -4278,14 +4278,14 @@
     "width": 1440,
     "height": 960,
     "button": {
-      "top": 666.203125,
-      "bottom": 733.703125,
+      "top": 690.203125,
+      "bottom": 757.703125,
       "left": 344,
       "right": 814
     },
     "view": {
-      "top": 187,
-      "bottom": 837,
+      "top": 153,
+      "bottom": 861,
       "left": 316,
       "right": 1309
     },

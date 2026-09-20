@@ -1,3 +1,4 @@
+import {validDeployment, deploymentLoadout, deploymentURL, deploymentFromSearch} from './menu-deployment.js';
 import {MAP_ID} from './level.js';
 import {chapterURL} from './menu-state.js';
 import {CHAPTERS} from './journey.js';
@@ -20,12 +21,18 @@ export function createSessionFlow(ctx){
   const destination=chapterURL(map,mode,entry);
   navigating=true;ctx.gameMenu?.refresh();location.href=destination;return true;
  }
- function startJourney(){
+ function applyDeployment(value){
+  if(!validDeployment(value))return;
+  ctx.loadout.reset(deploymentLoadout(value));ctx.selected=ctx.loadout.first();ctx.selectedSpecial=null;ctx.hud();
+ }
+ function startJourney(deployment){
   if(navigating)return false;
+  if(ctx.pendingJourneyResult){ctx.gameMenu?.error('请先保存当前章节结果，再开始新游戏。');return false;}
+  if(deployment!==undefined&&!validDeployment(deployment)){ctx.gameMenu?.error('战备配置无效，请重新选择。');return false;}
   if(!ctx.journey.start()){ctx.gameMenu?.error('无法保存新战役。请允许浏览器存储后重试，或在选择关卡中体验单章模式。');return false;}
   ctx.pendingJourneyResult=null;
-  if(MAP_ID!=='reactor')return openMenuChapter('reactor','journey');
-  ctx.runMode='journey';ctx.reset();requestIntro(0,null);
+  if(MAP_ID!=='reactor'){if(!deployment)return openMenuChapter('reactor','journey');navigating=true;location.href=deploymentURL(deployment);return true;}
+  ctx.runMode='journey';ctx.reset();applyDeployment(deployment);requestIntro(0,null);
   if(!ctx.journey.save(MAP_ID,ctx.checkpoint())){ctx.state='ready';refreshJourney();ctx.gameMenu?.error('新战役入口已创建，但检查点写入失败。请重试继续游戏。');return false;}
   return enterPlay();
  }
@@ -44,7 +51,9 @@ export function createSessionFlow(ctx){
   }
   const chapter=CHAPTERS[d.chapter];
   if(MAP_ID!==chapter.map)return openMenuChapter(chapter.map,'journey','continue');
-  ctx.runMode='journey';ctx.reset(d.checkpoint?.stageIndex||0,d.checkpoint);requestIntro(d.checkpoint?.stageIndex||0,d.checkpoint);
+  ctx.runMode='journey';ctx.reset(d.checkpoint?.stageIndex||0,d.checkpoint);
+  if(MAP_ID==='reactor'&&d.chapter===0&&!d.checkpoint)applyDeployment(deploymentFromSearch(location.search));
+  requestIntro(d.checkpoint?.stageIndex||0,d.checkpoint);
   if(!d.checkpoint&&!ctx.journey.save(MAP_ID,ctx.checkpoint())){ctx.state='ready';refreshJourney();ctx.gameMenu?.error('无法保存本章入口检查点，请允许浏览器存储后重试。');return false;}
   return enterPlay();
  }

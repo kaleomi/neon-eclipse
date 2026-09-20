@@ -1,0 +1,45 @@
+{
+  "inputSha256": "fadddae69cd52f8a310c9139bb5cf56374a2f8a5c5f766e4291d4633d1c4532b",
+  "executionEnvironment": "Arena sandbox; exact project GLB mirrored through MCP and hash verified",
+  "report": {
+    "uri": "engineer-guard-e02.glb",
+    "mimeType": "model/gltf-binary",
+    "validatorVersion": "2.0.0-dev.3.10",
+    "validatedAt": "2026-09-20T14:45:50.052Z",
+    "issues": {
+      "numErrors": 0,
+      "numWarnings": 0,
+      "numInfos": 0,
+      "numHints": 0,
+      "messages": [],
+      "truncated": false
+    },
+    "info": {
+      "version": "2.0",
+      "generator": "THREE.GLTFExporter r186",
+      "extensionsUsed": [
+        "KHR_materials_emissive_strength"
+      ],
+      "resources": [
+        {
+          "pointer": "/buffers/0",
+          "mimeType": "application/gltf-buffer",
+          "storage": "glb",
+          "byteLength": 815472
+        }
+      ],
+      "animationCount": 6,
+      "materialCount": 7,
+      "hasMorphTargets": false,
+      "hasSkins": false,
+      "hasTextures": false,
+      "hasDefaultScene": true,
+      "drawCallCount": 84,
+      "totalVertexCount": 28620,
+      "totalTriangleCount": 9540,
+      "maxUVs": 0,
+      "maxInfluences": 0,
+      "maxAttributes": 2
+    }
+  }
+}

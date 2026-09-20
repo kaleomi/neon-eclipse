@@ -4,6 +4,7 @@
 import {createAudioBus} from './audio-bus.js';
 import {createSfxPlayer} from './sfx-player.js';
 import {noiseBuffer} from './synth.js';
+import {createRecordedLoops,vehicleRecordingTargets} from './recorded-audio.js';
 // speed m/s, throttle -1..1 -> engine params. Pure.
 export function roverEngine(speed,throttle){
  const s=Math.abs(speed);const load=Math.max(0,Math.min(1,Math.abs(throttle)));
@@ -26,6 +27,8 @@ export function yachtEngine(speed,throttle){
 }
 export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
  const sfx=createSfxPlayer(bus);
+ const recordings=createRecordedLoops(bus);
+ bus.subscribe?.(()=>{if(recordings.bank.supported())void recordings.bank.preload(['rover-idle','rover-drive','rotor','boat','water','wind','plane-idle','plane-flight']);});
  let nodes=null,kind=null,stallTimer=0,lastImpacts=0,lastKind=null,lastBed=null;// lastBed: read-only mapped params for tests / HUD debug
  function build(){
   const ctx=bus.context,out=bus.input('sfx');if(!ctx||!out||nodes)return !!nodes;
@@ -52,12 +55,23 @@ export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
  function silence(t){if(!nodes)return;set(nodes.engGain.gain,0,t);set(nodes.whineGain.gain,0,t);set(nodes.windGain.gain,0,t);set(nodes.waveGain.gain,0,t);set(nodes.slapDepth.gain,0,t);}
  // state: {kind:'rover'|'plane'|'yacht'|'helicopter'|null, speed, throttle, onGround, stall, crashed, impacts, active, rpm, collective}
  function update(dt,state){
-  if(!bus.ready||!build())return;
+  if(!bus.ready)return;
   const t=bus.context.currentTime;
-  if(!state.active){silence(t);return;}
+  if(!state.active){silence(t);recordings.update({});return;}
   if(state.kind!==lastKind){if(lastKind!==null||state.kind!==null)sfx.play(state.kind?'vehicle.enter':'vehicle.exit');lastKind=state.kind;lastImpacts=state.impacts||0;}
   if((state.impacts||0)>lastImpacts){sfx.play('vehicle.impact',{gain:Math.min(1,.5+Math.abs(state.speed||0)/20)});lastImpacts=state.impacts;}
   kind=state.kind;
+  const targets=vehicleRecordingTargets(state);
+  if(targets!==null&&recordings.bank.supported()){
+   silence(t);recordings.update(targets);
+   const params=kind==='rover'?roverEngine(state.speed||0,state.throttle||0):kind==='helicopter'?helicopterRotor(state.rpm||0,state.collective||0,state.speed||0,!!state.crashed):kind==='yacht'?yachtEngine(state.speed||0,state.throttle||0):{};
+   lastBed={kind,...params,recorded:true};
+   if(kind==='plane'&&state.stall&&!state.onGround&&!state.crashed){stallTimer-=dt;if(stallTimer<=0){sfx.play('vehicle.stall');stallTimer=.6;}}else stallTimer=0;
+   if(state.touchdown)sfx.play('vehicle.touchdown');
+   return;
+  }
+  recordings.update({});
+  if(!build())return;
   if(kind!=='helicopter')set(nodes.slapDepth.gain,0,t);
   if(kind==='rover'){
    const e=roverEngine(state.speed||0,state.throttle||0);
@@ -95,10 +109,11 @@ export function createVehicleAudio({storage,bus=createAudioBus({storage})}={}){
  let counters=null;
  function events(next){const out=vehicleAudioEvents(counters,next);counters={...next};for(const e of out)sfx.play(e.name,e.opts);return out;}
  function reset(){
+  recordings.reset();sfx.reset();
   counters=null;lastKind=null;lastImpacts=0;stallTimer=0;kind=null;
   if(nodes)silence(bus.context.currentTime);// Preserve pause/hidden holds and persisted volume settings.
  }
- return {bus,sfx,update,events,reset,bed:()=>lastBed,play:(n,o)=>sfx.play(n,o),pause(){bus.hold('paused');},resume(){bus.release('paused');},unlock:()=>bus.unlock(),resetEvents(){counters=null;}};
+ return {bus,sfx,recordings,update,events,reset,bed:()=>lastBed,play:(n,o)=>sfx.play(n,o),pause(){bus.hold('paused');},resume(){bus.release('paused');},unlock:()=>bus.unlock(),resetEvents(){counters=null;}};
 }
 // Pure: diff two counter snapshots into sfx events. `prev` null = first frame (records baseline, plays nothing).
 // counters: {roofShots,planeShots,rocketShots,roofHits,planeHits,seaShots,seaHits,seaSplashes,repairs,rearms,landings,checkpoints,hullHits,waves,houndKills,paused}

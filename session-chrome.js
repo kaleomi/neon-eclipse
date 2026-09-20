@@ -11,6 +11,7 @@ export function createSessionChrome({mapId,document:doc=globalThis.document}){
  const $=s=>doc.querySelector(s);
  const overlay=doc.createElement('section');
  overlay.className='mission-overlay';
+ overlay.dataset.map=mapId;
  overlay.innerHTML=`<div class="mission-card"><span id="session-eyebrow" class="eyebrow">NEON ECLIPSE / SECTOR K-19</span><h2 id="session-title">突破<span>暗影封锁</span></h2><p id="brief">启动西侧冷却装置，取得东侧权限，解除反应堆封锁。击败 Warden 后返回南部撤离。橙色突击、紫色远程、金色重装：识别敌人，选择打法。</p><div class="controls"><span><b>W A S D</b>移动</span><span><b>鼠标</b>瞄准 / 左键射击</span><span><b>1 / 2 / 3 · 滚轮</b>主武器 / 副武器 / 近战</span><span><b>R / SHIFT</b>换弹 / 冲刺</span><span><b>SPACE / ESC</b>跳跃 / 暂停</span><span><b>右键 / E</b>瞄准 / 按住交互</span></div><button id="deploy">开始行动 ↗</button><small id="lock-note">G 按住预览 / 松开投掷无伤害 EMP · SPACE 跳跃 · 步枪连射 / 近战连击均可按住左键 · E 交互 · 红色加号补给恢复生命，子弹标识补给补充弹药</small></div>`;
  doc.body.append(overlay);
  const stamp=doc.createElement('div'),compass=doc.createElement('div'),toast=doc.createElement('div'),damageScreen=doc.createElement('div'),hit=doc.createElement('div'),streakBanner=doc.createElement('div');
@@ -19,6 +20,7 @@ export function createSessionChrome({mapId,document:doc=globalThis.document}){
  function applyBrief(){
   const brief=briefFor(mapId);
   if(brief.topstat!==null){$('#session-title').innerHTML=brief.title;$('#brief').textContent=brief.brief;$('#session-eyebrow').textContent=brief.eyebrow;$('.topstat').textContent=brief.topstat;}
+  overlay.dataset.map=mapId;
  }
  // Appends stamp / compass / toast / damage / hitmarker after the campaign & achievement UIs, in the same DOM order
  // app.js used, so stacking between fixed elements is unchanged.
@@ -37,7 +39,7 @@ export function createSessionChrome({mapId,document:doc=globalThis.document}){
  }
  return {
   overlay,stamp,compass,toast,damageScreen,hit,streakBanner,$,applyBrief,mount,mountStreakBanner,createQualityButton,
-  notify(text){toast.textContent=text;toastTime=NOTICE_SECONDS;},
+  notify(text,seconds=NOTICE_SECONDS){toast.textContent=text;toastTime=seconds;},
   noticeVisible:()=>toastTime>0,
   flashDamage(){damageTime=DAMAGE_SECONDS;},
   flashHit(seconds){hitTime=seconds;},

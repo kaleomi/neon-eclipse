@@ -1,0 +1,174 @@
+{
+  "date": "2026-09-20",
+  "scope": [
+    "assault",
+    "heavy"
+  ],
+  "assets": {
+    "assault-guard-a03": {
+      "sha256": "3440e9d08fc157b713bd63908ef5af317dc5d7be0f49d6ab314e5ce325b67751",
+      "bytes": 556688,
+      "triangles": 5992,
+      "meshes": 68,
+      "materials": 6,
+      "validatorVersion": "2.0.0-dev.3.10",
+      "issues": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    },
+    "heavy-guard-h12": {
+      "sha256": "51599737bcdc8621292e6a8a43e88d16fa437484cb925fb752df775a1cc6dcbf",
+      "bytes": 703604,
+      "triangles": 7972,
+      "meshes": 68,
+      "materials": 7,
+      "validatorVersion": "2.0.0-dev.3.10",
+      "issues": {
+        "numErrors": 0,
+        "numWarnings": 0,
+        "numInfos": 0,
+        "numHints": 0,
+        "messages": [],
+        "truncated": false
+      }
+    }
+  },
+  "node": {
+    "newGroupsPassed": 20,
+    "newComparisonRays": 25920,
+    "r07GroupsPassed": 10,
+    "r07ComparisonRays": 9072,
+    "relatedSuitesPassed": [
+      "test-enemies.mjs",
+      "test-core.mjs",
+      "test-combat.mjs",
+      "test-weapon-upgrade.mjs"
+    ]
+  },
+  "browser": {
+    "script": "test-guard-variants-browser.mjs",
+    "groupsPassed": 7,
+    "seconds": 67.2,
+    "evidence": {
+      "checks": [
+        {
+          "name": "three real GLBs, four actions each, selection, wireframe and camera controls",
+          "heavy": {
+            "source": "glb",
+            "meshes": 68,
+            "triangles": 7972,
+            "materials": 7,
+            "clips": [
+              "Idle",
+              "Patrol",
+              "Aim",
+              "Hit"
+            ]
+          },
+          "assault": {
+            "source": "glb",
+            "meshes": 68,
+            "triangles": 5992,
+            "materials": 6,
+            "clips": [
+              "Idle",
+              "Patrol",
+              "Aim",
+              "Hit"
+            ]
+          },
+          "ranged": {
+            "source": "glb",
+            "meshes": 72,
+            "triangles": 7768,
+            "materials": 8,
+            "clips": [
+              "Idle",
+              "Patrol",
+              "Aim",
+              "Hit"
+            ]
+          }
+        },
+        {
+          "name": "390px roster preview has both downloads, no horizontal overflow or page errors"
+        },
+        {
+          "name": "natural assault spawn: GLB visible, native shoot() damages the original head proxy",
+          "beforeHp": 81,
+          "afterHp": 35.5
+        },
+        {
+          "name": "heavy native shooting: frontal armor vs exposed rear core; real GLB core aligned",
+          "frontHp": [
+            162,
+            154.2
+          ],
+          "rearHp": [
+            162,
+            110
+          ],
+          "frontDamage": 7.800000000000011,
+          "coreDamage": 52,
+          "ratio": 6.666666666666657
+        },
+        {
+          "name": "six resets: one request per type, one visual per enemy, isolated storage preserved",
+          "assault": 1,
+          "heavy": 1
+        },
+        {
+          "name": "both delayed GLBs: hittable procedural fallbacks; disposed pre-reset groups not resurrected",
+          "assault": {
+            "parent": false,
+            "source": "procedural",
+            "visuals": 1
+          },
+          "heavy": {
+            "parent": false,
+            "source": "procedural",
+            "visuals": 1
+          }
+        },
+        {
+          "name": "both missing GLBs: fallback visuals and actual shooting remain functional"
+        }
+      ],
+      "softwareWebGL": true,
+      "targetHardwareValidated": false
+    }
+  },
+  "r07Browser": {
+    "originalScriptUnmodified": true,
+    "firstAttempt": "screenshot timeout at 60000ms; failed, not counted as passed",
+    "retryGroupsPassed": 6,
+    "retrySeconds": 98.4,
+    "beforeHp": 68,
+    "afterHp": 22.5
+  },
+  "unchangedBaselineHashes": {
+    "characters/ranged-guard.js": "f9bd2c9d404f7b9f6f712d74039408a511e11699125be91d2f0e22aad58c08b0",
+    "characters/ranged-guard-runtime.js": "76a3bfdd19d1a2b2f2e1fa75dd36a269edd7b3d4fb69a144d46e17401e5181cd",
+    "scripts/build-ranged-guard.mjs": "4c88ae6bfb4c2e71becf7dc91a186e4f30c748b912afae6fe809aa0fca74df0a",
+    "enemy-ranged-preview.html": "599b164c7d2aa27a981d87dca2711d17e5a182d21c4a56db394854a47d6efe51",
+    "enemy-ranged-preview.js": "759131de9783aff07ec979347aba413a09e33167309d6f9ce4d7d8451de24d88",
+    "models/ranged-guard-r07.glb": "18fd9cc4fa2716076a2f30c6e7eff46ca88fa664e8401194167b1bc59c59b177",
+    "models/ranged-guard-r07.manifest.json": "8c0589dc093effe7a384f01d04175bf335dce9e6477510db6f361f05280c66ec",
+    "enemy-rules.js": "6b9ba070afef4495514f41576eaf72e81a1b4dbee120929f17ee8ea1a8cbfee0"
+  },
+  "diagnostics": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "limits": {
+    "softwareWebGL": true,
+    "targetHardwareValidated": false,
+    "longRunGPUValidated": false,
+    "fullGamePlaythroughValidated": false
+  }
+}

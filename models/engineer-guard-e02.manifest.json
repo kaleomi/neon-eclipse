@@ -1,0 +1,56 @@
+{
+  "asset": "engineer-guard-e02.glb",
+  "version": "e02-v1",
+  "role": "engineer",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "description": "Original MENDER field engineer; rigid work armor, service pack and auxiliary manipulator. Not a skinned human.",
+  "meshes": 84,
+  "triangles": 9540,
+  "materials": 7,
+  "articulatedNodes": 18,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.8,
+      "tracks": 19
+    },
+    {
+      "name": "Patrol",
+      "seconds": 1,
+      "tracks": 19
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 19
+    },
+    {
+      "name": "Repair",
+      "seconds": 2,
+      "tracks": 19
+    },
+    {
+      "name": "Deploy",
+      "seconds": 2.5,
+      "tracks": 19
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 19
+    }
+  ],
+  "bytes": 929100,
+  "sha256": "fadddae69cd52f8a310c9139bb5cf56374a2f8a5c5f766e4291d4633d1c4532b",
+  "sourceHashes": {
+    "characters/engineer-guard.js": "0700d51902f5af9c774626e7ae4d397ce5369a22c2bd5e7b9b44949eb520fb94",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

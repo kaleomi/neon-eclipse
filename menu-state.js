@@ -3,11 +3,10 @@ import {validCheckpoint} from './campaign.js';
 import {mapById} from './maps/registry.js';
 
 export const HOME_MENU_ITEMS = Object.freeze([
-  {id: 'menu-new', label: '新游戏', hint: '从第一章开始完整战役', icon: 'play'},
-  {id: 'menu-continue', label: '继续游戏', hint: '暂无可继续的进度', icon: 'resume'},
-  {id: 'menu-levels', label: '选择关卡', hint: '九个战场，独立探索', icon: 'levels'},
-  {id: 'menu-achievements', label: '成就', hint: '单章挑战 · 星星收藏', icon: 'star'},
-  {id: 'menu-settings', label: '设置', hint: '画面、界面与操作', icon: 'settings'}
+  {id: 'menu-continue', label: '继续游戏', hint: '回到上次行动', icon: 'resume'},
+  {id: 'menu-new', label: '新游戏', hint: '选择战备，开始新的行动', icon: 'play'},
+  {id: 'menu-settings', label: '设置', hint: '画面、声音与操作', icon: 'settings'},
+  {id: 'menu-achievements', label: '成就', hint: '荣誉、收藏与行动档案', icon: 'star'}
 ].map(Object.freeze));
 
 // Presentation strings (sector code, English title, brief, feature line, accent color) live in maps/registry.js.

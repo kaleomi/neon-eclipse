@@ -1,5 +1,5 @@
 // Audio bus: five named buses (master, music, sfx, ui, voice) with independent, persisted volume.
-// Everything is procedural: no external files. The AudioContext is created lazily on first user
+// Synth cues and licensed local recordings share these gains. The AudioContext is created lazily on first user
 // gesture and suspended while the game is paused or the tab is hidden. Pure logic (volume math,
 // persistence, state machine) is testable without Web Audio; see test-audio.mjs.
 export const AUDIO_SETTINGS_KEY='neon-eclipse.audio.v1';

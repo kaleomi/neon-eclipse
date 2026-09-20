@@ -1,0 +1,46 @@
+{
+  "asset": "sniper-guard-s09.glb",
+  "version": "s09-v1",
+  "role": "sniper",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "description": "Original KESTREL sniper; scoped long rifle, reconnaissance optics and analytic two-handed rigid-node posing. Not a skinned human.",
+  "meshes": 66,
+  "triangles": 7208,
+  "materials": 6,
+  "articulatedNodes": 15,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.8,
+      "tracks": 18
+    },
+    {
+      "name": "Patrol",
+      "seconds": 1.12,
+      "tracks": 18
+    },
+    {
+      "name": "Aim",
+      "seconds": 1.6,
+      "tracks": 18
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 18
+    }
+  ],
+  "bytes": 664648,
+  "sha256": "4c5243c5c3f0063e89876ac3dbd3d6910f971dbb74aa57864c527cc1c50aab09",
+  "sourceHashes": {
+    "characters/sniper-guard.js": "39e5136c2d63d7624e7dc9c4530291279d40648394ce39c6280546827226389c",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

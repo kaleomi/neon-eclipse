@@ -1,0 +1,9 @@
+'Titan' by Scott Buckley – released under CC-BY 4.0. www.scottbuckley.com.au
+https://www.scottbuckley.com.au/library/titan/
+'Legionnaire (Original)' by Scott Buckley – released under CC-BY 4.0. www.scottbuckley.com.au
+https://www.scottbuckley.com.au/library/legionnaire/
+License: https://creativecommons.org/licenses/by/4.0/
+Game edits: excerpts, loop crossfade, peak normalization, 32 kHz stereo OGG encoding.
+Firearms: Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney / The Free Firearm Sound Library, CC0.
+Gun mechanisms: Joseph SARDIN / BigSoundBank, CC0.
+Aircraft: Sonniss GameAudioGDC 2019 license. Original source metadata and SHA256 in sources-round2.json.

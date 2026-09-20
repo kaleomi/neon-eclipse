@@ -53,6 +53,7 @@ try{
  });
  await step('frontier drone kill plays the explosion cue (air burst + ground impact)',async()=>{
   await page.keyboard.press('Escape');await page.waitForFunction(()=>document.body.dataset.driveActive==='false');
+  await page.click('#vehicle-tab-missions');await page.click('#vehicle-mission-tab-windfarm');
   await page.click('#start-windfarm');await page.click('#start-windfarm');await page.waitForFunction(()=>document.body.dataset.frontierStatus==='active'&&document.body.dataset.driveActive==='true');
   await page.waitForTimeout(400);// let the post-reset audio baseline frame pass so both explosions are diffs, not baseline
   await page.evaluate(()=>window.__heliAudioFixture.killDrone());

@@ -8,7 +8,7 @@ export function bindAudioSettings(container,audio){
  const bus=audio.bus;
  container.innerHTML=`<h4>音量</h4><div class="menu-audio-sliders">${BUSES.map(b=>`<label class="menu-audio-row"><span>${LABELS[b]}</span><input type="range" min="0" max="100" step="1" data-audio-bus="${b}"><b data-audio-value="${b}"></b></label>`).join('')}</div>
  <label class="menu-audio-mute"><input type="checkbox" data-audio-mute><span>静音</span></label>
- <p class="menu-setting-hint">全部声音由程序实时合成，没有外部音频文件。暂停与切出标签页时自动静音。</p>
+ <p class="menu-setting-hint">实录音效与管弦配乐。暂停与切出标签页时自动挂起。<a href="./audio-credits.html" target="_blank" rel="noopener">音频来源与音乐署名</a></p>
  <details class="menu-audio-lab"><summary>音效试听</summary><div class="menu-audio-lab-grid">${Object.entries(PREVIEW).map(([n,l])=>`<button type="button" class="menu-secondary" data-audio-preview="${n}">${l}</button>`).join('')}</div><p class="menu-setting-hint" data-audio-state></p></details>`;
  const $=s=>container.querySelector(s);
  function render(){
@@ -20,7 +20,7 @@ export function bindAudioSettings(container,audio){
  for(const b of BUSES)$(`[data-audio-bus="${b}"]`).addEventListener('input',e=>{bus.setVolume(b,Number(e.target.value)/100);$(`[data-audio-value="${b}"]`).textContent=e.target.value+'%';});
  for(const b of BUSES)$(`[data-audio-bus="${b}"]`).addEventListener('change',()=>{audio.unlock().then(()=>audio.play(b==='music'?'ui.confirm':b==='ui'?'ui.click':'hit.body'));});
  $('[data-audio-mute]').addEventListener('change',e=>bus.setMuted(e.target.checked));
- container.querySelectorAll('[data-audio-preview]').forEach(btn=>btn.addEventListener('click',async()=>{await audio.unlock();audio.play(btn.dataset.audioPreview);}));
+ container.querySelectorAll('[data-audio-preview]').forEach(btn=>btn.addEventListener('click',async()=>{await audio.unlock();await audio.sfx?.preload();audio.play(btn.dataset.audioPreview);}));
  bus.subscribe(render);render();
  return {render,names:SFX_NAMES};
 }

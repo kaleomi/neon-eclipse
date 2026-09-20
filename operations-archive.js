@@ -1,9 +1,11 @@
+import {mountArchivePresentation} from './archive-presentation.js';
 import {readArchive} from './archive-reader.js';
 import {prepareArchive,filterArchive,summarizeArchive,exportArchive,duration,WEAPON_LABELS,summarizeFramePerf} from './archive-summary.js';
 import {MAP_REGISTRY} from './maps/registry.js';
 const $=id=>document.getElementById(id),names=new Map(MAP_REGISTRY.map(m=>[m.id,m.title]));
 const difficulty={easy:'简单',normal:'普通',hard:'困难'},modes={campaign:'单章',journey:'战役',replay:'阶段训练'};
 let prepared={records:[],rejected:0,duplicates:0,truncated:false},page=0,selected=[],loading=false;
+const renderPresentation=mountArchivePresentation();let archiveError=false;
 const ids=['map','difficulty','mode','origin','days'],filters=()=>Object.fromEntries(ids.map(id=>[id,$(id).value]));
 function cell(row,text,cls){const e=document.createElement('td');e.textContent=text;if(cls)e.className=cls;row.append(e);return e;}
 function empty(tbody,span,text){const row=document.createElement('tr'),c=cell(row,text,'empty');c.colSpan=span;tbody.append(row);}
@@ -16,12 +18,13 @@ function render(){
  $('perf-samples').textContent=perf.samples?`${perf.samples} 条记录含帧时序`:'无帧时序样本';$('perf-fps').textContent=perf.avgFps===null?'—':`${perf.avgFps} FPS`;$('perf-p95').textContent=perf.p95Ms===null?'—':`${perf.p95Ms} ms`;$('perf-worst').textContent=perf.worstMs===null?'—':`${perf.worstMs} ms · 长帧 ${perf.longFrames}`;
  $('perf-quality').textContent=Object.keys(perf.byQuality).length?Object.entries(perf.byQuality).map(([q,v])=>`${qualityNames[q]||q}：${v.attempts} 次 · 平均 ${v.avgFps} FPS`).join(' / '):'开启统计后完成的行动会附带本机帧时序；旧记录没有此数据。';
  $('weapon-note').textContent=`仅按已有射击字段统计。${summary.missingWeaponRecords} 条记录缺少分枪数据；重武器可能归入未分类。刀的零射击不表示零使用。`;
- const pages=Math.max(1,Math.ceil(selected.length/20));page=Math.max(0,Math.min(page,pages-1));const body=$('records');body.replaceChildren();for(const r of selected.slice(page*20,page*20+20)){const row=document.createElement('tr');cell(row,new Date(r.finishedAt).toLocaleString('zh-CN',{hour12:false}));cell(row,`${names.get(r.map)||r.map} / ${difficulty[r.difficulty]}`);cell(row,r.won?'胜利':'失败',r.won?'win':'');cell(row,`${modes[r.mode]} / ${r.fromCheckpoint?'检查点恢复':r.startStage===0?'章首开始':'中途阶段开始'}`);cell(row,duration(r.time));cell(row,`${r.kills} / ${r.shots}`);body.append(row);}if(!selected.length)empty(body,6,prepared.records.length?'没有符合筛选条件的记录。可重置筛选。':'暂无可用战斗记录。请在游戏设置开启本地统计，并完成一次行动。');
+ const pages=Math.max(1,Math.ceil(selected.length/20));page=Math.max(0,Math.min(page,pages-1));const body=$('records');body.replaceChildren();for(const r of selected.slice(page*20,page*20+20)){const row=document.createElement('tr');cell(row,new Date(r.finishedAt).toLocaleString('zh-CN',{hour12:false}));cell(row,`${names.get(r.map)||r.map} / ${difficulty[r.difficulty]}`);cell(row,r.won?'胜利':'失败',r.won?'win':'loss');cell(row,`${modes[r.mode]} / ${r.fromCheckpoint?'检查点恢复':r.startStage===0?'章首开始':'中途阶段开始'}`);cell(row,duration(r.time));cell(row,`${r.kills} / ${r.shots}`);body.append(row);}if(!selected.length)empty(body,6,prepared.records.length?'没有符合筛选条件的记录。可重置筛选。':'暂无可用战斗记录。请在游戏设置开启本地统计，并完成一次行动。');
  $('count').textContent=`${selected.length} 条 / 本地有效 ${prepared.records.length} 条`;$('page').textContent=`${page+1} / ${pages}`;$('previous').disabled=page===0;$('next').disabled=page>=pages-1;$('export').disabled=loading||selected.length===0;
+  renderPresentation({total:prepared.records.length,count:selected.length,error:archiveError});
 }
 async function refresh(){
  if(loading)return;loading=true;$('refresh').disabled=true;$('export').disabled=true;$('status').dataset.error='false';$('status').textContent='正在只读读取本地档案…';
- const result=await readArchive();loading=false;$('refresh').disabled=false;
+ const result=await readArchive();archiveError=!result.ok;loading=false;$('refresh').disabled=false;
  if(!result.ok){prepared=prepareArchive([]);const messages={unavailable:'浏览器不支持 IndexedDB。',denied:'浏览器拒绝访问本地存储。',blocked:'数据库正在被其他页面升级，请稍后刷新。',timeout:'本地存储读取超时，可稍后重试。',unsupported:'数据库版本或结构暂不支持，原数据未修改。',changed:'数据库在读取期间发生版本变化，请刷新。'};$('status').dataset.error='true';$('status').textContent=(messages[result.code]||'读取失败，请稍后重试。')+' 未写入或清理任何存档。';}
  else{prepared=prepareArchive(result.records);$('status').textContent=`本地有效记录 ${prepared.records.length} 条 · 跳过无效/未知 ${prepared.rejected} 条 · 去重 ${prepared.duplicates} 条${prepared.truncated?' · 超过2000条，仅显示读取范围内的前2000条':''} · 只读快照，新增行动后请刷新`;}
  const old=$('map').value;$('map').replaceChildren(new Option('全部章节','all'));for(const id of [...new Set(prepared.records.map(r=>r.map))].sort())$('map').add(new Option(names.get(id)||id,id));if([...$('map').options].some(o=>o.value===old))$('map').value=old;page=0;render();

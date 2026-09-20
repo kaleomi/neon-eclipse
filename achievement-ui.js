@@ -1,3 +1,4 @@
+import {renderHonorOverview,honorHeading} from './honors-presentation.js';
 import {ACHIEVEMENTS,ACHIEVEMENT_KEY,CHALLENGE_MAPS,createAchievementStore,createChapterAttempt} from './chapter-achievements.js';
 import {CHAPTER_NAMES, selectAchievementGallery, createAchievementNotices, createAchievementToast} from './achievement-gallery.js';
 import {deriveChallengeProgress} from './challenge-progress.js';
@@ -38,7 +39,12 @@ export function createAchievementUI(map,start){
   CHALLENGE_MAPS.forEach((id,i)=>{const option=document.createElement('option');option.value=id;option.textContent=`${i+1} · ${CHAPTER_NAMES[i]}`;chapter.append(option);});
   toggle.checked=preferences.enabled;
   const summary=document.createElement('p');summary.className='achievement-gallery-summary';summary.setAttribute('role','status');
-  panel.querySelector('.achievement-list').before(filters,summary);
+  const overview=document.createElement('section');overview.className='achievement-overview';overview.setAttribute('aria-label','已保存荣誉概览');
+  const guide=document.createElement('details');guide.className='honor-attempt-guide';
+  const guideTitle=document.createElement('summary');guideTitle.textContent='本轮挑战资格与规则';guide.append(guideTitle);
+  for(const selector of ['.challenge-eligibility','.challenge-progress-note','.achievement-rules'])guide.append(panel.querySelector(selector));
+  panel.querySelector('.achievement-list').before(overview,filters,summary);
+  panel.querySelector('.challenge-start').before(guide);
   chapter.addEventListener('change',()=>{cancelRestart();refresh();});
   status.addEventListener('change',()=>{cancelRestart();refresh();});
   toggle.addEventListener('change',()=>{
@@ -65,21 +71,24 @@ export function createAchievementUI(map,start){
     const data=store.read(),state=attempt.state,list=panel.querySelector('.achievement-list');
     const models=deriveChallengeProgress(state,map);list.replaceChildren();
     const rows=selectAchievementGallery(data.awards,{chapter:chapter.value,status:status.value,currentMap:map});
+    const scopeRows=selectAchievementGallery(data.awards,{chapter:chapter.value,currentMap:map});
+    const scope=chapter.value==='all'?'全部章节 · 任一章已获':chapter.value==='current'?'当前章节 · '+CHAPTER_NAMES[CHALLENGE_MAPS.indexOf(map)]:chapter.selectedOptions[0].textContent;
+    renderHonorOverview(overview,{rows:scopeRows,error:data.error,scope});
     summary.textContent=data.error?'历史记录不可读取，暂不判断解锁状态。':`显示 ${rows.length} 类荣誉 · 已解锁按所选章节判断；全部章节表示任一章已获。徽章称号仅展示，无属性加成。`;
     for(const achievement of data.error?[]:rows){
       const {maps,unlocked,selected}=achievement,row=document.createElement('article');
       row.dataset.unlocked=String(unlocked);row.dataset.achievement=achievement.id;
       const badge=document.createElement('div');badge.className='achievement-badge';badge.setAttribute('aria-hidden','true');badge.textContent=achievement.mark;
       const title=document.createElement('strong'),rule=document.createElement('span'),history=document.createElement('small'),honor=document.createElement('small');
-      title.textContent=(unlocked?'◆ ':'◇ ')+achievement.name;rule.textContent=achievement.rule;
+      title.textContent=achievement.name;rule.textContent=achievement.rule;
       honor.className='achievement-honor';honor.textContent=(unlocked?'荣誉称号 · ':'待解锁称号 · ')+achievement.title;
       history.className='achievement-history';history.textContent=maps.length?'历史已获章节：'+maps.map(chapter=>CHAPTER_NAMES[CHALLENGE_MAPS.indexOf(chapter)]).join('、'):'历史荣誉：尚未获得';
-      row.append(badge,title,honor,rule,history);
+      row.append(honorHeading(achievement,title,badge),honor,rule,history);
       if(!selected||selected===map)row.append(progressElement(models.find(model=>model.id===achievement.id)));
       else{const note=document.createElement('p');note.className='challenge-progress-note';note.textContent='正在浏览其他章节的历史荣誉；不会切换关卡，也不代表该章有进行中的挑战。';row.append(note);}
       list.append(row);
     }
-    if(!rows.length&&!data.error){const empty=document.createElement('p');empty.className='achievement-empty';empty.textContent='此筛选下暂无荣誉。可切换章节或选择全部荣誉；破核猎手仅适用于风暴港口。';list.append(empty);}
+    if(!rows.length&&!data.error){const empty=document.createElement('div');empty.className='achievement-empty';const text=document.createElement('p');text.textContent='此筛选下暂无荣誉。记录未被删除；试试其他章节或查看全部荣誉。破核猎手仅适用于风暴港口。';const reset=document.createElement('button');reset.type='button';reset.textContent='查看全部荣誉';reset.addEventListener('click',()=>{chapter.value='all';status.value='all';cancelRestart();refresh();chapter.focus();});empty.append(text,reset);list.append(empty);}
     panel.querySelector('.challenge-eligibility').textContent=state?(state.reason+' · 已开枪 '+(Number.isFinite(state.shots)?state.shots:'—')+' 发 · 承伤 '+(Number.isFinite(state.damage)?Math.round(state.damage):'—')+(state.shots||state.bladeDisqualified?' · 纯刀资格已失效':'')):'从头开始本章即可挑战。';
     panel.querySelector('.achievement-notice').textContent=message||(data.error?'成就存储不可用或记录损坏；原存档未被覆盖。':'');
     previousSnapshot=JSON.stringify(state);

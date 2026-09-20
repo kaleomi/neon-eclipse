@@ -69,7 +69,13 @@ export function organizeVehicleUI(){
  for(const n of remaining){if(n.matches('.drive-actions,.drive-start-actions,.drive-footer,.drive-note'))settings.append(n);else if(!n.querySelector('button,input,select,[role="status"]')&&!n.matches('style'))n.remove();else overview.append(n);}
  panel.prepend(header);const host=box('ui-vehicle-deck');header.after(host);
  const deck=createViewDeck({host,id:'vehicle',label:'海陆空菜单',items:[{id:'overview',label:'开始 / 继续',content:overview},{id:'campaign',label:'先遣队战役',content:campaign},{id:'missions',label:'独立任务',content:missions},{id:'settings',label:'设置与说明',content:settings},{id:'records',label:'成绩与备份',content:records}]});
- const footer=box('ui-dialog-actions');append(footer,text('span','各模式沿用原有独立存档与确认规则。','ui-muted'),resume);panel.append(footer);if(oldResumeParent!==panel&&!oldResumeParent.children.length)oldResumeParent.remove();
+ const footer=box('ui-dialog-actions');
+ // The header's return link is outside the modal focus trap and behind its overlay.
+ // Put a real exit control inside every vehicle menu page, reusing the existing guarded link.
+ const returnLink=document.getElementById('return-menu'),returnButton=document.createElement('button');
+ returnButton.type='button';returnButton.id='vehicle-return-menu';returnButton.className='ui-secondary';returnButton.textContent='返回主菜单';returnButton.disabled=!returnLink;
+ returnButton.addEventListener('click',()=>returnLink?.click());
+ append(footer,returnButton,text('span','离开将结束当前未保存行动；已保存进度保留。','ui-muted'),resume);panel.append(footer);if(oldResumeParent!==panel&&!oldResumeParent.children.length)oldResumeParent.remove();
  const campaignLink=document.createElement('button');campaignLink.type='button';campaignLink.className='ui-secondary';campaignLink.textContent='查看先遣队进度 / 处理保存';campaignLink.onclick=()=>deck.select('campaign');overview.append(campaignLink);
  const missionsLink=document.createElement('button');missionsLink.type='button';missionsLink.className='ui-secondary';missionsLink.textContent='选择独立任务 / 从检查点继续';missionsLink.onclick=()=>deck.select('missions');overview.append(missionsLink);
  document.getElementById('show-flight-records')?.addEventListener('click',()=>deck.select('records'));

@@ -1,0 +1,254 @@
+[
+  {
+    "file": "rifle-ar.ogg",
+    "audition": "G01",
+    "start": 0.6977187499999999,
+    "seconds": 0.64996875,
+    "loop": false,
+    "source": {
+      "id": "G01",
+      "title": "AR-15 近距离单发",
+      "category": "枪械",
+      "description": "主步枪候选，5.56毫米。",
+      "file": "samples/G01.wav",
+      "source": "https://opengameart.org/content/the-free-firearm-sound-library",
+      "original": "extracted\\Prepared SFX Library\\AR-15\\D_32P.wav",
+      "license": "CC0 · 免费商用，无需署名",
+      "creator": "Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney",
+      "metadata": "AR-15, M4, rifle, carbine, semi automatic, assault rifle, .223, 5.56x45, gunshot, near distance, front of shooter, left, right, stereo",
+      "seconds": 10.2,
+      "sha256": "acee9d2106b68fe5956225a19d7aedf943d97793817f9bda9d486a2b74b0a812"
+    },
+    "sha256": "d4ac54f0bfae9c4b86b38c5b02a60f70fd69b5cb1b7ee56e0c66c3d316498087"
+  },
+  {
+    "file": "rifle-ak.ogg",
+    "audition": "G02",
+    "start": 0.60515625,
+    "seconds": 0.65,
+    "loop": false,
+    "source": {
+      "id": "G02",
+      "title": "AK-47 近距离单发",
+      "category": "枪械",
+      "description": "另一种步枪音色，7.62毫米。",
+      "file": "samples/G02.wav",
+      "source": "https://opengameart.org/content/the-free-firearm-sound-library",
+      "original": "extracted\\Prepared SFX Library\\AK-47\\C_28P.wav",
+      "license": "CC0 · 免费商用，无需署名",
+      "creator": "Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney",
+      "metadata": "AK-47, rifle, fully automatic, semi automatic, machine gun, assault rifle, 7.62x39, gunshot, near distance, front of shooter, left, right, stereo",
+      "seconds": 12.5,
+      "sha256": "e0934c1d79192d2216db62fdf6ab57bf9d5d585267af367a1cfb21f0972a537d"
+    },
+    "sha256": "3d62ebd0483b03103852133a9f4f51aa7ad539557e50832d9ca8e652006c3d31"
+  },
+  {
+    "file": "pistol-1911.ogg",
+    "audition": "G04",
+    "start": 0.93546875,
+    "seconds": 0.55,
+    "loop": false,
+    "source": {
+      "id": "G04",
+      "title": "1911 手枪",
+      "category": "枪械",
+      "description": "较厚重的 .45 手枪候选。",
+      "file": "samples/G04.wav",
+      "source": "https://opengameart.org/content/the-free-firearm-sound-library",
+      "original": "extracted\\Prepared SFX Library\\1911\\A_42P.wav",
+      "license": "CC0 · 免费商用，无需署名",
+      "creator": "Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney",
+      "metadata": "1911, handgun, pistol, semi automatic, .45, gunshot, near distance, front of shooter, left, right, stereo",
+      "seconds": 9.5,
+      "sha256": "8e84438e771c157155a6a1ff47a6a7a7d81b6f39b185d41e426c57337a82254a"
+    },
+    "sha256": "e5c09f52926c5676fc06dd71888b6e3ad8cda5e31d70892786b8b7ca230bf9b0"
+  },
+  {
+    "file": "pistol-soft.ogg",
+    "audition": "G06",
+    "start": 0.47546875,
+    "seconds": 0.4,
+    "loop": false,
+    "source": {
+      "id": "G06",
+      "title": "Ruger Mark III 手枪",
+      "category": "枪械",
+      "description": "小口径对照，不是消音器录音。",
+      "file": "samples/G06.wav",
+      "source": "https://opengameart.org/content/the-free-firearm-sound-library",
+      "original": "extracted\\Prepared SFX Library\\Ruger Mark III\\R_35P.wav",
+      "license": "CC0 · 免费商用，无需署名",
+      "creator": "Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney",
+      "metadata": "Ruger Mark III, handgun, pistol, semi automatic, .22, gunshot, near distance, front of shooter, left, right, stereo",
+      "seconds": 7.6,
+      "sha256": "9ae9b13cb414bbfa2d12ee9321fc79c508a9cf25bde6e916c153e86965a600d5"
+    },
+    "sha256": "ee8bab15e2f53ab4ed2d320d8bb05643311e24190ea79e5c86ff7258d054f42c"
+  },
+  {
+    "file": "shotgun.ogg",
+    "audition": "G07",
+    "start": 0.42515625,
+    "seconds": 0.94996875,
+    "loop": false,
+    "source": {
+      "id": "G07",
+      "title": "Benelli Nova 霰弹枪",
+      "category": "枪械",
+      "description": "泵动霰弹枪候选。",
+      "file": "samples/G07.wav",
+      "source": "https://opengameart.org/content/the-free-firearm-sound-library",
+      "original": "extracted\\Prepared SFX Library\\Nova\\O_21P.wav",
+      "license": "CC0 · 免费商用，无需署名",
+      "creator": "Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney",
+      "metadata": "Benelli, Nova, shotgun, pump action, 12 gauge, gunshot, near distance, front of shooter, left, right, stereo",
+      "seconds": 6.8,
+      "sha256": "5661d0625e4634f19e6e316c13693b80c8e28cd9f716cf9c75c465153ae40815"
+    },
+    "sha256": "42718645141a77f6010402f377f82a439b9c9b5ed0517d2c76b1c9838c024dd2"
+  },
+  {
+    "file": "smg.ogg",
+    "audition": "G09",
+    "start": 0.30428125,
+    "seconds": 0.45,
+    "loop": false,
+    "source": {
+      "id": "G09",
+      "title": "Carl Gustav M45 单发",
+      "category": "枪械",
+      "description": "冲锋枪单发候选，便于按游戏射速触发。",
+      "file": "samples/G09.wav",
+      "source": "https://opengameart.org/content/the-free-firearm-sound-library",
+      "original": "extracted\\Prepared SFX Library\\Carl Gustav M45\\G_31P.wav",
+      "license": "CC0 · 免费商用，无需署名",
+      "creator": "Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney",
+      "metadata": "Carl Gustav M45, Swedish K, rifle, fully automatic, machine gun, sub machine gun, 9mm, gunshot, near distance, front of shooter, left, right, stereo",
+      "seconds": 9.2,
+      "sha256": "5982c6c2fa44545b750ba6217ed57797a6a15c02f5c9943ac0e99e5f3ab2b158"
+    },
+    "sha256": "1a919cd535b84adbec3d1a8c5178238f5a806290e44f2be823e1e79ee3bae6bc"
+  },
+  {
+    "file": "magazine.ogg",
+    "audition": "G11",
+    "start": 0.35853124999999997,
+    "seconds": 0.41325,
+    "loop": false,
+    "source": {
+      "id": "G11",
+      "title": "手枪弹匣装填",
+      "category": "枪械",
+      "file": "samples/1988.mp3",
+      "source": "https://bigsoundbank.com/gun-loading-1-s1988.html",
+      "license": "CC0 · 免费商用，无需署名",
+      "creator": "Joseph SARDIN",
+      "description": "真实物件拟音，可用于换弹/上膛操作。",
+      "seconds": 0.8,
+      "sha256": "7ad802afc882f266331dca7b19675a617e6e339f8bffe561305d46449d7bbf14"
+    },
+    "sha256": "78c9c65b1ce070d47564b1c4fbf7ca0a64e87986466729e42e3c882f40838439"
+  },
+  {
+    "file": "cocking.ogg",
+    "audition": "G12",
+    "start": 0.12721875,
+    "seconds": 0.7,
+    "loop": false,
+    "source": {
+      "id": "G12",
+      "title": "手枪拉套筒上膛",
+      "category": "枪械",
+      "file": "samples/1984.mp3",
+      "source": "https://bigsoundbank.com/pistolet-armement-1-s1984.html",
+      "license": "CC0 · 免费商用，无需署名",
+      "creator": "Joseph SARDIN",
+      "description": "真实物件拟音，可用于换弹/上膛操作。",
+      "seconds": 1.6,
+      "sha256": "228c6d5097c4939c8064a60c376bb152d6e9936074bbcb0e271c90514b08db8c"
+    },
+    "sha256": "1889dea694d40b0a4da733b15a7bd99b766de7b298048e271e2b286cfe24c83e"
+  },
+  {
+    "file": "plane-idle.ogg",
+    "audition": "P02",
+    "start": 2,
+    "seconds": 7.6,
+    "loop": true,
+    "source": {
+      "id": "P02",
+      "title": "Spitfire 发动机怠速与加油",
+      "category": "飞机",
+      "description": "活塞式战机发动机，供比较更厚重的机体质感。",
+      "file": "samples/P02.wav",
+      "source": "https://sonniss.com/gameaudiogdc/",
+      "original": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 5of8/Pole Position - Supermarine Spitfire Mk IX 1943/spitfire_mk_ix_t12_onbrd_idle_blips_engine_a_DPA4062.wav",
+      "license": "Sonniss GDC · 免费商用，无需署名",
+      "seconds": 69.1,
+      "sha256": "412dc74975097acc2c91fd1bd517b1920ae0a5c17cd8797b15d32e3b538f7eb1"
+    },
+    "sha256": "9d678bae326856c2e41a5e37bfa0fcbb785d9f9c84c8021dd85270d02f411629"
+  },
+  {
+    "file": "plane-flight.ogg",
+    "audition": "P01",
+    "start": 8,
+    "seconds": 9.6,
+    "loop": true,
+    "source": {
+      "id": "P01",
+      "title": "Cessna 172 飞行与进近",
+      "category": "飞机",
+      "description": "轻型螺旋桨飞机，适合当前试验区飞机的声音方向。",
+      "file": "samples/P01.wav",
+      "source": "https://sonniss.com/gameaudiogdc/",
+      "original": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 5of8/Sound Spark LLC – Ambisonic Airplane Cessna 172/Airplane_Small_Propeller_Cessna172_Flying_Landing_Approach.wav",
+      "license": "Sonniss GDC · 免费商用，无需署名",
+      "seconds": 71.6,
+      "sha256": "ac2dce699d8ba5302172ef25d95ea97471585a5b7947811178305d8ec96353ea"
+    },
+    "sha256": "0bfa4a26ddd0c11af1a6150936e6361d67ffbce9d60330c71b5df7d4cc37a9e0"
+  },
+  {
+    "file": "music-explore.ogg",
+    "audition": "M02",
+    "start": 0,
+    "seconds": 60.0,
+    "loop": true,
+    "source": {
+      "id": "M02",
+      "title": "Titan",
+      "category": "音乐",
+      "description": "由大提琴逐渐展开的管弦风格，适合探索、开场或通关。 作者页面未声明为真人乐团现场录音；这里按配器风格推荐。",
+      "file": "titan.mp3",
+      "source": "https://www.scottbuckley.com.au/library/titan/",
+      "license": "CC BY 4.0 · 免费商用，必须署名 Scott Buckley",
+      "creator": "Scott Buckley",
+      "seconds": 175.8,
+      "sha256": "fb921a09cc6181228b14945c7a6b90b50a83f4f38a37644a383bf7c70ea83729"
+    },
+    "sha256": "77e7300a5b6dee3e0eaba5153416100381069f91fe45cf5b0531cee4eb212a68"
+  },
+  {
+    "file": "music-combat.ogg",
+    "audition": "M01",
+    "start": 0,
+    "seconds": 60.0,
+    "loop": true,
+    "source": {
+      "id": "M01",
+      "title": "Legionnaire",
+      "category": "音乐",
+      "description": "铜管与鼓组为主的管弦风格，适合战斗或Boss段落。 作者页面未声明为真人乐团现场录音；这里按配器风格推荐。",
+      "file": "legionnaire.mp3",
+      "source": "https://www.scottbuckley.com.au/library/legionnaire/",
+      "license": "CC BY 4.0 · 免费商用，必须署名 Scott Buckley",
+      "creator": "Scott Buckley",
+      "seconds": 184.0,
+      "sha256": "49230c850b0d3a278aee2871ca684cf4bc87bf4dd1ecc8f453f425bff2dce27c"
+    },
+    "sha256": "2a3dd6eed70579d2dce3fefba8d6e3def2e50e0a02f6ae4e8f84fcd9fbbf846b"
+  }
+]

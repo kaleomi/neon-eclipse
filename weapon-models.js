@@ -1,11 +1,11 @@
 import {reloadPose} from './action-poses.js';
 import * as T from './node_modules/three/build/three.module.js';
 const material=(color,metalness=.35,roughness=.48)=>new T.MeshStandardMaterial({color,metalness,roughness});
-const steel=material(0x728893,.7,.32),body=material(0x344a58),dark=material(0x13232d),rubber=material(0x17252b,.05,.85),glove=material(0x50646d,.1,.8);
-const casing=material(0x9b4932,.15,.65),brass=material(0xc69e59,.65,.35);
+const steel=material(0x829ca9,.85,.22),body=material(0x2a3944,.6,.38),dark=material(0x111b22,.7,.35),rubber=material(0x151f24,.1,.82),glove=material(0x485860,.15,.75);
+const casing=material(0x9b4932,.2,.55),brass=material(0xd4ab62,.85,.26);
 const glass=new T.MeshBasicMaterial({color:0x53bfae,transparent:true,opacity:.18,depthWrite:false});
-const cyan=new T.MeshStandardMaterial({color:0x72e7d9,emissive:0x247f78,emissiveIntensity:.5});
-const amber=new T.MeshStandardMaterial({color:0xeaa566,emissive:0x773510,emissiveIntensity:.3});
+const cyan=new T.MeshStandardMaterial({color:0x72e7d9,emissive:0x247f78,emissiveIntensity:1.2,roughness:.2,metalness:.4});
+const amber=new T.MeshStandardMaterial({color:0xeaa566,emissive:0x773510,emissiveIntensity:1.0,roughness:.3,metalness:.4});
 function box(g,w,h,d,x,y,z,m=body,bevel=false){
  let geo;
  if(bevel){const s=new T.Shape();s.moveTo(-w/2,-h/2);s.lineTo(w/2,-h/2);s.lineTo(w/2,h/2);s.lineTo(-w/2,h/2);s.closePath();geo=new T.ExtrudeGeometry(s,{depth:d,bevelEnabled:true,bevelSize:.008,bevelThickness:.008,bevelSegments:1,steps:1});geo.translate(0,0,-d/2);}

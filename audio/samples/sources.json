@@ -1,0 +1,422 @@
+[
+  {
+    "file": "rover-idle.ogg",
+    "audition": "01",
+    "start": 2,
+    "seconds": 7.650022675736961,
+    "loop": true,
+    "sha256": "2e3cb8292d715b67da64e03e042820a9eb50a3df827ec6bcbd106460ea6c0b32",
+    "source": {
+      "part": 1,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Andrew Vailcross - BMW 3 Series E46/BMW E46, Cars, Vehicles, Engine, Idle, Loop 07 (NTG4) Exhaust.wav",
+      "bytes": 4437064,
+      "id": "01",
+      "title": "汽车怠速",
+      "category": "载具",
+      "file": "samples/01.wav",
+      "seconds": 15.4,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%201of8.zip",
+      "sha256": "f888428f4671be0f82b03814eee8069cdd858f73a24ff57aa5c0c50da833850d"
+    }
+  },
+  {
+    "file": "rover-drive.ogg",
+    "audition": "03",
+    "start": 8,
+    "seconds": 7.650022675736961,
+    "loop": true,
+    "sha256": "36c99194feff4be7cd63d07516479c6ea3767f45ec5c9ad98f342a7dbced55e9",
+    "source": {
+      "part": 4,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 4of8/Pole Position - Jeep SRT8 2014/Jeep_SRT8_t9_Onbrd_Fast_Drive_Short_Stop_Engine_Right_DPA4061.wav",
+      "bytes": 12810504,
+      "id": "03",
+      "title": "Jeep加速行驶",
+      "category": "载具",
+      "file": "samples/03.wav",
+      "seconds": 42.7,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%204of8.zip",
+      "sha256": "c7914406cafc317abe6019e02e080058c14eed39235d6e24af7906aed37bf457"
+    }
+  },
+  {
+    "file": "rotor.ogg",
+    "audition": "04",
+    "start": 6,
+    "seconds": 9.650022675736961,
+    "loop": true,
+    "sha256": "e898ef6376ca73520d7e9bcec561a24061c2459c8ac9547232de81ca9d9f1062",
+    "source": {
+      "part": 1,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Airborne Sound - Vehicles Aviation/Helicopter,Bell,222,Idle,Grow,Take Off,Away - faint background birds.wav",
+      "bytes": 58515524,
+      "id": "04",
+      "title": "Bell直升机起飞",
+      "category": "载具",
+      "file": "samples/04.wav",
+      "seconds": 101.2,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%201of8.zip",
+      "sha256": "71eda5721841db1e8b9a2427b2c2335926c532e7e337f9c41c371d47de03c1c7"
+    }
+  },
+  {
+    "file": "boat.ogg",
+    "audition": "05",
+    "start": 3,
+    "seconds": 7.650022675736961,
+    "loop": true,
+    "sha256": "fc7758ba8be636ae1c88b6849f804d3092867d6ca1f33c249be40881edc1cdbb",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Soundholder - Arvor 215 Boat/boat Arvor 215 engine neutral gear than turn off mono 4061 mix1.wav",
+      "bytes": 14242772,
+      "id": "05",
+      "title": "柴油船引擎熄火",
+      "category": "载具",
+      "file": "samples/05.wav",
+      "seconds": 49.2,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "6933302cf761b0542a6e41e3578b6a7d8fd0747729338e74d4a649ee887bd374"
+    }
+  },
+  {
+    "file": "wind.ogg",
+    "audition": "15",
+    "start": 8,
+    "seconds": 9.650022675736961,
+    "loop": true,
+    "sha256": "e08b2ab391b2b04b1ff4d1a0d6a839acabd3613d10cf9a0a7977b9f4867c47e8",
+    "source": {
+      "part": 1,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Borys Peter - Blowing winds/wind blowing mike v1.wav",
+      "bytes": 11829842,
+      "id": "15",
+      "title": "吹风声",
+      "category": "环境",
+      "file": "samples/15.wav",
+      "seconds": 41.1,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%201of8.zip",
+      "sha256": "09b484b01a43ac6f783305919f47babeeaa1608886ace7f000820266609930ca"
+    }
+  },
+  {
+    "file": "water.ogg",
+    "audition": "14",
+    "start": 0.2,
+    "seconds": 3.9500226757369616,
+    "loop": true,
+    "sha256": "7f8ed935061dc9c3f620d2b20e581bcf462a6d136a266f7dff6d5e786f9c5338",
+    "source": {
+      "part": 1,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/BlueZone - Lake Wave Sound Effects/Bluezone_BC0252_isolated_lake_wave_01_01.wav",
+      "bytes": 2736232,
+      "id": "14",
+      "title": "湖水拍岸",
+      "category": "环境",
+      "file": "samples/14.wav",
+      "seconds": 4.8,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%201of8.zip",
+      "sha256": "4267b7e2c94cf1cb32483b85dd8153162e01b4ebcea3f93118b1b10ea5ff1445"
+    }
+  },
+  {
+    "file": "rain.ogg",
+    "audition": "16",
+    "start": 2,
+    "seconds": 11.650022675736961,
+    "loop": true,
+    "sha256": "4fdc04d1ac32a7a273291830cd427c31969289edd07b0224cecfe650469aa7d2",
+    "source": {
+      "part": 3,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 3of8/PMSFX - EMPTY CITY RAIN/PM_ECR_1 Rain, City, Light, Thunder, Peel.wav",
+      "bytes": 10929222,
+      "id": "16",
+      "title": "小雨与雷声",
+      "category": "环境",
+      "file": "samples/16.wav",
+      "seconds": 18.6,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%203of8.zip",
+      "sha256": "23cfbe23f708974a1ccf14be3d7e2aa166b7b68d778dc945cde1d220093c8388"
+    }
+  },
+  {
+    "file": "cannon-a.ogg",
+    "audition": "06",
+    "start": 0,
+    "seconds": 2.7999773242630384,
+    "loop": false,
+    "sha256": "441fc568e323dd7f8d740e4a3bac0c09947cc1c46a91ea0ca1b24cc219557632",
+    "source": {
+      "part": 1,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Airborne Sound - Battlefield Howitzers/Howitzer,M101,C3,105 mm,Distant,Right Side,Shot,Explode,Crack,Sweetener.wav",
+      "bytes": 1910570,
+      "id": "06",
+      "title": "105毫米榴弹炮A",
+      "category": "火炮",
+      "file": "samples/06.wav",
+      "seconds": 2.8,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%201of8.zip",
+      "sha256": "3b5a39a6a77f9e55b1c09acd6866a3872c25043c85427b4c433d7f1207e59a2a"
+    }
+  },
+  {
+    "file": "cannon-b.ogg",
+    "audition": "07",
+    "start": 0,
+    "seconds": 4.4,
+    "loop": false,
+    "sha256": "358db9842c1c6e96f0dd22666e727c11359a40fbebc601e43d2adac18d20bf49",
+    "source": {
+      "part": 1,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Airborne Sound - Battlefield Howitzers/Howitzer,M101,C1,105 mm,Distant,Right Side,Shot,Pound,Thick.wav",
+      "bytes": 2802106,
+      "id": "07",
+      "title": "105毫米榴弹炮B",
+      "category": "火炮",
+      "file": "samples/07.wav",
+      "seconds": 4.4,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%201of8.zip",
+      "sha256": "21d5791d1b147ed68ba1223035499dfd9be1381a0da391c53235fd1ddf8584f6"
+    }
+  },
+  {
+    "file": "metal-drop.ogg",
+    "audition": "08",
+    "start": 0,
+    "seconds": 2.7,
+    "loop": false,
+    "sha256": "aa2df47dd5ec26df952b8e53b3a883572cf3d5033b29df1a1395668fdbb9dae9",
+    "source": {
+      "part": 1,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Airborne Sound - Elements Metal/Metal,Rebar,Drop,Concrete,Low Height,3,Medium Distant.wav",
+      "bytes": 1011204,
+      "id": "08",
+      "title": "钢筋落地",
+      "category": "机械",
+      "file": "samples/08.wav",
+      "seconds": 2.7,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%201of8.zip",
+      "sha256": "e61c32212e8ee0879ad2708491d8ab0c2bd202efddedebb6dc2bf07399230d22"
+    }
+  },
+  {
+    "file": "metal-crash.ogg",
+    "audition": "09",
+    "start": 0,
+    "seconds": 2.884965986394558,
+    "loop": false,
+    "sha256": "958d7b60870751cec70fd103cf34fe5e33f4458ebdec8cbeb70e1d432b9646aa",
+    "source": {
+      "part": 1,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Airborne Sound - Elements Metal/Metal,Crash,Concrete,Sheet Metal,20 Gauge,Slow,Complex.wav",
+      "bytes": 1058280,
+      "id": "09",
+      "title": "金属板撞击",
+      "category": "机械",
+      "file": "samples/09.wav",
+      "seconds": 2.9,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%201of8.zip",
+      "sha256": "4663543525283416fdb494ed2f129edc5ee1c379f342a3f611b1947edd41778c"
+    }
+  },
+  {
+    "file": "metal-hit.ogg",
+    "audition": "10",
+    "start": 0,
+    "seconds": 1.5,
+    "loop": false,
+    "sha256": "97f5ff5bc941f00009b9f2900e34b535fd602e823ece5e18f40c838792c5df6e",
+    "source": {
+      "part": 1,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 1of8/Airborne Sound - Elements Metal/Metal,Hits,Pipe,Mixed,Fast,Irregular.wav",
+      "bytes": 671518,
+      "id": "10",
+      "title": "金属管敲击",
+      "category": "机械",
+      "file": "samples/10.wav",
+      "seconds": 1.5,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%201of8.zip",
+      "sha256": "83b4ed0d443d948295362ed0b0cddfd333fa4568c53d3a78e956b9717b496fc8"
+    }
+  },
+  {
+    "file": "step-metal-1.ogg",
+    "audition": "11",
+    "start": 0,
+    "seconds": 0.3,
+    "loop": false,
+    "sha256": "d0169192729f66e2b10ab6b65015f6fae77c87478d85e54be6f98b72ffcbf534",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Metal_Boots_Loop_Jogging.wav",
+      "bytes": 10143848,
+      "id": "11",
+      "title": "靴子在金属地面慢跑",
+      "category": "脚步",
+      "file": "samples/11.wav",
+      "seconds": 15.7,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "d5003dc4ee8aeb9e811ca03ee1d45a2313e480b7a317a992a983da62276f9f00"
+    }
+  },
+  {
+    "file": "step-metal-2.ogg",
+    "audition": "11",
+    "start": 0.595,
+    "seconds": 0.3,
+    "loop": false,
+    "sha256": "8846295d15f247f6ff93ea1739da946ab4192735b89eacabc9c973fd8b060e40",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Metal_Boots_Loop_Jogging.wav",
+      "bytes": 10143848,
+      "id": "11",
+      "title": "靴子在金属地面慢跑",
+      "category": "脚步",
+      "file": "samples/11.wav",
+      "seconds": 15.7,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "d5003dc4ee8aeb9e811ca03ee1d45a2313e480b7a317a992a983da62276f9f00"
+    }
+  },
+  {
+    "file": "step-metal-3.ogg",
+    "audition": "11",
+    "start": 1.205,
+    "seconds": 0.3,
+    "loop": false,
+    "sha256": "57435f40d620444ba9705006038acf38b8a668bf54ca837d3d99da21ac1834ac",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Metal_Boots_Loop_Jogging.wav",
+      "bytes": 10143848,
+      "id": "11",
+      "title": "靴子在金属地面慢跑",
+      "category": "脚步",
+      "file": "samples/11.wav",
+      "seconds": 15.7,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "d5003dc4ee8aeb9e811ca03ee1d45a2313e480b7a317a992a983da62276f9f00"
+    }
+  },
+  {
+    "file": "step-snow-1.ogg",
+    "audition": "12",
+    "start": 0.11500000000000002,
+    "seconds": 0.3,
+    "loop": false,
+    "sha256": "1eac2da67dfb108195bda780e04d7cf6e41bd0298926c567b941daadd7ffa16a",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Snow_Singles_Sequence.wav",
+      "bytes": 8054210,
+      "id": "12",
+      "title": "雪地脚步",
+      "category": "脚步",
+      "file": "samples/12.wav",
+      "seconds": 12.3,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "101560f7781eb7ef928ca6433e7929dc088da4843015abeed233d76e8d1eac1a"
+    }
+  },
+  {
+    "file": "step-snow-2.ogg",
+    "audition": "12",
+    "start": 0.595,
+    "seconds": 0.3,
+    "loop": false,
+    "sha256": "70e5669278323037df9a46acccbb0e814a7263107832a2c1e078f72d7c562858",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Snow_Singles_Sequence.wav",
+      "bytes": 8054210,
+      "id": "12",
+      "title": "雪地脚步",
+      "category": "脚步",
+      "file": "samples/12.wav",
+      "seconds": 12.3,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "101560f7781eb7ef928ca6433e7929dc088da4843015abeed233d76e8d1eac1a"
+    }
+  },
+  {
+    "file": "step-snow-3.ogg",
+    "audition": "12",
+    "start": 1.0950000000000002,
+    "seconds": 0.3,
+    "loop": false,
+    "sha256": "dabefb127fbe3058c420ed3b6ac72ddcca051e2cf1325e66d7c04d516c450927",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Snow_Singles_Sequence.wav",
+      "bytes": 8054210,
+      "id": "12",
+      "title": "雪地脚步",
+      "category": "脚步",
+      "file": "samples/12.wav",
+      "seconds": 12.3,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "101560f7781eb7ef928ca6433e7929dc088da4843015abeed233d76e8d1eac1a"
+    }
+  },
+  {
+    "file": "step-gravel-1.ogg",
+    "audition": "13",
+    "start": 0,
+    "seconds": 0.3,
+    "loop": false,
+    "sha256": "14476dbc6b4a5e94c35882a93df37a36dec666b88e11eec13c933bc36cf42e2b",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Gravel_Loafers_Loops_Walk_Normal.wav",
+      "bytes": 9066764,
+      "id": "13",
+      "title": "碎石路脚步",
+      "category": "脚步",
+      "file": "samples/13.wav",
+      "seconds": 13.4,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "e1761e27212b86cb95c9add63b9295c18879e966f32baaab4660a557a320517a"
+    }
+  },
+  {
+    "file": "step-gravel-2.ogg",
+    "audition": "13",
+    "start": 0.575,
+    "seconds": 0.3,
+    "loop": false,
+    "sha256": "a36455623269698b23f274fbfcc53b4977d39b00b2751fb940546c74a7c01b39",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Gravel_Loafers_Loops_Walk_Normal.wav",
+      "bytes": 9066764,
+      "id": "13",
+      "title": "碎石路脚步",
+      "category": "脚步",
+      "file": "samples/13.wav",
+      "seconds": 13.4,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "e1761e27212b86cb95c9add63b9295c18879e966f32baaab4660a557a320517a"
+    }
+  },
+  {
+    "file": "step-gravel-3.ogg",
+    "audition": "13",
+    "start": 1.1150000000000002,
+    "seconds": 0.3,
+    "loop": false,
+    "sha256": "d44ce78f437b871000bd67ce5a5b32ec215f0b5f331202a7c044b84575d73fed",
+    "source": {
+      "part": 6,
+      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Gravel_Loafers_Loops_Walk_Normal.wav",
+      "bytes": 9066764,
+      "id": "13",
+      "title": "碎石路脚步",
+      "category": "脚步",
+      "file": "samples/13.wav",
+      "seconds": 13.4,
+      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
+      "sha256": "e1761e27212b86cb95c9add63b9295c18879e966f32baaab4660a557a320517a"
+    }
+  }
+]

@@ -1,0 +1,37 @@
+{
+  "asset": "ranged-guard-r07.glb",
+  "version": "r07-v1",
+  "description": "Original R-07 VIGIL ranged guard; rigid articulated PBR armor. Not a skinned human.",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 72,
+  "triangles": 7768,
+  "materials": 8,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 14
+    },
+    {
+      "name": "Patrol",
+      "seconds": 0.9,
+      "tracks": 14
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 14
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 14
+    }
+  ],
+  "bytes": 892920,
+  "sha256": "18fd9cc4fa2716076a2f30c6e7eff46ca88fa664e8401194167b1bc59c59b177",
+  "sourceSha256": "f9bd2c9d404f7b9f6f712d74039408a511e11699125be91d2f0e22aad58c08b0",
+  "textures": 0,
+  "externalDependencies": 0
+}

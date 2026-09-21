@@ -657,3 +657,9 @@
 - 修改：`abyss-rules.js` 核心移到 (0, 3.2, −7.7)，即主机前面板（z=−9）外的检修口；规则、护罩水位门槛、伤害均不变。视觉：新模型 Hull 的检修口正好包住核心，护罩阶段旧 cage 仍显示，无重叠。
 - 新增测试：`test-abyss-core-access.mjs`（正面／两侧真实几何射线先命中核心，盒外近战可及，高水位仍拒伤）；`test-abyss-browser.mjs`（原生开火＋电弧战刃击破 1500 HP、存档点恢复、后续四守卫与撤离）；`test-boss-core-access-browser.mjs`（八章 Boss 核心均能从真实可站立位置射到）。
 - 验证：`test-abyss`、`test-datacenter`、`test-enemy-roster-world` 通过；两条浏览器链 EXIT=0（`.tools/b9-abyss.log`、`.tools/b9-coreaccess.log`）；截图 `.tools/qa-abyss/abyss-exposed-front.png`、`abyss-exposed-side.png`。
+
+## 2026-09-21：station-look 基线重采（arena-boss 视觉预算增量）
+
+- 依据 2026-09-20 记录的红灯：`switchyard-world.js` 接入 `attachArenaBossVisual` 后 draw calls +1（高画质 +2）、三角 +2000～4150，超出纯材质批次的零增长基线。
+- 处理：旧基线保留为 `.tools/qa-station-look/before-pre-arena-boss.json`（q0/q1 calls 105/108/92，q2 204/207/191）；以当前源码重采 `before.json`（q0/q1 106/109/93，q2 206/209/193；三角 6962/7322/6062，q2 14124/14484/13224）；纹理 9/11、灯光 3、五阶段碰撞快照与天花板均与旧基线一致。
+- 验证：`STATION_CAPTURE=before` 与 `after` 两次运行 EXIT=0（`.tools/b10-station-before.log`、`b10-station-after.log`）。本条即该增量的正式记录，此后任何再增长都会重新触发红灯。

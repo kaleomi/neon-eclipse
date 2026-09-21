@@ -97,3 +97,7 @@
 - `weapon-models.js`
 - `app.js`
 - `scripts/build-cover-model.mjs`
+
+## 状态更新（2026-09-21）
+
+本文"主角第一人称"条目已完成：P01 SENTINEL 第一人称手臂（程序化 + `models/player-arms-p01.glb`，41 网格 / 4880 三角 / 5 段剪辑）已接入全部 8 把武器锚点，右手握把与左手支撑在 Node 契约（8/8）与真实浏览器（软件 WebGL，6/6）中验证 <1e-6 m；生产入口 `createWeapons()` 无 shim 零错误启动。验证记录、边界与可复现构建脚本见 `docs/mcp-player-arms-2026-09-21.md`。

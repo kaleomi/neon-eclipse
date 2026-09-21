@@ -13,3 +13,6 @@
 - rules：`test-helicopter-sling.mjs` 新块（投错区惩罚与重生、按序两段、重生期间事件忽略、末段损失后仍可完成、`complete` 与一次性奖励、done 后忽略事件、fresh run 无奖励、区外落下计损失、`platform` 区落在甲板高度）PASS；check 656/656；rules 除 `test-import-graph`（用户未提交的 6 个模型文件导致，与本批无关）外全过。
 - 浏览器：`test-helicopter-field-browser.mjs` 吊挂段延长：低空脱钩（区外）→ `slingRunRespawn>0` → 等待重生 → 重新挂钩 → 传送到车库区上空放下 → `slingRunLeg=1`、目标变为 island、`slingDeliveries=1`，截图 `heli-sling-run.png`；EXIT=0（`.tools/b20-heli-field4.log`）。
 - 测试时限调整：重生等待 15 s→45 s、Ctrl 降落 45 s→90 s。原因：吊挂段结束后直升机停在 ~13 m 而不是原来的 ~4 m，软件光栅下 `dt` 被钳到 0.1 使模拟时间被拉长；非产品行为变化。
+
+## 音效（2026-09-21 追加）
+事件计数 `audioSling` → `VEHICLE_EVENT_SFX`：hook→`vehicle.enter`(.6)、touchdown→`player.land`(.7)、delivered→`vehicle.checkpoint`、damaged/dropped→`vehicle.impact`(.8)、run complete→`objective.complete`。复用现有合成配方，无新采样。

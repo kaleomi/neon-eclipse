@@ -50,7 +50,9 @@ assert.equal(await page.getAttribute('body','data-vehicle-kind'),'helicopter');
 // Sling load: hover over the crate at hook height, F hooks (dataset + cable), F again releases; crate stays intact from a low release.
 {
  await page.evaluate(()=>window.__heliFixture.overCrate());await page.waitForTimeout(150);
+ const sfxBeforeHook=await page.evaluate(()=>window.neonVehicleAudio.sfx.stats().played);
  await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.slingHooked==='true',{},{timeout:5000});
+ await page.waitForFunction(n=>window.neonVehicleAudio.sfx.stats().played>n,sfxBeforeHook,{timeout:5000});// hook latch cue
  await page.waitForFunction(()=>Number(document.body.dataset.slingCargoY)>1,{},{timeout:5000});
  await page.screenshot({path:`${shots}/heli-sling.png`});
  await page.evaluate(()=>window.__heliFixture.lowerForRelease());await page.waitForFunction(()=>Number(document.body.dataset.slingCargoY)<.6,{},{timeout:5000});

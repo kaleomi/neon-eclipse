@@ -39,11 +39,11 @@
   "bytes": 661320,
   "sha256": "7243c27ddcddc6b918ce717f79abcaf9d0000ea29553405d4ef33d1ec59de89b",
   "sourceHashes": {
-    "characters/player-arms/player-arms.js": "b7a7b48e94b3a22aed2d2e4d40d9cebec8b9c3ade53b8d94a4d874817042a5df"
+    "characters/player-arms.js": "1958155fc0dc910ab7199bd603708996f366f84113101aa770f0287abce3ddf6"
   },
   "generator": {
     "three": "186",
-    "node": "20.20.2"
+    "node": "24.15.0"
   },
   "textures": 0,
   "externalDependencies": 0

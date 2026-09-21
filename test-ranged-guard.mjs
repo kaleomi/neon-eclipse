@@ -18,7 +18,7 @@ const legacy = createEnemyModel('ranged', {rangedSample: false});
 const current = createEnemyModel('ranged', {loadRangedAsset: false});
 check('ranged only; root-level legacy hit geometry/transforms unchanged', () => {
   assert.deepEqual(proxySignature(current), proxySignature(legacy));
-  assert(current.children.filter(o => o.isMesh).every(o => !o.visible && o.userData.rangedGuardProxy));
+  assert(current.children.filter(o => o.isMesh).every(o => o.visible && !o.material.visible && o.userData.rangedGuardProxy));
   assert(current.userData.parts.guard); assert.equal(current.userData.rangedGuardSource, 'procedural');
   assert.equal(ENEMY_TYPES.ranged.hp, 60); assert.equal(ENEMY_TYPES.ranged.radius, .65);
 });

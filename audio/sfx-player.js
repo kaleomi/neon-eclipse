@@ -1,6 +1,7 @@
 // Plays catalog recipes through the bus with per-event cooldowns, a global voice cap,
 // random pitch variation, and optional 3D placement (pan + distance + occlusion low-pass).
 import {SFX} from './sfx-catalog.js';
+import {isCriticalSfx,RESERVED_CRITICAL_VOICES} from './sfx-priority.js';
 import {renderRecipe,recipeDuration} from './synth.js';
 import {RECORDED_EVENTS,recordedBank} from './recorded-audio.js';
 export const MAX_VOICES=24;
@@ -36,7 +37,8 @@ export function createSfxPlayer(bus,{catalog=SFX,random=Math.random,preloadFiles
   const now=ctx.currentTime;
   const cd=recipe.cooldown||0;
   if(cd&&now-(last.get(name)??-1)<cd){dropped++;return false;}
-  if(active>=MAX_VOICES){dropped++;return false;}
+  const limit=isCriticalSfx(name)?MAX_VOICES:MAX_VOICES-RESERVED_CRITICAL_VOICES;
+  if(active>=limit){dropped++;return false;}
   last.set(name,now);
   let destination=bus.input(recipe.bus||'sfx');if(!destination)return false;
   let g=gain;const spatialNodes=[];

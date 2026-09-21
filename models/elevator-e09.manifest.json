@@ -1,0 +1,48 @@
+{
+  "asset": "elevator-e09.glb",
+  "id": "E09",
+  "version": "e09-v1",
+  "role": "elevator",
+  "name": "ELEVATOR · 中枢升降守卫",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 19,
+  "triangles": 1960,
+  "materials": 6,
+  "articulatedNodes": 7,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 21
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 21
+    },
+    {
+      "name": "Exposed",
+      "seconds": 2.4,
+      "tracks": 21
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 21
+    }
+  ],
+  "bytes": 260396,
+  "sha256": "97ba956584e1c49ac3143f46802bd58ab254580832f9174294ffda03d5ac57a9",
+  "sourceHashes": {
+    "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+    "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

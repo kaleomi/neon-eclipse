@@ -1,0 +1,53 @@
+{
+  "asset": "harborElite-h18.glb",
+  "id": "H18",
+  "version": "h18-v1",
+  "role": "harborElite",
+  "name": "BREAKWATER · 港务镇压者",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 60,
+  "triangles": 5636,
+  "materials": 6,
+  "articulatedNodes": 16,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 48
+    },
+    {
+      "name": "Patrol",
+      "seconds": 1.2,
+      "tracks": 48
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 48
+    },
+    {
+      "name": "Vent",
+      "seconds": 2.4,
+      "tracks": 48
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 48
+    }
+  ],
+  "bytes": 735572,
+  "sha256": "ad1e7103cadd50e1956531a268b4840cf572c10149a1240ae63067a3c0957bf3",
+  "sourceHashes": {
+    "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+    "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

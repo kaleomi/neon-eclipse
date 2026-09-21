@@ -1,3 +1,4 @@
+import {hideProxyDraw} from './hit-proxies.js';
 // A03/H12 visual adapters. The pre-existing flat meshes remain exact combat proxies.
 import {GLTFLoader} from '../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import {GUARD_VARIANTS,createGuardVariant,cloneGuardVariant,bindGuardVariant,poseGuardVariant,disposeGuardVariant} from './guard-variants.js';
@@ -19,7 +20,7 @@ export function attachGuardVariant(group,type,{loadAsset=typeof document!=='unde
   const cached=loadAsset&&assets.get(type)?.template;
   const visual=cached?cloneGuardVariant(cached,type,bindings):createGuardVariant(type,bindings);
   const proxies=group.children.filter(o=>o.isMesh);
-  for(const o of proxies){o.visible=false;o.userData.guardVariantProxy=true;}
+  hideProxyDraw(group,proxies,'guardVariantProxy');
   const state={type,visual,proxies,pose:{time:0,mode:'Idle'},lastHp:null,hitAt:-Infinity};
   parts.variantModel=state;group.name=spec.id+'_'+type.toUpperCase()+'_GUARD';
   group.userData.guardVariantSource=cached?'glb':'procedural';group.userData.ownedMaterials.push(...visual.materials);group.add(visual.root);

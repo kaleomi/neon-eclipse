@@ -30,10 +30,12 @@ export function validFramePerf(p){
  return int(p.frames,1e8)&&int(p.avgFps,1000)&&num(p.p50Ms,1e5)&&num(p.p95Ms,1e5)&&num(p.maxMs,1e6)&&int(p.long,1e8)&&(p.quality===null||int(p.quality,2));
 }
 export function summarizeFramePerf(records){
- const list=records.map(r=>r.perf).filter(p=>p&&validFramePerf(p));
+ const list=records.map(r=>r.perf).filter(p=>p&&validFramePerf(p)&&p.frames>0);
  if(!list.length)return {samples:0,avgFps:null,p95Ms:null,worstMs:null,longFrames:0,byQuality:{}};
- const weight=list.reduce((n,p)=>n+p.frames,0)||1;
+ // Discarded frames are not evidence for weighting a retained-window average.
+ const sampleWeight=p=>Math.min(p.frames,FRAME_STATS_MAX_SAMPLES);
+ const weight=list.reduce((n,p)=>n+sampleWeight(p),0)||1;
  const byQuality={};for(const p of list){const key=p.quality===null?'unknown':String(p.quality);const q=byQuality[key]||(byQuality[key]={attempts:0,avgFps:0});q.attempts++;q.avgFps+=p.avgFps;}
  for(const q of Object.values(byQuality))q.avgFps=Math.round(q.avgFps/q.attempts);
- return {samples:list.length,avgFps:Math.round(list.reduce((n,p)=>n+p.avgFps*p.frames,0)/weight),p95Ms:Math.round(Math.max(...list.map(p=>p.p95Ms))*10)/10,worstMs:Math.round(Math.max(...list.map(p=>p.maxMs))*10)/10,longFrames:list.reduce((n,p)=>n+p.long,0),byQuality};
+ return {samples:list.length,avgFps:Math.round(list.reduce((n,p)=>n+p.avgFps*sampleWeight(p),0)/weight),p95Ms:Math.round(Math.max(...list.map(p=>p.p95Ms))*10)/10,worstMs:Math.round(Math.max(...list.map(p=>p.maxMs))*10)/10,longFrames:list.reduce((n,p)=>n+p.long,0),byQuality};
 }

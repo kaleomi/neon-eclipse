@@ -17,7 +17,7 @@ const signature=g=>g.children.filter(o=>o.isMesh).map(o=>({zone:o.userData.hitZo
 const before=createEnemyModel('engineer',{engineerSample:false}),after=createEnemyModel('engineer',{loadEngineerAsset:false});
 test('engineer keeps FIELD_ENGINEER name, exact hit meshes and unchanged role parameters',()=>{
  assert.equal(after.name,before.name);assert.equal(after.name,'FIELD_ENGINEER');assert.deepEqual(signature(after),signature(before));
- assert(after.children.filter(o=>o.isMesh).every(o=>!o.visible&&o.userData.engineerProxy));
+ assert(after.children.filter(o=>o.isMesh).every(o=>o.visible&&!o.material.visible&&o.userData.engineerProxy));
  assert.equal(ENEMY_TYPES.engineer.hp,90);assert.equal(ENEMY_TYPES.engineer.radius,.65);assert.equal(ENEMY_TYPES.engineer.attack.charge,1);
 });
 test('17,400 rays preserve distance, hit zone and root ownership across six poses',()=>{

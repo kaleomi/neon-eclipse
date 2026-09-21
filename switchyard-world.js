@@ -1,3 +1,5 @@
+import {attachArenaBossVisual} from './characters/arena-boss-runtime.js';
+import {refineDispatchMaterials,STATION_CONTROL_IDLE} from './station-look.js';
 import {createBossAdapter} from './boss-adapter.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
@@ -13,20 +15,24 @@ export function createSwitchyardWorld(scene,obstacles,{onEvent=()=>{}}={}){
  const owned=[];const materials=[];
  const mat=(color,basic=false)=>{const m=basic?new T.MeshBasicMaterial({color}):new T.MeshStandardMaterial({color,metalness:.5,roughness:.5});materials.push(m);return m;};
  const steel=mat(0x183541),bronze=mat(0x997143),railMat=mat(0x587887),cyan=mat(0x75fff1,true),amber=mat(0xffc36d,true),red=mat(0xff5366,true);
+ refineDispatchMaterials({steel,bronze,railMat});
  function box(w,h,d,x,y,z,m=steel,parent=root){const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);parent.add(mesh);return mesh;}
  SWITCHYARD_SOLIDS.forEach((o,i)=>{const mesh=box(o.w,o.h,o.d,o.x,o.h/2,o.z,i===0?steel:bronze);const solid={...o,bottom:0,top:o.h,mesh,switchyard:true};obstacles.push(solid);owned.push(solid);});
+ const artFrameStart=root.children.length;
  // Industrial control tower: dark frame around the low, melee-reachable core.
  for(const dx of [-.85,.85])for(const dz of [-.85,.85])box(.14,2.1,.14,22+dx,2,-25+dz,steel);
  box(2.1,.16,2.1,22,3.1,-25,steel);box(1.8,.06,1.8,22,3.21,-25,amber);
+ const artHull=root.children.slice(artFrameStart);
  const coreMat=mat(0x75fff1,true);coreMat.transparent=true;
  const core=new T.Mesh(new T.IcosahedronGeometry(.95,1),coreMat);core.position.set(SWITCHYARD_CORE.x,SWITCHYARD_CORE.y,SWITCHYARD_CORE.z);core.userData.overseer='core';root.add(core);
  const shieldMat=mat(0xffc36d,true);shieldMat.wireframe=true;
  const cage=new T.Mesh(new T.IcosahedronGeometry(1.35,1),shieldMat);cage.position.copy(core.position);cage.userData.overseer='core';root.add(cage);
  const ring=new T.Mesh(new T.TorusGeometry(1.3,.07,6,32),cyan);ring.rotation.x=Math.PI/2;ring.position.set(22,.12,-25);root.add(ring);
+ const visual=attachArenaBossVisual('switchyard',{parent:root,core,hide:artHull,materials});
  // Permanent numbered controls; all geometry stays inside its matching solid (apart from non-solid lamps).
  const lamps=SWITCHYARD_SWITCHES.map((p,i)=>{
   const group=new T.Group();group.position.set(p.x,1.25,p.z);root.add(group);
-  const m=mat(0x42535a,true);
+  const m=mat(STATION_CONTROL_IDLE,true);
   // Numerals face west, toward the dispatch arena. Seven segment digits, no font dependency.
   const segments=[[0,.22,.32,.045],[.16,.11,.045,.22],[.16,-.11,.045,.22],[0,-.22,.32,.045],[-.16,-.11,.045,.22],[-.16,.11,.045,.22],[0,0,.32,.045]];
   const digits=[[1,2],[0,1,6,4,3],[0,1,6,2,3]];
@@ -54,13 +60,13 @@ export function createSwitchyardWorld(scene,obstacles,{onEvent=()=>{}}={}){
   coreMat.opacity=s.phase==='defeated'?s.timer/SWITCHYARD.defeat:1;
   ring.scale.setScalar(s.phase==='defeated'?1+(1-s.timer/SWITCHYARD.defeat)*1.5:1);
   core.rotation.y=displayTime*.5;cage.rotation.y=-displayTime*.2;
-  lamps.forEach((m,i)=>m.color.setHex(rules.alive&&s.phase==='shield'&&r.lane===i?(r.armed?0x75fff1:0xffc36d):0x42535a));
+  lamps.forEach((m,i)=>m.color.setHex(rules.alive&&s.phase==='shield'&&r.lane===i?(r.armed?0x75fff1:0xffc36d):STATION_CONTROL_IDLE));
   routes.forEach((rte,i)=>{rte.group.visible=s.active&&s.phase==='shield'&&i===r.lane;rte.material.color.setHex(r.mode==='moving'?0xff5366:r.armed?0x75fff1:0xffc36d);});
   cart.visible=rules.alive&&s.phase==='shield'&&r.mode==='moving';
   if(cart.visible){const t=1-r.timer/SWITCHYARD.travel,p=trainPoint(r.lane,t,r.armed),next=trainPoint(r.lane,Math.min(1,t+.01),r.armed);cart.position.set(p.x,0,p.z);cart.rotation.y=-Math.atan2(next.z-p.z,next.x-p.x);}
   blastRing.visible=blastDot.visible=rules.alive&&rules.blast.mode==='warning';
   if(rules.blast.target){const p=rules.blast.target;blastRing.position.set(p.x,.075,p.z);blastDot.position.set(p.x,.08,p.z);}
-  ui.update(rules,playing,interaction,feedback,haloMarkText(haloTarget));root.updateMatrixWorld(true);
+  visual.sync({exposed:s.phase==='exposed',aim:rules.blast.mode!=='rest'});ui.update(rules,playing,interaction,feedback,haloMarkText(haloTarget));root.updateMatrixWorld(true);
  }
  function setStage(index){
   if(stage===index)return;breaker.reset();stage=index;rules.reset();delete haloTarget.haloMark;interaction={};feedback=0;displayTime=0;sync(false);
@@ -89,7 +95,7 @@ export function createSwitchyardWorld(scene,obstacles,{onEvent=()=>{}}={}){
  function update(dt,player,feetY,playing){
   if(!playing){rules.cancelInteraction();interaction={};sync(false);return 0;}
   if(!rules.blocking){sync(playing);return 0;}
-  stepHaloMark(haloTarget,dt);battle.tick(dt);displayTime+=Math.max(0,dt);feedback=Math.max(0,feedback-dt);
+  visual.tick(dt);stepHaloMark(haloTarget,dt);battle.tick(dt);displayTime+=Math.max(0,dt);feedback=Math.max(0,feedback-dt);
   const damage=rules.tick(dt,{player,feetY,blastVisible:(_,p)=>{
    origin.set(SWITCHYARD_CORE.x,SWITCHYARD_CORE.y,SWITCHYARD_CORE.z);direction.set(p.x,feetY+1,p.z).sub(origin);ray.set(origin,direction.clone().normalize());ray.far=direction.length();return !ray.intersectObjects(obstacles.map(o=>o.mesh),false).length;
   }});
@@ -109,7 +115,7 @@ export function createSwitchyardWorld(scene,obstacles,{onEvent=()=>{}}={}){
    if(!el.hidden){el.style.left=((p.x+1)*innerWidth/2)+'px';el.style.top=((1-p.y)*innerHeight/2)+'px';el.textContent=`${i+1} 号道岔${i===rules.rail.lane?' · 当前来车':''}`;el.style.borderColor=i===rules.rail.lane?'#ffcb7c':'#617b85';}
   });
  }
- function dispose(){clear();scene.remove(root);for(const o of owned){const i=obstacles.indexOf(o);if(i>=0)obstacles.splice(i,1);}root.traverse(m=>m.geometry?.dispose());materials.forEach(m=>m.dispose());ui.panel.remove();ui.markers.forEach(m=>m.remove());}
+ function dispose(){clear();visual.dispose();scene.remove(root);for(const o of owned){const i=obstacles.indexOf(o);if(i>=0)obstacles.splice(i,1);}root.traverse(m=>m.geometry?.dispose());materials.forEach(m=>m.dispose());ui.panel.remove();ui.markers.forEach(m=>m.remove());}
  clear();return {interruptCharge,boss,setStage,prepareMission,canAdvance:m=>m.index!==3||!m.defending||(rules.state.phase==='defeated'&&!rules.blocking),clear,interact,update,hit,updateMarkers,dispose,battle,
   origin:new T.Vector3(SWITCHYARD_CORE.x,0,SWITCHYARD_CORE.z),
   get state(){return rules.state;},get rail(){return {...rules.rail};},get blocking(){return rules.blocking;},

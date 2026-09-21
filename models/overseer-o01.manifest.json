@@ -1,0 +1,48 @@
+{
+  "asset": "overseer-o01.glb",
+  "id": "O01",
+  "version": "o01-v1",
+  "role": "overseer",
+  "name": "OVERSEER · 枢纽监察者",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 17,
+  "triangles": 3000,
+  "materials": 6,
+  "articulatedNodes": 5,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 15
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 15
+    },
+    {
+      "name": "Exposed",
+      "seconds": 2.4,
+      "tracks": 15
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 15
+    }
+  ],
+  "bytes": 304804,
+  "sha256": "4cf23ad258f2c8c275d914042eceba5551578bc4cad7368577dd6467185898ef",
+  "sourceHashes": {
+    "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+    "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

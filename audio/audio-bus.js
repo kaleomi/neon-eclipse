@@ -50,22 +50,36 @@ export function createAudioBus({storage,contextFactory=defaultContextFactory,now
   nodes.master.gain.cancelScheduledValues(t);nodes.master.gain.setTargetAtTime(effectiveGain(settings,'master'),t,ramp);
   for(const b of BUSES){if(b==='master')continue;const g=sliderToGain(settings[b]);nodes[b].gain.cancelScheduledValues(t);nodes[b].gain.setTargetAtTime(settings.muted?0:g,t,ramp);}
  }
- // Must be called from a user gesture (click / keydown). Safe to call repeatedly.
- async function unlock(){
-  try{
-   if(!ctx){ctx=contextFactory();if(!ctx)return false;build();}
-   if(ctx.state!=='running'&&suspendedBy.size===0)await ctx.resume();
-   unlocked=ctx.state==='running'||suspendedBy.size>0;
-   emit();return unlocked;
-  }catch{return false;}
- }
- // Suspend reasons stack: pause + hidden both hold; audio resumes only when all are released.
- async function hold(reason){suspendedBy.add(reason);if(ctx&&ctx.state==='running'){try{await ctx.suspend();}catch{}}emit();}
- async function release(reason){suspendedBy.delete(reason);if(ctx&&suspendedBy.size===0&&unlocked&&ctx.state==='suspended'){try{await ctx.resume();}catch{}}emit();}
+  // Web Audio transitions are asynchronous. Serialize them and re-check current intent
+  // after every completion, so a stale resume/suspend cannot defeat newer holds.
+  let transition=Promise.resolve();
+  function enqueue(fn){const job=transition.then(fn);transition=job.catch(()=>{});return job;}
+  async function reconcile(){
+    while(ctx&&ctx.state!=='closed'){
+      const desired=unlocked&&suspendedBy.size===0?'running':'suspended';
+      if(ctx.state===desired)return;
+      await (desired==='running'?ctx.resume():ctx.suspend());
+    }
+  }
+  // Must be called from a user gesture (click / keydown). Safe to call repeatedly.
+  function unlock(){
+    return enqueue(async()=>{
+      const previous=unlocked;
+      try{
+        if(!ctx){ctx=contextFactory();if(!ctx)return false;build();}
+        unlocked=true;await reconcile();
+        unlocked=ctx.state!=='closed'&&(ctx.state==='running'||suspendedBy.size>0);
+        emit();return unlocked;
+      }catch{unlocked=previous;emit();return false;}
+    });
+  }
+  // Record intent immediately; release only runs when *all* reasons are gone.
+  function hold(reason){suspendedBy.add(reason);return enqueue(async()=>{try{await reconcile();}catch{}emit();});}
+  function release(reason){suspendedBy.delete(reason);return enqueue(async()=>{try{await reconcile();}catch{}emit();});}
  function setVolume(bus,value){if(!BUSES.includes(bus))return false;settings[bus]=clamp01(value);writeAudioSettings(settings,storage);applyGains();emit();return true;}
  function setMuted(value){settings.muted=value===true;writeAudioSettings(settings,storage);applyGains();emit();return settings.muted;}
  return {
-  get context(){return ctx;},get ready(){return !!ctx&&ctx.state==='running';},
+  get context(){return ctx;},get ready(){return !!ctx&&ctx.state==='running'&&suspendedBy.size===0;},
   get settings(){return {...settings};},
   input(bus){return nodes?nodes[BUSES.includes(bus)&&bus!=='master'?bus:'sfx']:null;},
   unlock,hold,release,setVolume,setMuted,snapshot,

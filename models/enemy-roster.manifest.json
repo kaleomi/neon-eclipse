@@ -1,0 +1,1280 @@
+{
+  "version": "roster-v1",
+  "ordinary": 15,
+  "bosses": 9,
+  "total": 24,
+  "assetKind": "rigid articulated hard-surface game models",
+  "assets": [
+    {
+      "asset": "ranged-guard-r07.glb",
+      "version": "r07-v1",
+      "description": "Original R-07 VIGIL ranged guard; rigid articulated PBR armor. Not a skinned human.",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 72,
+      "triangles": 7768,
+      "materials": 8,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 14
+        },
+        {
+          "name": "Patrol",
+          "seconds": 0.9,
+          "tracks": 14
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 14
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 14
+        }
+      ],
+      "bytes": 892920,
+      "sha256": "18fd9cc4fa2716076a2f30c6e7eff46ca88fa664e8401194167b1bc59c59b177",
+      "sourceSha256": "f9bd2c9d404f7b9f6f712d74039408a511e11699125be91d2f0e22aad58c08b0",
+      "textures": 0,
+      "externalDependencies": 0,
+      "id": "R07",
+      "name": "VIGIL · 远程守卫",
+      "role": "ranged",
+      "category": "infantry",
+      "gameScale": 1,
+      "newInBatch": false
+    },
+    {
+      "asset": "assault-guard-a03.glb",
+      "version": "a03-v1",
+      "type": "assault",
+      "code": "A–03",
+      "name": "ASSAULT · 突击守卫",
+      "label": "突击守卫",
+      "description": "Original rigid articulated armor; not a skinned human; visual-only geometry.",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "displayScale": 1,
+      "meshes": 68,
+      "triangles": 5992,
+      "materials": 6,
+      "rigidJoints": 13,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 14
+        },
+        {
+          "name": "Patrol",
+          "seconds": 0.65,
+          "tracks": 14
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 14
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 14
+        }
+      ],
+      "bytes": 556688,
+      "sha256": "3440e9d08fc157b713bd63908ef5af317dc5d7be0f49d6ab314e5ce325b67751",
+      "sourceHashes": {
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e",
+        "characters/guard-variants.js": "ca2aad0bf2d5bc0ebdccda8fb60fcdc47d1d36164fa44f934a5b8014c3a0cd74"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "id": "A03",
+      "role": "assault",
+      "category": "infantry",
+      "gameScale": 1,
+      "newInBatch": false
+    },
+    {
+      "asset": "heavy-guard-h12.glb",
+      "version": "h12-v1",
+      "type": "heavy",
+      "code": "H–12",
+      "name": "HEAVY · 重装守卫",
+      "label": "重装守卫",
+      "description": "Original rigid articulated armor; not a skinned human; visual-only geometry.",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "displayScale": 1.12,
+      "meshes": 68,
+      "triangles": 7972,
+      "materials": 7,
+      "rigidJoints": 13,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 14
+        },
+        {
+          "name": "Patrol",
+          "seconds": 1.25,
+          "tracks": 14
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 14
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 14
+        }
+      ],
+      "coreSocket": {
+        "node": "H12_CoreSocket",
+        "position": [
+          0,
+          1.28,
+          -0.6
+        ],
+        "radius": 0.21,
+        "animated": false
+      },
+      "bytes": 703604,
+      "sha256": "51599737bcdc8621292e6a8a43e88d16fa437484cb925fb752df775a1cc6dcbf",
+      "sourceHashes": {
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e",
+        "characters/guard-variants.js": "ca2aad0bf2d5bc0ebdccda8fb60fcdc47d1d36164fa44f934a5b8014c3a0cd74"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "id": "H12",
+      "role": "heavy",
+      "category": "infantry",
+      "gameScale": 1.12,
+      "newInBatch": false
+    },
+    {
+      "asset": "engineer-guard-e02.glb",
+      "version": "e02-v1",
+      "role": "engineer",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "description": "Original MENDER field engineer; rigid work armor, service pack and auxiliary manipulator. Not a skinned human.",
+      "meshes": 84,
+      "triangles": 9540,
+      "materials": 7,
+      "articulatedNodes": 18,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.8,
+          "tracks": 19
+        },
+        {
+          "name": "Patrol",
+          "seconds": 1,
+          "tracks": 19
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 19
+        },
+        {
+          "name": "Repair",
+          "seconds": 2,
+          "tracks": 19
+        },
+        {
+          "name": "Deploy",
+          "seconds": 2.5,
+          "tracks": 19
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 19
+        }
+      ],
+      "bytes": 929100,
+      "sha256": "fadddae69cd52f8a310c9139bb5cf56374a2f8a5c5f766e4291d4633d1c4532b",
+      "sourceHashes": {
+        "characters/engineer-guard.js": "0700d51902f5af9c774626e7ae4d397ce5369a22c2bd5e7b9b44949eb520fb94",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "id": "E02",
+      "name": "MENDER · 战地工程兵",
+      "category": "infantry",
+      "gameScale": 1,
+      "newInBatch": false
+    },
+    {
+      "asset": "commander-guard-c01.glb",
+      "version": "c01-v1",
+      "role": "commander",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "description": "Original VECTOR tactical commander; rigid segmented mantle, dual communications blades and tactical terminal. Not a skinned human.",
+      "meshes": 79,
+      "triangles": 7100,
+      "materials": 7,
+      "articulatedNodes": 18,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.6,
+          "tracks": 19
+        },
+        {
+          "name": "Patrol",
+          "seconds": 1.05,
+          "tracks": 19
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 19
+        },
+        {
+          "name": "Command",
+          "seconds": 2.6,
+          "tracks": 19
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 19
+        }
+      ],
+      "bytes": 720228,
+      "sha256": "f18ba848af1cc0164526b08a44ce601cc0a4dce2127c795d7e6f909bd8c3bdc5",
+      "sourceHashes": {
+        "characters/commander-guard.js": "4ef6cbe8f13b124385cb5fe13422225caab2e43769762baf137bd4eeb0dae301",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "id": "C01",
+      "name": "VECTOR · 战术指挥官",
+      "category": "infantry",
+      "gameScale": 1,
+      "newInBatch": false
+    },
+    {
+      "asset": "sniper-guard-s09.glb",
+      "version": "s09-v1",
+      "role": "sniper",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "description": "Original KESTREL sniper; scoped long rifle, reconnaissance optics and analytic two-handed rigid-node posing. Not a skinned human.",
+      "meshes": 66,
+      "triangles": 7208,
+      "materials": 6,
+      "articulatedNodes": 15,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.8,
+          "tracks": 18
+        },
+        {
+          "name": "Patrol",
+          "seconds": 1.12,
+          "tracks": 18
+        },
+        {
+          "name": "Aim",
+          "seconds": 1.6,
+          "tracks": 18
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 18
+        }
+      ],
+      "bytes": 664648,
+      "sha256": "4c5243c5c3f0063e89876ac3dbd3d6910f971dbb74aa57864c527cc1c50aab09",
+      "sourceHashes": {
+        "characters/sniper-guard.js": "39e5136c2d63d7624e7dc9c4530291279d40648394ce39c6280546827226389c",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "id": "S09",
+      "name": "KESTREL · 狙击守卫",
+      "category": "infantry",
+      "gameScale": 1.02,
+      "newInBatch": false
+    },
+    {
+      "asset": "shield-guard-b04.glb",
+      "version": "b04-v1",
+      "role": "shield",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "description": "Original BASTION shield carrier; projected tower shield, compact twin emitter and fixed rear weak core. Rigid-node animation, not a skinned human.",
+      "meshes": 72,
+      "triangles": 7884,
+      "materials": 8,
+      "articulatedNodes": 14,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.6,
+          "tracks": 16
+        },
+        {
+          "name": "Patrol",
+          "seconds": 1.18,
+          "tracks": 16
+        },
+        {
+          "name": "Aim",
+          "seconds": 0.8,
+          "tracks": 16
+        },
+        {
+          "name": "Exposed",
+          "seconds": 2.6,
+          "tracks": 16
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 16
+        }
+      ],
+      "bytes": 729664,
+      "sha256": "bc66d573a39c417d35cfc75293820c94048a3e63be52fea7fc28bf5e2c7d5e8d",
+      "sourceHashes": {
+        "characters/shield-guard.js": "43c5b9c7601c19ca304da86ab6eaeba2b04ca3eb0c834bc759e9d327241653ad",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "id": "B04",
+      "name": "BASTION · 护盾兵",
+      "category": "infantry",
+      "gameScale": 1.1,
+      "newInBatch": false
+    },
+    {
+      "asset": "stalker-l05.glb",
+      "id": "L05",
+      "version": "l05-v1",
+      "role": "stalker",
+      "name": "VEIL · 潜行者",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 50,
+      "triangles": 4156,
+      "materials": 5,
+      "articulatedNodes": 15,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 45
+        },
+        {
+          "name": "Patrol",
+          "seconds": 1.2,
+          "tracks": 45
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 45
+        },
+        {
+          "name": "Cloak",
+          "seconds": 2.4,
+          "tracks": 45
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 45
+        }
+      ],
+      "bytes": 604772,
+      "sha256": "892afce38253e4e4525201dc29be6042e69b491708bb22396edf785dfa4ecbb0",
+      "sourceHashes": {
+        "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "specialist",
+      "gameScale": 0.95,
+      "newInBatch": true
+    },
+    {
+      "asset": "rusher-r11.glb",
+      "id": "R11",
+      "version": "r11-v1",
+      "role": "rusher",
+      "name": "FUSE · 自爆奔袭者",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 47,
+      "triangles": 4264,
+      "materials": 5,
+      "articulatedNodes": 14,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 42
+        },
+        {
+          "name": "Sprint",
+          "seconds": 1.2,
+          "tracks": 42
+        },
+        {
+          "name": "Armed",
+          "seconds": 2.4,
+          "tracks": 42
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 42
+        }
+      ],
+      "bytes": 530084,
+      "sha256": "a1422dce1878ccc7679063d716365a646dcdba086d7ebcb2ba6125d408e2fc52",
+      "sourceHashes": {
+        "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "specialist",
+      "gameScale": 0.92,
+      "newInBatch": true
+    },
+    {
+      "asset": "harborElite-h18.glb",
+      "id": "H18",
+      "version": "h18-v1",
+      "role": "harborElite",
+      "name": "BREAKWATER · 港务镇压者",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 60,
+      "triangles": 5636,
+      "materials": 6,
+      "articulatedNodes": 16,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 48
+        },
+        {
+          "name": "Patrol",
+          "seconds": 1.2,
+          "tracks": 48
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 48
+        },
+        {
+          "name": "Vent",
+          "seconds": 2.4,
+          "tracks": 48
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 48
+        }
+      ],
+      "bytes": 735572,
+      "sha256": "ad1e7103cadd50e1956531a268b4840cf572c10149a1240ae63067a3c0957bf3",
+      "sourceHashes": {
+        "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "specialist",
+      "gameScale": 1.12,
+      "newInBatch": true
+    },
+    {
+      "asset": "hound-k06.glb",
+      "id": "K06",
+      "version": "k06-v1",
+      "role": "hound",
+      "name": "TRACKER · 猎犬机",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 26,
+      "triangles": 2292,
+      "materials": 5,
+      "articulatedNodes": 11,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 33
+        },
+        {
+          "name": "Run",
+          "seconds": 1.2,
+          "tracks": 33
+        },
+        {
+          "name": "Pounce",
+          "seconds": 2.4,
+          "tracks": 33
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 33
+        }
+      ],
+      "bytes": 333300,
+      "sha256": "00ee2726a39c46033bbd32c81f839937919a6d0fc20830dbdfa5a90e3d9805dd",
+      "sourceHashes": {
+        "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "mechanical",
+      "gameScale": 0.9,
+      "newInBatch": true
+    },
+    {
+      "asset": "drone-d08.glb",
+      "id": "D08",
+      "version": "d08-v1",
+      "role": "drone",
+      "name": "VECTOR POD · 普通无人机",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 25,
+      "triangles": 2416,
+      "materials": 5,
+      "articulatedNodes": 10,
+      "animations": [
+        {
+          "name": "Hover",
+          "seconds": 2.4,
+          "tracks": 30
+        },
+        {
+          "name": "Advance",
+          "seconds": 1.2,
+          "tracks": 30
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 30
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 30
+        }
+      ],
+      "bytes": 329276,
+      "sha256": "870b6ec3585bf5cf6763184f5df674a58b5f0db7a7c98b5761a6e8c72924748b",
+      "sourceHashes": {
+        "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "mechanical",
+      "gameScale": 0.8,
+      "newInBatch": true
+    },
+    {
+      "asset": "swarmDrone-d02.glb",
+      "id": "D02",
+      "version": "d02-v1",
+      "role": "swarmDrone",
+      "name": "MOTE · 编队无人机",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 16,
+      "triangles": 2132,
+      "materials": 5,
+      "articulatedNodes": 5,
+      "animations": [
+        {
+          "name": "Hover",
+          "seconds": 2.4,
+          "tracks": 15
+        },
+        {
+          "name": "Formation",
+          "seconds": 1.2,
+          "tracks": 15
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 15
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 15
+        }
+      ],
+      "bytes": 234752,
+      "sha256": "c970c875c6ece29e879c713fac21442bb5bbd26dd520c0fa702d8fcebe62b406",
+      "sourceHashes": {
+        "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "mechanical",
+      "gameScale": 0.8,
+      "newInBatch": true
+    },
+    {
+      "asset": "sentry-t03.glb",
+      "id": "T03",
+      "version": "t03-v1",
+      "role": "sentry",
+      "name": "WATCHTOWER · 哨兵炮塔",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 16,
+      "triangles": 1564,
+      "materials": 6,
+      "articulatedNodes": 5,
+      "animations": [
+        {
+          "name": "Scan",
+          "seconds": 2.4,
+          "tracks": 15
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 15
+        },
+        {
+          "name": "Disabled",
+          "seconds": 2.4,
+          "tracks": 15
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 15
+        }
+      ],
+      "bytes": 200568,
+      "sha256": "3cd338708ab522d3a776900dcef93db28ad10b03c8aabfc4485f85450a0fabf7",
+      "sourceHashes": {
+        "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "mechanical",
+      "gameScale": 1,
+      "newInBatch": true
+    },
+    {
+      "asset": "artilleryMech-m20.glb",
+      "id": "M20",
+      "version": "m20-v1",
+      "role": "artilleryMech",
+      "name": "SIEGEBREAK · 重炮机甲",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 26,
+      "triangles": 1892,
+      "materials": 6,
+      "articulatedNodes": 10,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 30
+        },
+        {
+          "name": "Patrol",
+          "seconds": 1.2,
+          "tracks": 30
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 30
+        },
+        {
+          "name": "Vent",
+          "seconds": 2.4,
+          "tracks": 30
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 30
+        }
+      ],
+      "bytes": 335456,
+      "sha256": "27a5cd804a9868e0d081b75894602125b47c34b03614b8c4b375186a76cf6d6c",
+      "sourceHashes": {
+        "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "mechanical",
+      "gameScale": 1.35,
+      "newInBatch": true
+    },
+    {
+      "asset": "warden-w01.glb",
+      "id": "W01",
+      "version": "w01-v1",
+      "role": "warden",
+      "name": "THE WARDEN · 典狱长",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 67,
+      "triangles": 6208,
+      "materials": 6,
+      "articulatedNodes": 19,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 57
+        },
+        {
+          "name": "Patrol",
+          "seconds": 1.2,
+          "tracks": 57
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 57
+        },
+        {
+          "name": "Overload",
+          "seconds": 2.4,
+          "tracks": 57
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 57
+        }
+      ],
+      "bytes": 835952,
+      "sha256": "7c8db6b3ecc12e71dbf708677a2802784d52cf3237b243178664c3029d4cc7da",
+      "sourceHashes": {
+        "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "boss",
+      "gameScale": 1.9,
+      "newInBatch": true
+    },
+    {
+      "asset": "switchyard-y02.glb",
+      "id": "Y02",
+      "version": "y02-v1",
+      "role": "switchyard",
+      "name": "SWITCHYARD · 道岔主机",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 8,
+      "triangles": 2228,
+      "materials": 6,
+      "articulatedNodes": 3,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 9
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 9
+        },
+        {
+          "name": "Exposed",
+          "seconds": 2.4,
+          "tracks": 9
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 9
+        }
+      ],
+      "bytes": 212108,
+      "sha256": "7165f430886c82dc3016aa044df9e5949eeb1bfc98619676d7d0cf08a57c9489",
+      "sourceHashes": {
+        "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "boss",
+      "gameScale": 1,
+      "newInBatch": true
+    },
+    {
+      "asset": "overseer-o01.glb",
+      "id": "O01",
+      "version": "o01-v1",
+      "role": "overseer",
+      "name": "OVERSEER · 枢纽监察者",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 17,
+      "triangles": 3000,
+      "materials": 6,
+      "articulatedNodes": 5,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 15
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 15
+        },
+        {
+          "name": "Exposed",
+          "seconds": 2.4,
+          "tracks": 15
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 15
+        }
+      ],
+      "bytes": 304804,
+      "sha256": "4cf23ad258f2c8c275d914042eceba5551578bc4cad7368577dd6467185898ef",
+      "sourceHashes": {
+        "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "boss",
+      "gameScale": 1,
+      "newInBatch": true
+    },
+    {
+      "asset": "elevator-e09.glb",
+      "id": "E09",
+      "version": "e09-v1",
+      "role": "elevator",
+      "name": "ELEVATOR · 中枢升降守卫",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 19,
+      "triangles": 1960,
+      "materials": 6,
+      "articulatedNodes": 7,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 21
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 21
+        },
+        {
+          "name": "Exposed",
+          "seconds": 2.4,
+          "tracks": 21
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 21
+        }
+      ],
+      "bytes": 260396,
+      "sha256": "97ba956584e1c49ac3143f46802bd58ab254580832f9174294ffda03d5ac57a9",
+      "sourceHashes": {
+        "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "boss",
+      "gameScale": 1,
+      "newInBatch": true
+    },
+    {
+      "asset": "skyhook-a17.glb",
+      "id": "A17",
+      "version": "a17-v1",
+      "role": "skyhook",
+      "name": "SKYHOOK · 追击直升机",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 19,
+      "triangles": 1800,
+      "materials": 6,
+      "articulatedNodes": 4,
+      "animations": [
+        {
+          "name": "Flight",
+          "seconds": 2.4,
+          "tracks": 12
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 12
+        },
+        {
+          "name": "Boarding",
+          "seconds": 2.4,
+          "tracks": 12
+        },
+        {
+          "name": "Exposed",
+          "seconds": 2.4,
+          "tracks": 12
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 12
+        }
+      ],
+      "bytes": 221456,
+      "sha256": "e062d1a67b88a358a7c463bc5f37808371d9154a39137c8e1f65293d03773f83",
+      "sourceHashes": {
+        "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "boss",
+      "gameScale": 1,
+      "newInBatch": true
+    },
+    {
+      "asset": "leviathan-n19.glb",
+      "id": "N19",
+      "version": "n19-v1",
+      "role": "leviathan",
+      "name": "LEVIATHAN · 港务旗舰炮台",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 9,
+      "triangles": 1764,
+      "materials": 6,
+      "articulatedNodes": 3,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 9
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 9
+        },
+        {
+          "name": "Exposed",
+          "seconds": 2.4,
+          "tracks": 9
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 9
+        }
+      ],
+      "bytes": 179504,
+      "sha256": "edeaf3439faa77f7f55cd974e6c38bce78d316c110ad75dba88186d13bdb3e93",
+      "sourceHashes": {
+        "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "boss",
+      "gameScale": 1,
+      "newInBatch": true
+    },
+    {
+      "asset": "tether-o12.glb",
+      "id": "O12",
+      "version": "o12-v1",
+      "role": "tether",
+      "name": "TETHER · 锚定核心",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 12,
+      "triangles": 2884,
+      "materials": 5,
+      "articulatedNodes": 6,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 18
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 18
+        },
+        {
+          "name": "Exposed",
+          "seconds": 2.4,
+          "tracks": 18
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 18
+        }
+      ],
+      "bytes": 307268,
+      "sha256": "1d49f8c44607ac60625e0d615abcd82862bf6a137a6baa83f65d85c2080f0007",
+      "sourceHashes": {
+        "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "boss",
+      "gameScale": 1,
+      "newInBatch": true
+    },
+    {
+      "asset": "abyss-a08.glb",
+      "id": "A08",
+      "version": "a08-v1",
+      "role": "abyss",
+      "name": "ABYSS · 水冷主机",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 20,
+      "triangles": 3476,
+      "materials": 6,
+      "articulatedNodes": 7,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 21
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 21
+        },
+        {
+          "name": "Exposed",
+          "seconds": 2.4,
+          "tracks": 21
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 21
+        }
+      ],
+      "bytes": 371340,
+      "sha256": "a3b1e9cdf50e4ef8dc211000c879fe74dbdb22a6490d47aadfb04e0a63f50b8f",
+      "sourceHashes": {
+        "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "boss",
+      "gameScale": 1,
+      "newInBatch": true
+    },
+    {
+      "asset": "glacier-g40.glb",
+      "id": "G40",
+      "version": "g40-v1",
+      "role": "glacier",
+      "name": "GLACIER · 极地重炮机甲",
+      "axis": "+Y up, +Z forward",
+      "units": "metres",
+      "meshes": 25,
+      "triangles": 2640,
+      "materials": 6,
+      "articulatedNodes": 7,
+      "animations": [
+        {
+          "name": "Idle",
+          "seconds": 2.4,
+          "tracks": 21
+        },
+        {
+          "name": "Aim",
+          "seconds": 2.4,
+          "tracks": 21
+        },
+        {
+          "name": "Exposed",
+          "seconds": 2.4,
+          "tracks": 21
+        },
+        {
+          "name": "Hit",
+          "seconds": 0.5,
+          "tracks": 21
+        }
+      ],
+      "bytes": 314084,
+      "sha256": "ca9740d3b3f7e71e34545ed94b8f5ec9f8b9efe9a967b6a2d93f89575a200eed",
+      "sourceHashes": {
+        "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+        "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+        "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "textures": 0,
+      "externalDependencies": 0,
+      "category": "boss",
+      "gameScale": 1,
+      "newInBatch": true
+    }
+  ]
+}

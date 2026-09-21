@@ -1,0 +1,53 @@
+{
+  "asset": "skyhook-a17.glb",
+  "id": "A17",
+  "version": "a17-v1",
+  "role": "skyhook",
+  "name": "SKYHOOK · 追击直升机",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 19,
+  "triangles": 1800,
+  "materials": 6,
+  "articulatedNodes": 4,
+  "animations": [
+    {
+      "name": "Flight",
+      "seconds": 2.4,
+      "tracks": 12
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 12
+    },
+    {
+      "name": "Boarding",
+      "seconds": 2.4,
+      "tracks": 12
+    },
+    {
+      "name": "Exposed",
+      "seconds": 2.4,
+      "tracks": 12
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 12
+    }
+  ],
+  "bytes": 221456,
+  "sha256": "e062d1a67b88a358a7c463bc5f37808371d9154a39137c8e1f65293d03773f83",
+  "sourceHashes": {
+    "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+    "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

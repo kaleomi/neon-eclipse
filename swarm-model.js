@@ -1,3 +1,4 @@
+import {animateRosterUnit} from './characters/roster-runtime.js';
 import * as T from './node_modules/three/build/three.module.js';
 export function createSwarmModel(){
  const group=new T.Group();group.name='SWARM_DRONE';group.userData.swarmDrone=true;group.userData.combatAnchorY=0;
@@ -12,4 +13,4 @@ export function createSwarmModel(){
  }
  group.userData.parts={swarm:true,rotors,accent:glow};return group;
 }
-export function animateSwarm(enemy,time){const p=enemy.group.userData.parts;for(const rotor of p.rotors)rotor.rotation.y=time*24+enemy.seed;p.accent.emissiveIntensity=enemy.charge>0?2+Math.sin(time*20)*.8:1.1;}
+export function animateSwarm(enemy,time){const p=enemy.group.userData.parts;for(const rotor of p.rotors)rotor.rotation.y=time*24+enemy.seed;p.accent.emissiveIntensity=enemy.charge>0?2+Math.sin(time*20)*.8:1.1;animateRosterUnit(enemy,time,enemy.charge<=0);}

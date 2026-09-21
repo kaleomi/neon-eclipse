@@ -11,11 +11,12 @@ try{
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
  const context=await browser.newContext(),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(45000);
  await context.addInitScript(()=>localStorage.setItem('neon-eclipse.telemetry-enabled.v1','true'));
- // Browser-route-only hook: expose the in-app `end` so the death path runs without scripting real combat.
- await context.route('**/app.js',route=>route.fulfill({contentType:'text/javascript',body:fs.readFileSync(new URL('./app.js',import.meta.url),'utf8')+'\nwindow.__perfProbe={die(){health=0;end(false);},fps:()=>document.querySelector("#fps").textContent};'}));
+ // Browser-route-only hook: count actual playing samples without altering timing; expose end for controlled loss.
+ // A fixed 2.5s delay does not guarantee enough samples on software WebGL.
+ await context.route('**/app.js',route=>route.fulfill({contentType:'text/javascript',body:fs.readFileSync(new URL('./app.js',import.meta.url),'utf8')+'\nlet perfPlayingFrames=0;const nativePerfSample=frameStats.sample.bind(frameStats);frameStats.sample=now=>{if(state==="playing")perfPlayingFrames++;return nativePerfSample(now);};window.__perfProbe={die(){health=0;end(false);},frames:()=>perfPlayingFrames,fps:()=>document.querySelector("#fps").textContent};'}));
  await page.goto(`http://127.0.0.1:${port}/index.html?map=reactor&menu=chapter`);await page.waitForFunction(()=>document.body.dataset.menuOpen==='true');
  await page.click('#deploy');await page.waitForFunction(()=>document.body.dataset.playState==='playing');
- await page.waitForTimeout(2500);const hud=await page.evaluate(()=>window.__perfProbe.fps());assert.match(hud,/^\d+$/);assert(Number(hud)>0,'hud fps shows a number');
+ await page.waitForFunction(()=>window.__perfProbe.frames()>=20,{},{timeout:90000});const hud=await page.evaluate(()=>window.__perfProbe.fps());assert.match(hud,/^\d+$/);assert(Number(hud)>0,'hud fps shows a number');
  await page.keyboard.press('KeyQ');await page.waitForTimeout(600);
  await page.evaluate(()=>window.__perfProbe.die());await page.waitForFunction(()=>document.body.dataset.playState==='lost');
  const record=await page.evaluate(async()=>{const r=await window.neonTelemetry.read();return r.ok?r.records.at(-1):r;});

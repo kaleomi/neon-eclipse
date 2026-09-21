@@ -1,0 +1,51 @@
+{
+  "asset": "shield-guard-b04.glb",
+  "version": "b04-v1",
+  "role": "shield",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "description": "Original BASTION shield carrier; projected tower shield, compact twin emitter and fixed rear weak core. Rigid-node animation, not a skinned human.",
+  "meshes": 72,
+  "triangles": 7884,
+  "materials": 8,
+  "articulatedNodes": 14,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.6,
+      "tracks": 16
+    },
+    {
+      "name": "Patrol",
+      "seconds": 1.18,
+      "tracks": 16
+    },
+    {
+      "name": "Aim",
+      "seconds": 0.8,
+      "tracks": 16
+    },
+    {
+      "name": "Exposed",
+      "seconds": 2.6,
+      "tracks": 16
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 16
+    }
+  ],
+  "bytes": 729664,
+  "sha256": "bc66d573a39c417d35cfc75293820c94048a3e63be52fea7fc28bf5e2c7d5e8d",
+  "sourceHashes": {
+    "characters/shield-guard.js": "43c5b9c7601c19ca304da86ab6eaeba2b04ca3eb0c834bc759e9d327241653ad",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

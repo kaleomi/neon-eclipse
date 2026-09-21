@@ -1,3 +1,4 @@
+import {attachArenaBossVisual} from './characters/arena-boss-runtime.js';
 import {createBossAdapter} from './boss-adapter.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
@@ -9,6 +10,7 @@ import {createSiegeModel} from './siege-models.js';
 export function createSiegeWorld(scene,obstacles,config,{onEvent=()=>{},getPlayerFeet=null}={}){
  const root=new T.Group();root.name=config.id.toUpperCase()+'_ARENA';scene.add(root);
  const materials=[],owned=[],bases=[],battle=createBossBattleRecord(),haloTarget={},ui=createSiegeUI(config),model=createSiegeModel(root,config,materials);
+ const visual=attachArenaBossVisual(config.id,{parent:model.body,core:model.core,hide:model.armor,materials,parts:config.id==='skyhook'?{air:model.air,inside:model.inside,rotor:model.air.userData.rotor}:null});
  let stage=-1,feet=0,feedback=0,interaction={},clock=0,summonPending=false,summoned=false;
  const rules=createSiegeBoss(config,{onEvent:e=>{if(e==='window.opened'){battle.hit(0,true,true);if(config.id==='skyhook'&&rules.arena.index===0&&!summoned)summonPending=true;}onEvent(e);}});
  function solid(o,dynamic=false){const mesh=model.box(o.w,o.top-o.bottom,o.d,o.x,(o.bottom+o.top)/2,o.z,model.steel),entry={...o,mesh};owned.push(entry);if(dynamic){bases.push(entry);mesh.visible=false;}else obstacles.push(entry);return entry;}
@@ -25,7 +27,7 @@ export function createSiegeWorld(scene,obstacles,config,{onEvent=()=>{},getPlaye
   if(rules.attack.target){const p=rules.attack.target;model.warning.position.set(p.x,rules.floor+.04,p.z);model.spotlight.position.set(p.x,rules.floor+2.5,p.z);}
   lamps.forEach((m,i)=>{m.visible=s.active&&i===a.index;});
   for(const b of bases){const active=s.active&&(!sky||Math.abs(b.bottom-rules.floor)<.1),index=obstacles.indexOf(b);b.mesh.visible=active;if(active&&index<0)obstacles.push(b);if(!active&&index>=0)obstacles.splice(index,1);}
-  root.updateMatrixWorld(true);ui.update(rules,playing,interaction,feedback,haloMarkText(haloTarget),feet);
+  visual.sync({exposed:s.phase==='exposed',aim:rules.attack.mode!=='rest',mode:sky&&a.index===1?'Boarding':'Idle'});root.updateMatrixWorld(true);ui.update(rules,playing,interaction,feedback,haloMarkText(haloTarget),feet);
  }
  const boss=createBossAdapter(rules,'siege',{name:config.name,maxHp:config.hp}),breaker={interrupt:boss.interruptCharge,reset:boss.resetInterrupt};
  function interruptCharge(){const ok=breaker.interrupt();if(ok)sync(true);return ok;}
@@ -41,7 +43,7 @@ export function createSiegeWorld(scene,obstacles,config,{onEvent=()=>{},getPlaye
   });rules.interact(dt,{...interaction,held});
  }
  function update(dt,player,feetY,playing){feet=feetY;if(!playing){rules.cancel();interaction={};sync(false);return 0;}if(!rules.blocking){sync(true);return 0;}
-  stepHaloMark(haloTarget,dt);battle.tick(dt);clock+=Math.max(0,dt);feedback=Math.max(0,feedback-dt);
+  visual.tick(dt);stepHaloMark(haloTarget,dt);battle.tick(dt);clock+=Math.max(0,dt);feedback=Math.max(0,feedback-dt);
   const damage=rules.tick(dt,{player,feetY,visible:p=>{const origin=new T.Vector3(config.core.x,rules.floor+2.5,config.core.z+config.core.front+1),delta=new T.Vector3(p.x,feetY+1,p.z).sub(origin);ray.set(origin,delta.clone().normalize());ray.far=delta.length();return !ray.intersectObjects(obstacles.map(o=>o.mesh),false).length;}});
   if(damage)rules.cancel();if(rules.state.phase!=='exposed')delete haloTarget.haloMark;sync(true);return damage;
  }
@@ -58,7 +60,7 @@ export function createSiegeWorld(scene,obstacles,config,{onEvent=()=>{},getPlaye
  function takeSummons(player){if(!summonPending||!rules.alive||rules.arena.index!==0)return [];summonPending=false;summoned=true;
   return [{x:2,z:2,y:4.5},{x:0,z:-2,y:4.5}].filter(p=>Math.hypot(p.x-player.x,p.z-player.z)>=6);
  }
- function dispose(){clear();scene.remove(root);for(const o of owned){const i=obstacles.indexOf(o);if(i>=0)obstacles.splice(i,1);}root.traverse(m=>m.geometry?.dispose());materials.forEach(m=>m.dispose());ui.dispose();}
+ function dispose(){clear();visual.dispose();scene.remove(root);for(const o of owned){const i=obstacles.indexOf(o);if(i>=0)obstacles.splice(i,1);}root.traverse(m=>m.geometry?.dispose());materials.forEach(m=>m.dispose());ui.dispose();}
  clear();return {interruptCharge,boss,setStage,prepareMission,clear,interact,update,hit,updateMarkers,dispose,battle,takeSummons,summonRole:'hound',summonMessage:'SKYHOOK 投放猎犬机 // 最多两台，落点在信号车顶',
   canAdvance:m=>m.index!==3||!m.defending||(rules.state.phase==='defeated'&&!rules.blocking),get state(){return rules.state;},get arena(){return {...rules.arena};},get blocking(){return rules.blocking;},get floor(){return rules.floor;},
   get origin(){return new T.Vector3(config.core.x,rules.floor,config.core.z);},get targets(){return rules.alive?[model.core,...(model.cage.visible?[model.cage]:[]),...model.armor.filter(m=>config.id!=='skyhook'||m.userData.siegePhase===rules.arena.index)]:[];},

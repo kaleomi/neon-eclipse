@@ -17,7 +17,7 @@ const signature=g=>g.children.filter(o=>o.isMesh).map(o=>({zone:o.userData.hitZo
 const legacy=createEnemyModel('commander',{commanderSample:false}),current=createEnemyModel('commander',{loadCommanderAsset:false});
 test('same TACTICAL_COMMANDER identity, legacy direct hit proxies and 110HP profile',()=>{
  assert.equal(current.name,'TACTICAL_COMMANDER');assert.deepEqual(signature(current),signature(legacy));assert.equal(ENEMY_TYPES.commander.hp,110);
- assert(current.children.filter(o=>o.isMesh).every(o=>!o.visible&&o.userData.commanderProxy));
+ assert(current.children.filter(o=>o.isMesh).every(o=>o.visible&&!o.material.visible&&o.userData.commanderProxy));
 });
 test('original 12m non-hittable world-space command ring remains outside visual rig',()=>{
  const a=current.userData.commandRing,b=legacy.userData.commandRing;assert.equal(a.parent,current);assert(a.visible);

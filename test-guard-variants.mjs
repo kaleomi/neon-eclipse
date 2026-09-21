@@ -17,7 +17,7 @@ for(const type of ['assault','heavy']){
   const old=createEnemyModel(type,{guardBatch:false}),current=createEnemyModel(type,{loadGuardAsset:false});copies[type]={old,current};
   check(type+': exact legacy direct hit meshes and transforms, new visual is non-combat',()=>{
     assert.deepEqual(signature(current),signature(old));assert(current.userData.parts.variantModel);
-    assert(current.children.filter(o=>o.isMesh).every(o=>o.visible===false));
+    assert(current.children.filter(o=>o.isMesh).every(o=>o.visible===true&&o.material.visible===false));
     current.userData.parts.variantModel.visual.root.traverse(o=>{if(o.isMesh)assert(o.userData.combatDecoration);});
   });
   check(type+': 12,960 front/rear/side ray results match in four animation poses',()=>{

@@ -1,3 +1,4 @@
+import {attachArenaBossVisual} from './characters/arena-boss-runtime.js';
 import {createBossAdapter} from './boss-adapter.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
@@ -13,6 +14,7 @@ export function createOverseerWorld(scene,obstacles){
  const cage=new T.Mesh(new T.IcosahedronGeometry(1.4,1),shield);cage.position.copy(core.position);cage.userData.overseer='core';root.add(cage);
  const nodes=OVERSEER_NODES.map((p,i)=>{const m=new T.Mesh(new T.CylinderGeometry(.65,.9,2.4,8),new T.MeshStandardMaterial({color:0xffbd64,emissive:0x9c4200,emissiveIntensity:1}));m.position.set(p.x,1.2,p.z);m.userData.overseer=i;root.add(m);return m;});
  for(const x of [-1.8,1.8]){const wing=new T.Mesh(new T.BoxGeometry(.5,1.3,2.6),metal);wing.position.set(x,1.8,-21);root.add(wing);}
+ const visual=attachArenaBossVisual('overseer',{parent:root,core,hide:root.children.filter(o=>o.isMesh&&o.geometry.type==='BoxGeometry')});
  const lane=new T.Mesh(new T.PlaneGeometry(2.8,34),new T.MeshBasicMaterial({color:0xffc16c,transparent:true,opacity:.45,side:T.DoubleSide,depthWrite:false}));lane.rotation.x=-Math.PI/2;root.add(lane);
  const lanes=[lane,...Array.from({length:3},()=>{const m=lane.clone();m.material=lane.material.clone();root.add(m);return m;})];
  const panel=document.createElement('div');panel.className='boss-mechanic';panel.style.cssText='position:fixed;top:124px;right:auto;left:50%;transform:translateX(-50%);width:440px;max-width:calc(100vw - 48px);pointer-events:none;z-index:12;padding:12px;background:#081d2ee8;border:1px solid #66dce8;color:#e0fbff;font:13px sans-serif';document.body.append(panel);
@@ -26,6 +28,7 @@ export function createOverseerWorld(scene,obstacles){
  const ray=new T.Raycaster();
  function sync(playing=true){
   const s=rules.state;root.visible=s.active;panel.hidden=!playing||!s.active;
+  visual.sync({exposed:s.phase==='exposed',aim:s.attack==='warning'||s.attack==='live'});
   cage.visible=s.phase!=='exposed';nodes.forEach((m,i)=>{m.visible=s.nodes[i]>0;});
   const angles=overseerAngles(s);
   lanes.forEach((m,i)=>{const angle=angles[i]??0;m.visible=i<angles.length&&s.attack!=='rest'&&s.phase==='shield';m.position.set(Math.sin(angle)*17,.1,-21+Math.cos(angle)*17);m.rotation.z=angle;m.material.color.setHex(s.attack==='live'?0xff4568:0xffc16c);});
@@ -42,7 +45,7 @@ export function createOverseerWorld(scene,obstacles){
  function clear(){breaker.reset();delete haloTarget.haloMark;battle.clear();stage=-1;shieldFeedback=0;rules.reset();markers.forEach(el=>el.hidden=true);sync(false);}
  function update(dt,player,feetY,playing){
   if(!rules.blocking||!playing){sync(playing);return 0;}
-  stepHaloMark(haloTarget,dt);battle.tick(dt);
+  visual.tick(dt);stepHaloMark(haloTarget,dt);battle.tick(dt);
   const origin=new T.Vector3(OVERSEER_POSITION.x,.45,OVERSEER_POSITION.z),target=new T.Vector3(player.x,.45,player.z),delta=target.sub(origin);ray.set(origin,delta.clone().normalize());ray.far=delta.length();
   const blocked=ray.intersectObjects(obstacles.map(o=>o.mesh),false).length>0;
   shieldFeedback=Math.max(0,shieldFeedback-dt);

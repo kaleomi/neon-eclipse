@@ -1,3 +1,4 @@
+import {attachArenaBossVisual} from './characters/arena-boss-runtime.js';
 import {createBossAdapter} from './boss-adapter.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
@@ -15,6 +16,7 @@ export function createTetherWorld(scene,obstacles){
  const cage=new T.Mesh(new T.IcosahedronGeometry(1.5,1),shield);cage.position.copy(core.position);cage.userData.overseer='core';root.add(cage);
  const nodes=TETHER_STABILIZERS.map((p,i)=>{const m=new T.Mesh(new T.CylinderGeometry(.6,.85,2.2,8),new T.MeshStandardMaterial({color:0xffbd64,emissive:0x9c4200,emissiveIntensity:1}));m.position.set(p.x,p.feetY+1.1,p.z);m.userData.overseer=i;root.add(m);return m;});
  const bands=BAND_HEIGHTS.map(h=>{const m=new T.Mesh(new T.RingGeometry(3.2,36,64),new T.MeshBasicMaterial({color:0xffc16c,transparent:true,opacity:.35,side:T.DoubleSide,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.y=h;m.visible=false;root.add(m);return m;});
+ const visual=attachArenaBossVisual('tether',{parent:root,core});
  const panel=document.createElement('div');panel.className='boss-mechanic';panel.style.cssText='position:fixed;top:124px;right:auto;left:50%;transform:translateX(-50%);width:440px;max-width:calc(100vw - 48px);pointer-events:none;z-index:12;padding:12px;background:#081d2ee8;border:1px solid #66dce8;color:#e0fbff;font:13px sans-serif;white-space:pre-line';document.body.append(panel);
  const title=document.createElement('div'),healthTrack=document.createElement('div'),healthFill=document.createElement('div');
  healthTrack.style.cssText='height:12px;background:#152638;border:1px solid #9cb2bd;margin:8px 0;position:relative';
@@ -25,6 +27,7 @@ export function createTetherWorld(scene,obstacles){
  let shieldFeedback=0;
  function sync(playing=true){
   const s=rules.state;root.visible=s.active;panel.hidden=!playing||!s.active;
+  visual.sync({exposed:s.phase==='exposed',aim:s.attack==='warning'||s.attack==='live'});
   cage.visible=s.phase!=='exposed';nodes.forEach((m,i)=>{m.visible=s.stabilizers[i]>0;});
   bands.forEach((m,i)=>{m.visible=s.phase==='shield'&&s.attack!=='rest'&&s.bands.includes(i);m.material.color.setHex(s.attack==='live'?0xff4568:0xffc16c);});
   title.textContent=TETHER_NAME+' · 阶段 '+s.tier+' / '+(s.tier===2?'双段脉冲':'单段脉冲')+' · '+Math.ceil(s.hp)+' / '+TETHER_MAX_HP;
@@ -39,7 +42,7 @@ export function createTetherWorld(scene,obstacles){
  function clear(){breaker.reset();delete haloTarget.haloMark;battle.clear();stage=-1;shieldFeedback=0;rules.reset();markers.forEach(el=>el.hidden=true);sync(false);}
  function update(dt,player,feetY,playing,grounded=true){
   if(!rules.blocking||!playing){sync(playing);return 0;}
-  stepHaloMark(haloTarget,dt);battle.tick(dt);shieldFeedback=Math.max(0,shieldFeedback-dt);
+  visual.tick(dt);stepHaloMark(haloTarget,dt);battle.tick(dt);shieldFeedback=Math.max(0,shieldFeedback-dt);
   const damage=rules.tick(dt,{feetY,grounded});if(rules.state.phase!=='exposed')delete haloTarget.haloMark;sync(playing);return damage;
  }
  function hit(object,amount,{halo=false}={}){const part=object.userData.overseer,shielded=rules.blocking&&rules.state.phase==='shield'&&part==='core';if(shielded)shieldFeedback=1.5;const was=rules.blocking,previous=rules.state.phase,dealt=rules.damage(part,amount*(part==='core'?haloDamageMultiplier(haloTarget):1));const marked=halo&&dealt>0&&part==='core'&&registerHaloWeakHit(haloTarget);battle.hit(dealt,part==='core',previous!=='exposed'&&rules.state.phase==='exposed');sync();return {shielded,marked,damage:dealt,killed:was&&!rules.blocking,weak:dealt>0&&part==='core',message:'核心护盾！先击破三段金色稳定器，再攻击青色核心',killMessage:'TETHER 锚定核心已沉寂 // 重力场恢复稳定，返回升降平台'};}

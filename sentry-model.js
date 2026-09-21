@@ -1,3 +1,4 @@
+import {animateRosterUnit} from './characters/roster-runtime.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {SENTRY} from './sentry-rules.js';
 export function createSentryModel(){
@@ -18,4 +19,5 @@ export function updateSentryFan(enemy,obstacles){
  for(let i=0;i<=18;i++){const angle=-SENTRY.halfAngle+SENTRY.halfAngle*2*i/18,yaw=g.rotation.y+angle;ray.set(origin,new T.Vector3(Math.sin(yaw),0,Math.cos(yaw)));ray.far=SENTRY.range;const hit=ray.intersectObjects(meshes,false)[0];radii.push(hit?Math.max(0,hit.distance-.05):SENTRY.range);}
  for(let i=0;i<18;i++){const a=-SENTRY.halfAngle+SENTRY.halfAngle*2*i/18,b=-SENTRY.halfAngle+SENTRY.halfAngle*2*(i+1)/18;const lo=SENTRY.minRange,ra=Math.max(lo,radii[i]),rb=Math.max(lo,radii[i+1]),points=[[a,lo],[a,ra],[b,rb],[a,lo],[b,rb],[b,lo]];points.forEach(([angle,r],j)=>vertices.setXYZ(i*6+j,Math.sin(angle)*r,0,Math.cos(angle)*r));}vertices.needsUpdate=true;fan.geometry.computeBoundingSphere();
  const edge=g.userData.parts.edge,points=edge.geometry.getAttribute('position');let k=0;const copy=i=>points.setXYZ(k++,vertices.getX(i),0,vertices.getZ(i));for(let i=0;i<18;i++){copy(i*6);copy(i*6+5);copy(i*6+1);copy(i*6+2);}copy(0);copy(1);copy(107);copy(104);points.needsUpdate=true;edge.geometry.computeBoundingSphere();
+ animateRosterUnit(enemy,enemy.sentryScan||0,false);
 }

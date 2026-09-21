@@ -1,0 +1,53 @@
+{
+  "asset": "stalker-l05.glb",
+  "id": "L05",
+  "version": "l05-v1",
+  "role": "stalker",
+  "name": "VEIL · 潜行者",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 50,
+  "triangles": 4156,
+  "materials": 5,
+  "articulatedNodes": 15,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 45
+    },
+    {
+      "name": "Patrol",
+      "seconds": 1.2,
+      "tracks": 45
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 45
+    },
+    {
+      "name": "Cloak",
+      "seconds": 2.4,
+      "tracks": 45
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 45
+    }
+  ],
+  "bytes": 604772,
+  "sha256": "892afce38253e4e4525201dc29be6042e69b491708bb22396edf785dfa4ecbb0",
+  "sourceHashes": {
+    "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+    "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

@@ -1,0 +1,48 @@
+{
+  "asset": "switchyard-y02.glb",
+  "id": "Y02",
+  "version": "y02-v1",
+  "role": "switchyard",
+  "name": "SWITCHYARD · 道岔主机",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 8,
+  "triangles": 2228,
+  "materials": 6,
+  "articulatedNodes": 3,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 9
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 9
+    },
+    {
+      "name": "Exposed",
+      "seconds": 2.4,
+      "tracks": 9
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 9
+    }
+  ],
+  "bytes": 212108,
+  "sha256": "7165f430886c82dc3016aa044df9e5949eeb1bfc98619676d7d0cf08a57c9489",
+  "sourceHashes": {
+    "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+    "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

@@ -1,0 +1,48 @@
+{
+  "asset": "sentry-t03.glb",
+  "id": "T03",
+  "version": "t03-v1",
+  "role": "sentry",
+  "name": "WATCHTOWER · 哨兵炮塔",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 16,
+  "triangles": 1564,
+  "materials": 6,
+  "articulatedNodes": 5,
+  "animations": [
+    {
+      "name": "Scan",
+      "seconds": 2.4,
+      "tracks": 15
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 15
+    },
+    {
+      "name": "Disabled",
+      "seconds": 2.4,
+      "tracks": 15
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 15
+    }
+  ],
+  "bytes": 200568,
+  "sha256": "3cd338708ab522d3a776900dcef93db28ad10b03c8aabfc4485f85450a0fabf7",
+  "sourceHashes": {
+    "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+    "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

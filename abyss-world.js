@@ -1,3 +1,4 @@
+import {attachArenaBossVisual} from './characters/arena-boss-runtime.js';
 import {createBossAdapter} from './boss-adapter.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
@@ -13,6 +14,7 @@ export function createAbyssWorld(scene,obstacles,water){
  const core=new T.Mesh(new T.IcosahedronGeometry(1,1),coreMat);core.position.set(ABYSS_POSITION.x,ABYSS_POSITION.y,ABYSS_POSITION.z);core.userData.overseer='core';root.add(core);
  const cage=new T.Mesh(new T.IcosahedronGeometry(1.45,1),shell);cage.position.copy(core.position);cage.userData.overseer='core';root.add(cage);
  const arc=new T.Mesh(new T.RingGeometry(3.5,37,64),new T.MeshBasicMaterial({color:0xffc16c,transparent:true,opacity:.3,side:T.DoubleSide,depthWrite:false}));arc.rotation.x=-Math.PI/2;arc.position.set(0,.05,0);arc.visible=false;root.add(arc);
+ const visual=attachArenaBossVisual('abyss',{parent:root,core});
  const panel=document.createElement('div');panel.className='boss-mechanic';panel.style.cssText='position:fixed;top:124px;right:auto;left:50%;transform:translateX(-50%);width:440px;max-width:calc(100vw - 48px);pointer-events:none;z-index:12;padding:12px;background:#081d2ee8;border:1px solid #66dce8;color:#e0fbff;font:13px sans-serif;white-space:pre-line';document.body.append(panel);
  const title=document.createElement('div'),healthTrack=document.createElement('div'),healthFill=document.createElement('div');
  healthTrack.style.cssText='height:12px;background:#152638;border:1px solid #9cb2bd;margin:8px 0;position:relative';healthFill.style.cssText='height:100%;width:100%;background:linear-gradient(90deg,#6fe6ff,#ff5b79);transition:width .12s linear';
@@ -20,6 +22,7 @@ export function createAbyssWorld(scene,obstacles,water){
  let shieldFeedback=0;
  function sync(playing=true){
   const s=rules.state;root.visible=s.active;panel.hidden=!playing||!s.active;
+  visual.sync({exposed:s.phase==='exposed',aim:s.attack==='warning'||s.attack==='live'});
   cage.visible=s.phase!=='exposed';arc.visible=s.attack!=='rest';arc.material.color.setHex(s.attack==='live'?0xff4568:0xffc16c);arc.position.y=Math.max(.05,water.level+.02);
   title.textContent=ABYSS_NAME+' · 阶段 '+s.tier+' / '+(s.tier===2?'高频放电':'放电')+' · '+Math.ceil(s.hp)+' / '+ABYSS_MAX_HP;
   healthFill.style.width=(Math.max(0,s.hp)/ABYSS_MAX_HP*100)+'%';
@@ -34,7 +37,7 @@ export function createAbyssWorld(scene,obstacles,water){
  let summonRequest=0;
  function update(dt,player,feetY,playing,grounded=true,alive=0){
   if(!rules.blocking||!playing){sync(playing);return 0;}
-  stepHaloMark(haloTarget,dt);battle.tick(dt);shieldFeedback=Math.max(0,shieldFeedback-dt);
+  visual.tick(dt);stepHaloMark(haloTarget,dt);battle.tick(dt);shieldFeedback=Math.max(0,shieldFeedback-dt);
   const damage=rules.tick(dt,{level:water.level,feetY,alive});summonRequest+=rules.takeSummons();
   if(rules.state.phase!=='exposed')delete haloTarget.haloMark;sync(playing);return damage;
  }

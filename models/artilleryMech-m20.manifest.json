@@ -1,0 +1,53 @@
+{
+  "asset": "artilleryMech-m20.glb",
+  "id": "M20",
+  "version": "m20-v1",
+  "role": "artilleryMech",
+  "name": "SIEGEBREAK · 重炮机甲",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 26,
+  "triangles": 1892,
+  "materials": 6,
+  "articulatedNodes": 10,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 30
+    },
+    {
+      "name": "Patrol",
+      "seconds": 1.2,
+      "tracks": 30
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 30
+    },
+    {
+      "name": "Vent",
+      "seconds": 2.4,
+      "tracks": 30
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 30
+    }
+  ],
+  "bytes": 335456,
+  "sha256": "27a5cd804a9868e0d081b75894602125b47c34b03614b8c4b375186a76cf6d6c",
+  "sourceHashes": {
+    "characters/roster-units.js": "7dbd9f3c70763b4a41f8a654405aa3b0de6f4c16362d1bbf457292cc9cca317f",
+    "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

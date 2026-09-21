@@ -26,7 +26,7 @@ export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact,hook
   const ring=new THREE.Mesh(ringGeometry,material);ring.position.copy(origin);ring.lookAt(target);scene.add(ring);
   let line=null;
   if(attack.showAim){
-   line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([origin,target]),new THREE.LineBasicMaterial({color:material.color,transparent:true,opacity:.48,depthWrite:false}));scene.add(line);
+   line=new THREE.Line(new THREE.BufferGeometry().setFromPoints([origin,target]),new THREE.LineBasicMaterial({color:material.color,transparent:true,opacity:.75,depthWrite:false}));scene.add(line);
   }
   pending.push({slot,origin:origin.clone(),target:target.clone(),boss,owner,ring,line,attack,emitted:0,remaining:attack.charge,total:attack.charge});hooks.onQueue?.(origin,attack,boss,owner);return true;
  }
@@ -50,7 +50,7 @@ export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact,hook
   return first;
  }
  function targetVisible(mesh){
-  if(!mesh?.geometry)return false;
+  if(!mesh?.isMesh||!mesh.geometry||mesh.userData.combatDecoration)return false;
   for(let node=mesh;node;node=node.parent){if(!node.visible)return false;if(node===scene)return true;}
   return false;
  }
@@ -64,7 +64,7 @@ export function createEnemyProjectiles(scene,obstacles,onPlayerHit,onImpact,hook
     if(!targetVisible(mesh))continue;
     mesh.updateWorldMatrix(true,false);targetProxy.geometry=mesh.geometry;targetProxy.matrixWorld.copy(mesh.matrixWorld);
     const contact=reflectedRay.intersectObject(targetProxy,false)[0];
-    if(contact&&(!hit||contact.distance<hit.distance))hit={...contact,object:mesh};
+    if(contact&&Number.isFinite(contact.distance)&&(!hit||contact.distance<hit.distance))hit={...contact,object:mesh};
    }
    targetProxy.geometry=emptyGeometry;
   }

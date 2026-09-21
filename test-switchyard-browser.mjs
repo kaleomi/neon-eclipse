@@ -37,10 +37,10 @@ window.__switchyardFixture={
  // Damage fixture: prepare one carried primary; native terminal permissions are tested separately.
  equipWeapon(i){if(i!==2&&i!==3&&!loadout.equip(i))throw new Error('Cannot equip fixture primary');return loadout.allows(i);},
  snapshot(){return {state,stage:mission.state.index,defending:mission.state.defending,progress:mission.state.progress,hp:overseer.state.hp,phase:overseer.state.phase,blocking:overseer.blocking,rail:overseer.rail,health,kills,shots:[...telemetryShots],challenge:achievementUI.attempt.state,record:overseer.battle.summary,emp:emp.charges,gateOpen:!obstacles.some(o=>o.x===8&&o.z===-28&&o.w===.8&&o.d===8)};},
- tick(seconds){for(let left=seconds;left>1e-8&&state==='playing';){const dt=Math.min(.05,left);left-=dt;damageTime=Math.max(0,damageTime-dt);update(dt);}scene.updateMatrixWorld(true);return this.snapshot();},
+ tick(seconds){for(let left=seconds;left>1e-8&&state==='playing';){const dt=Math.min(.05,left);left-=dt;chrome.update(dt);update(dt);}scene.updateMatrixWorld(true);return this.snapshot();},
  control(id){const z=[-25,-29,-35][id];this.place(28.4,z,30,z,1.15);},
  view(){this.place(29,-20,20,-30);},safe(){this.place(0,30,0,0);},core(){this.place(24.5,-25,22,-25);},
- save(){saveCheckpoint();return checkpoint();},retry(){return retryStage();},
+ save(){flow.saveCheckpoint();return checkpoint();},retry(){return flow.retryStage();},
  extract(){this.clearGuards();this.place(-22,-25.6,-22,-28);},
  fail(){end(false);return this.snapshot();}
 };`;

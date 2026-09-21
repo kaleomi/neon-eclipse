@@ -15,7 +15,7 @@ try{
  await context.route('**/app.js',route=>route.fulfill({contentType:'text/javascript',body:fs.readFileSync(new URL('./app.js',import.meta.url),'utf8')+'\nwindow.__b8={pos:()=>({x:camera.position.x,z:camera.position.z}),feetY:()=>playerMotion.state.y,state:()=>state,firing:()=>firing,selected:()=>selected,allowed:()=>[...Array(weapons.length).keys()].filter(i=>loadout.allows(i))};'}));
  await page.goto(`http://127.0.0.1:${port}/index.html?map=reactor`);await page.waitForFunction(()=>document.body.dataset.menuOpen==='true');
  // --- settings UI (home page of the menu): bindings panel renders, rebind jump Space→KeyX via listening button
- await page.click('#menu-settings');await page.waitForSelector('#menu-bindings [data-bind="jump"]');
+ await page.click('#menu-settings');await page.click('#settings-tab-controls');await page.waitForSelector('#menu-bindings [data-bind="jump"]');
  assert.equal(await page.textContent('#menu-bindings [data-bind="jump"]'),'SPACE');
  await page.click('#menu-bindings [data-bind="jump"]');assert.equal(await page.textContent('#menu-bindings [data-bind="jump"]'),'请按键…');
  await page.keyboard.press('KeyX');await page.waitForFunction(()=>document.querySelector('#menu-bindings [data-bind="jump"]').textContent==='X');
@@ -24,11 +24,12 @@ try{
  await page.click('#menu-bindings [data-bind="reload"]');await page.keyboard.press('ArrowUp');
  assert.equal(await page.textContent('#menu-bindings [data-bind="reload"]'),'R');assert.equal(await page.textContent('[data-bindings-status]'),'该键为保留键');
  // a11y: subtitles on, shapes on, colour mode → canvas filter
- await page.check('#menu-a11y input[data-a11y-subtitles]');await page.check('#menu-a11y input[data-a11y-shapes]');await page.click('input[name="menu-color-mode"][value="deuteranopia"]');
+ await page.click('#settings-tab-accessibility');await page.check('#menu-a11y input[data-a11y-subtitles]');await page.check('#menu-a11y input[data-a11y-shapes]');await page.click('input[name="menu-color-mode"][value="deuteranopia"]');
  assert.equal(await page.evaluate(()=>document.documentElement.dataset.colorMode),'deuteranopia');
  assert.match(await page.evaluate(()=>document.querySelector('canvas').style.filter),/cvd-deuteranopia/);
  assert.ok(await page.evaluate(()=>!!document.querySelector('#a11y-filters filter#cvd-deuteranopia')));
  // language: switch to en updates settings heading, persists
+ const localeTab=await page.locator('[data-locale]').evaluate(el=>el.closest('[role=tabpanel]')?.getAttribute('aria-labelledby'));if(localeTab)await page.locator('#'+localeTab).click();
  await page.selectOption('[data-locale]','en');assert.equal(await page.textContent('#menu-settings-title'),'Settings');
  assert.equal(await page.textContent('#menu-bindings h4'),'Key bindings');assert.equal(await page.evaluate(()=>document.documentElement.lang),'en');
  await page.selectOption('[data-locale]','zh-CN');assert.equal(await page.textContent('#menu-settings-title'),'设置');

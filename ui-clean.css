@@ -538,3 +538,33 @@
  .ui-clean .menu-context .menu-result-stats span{font-size:10px}
 }
 @media(prefers-reduced-motion:reduce){.ui-clean #combat-feedback .combat-alerts *{animation:none!important;transition:none!important}}
+
+/* Combat cue pilot: WARDEN + SWITCHYARD HUD, not world telegraph geometry. */
+.ui-clean #enemy-combat-hud .enemy-inspector{background:#0b1c27f5;border:1px solid #7896a3;border-left:3px solid var(--enemy-accent,#8ecbb9);border-radius:7px;padding:9px 12px;width:280px;top:auto;bottom:calc(50% + 30px);color:#e8f4f0;text-align:left;box-shadow:none}
+.ui-clean #enemy-combat-hud .enemy-inspector b{font:600 12px/1.5 'Segoe UI','Microsoft YaHei',sans-serif;color:#e8f4f0;letter-spacing:0}
+.ui-clean #enemy-combat-hud .enemy-inspector span{font:11px/1.55 'Segoe UI','Microsoft YaHei',sans-serif;color:#c7d9df}
+.ui-clean #enemy-combat-hud .target-life{margin:6px 0}
+.ui-clean #enemy-combat-hud .armor-feedback{padding:6px 10px;border-radius:5px;background:#0b1c27f2;color:#e4f0ea;font:11px/1.5 'Microsoft YaHei',sans-serif;text-shadow:none}
+.ui-clean .boss-mechanic[data-cue]{top:174px!important;left:50%!important;transform:translateX(-50%)!important;width:min(380px,calc(100vw - 560px))!important;max-width:none!important;padding:9px 12px!important;border:1px solid #a38d65!important;border-left:3px solid #e4bd7e!important;border-radius:7px;background:#13232cf7!important;color:#d9e9ec;font:11px/1.5 'Segoe UI','Microsoft YaHei',sans-serif!important;text-align:left;white-space:pre-line;box-shadow:none}
+.ui-clean .boss-mechanic[data-cue] strong{font:600 12px/1.5 'Segoe UI','Microsoft YaHei',sans-serif;color:#f2d49c;letter-spacing:0}
+.ui-clean .boss-mechanic[data-cue] span{font:11px/1.5 'Segoe UI','Microsoft YaHei',sans-serif;color:#d0e4e5;margin-top:5px}
+.ui-clean .boss-mechanic[data-cue=exposed]{border-color:#84cdb3!important;border-left-style:double!important;border-left-width:4px!important;background:#102b28f7!important}
+.ui-clean .boss-mechanic[data-cue=exposed] strong{color:#b4efcf}
+.ui-clean .boss-mechanic[data-cue=warning]{border-color:#eea28b!important;border-left-style:dashed!important;background:#30221ff7!important}
+.ui-clean .boss-mechanic[data-cue=warning] strong{color:#ffcebb}
+.ui-clean .boss-mechanic[data-cue=complete]{border-color:#aec2cb!important}
+.ui-clean .boss-mechanic[data-cue] .holo-frame{display:none}
+.ui-clean:has(.boss-mechanic[data-cue]:not([hidden])) #enemy-combat-hud .enemy-inspector{top:calc(50% + 34px);bottom:auto}
+.ui-clean .switchyard-marker{background:#0b202bf5!important;border-width:2px!important;border-radius:5px;color:#eaf7f3!important;box-shadow:none}
+@media(max-height:760px) and (min-width:721px){
+ .ui-clean .boss-mechanic[data-cue]{top:156px!important;padding:7px 10px!important;font-size:10px!important;line-height:1.4!important}
+ .ui-clean .boss-mechanic[data-cue] strong,.ui-clean .boss-mechanic[data-cue] span{font-size:10px;line-height:1.4}
+}
+@media(max-width:720px){
+ .ui-clean .boss-mechanic[data-cue]{top:156px!important;width:calc(100vw - 24px)!important;padding:8px 10px!important;font-size:11px!important}
+ .ui-clean #enemy-combat-hud .enemy-inspector,.ui-clean:has(.boss-mechanic[data-cue]:not([hidden])) #enemy-combat-hud .enemy-inspector{left:12px;top:calc(50% - 28px);bottom:auto;transform:none;width:calc(50vw - 64px);padding:7px 9px}
+ .ui-clean #enemy-combat-hud .enemy-inspector b,.ui-clean #enemy-combat-hud .enemy-inspector span{font-size:10px}
+ .ui-clean .switchyard-marker{font-size:10px!important;padding:4px 6px!important}
+}
+html[data-color-mode=high-contrast] .ui-clean .boss-mechanic[data-cue],html[data-color-mode=high-contrast] .ui-clean .enemy-inspector{background:#06131c!important;color:#fff;border-width:2px!important}
+@media(prefers-reduced-motion:reduce){.ui-clean .boss-mechanic[data-cue],.ui-clean #enemy-combat-hud :is(.enemy-inspector,.armor-feedback){animation:none!important;transition:none!important}}

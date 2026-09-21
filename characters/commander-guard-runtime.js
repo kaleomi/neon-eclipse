@@ -1,3 +1,4 @@
+import {hideProxyDraw} from './hit-proxies.js';
 // C01 visual-only adapter. The original root meshes remain authoritative hit proxies.
 import {GLTFLoader} from '../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import {COMMANDER_ASSET,createCommanderVisual,cloneCommanderVisual,bindCommanderRig,
@@ -16,7 +17,7 @@ export function attachCommanderGuard(group,{loadAsset=typeof document!=='undefin
   const cached=loadAsset&&template;
   const visual=cached?cloneCommanderVisual(cached,p.accent):createCommanderVisual({accentMaterial:p.accent});
   const proxies=group.children.filter(o=>o.isMesh);
-  proxies.forEach(o=>{o.visible=false;o.userData.commanderProxy=true;});
+  hideProxyDraw(group,proxies,'commanderProxy');
   const state={visual,proxies,lastHp:null,hitAt:-Infinity,pose:{time:0,mode:'Idle'}};
   p.commanderModel=state;group.userData.commanderModelId='C01';group.userData.commanderModelSource=cached?'glb':'procedural';
   group.userData.ownedMaterials.push(...visual.materials);group.add(visual.root);

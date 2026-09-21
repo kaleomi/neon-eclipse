@@ -1,3 +1,4 @@
+import {attachArenaBossVisual} from './characters/arena-boss-runtime.js';
 import {createBossAdapter} from './boss-adapter.js';
 import {registerHaloWeakHit,stepHaloMark,haloDamageMultiplier,haloMarkText} from './weapons/halo-rules.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
@@ -19,6 +20,7 @@ export function createGlacierWorld(scene,obstacles,weather){
  const eye=new T.Mesh(new T.SphereGeometry(.25,8,8),new T.MeshBasicMaterial({color:0xff4568}));eye.position.set(0,4.4,1.7);mech.add(eye);
  const shellRing=new T.Mesh(new T.RingGeometry(GLACIER_SHELL_RADIUS-.3,GLACIER_SHELL_RADIUS,48),new T.MeshBasicMaterial({color:0xff4568,transparent:true,opacity:.7,side:T.DoubleSide,depthWrite:false}));shellRing.rotation.x=-Math.PI/2;shellRing.position.y=.05;shellRing.visible=false;root.add(shellRing);
  const crack=new T.Mesh(new T.RingGeometry(THIN_ICE.radius-.6,THIN_ICE.radius,48),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.8,side:T.DoubleSide,depthWrite:false}));crack.rotation.x=-Math.PI/2;crack.position.set(THIN_ICE.x,.03,THIN_ICE.z);crack.visible=false;root.add(crack);
+ const visual=attachArenaBossVisual('glacier',{parent:mech,core,hide:mech.children.filter(o=>o.isMesh&&o!==core),shellMaterial:plateMat,mounts:legs.map((parent,i)=>({key:'Leg'+i,parent,position:[0,1.1,0]}))});
  const panel=document.createElement('div');panel.className='boss-mechanic';panel.style.cssText='position:fixed;top:124px;right:auto;left:50%;transform:translateX(-50%);width:440px;max-width:calc(100vw - 48px);pointer-events:none;z-index:12;padding:12px;background:#0c1a26e8;border:1px solid #9fd2ff;color:#eaf6ff;font:13px sans-serif;white-space:pre-line';document.body.append(panel);
  const title=document.createElement('div'),healthTrack=document.createElement('div'),healthFill=document.createElement('div');
  healthTrack.style.cssText='height:12px;background:#152638;border:1px solid #9cb2bd;margin:8px 0;position:relative';healthFill.style.cssText='height:100%;width:100%;background:linear-gradient(90deg,#9fd2ff,#ff7a3a);transition:width .12s linear';
@@ -28,6 +30,7 @@ export function createGlacierWorld(scene,obstacles,weather){
   const s=rules.state;root.visible=s.active;panel.hidden=!playing||!s.active;
   mech.position.set(s.x,s.phase==='sunk'?-1.6:s.phase==='climbing'?-.6:0,s.z);
   const exposed=rules.exposed;plateMat.emissiveIntensity=exposed?0:.6;plateMat.color.setHex(exposed?0x5a6d80:0xc8d6e2);coreMat.color.setHex(exposed?0xff7a3a:0x7a3a1a);core.scale.setScalar(exposed?1.3:1);
+  visual.sync({exposed,aim:s.shell==='warning'});
   shellRing.visible=s.shell==='warning'&&!!s.target;if(s.target)shellRing.position.set(s.target.x,.05,s.target.z);
   crack.visible=s.phase!=='armored'||s.press>0;crack.material.opacity=s.phase!=='armored'?.9:.2+s.press/2.5*.6;
   title.textContent=GLACIER_NAME+' · 阶段 '+s.tier+' / '+(s.tier===2?'急速炮击':'重炮')+' · '+Math.ceil(s.hp)+' / '+GLACIER_MAX_HP+' · 陷冰 '+s.sinks+' 次';
@@ -42,7 +45,7 @@ export function createGlacierWorld(scene,obstacles,weather){
  function clear(){breaker.reset();delete haloTarget.haloMark;battle.clear();stage=-1;armorFeedback=0;rules.reset();sync(false);}
  function update(dt,player,feetY,playing,grounded=true){
   if(!rules.blocking||!playing){sync(playing);return 0;}
-  stepHaloMark(haloTarget,dt);battle.tick(dt);armorFeedback=Math.max(0,armorFeedback-dt);
+  visual.tick(dt);stepHaloMark(haloTarget,dt);battle.tick(dt);armorFeedback=Math.max(0,armorFeedback-dt);
   const was=rules.exposed,damage=rules.tick(dt,{player:{x:player.x,z:player.z},feetY});
   if(rules.state.phase==='armored'){mech.rotation.y=Math.atan2(player.x-rules.state.x,player.z-rules.state.z);const t=performance.now()*.004;legs.forEach((l,i)=>l.rotation.x=Math.sin(t+i*1.6)*.25);}
   if(!rules.exposed)delete haloTarget.haloMark;sync(playing);void was;return damage;

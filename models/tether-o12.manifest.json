@@ -1,0 +1,48 @@
+{
+  "asset": "tether-o12.glb",
+  "id": "O12",
+  "version": "o12-v1",
+  "role": "tether",
+  "name": "TETHER · 锚定核心",
+  "axis": "+Y up, +Z forward",
+  "units": "metres",
+  "meshes": 12,
+  "triangles": 2884,
+  "materials": 5,
+  "articulatedNodes": 6,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 18
+    },
+    {
+      "name": "Aim",
+      "seconds": 2.4,
+      "tracks": 18
+    },
+    {
+      "name": "Exposed",
+      "seconds": 2.4,
+      "tracks": 18
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.5,
+      "tracks": 18
+    }
+  ],
+  "bytes": 307268,
+  "sha256": "1d49f8c44607ac60625e0d615abcd82862bf6a137a6baa83f65d85c2080f0007",
+  "sourceHashes": {
+    "characters/arena-boss-models.js": "958b3df40fd47e0a4bed28dbf87d5b164249252bae23bd37ab5e47f3760fede0",
+    "characters/art-kit.js": "436bbe831cff0384fcda370cd4e67ebd0c842fdd754c39eedb7ef4520e4442f9",
+    "characters/guard-geometry.js": "49f5d6f13201960e4fdcfee071e807e0feae14630a92c1244b123a70702d678e"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

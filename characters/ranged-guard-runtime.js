@@ -1,3 +1,4 @@
+import {hideProxyDraw} from './hit-proxies.js';
 // Visual-only adapter. Existing root-level meshes remain the authoritative hit proxies.
 import {GLTFLoader} from '../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import {createRangedGuardVisual, cloneRangedGuardVisual, poseRangedGuard,
@@ -28,10 +29,9 @@ function replaceVisual(group, state, next) {
 export function attachRangedGuard(group, {loadAsset = typeof document !== 'undefined'} = {}) {
   const parts = group.userData.parts;
   if (!parts || parts.guard) return;
-  // Mesh.visible only controls rendering. Mesh.raycast still intersects these exact
-  // legacy geometries; the parity test verifies all sampled rays and animation poses.
+  // Keep logical visibility for reflection filters; only private draw materials are hidden.
   const proxies = group.children.filter(o => o.isMesh);
-  proxies.forEach(o => { o.visible = false; o.userData.rangedGuardProxy = true; });
+  hideProxyDraw(group,proxies,'rangedGuardProxy');
   const visual = createRangedGuardVisual({accentMaterial: parts.accent});
   const state = {visual, proxies, lastHp: null, hitAt: -Infinity, pose: {time: 0, mode: 'Idle'}};
   parts.guard = state;

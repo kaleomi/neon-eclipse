@@ -1,3 +1,4 @@
+import {attachArenaBossVisual} from './characters/arena-boss-runtime.js';
 import {createBossAdapter} from './boss-adapter.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {createBossBattleRecord} from './boss-battle-record.js';
@@ -29,6 +30,7 @@ export function createElevatorWorld(scene,obstacles,{onEvent=()=>{},getPlayerFee
  const core=new T.Mesh(new T.IcosahedronGeometry(.46,1),coreMaterial);core.position.set(0,ELEVATOR_CORE.height,.4);core.userData.overseer='core';body.add(core);
  const shieldMaterial=mat(0xc2a1ff,true);shieldMaterial.wireframe=true;
  const cage=new T.Mesh(new T.IcosahedronGeometry(.67,1),shieldMaterial);cage.position.copy(core.position);cage.userData.overseer='core';body.add(cage);
+ const visual=attachArenaBossVisual('elevator',{parent:body,core,hide:body.children.filter(o=>o.isMesh&&o!==core&&o!==cage),materials});
  const beamMesh=box(6.5,.035,1.2,23.75,.06,0,purple),beamLine=box(6.5,.045,.065,23.75,.07,0,gold);beamMesh.material=mat(0xc2a1ff,true);beamMesh.material.transparent=true;beamMesh.material.opacity=.22;
  const rules=createElevatorBoss({onEvent:e=>{if(e==='window.opened')battle.hit(0,true,true);onEvent(e);}});
  const ray=new T.Raycaster();let stage=-1,feet=0,feedback=0,interaction={},callHold=0,callId=-1,displayTime=0;
@@ -38,7 +40,7 @@ export function createElevatorWorld(scene,obstacles,{onEvent=()=>{},getPlayerFee
   pads.forEach((p,i)=>p.material.color.setHex(s.active&&i===a.index?0x82fff1:i<a.index?0x8ea18c:0x485367));
   beamMesh.visible=beamLine.visible=s.active&&rules.beam.mode==='warning';
   if(rules.beam.targetZ!==null){beamMesh.position.set(23.75,rules.floor+.045,rules.beam.targetZ);beamLine.position.set(23.75,rules.floor+.06,rules.beam.targetZ);}
-  volume.mesh.position.y=(volume.top+volume.bottom)/2;root.updateMatrixWorld(true);
+  visual.sync({exposed:s.phase==='exposed',aim:rules.beam.mode!=='rest'});volume.mesh.position.y=(volume.top+volume.bottom)/2;root.updateMatrixWorld(true);
   ui.update(rules,lift,playing,feedback,interaction,haloMarkText(haloTarget));
  }
  const boss=createBossAdapter(rules,'beam',{name:ELEVATOR.name,maxHp:ELEVATOR.hp}),breaker={interrupt:boss.interruptCharge,reset:boss.resetInterrupt};
@@ -73,7 +75,7 @@ export function createElevatorWorld(scene,obstacles,{onEvent=()=>{},getPlayerFee
   feet=feetY;
   if(!playing){callHold=0;interaction={};rules.tick(0,{playing:false});sync(false);return 0;}
   if(!rules.blocking){sync(true);return 0;}
-  stepHaloMark(haloTarget,dt);battle.tick(dt);displayTime+=Math.max(0,dt);feedback=Math.max(0,feedback-dt);
+  visual.tick(dt);stepHaloMark(haloTarget,dt);battle.tick(dt);displayTime+=Math.max(0,dt);feedback=Math.max(0,feedback-dt);
   const damage=rules.tick(dt,{player,feetY,grounded,visible:p=>{
    const origin=new T.Vector3(ELEVATOR_CORE.x,rules.floor+1.7,ELEVATOR_CORE.z+.8),delta=new T.Vector3(p.x,feetY+1,p.z).sub(origin);ray.set(origin,delta.clone().normalize());ray.far=delta.length();return !ray.intersectObjects(obstacles.map(o=>o.mesh),false).length;
   }});
@@ -94,7 +96,7 @@ export function createElevatorWorld(scene,obstacles,{onEvent=()=>{},getPlayerFee
    if(!el.hidden){el.style.left=((p.x+1)*innerWidth/2)+'px';el.style.top=((1-p.y)*innerHeight/2)+'px';el.textContent=`E · 呼梯至 ${call.feetY}m`;}
   });
  }
- function dispose(){clear();scene.remove(root);for(const o of owned){const i=obstacles.indexOf(o);if(i>=0)obstacles.splice(i,1);}root.traverse(m=>m.geometry?.dispose());materials.forEach(m=>m.dispose());ui.panel.remove();ui.markers.forEach(m=>m.remove());}
+ function dispose(){clear();visual.dispose();scene.remove(root);for(const o of owned){const i=obstacles.indexOf(o);if(i>=0)obstacles.splice(i,1);}root.traverse(m=>m.geometry?.dispose());materials.forEach(m=>m.dispose());ui.panel.remove();ui.markers.forEach(m=>m.remove());}
  clear();return {interruptCharge,boss,clear,setStage,prepareMission,beforeMotion,interact,update,hit,updateMarkers,dispose,battle,
   canAdvance:m=>m.index!==3||!m.defending||(rules.state.phase==='defeated'&&!rules.blocking),
   get state(){return rules.state;},get arena(){return {...rules.arena};},get lift(){return {y:lift.y,target:lift.target,moving:lift.moving,blocked:lift.blocked};},

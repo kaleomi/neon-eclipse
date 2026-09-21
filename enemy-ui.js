@@ -1,3 +1,4 @@
+import {wardenCue} from './combat-cue-model.js';
 import {haloMarkText} from './weapons/halo-rules.js';
 import * as THREE from './node_modules/three/build/three.module.js';
 import {ENEMY_TYPES,BOSS_PHASES,facingDot} from './enemy-rules.js';
@@ -19,7 +20,7 @@ export function createEnemyUI(){
   impactLife=Math.max(0,impactLife-dt);impact.style.opacity=impactLife>0?'1':'0';
   bossPanel.hidden=!boss;
   if(boss){
-   const state=boss.bossState,phase=BOSS_PHASES[state.phase];bossPanel.querySelector('strong').textContent='THE WARDEN / '+bossLabel(boss);
+   const state=boss.bossState,phase=BOSS_PHASES[state.phase];const cue=wardenCue(state);bossPanel.dataset.cue=cue.kind;bossPanel.querySelector('strong').textContent=cue.symbol+' THE WARDEN / '+bossLabel(boss);
    bossPanel.querySelector('span').textContent=state.openRemaining>0?'瞄准青色胸口核心 · 核心伤害 ×2.5':state.transitionRemaining>0?'武器切换预警 · 趁机换弹和移动':phase.hint+' · '+phase.attacks+' 次攻击后暴露';
    bossPanel.dataset.exposed=String(state.openRemaining>0);
   }

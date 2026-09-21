@@ -1,3 +1,4 @@
+import {drawStationTiles,drawStationSign,refineStationMaterials} from './station-look.js';
 import * as T from './node_modules/three/build/three.module.js';
 import {STATION_WALLS,STATION_COVER,STATION_GATES} from './station-data.js';
 export function createStationWorld(scene,renderer,obstacles){
@@ -9,10 +10,11 @@ export function createStationWorld(scene,renderer,obstacles){
  function box(w,h,d,x,y,z,m=wall){const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);scene.add(mesh);if(h<=.2&&y-h/2>1.8)ceilings.push({x,z,w,d,bottom:y-h/2,top:y+h/2});return mesh;}
  function solid(def,m){const [w,h,d,x,z]=def,mesh=box(w,h,d,x,h/2,z,m);const o={w,h,d,x,z,mesh};obstacles.push(o);return o;}
  function sign(title,sub,x,y,z,width=7,rotation=0){
-  const c=document.createElement('canvas');c.width=768;c.height=192;const g=c.getContext('2d');g.fillStyle='#0b1d29';g.fillRect(0,0,768,192);g.fillStyle='#dcad68';g.fillRect(0,0,12,192);g.font='bold 56px sans-serif';g.fillStyle='#c8f3ed';g.fillText(title,34,84);g.font='24px monospace';g.fillStyle='#88a5b0';g.fillText(sub,36,142);
+  const c=document.createElement('canvas');c.width=768;c.height=192;const g=c.getContext('2d');drawStationSign(g,title,sub);
   const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;const p=new T.Mesh(new T.PlaneGeometry(width,width/4),new T.MeshBasicMaterial({map:tex,side:T.DoubleSide}));p.position.set(x,y,z);p.rotation.y=rotation;scene.add(p);
  }
- const tiles=document.createElement('canvas');tiles.width=tiles.height=256;const tc=tiles.getContext('2d');tc.fillStyle='#8e9ea4';tc.fillRect(0,0,256,256);tc.strokeStyle='#506269';tc.lineWidth=4;tc.strokeRect(2,2,252,252);tc.strokeStyle='#adc0c4';tc.lineWidth=1;tc.strokeRect(8,8,240,240);for(let y=24;y<240;y+=16){tc.fillStyle='#809399';tc.fillRect(20,y,216,2);}const tileMap=new T.CanvasTexture(tiles);tileMap.colorSpace=T.SRGBColorSpace;tileMap.wrapS=tileMap.wrapT=T.RepeatWrapping;tileMap.repeat.set(16,19);floor.map=tileMap;floor.color.setHex(0x80999e);
+ const tiles=document.createElement('canvas');tiles.width=tiles.height=256;drawStationTiles(tiles.getContext('2d'),256,256);const tileMap=new T.CanvasTexture(tiles);tileMap.colorSpace=T.SRGBColorSpace;tileMap.wrapS=tileMap.wrapT=T.RepeatWrapping;tileMap.repeat.set(16,19);tileMap.anisotropy=Math.min(4,renderer.capabilities?.getMaxAnisotropy?.()||1);floor.map=tileMap;
+ refineStationMaterials({wall,floor,train,ivory,black,orange,seat});
  box(64,.3,76,0,-.2,0,floor);
  STATION_WALLS.forEach((d,i)=>solid(d,i>=8?i>=15?ivory:train:wall));STATION_COVER.forEach((d,i)=>{
   const o=solid(d,black);if(i<5||i>=9)return;o.mesh.userData.collisionOnly=true;o.mesh.visible=false;const x=d[3],z=d[4],outer=Math.sign(x);
@@ -31,7 +33,7 @@ export function createStationWorld(scene,renderer,obstacles){
  }
  for(let z=20;z<36;z+=5){box(5,.05,.12,-24,4.62,z,glow);box(.2,.03,2,-24,.025,z,orange);}
  for(let z=-14;z<16;z+=4){box(14,.025,.08,0,.025,z,black);}
- for(const x of [-6.5,6.5])box(.1,.04,33,x,.035,-1,white);
+ for(const x of [-6.5,6.5])box(.1,.04,33,x,.035,-1,ivory);
  for(const z of [-28,-34]){box(18,.1,.16,20,5.65,z,white);box(16,.08,.12,-22,3.42,z,white);}
  // Carriage ceiling ribs, grab rails and hanging handles.
  for(const z of [-12,-4,4,12]){box(12.8,.09,.09,0,3.34,z,ivory);for(const x of [-7.1,7.1]){const rib=box(1.6,.09,.09,x,3.14,z,ivory);rib.rotation.z=Math.sign(x)*-.28;}}

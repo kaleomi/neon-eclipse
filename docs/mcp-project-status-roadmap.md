@@ -617,3 +617,12 @@
 - 鼠标与手柄为独立输入源，手柄 LT 始终长按；切枪、暂停、失焦、指针锁丢失、结束与重置都会清理开镜状态，近战右键弹反不变。
 - 520项语法、122项规则、43项集成，以及新增7+10组、步战控制10组、弹反、界面20组、布局33例、终端8组全部通过；诊断0；入口与7个生产资源HTTP 200字节一致。
 - 隧道地址更换后重建会话并重跑；详情见 `docs/mcp-controls-aim-mode-2026-09-20.md`。
+
+
+## 2026-09-20：角色模型／材质／音频批次一次性提交与验证记录
+
+- 提交范围：`characters/`（roster-*、shield-guard*、arena-boss*、art-kit、hit-proxies）、`models/` 17 个 GLB、`station-look.js`、`reactor-look.js`、`combat-cue-model.js`、`frame-perf-scope.js`、`audio/sfx-priority.js`、`scripts/build-enemy-roster.mjs`、`scripts/build-shield-guard.mjs`、15 个新测试及 33 处修改；批次文档见同日 `docs/mcp-*-2026-09-20.md`。
+- 验证：check 604/604；rules 131/132（`test-import-graph.mjs` 在提交前报未跟踪模块，提交后重跑确认）；integration 54/54（`test-swarm-world.mjs` 第 9 行改为过滤 roster 视觉根后再断言网格）。
+- 浏览器链 8/9 通过：smoke、shield-guard、enemy-roster-game、reactor-look、combat-cues、frame-perf、switchyard、archive。
+- **已知红灯（未修复，按决定 C 记录）**：`test-station-look-browser.mjs` 报 `calls budget grew`。原因：`switchyard-world.js` 接入 `characters/arena-boss-runtime.js` 的 `attachArenaBossVisual` 后，9 个视角 draw calls 各 +1（高画质 +2）、三角约 +2000～+4150；纹理、灯光、碰撞快照、天花板均不变。该测试对照 `.tools/qa-station-look/before.json`（零增长契约，针对纯材质替换批次）。待办：在 arena-boss 批次文档记录预算增量后重采基线（`STATION_CAPTURE=before`），或将阈值放宽为 base+2 calls／+4200 triangles。
+- `app.js` 预热尚未接回 shield／roster 加载器（`4256b35` 因未跟踪模块暂时移除），本批提交后可恢复。

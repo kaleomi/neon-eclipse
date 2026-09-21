@@ -1,3 +1,4 @@
+import {hideProxyDraw} from './hit-proxies.js';
 // E02 visual-only adapter. The original root meshes remain authoritative hit proxies.
 import {GLTFLoader} from '../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import {ENGINEER_ASSET,createEngineerVisual,cloneEngineerVisual,bindEngineerRig,
@@ -16,7 +17,7 @@ export function attachEngineerGuard(group,{loadAsset=typeof document!=='undefine
   const cached=loadAsset&&template;
   const visual=cached?cloneEngineerVisual(cached,p.accent):createEngineerVisual({accentMaterial:p.accent});
   const proxies=group.children.filter(o=>o.isMesh);
-  proxies.forEach(o=>{o.visible=false;o.userData.engineerProxy=true;});
+  hideProxyDraw(group,proxies,'engineerProxy');
   const state={visual,proxies,lastHp:null,hitAt:-Infinity,pose:{time:0,mode:'Idle'}};
   p.engineerModel=state;group.userData.engineerModelId='E02';group.userData.engineerModelSource=cached?'glb':'procedural';
   group.userData.ownedMaterials.push(...visual.materials);group.add(visual.root);

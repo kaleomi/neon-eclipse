@@ -15,10 +15,11 @@ export const SLING_CARGO=Object.freeze({id:'crate',x:214,z:104,name:'物资吊�
 export const SLING_ZONES=Object.freeze([
  {id:'garage',x:-92,z:118,name:'车库物资区'},
  {id:'island',x:LIGHTHOUSE_ISLAND.x-10,z:LIGHTHOUSE_ISLAND.z+6,name:'灯塔岛平台'},
- {id:'platform',x:(PLATFORM.minX+PLATFORM.maxX)/2,z:(PLATFORM.minZ+PLATFORM.maxZ)/2,name:'海上平台'}
+ {id:'platform',x:(PLATFORM.minX+PLATFORM.maxX)/2,z:(PLATFORM.minZ+PLATFORM.maxZ)/2,name:'海上平台'},
+ {id:'medical',x:180,z:100,name:'岸边医疗区'}
 ]);
 export function createSling(cargo=SLING_CARGO,zones=SLING_ZONES){
- return {cargo:{x:cargo.x,y:0,z:cargo.z,vx:0,vz:0,vy:0,resting:true,intact:true},hooked:false,cable:0,zones:zones.map(z=>({...z})),deliveries:0,drops:0,damaged:0,lastEvent:null,elapsedHooked:0};
+ return {cargo:{x:cargo.x,y:0,z:cargo.z,vx:0,vz:0,vy:0,resting:true,intact:true,kind:'crate'},hooked:false,cable:0,zones:zones.map(z=>({...z})),deliveries:0,drops:0,damaged:0,lastEvent:null,elapsedHooked:0};
 }
 function hookPoint(h){return {x:h.x,y:h.y-HELICOPTER.height*.35,z:h.z};}
 // Can the crew hook right now? Returns null when allowed or a reason string.
@@ -79,7 +80,7 @@ export function createSlingRun(order=SLING_RUN.order){
  return {order:[...order],index:0,status:'active',respawn:0,pendingReason:null,legs:[],reward:false,rewardClaimed:false};
 }
 export function slingRunTarget(run,s){return run.status==='active'?s.zones.find(z=>z.id===run.order[run.index])||null:null;}
-export function resetCargo(s,cargo=SLING_CARGO){s.hooked=false;s.cable=0;Object.assign(s.cargo,{x:cargo.x,y:0,z:cargo.z,vx:0,vy:0,vz:0,resting:true,intact:true});s.elapsedHooked=0;}
+export function resetCargo(s,cargo=SLING_CARGO,groundAt=()=>0){s.hooked=false;s.cable=0;Object.assign(s.cargo,{x:cargo.x,y:groundAt(cargo.x,cargo.z),z:cargo.z,vx:0,vy:0,vz:0,resting:true,intact:true,kind:cargo.kind||'crate'});s.elapsedHooked=0;}
 // Feed each stepSling event + dt. Returns a run event: 'leg' (target delivered), 'wrongZone', 'lost', 'respawn', 'complete' or null.
 export function stepSlingRun(run,s,ev,dt){
  if(!Number.isFinite(dt)||dt<=0)return null;

@@ -126,7 +126,7 @@ export const VEHICLE_EVENT_SFX=Object.freeze({
  // Frontier presentation (drone air/ground explosions, turret/dish/mech collapse, mech footsteps) reuse boss/player cues at reduced gain.
  frontierExplosions:'kill.boss',frontierCollapses:'vehicle.impact',mechSteps:'player.land',
  // Helicopter sling / supply run: hook latch, crate touchdown, delivery chime, smashed crate, run complete fanfare.
- slingHooks:'vehicle.enter',slingTouchdowns:'player.land',slingDeliveries:'vehicle.checkpoint',slingLosses:'vehicle.impact',slingRunsComplete:'objective.complete'
+ slingHooks:'vehicle.enter',slingTouchdowns:'player.land',slingDeliveries:'vehicle.checkpoint',slingLosses:'vehicle.impact',slingRunsComplete:'objective.complete',medevacsComplete:'objective.extract'
 });
 const EVENT_GAIN=Object.freeze({hullHits:.9,frontierHits:.9,frontierExplosions:.7,frontierCollapses:.8,mechSteps:.45,slingHooks:.6,slingTouchdowns:.7,slingLosses:.8});
 export function vehicleAudioEvents(prev,next){

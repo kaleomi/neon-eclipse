@@ -12,7 +12,7 @@ const browser=await chromium.launch({headless:true,args:['--use-angle=swiftshade
 const context=await browser.newContext({viewport:{width:1280,height:800}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
 await page.route('**/vehicle-app.js',async route=>{
  const body=await (await route.fetch()).text();
- const hook=`\nwindow.__heliFixture={backToPad(){heli.x=196;heli.z=120;heli.vx=heli.vz=0;},async overZone(id){const {SLING,SLING_ZONES}=await import('./helicopter-sling.js');const {HELICOPTER}=await import('./helicopter-rules.js');const {fieldGround}=await import('./helicopter-field.js');const z=SLING_ZONES.find(z=>z.id===id);heli.x=z.x;heli.z=z.z;heli.y=fieldGround(z.x,z.z)+HELICOPTER.height*.35+SLING.cable+SLING.cargoHeight+.3;heli.vx=heli.vz=heli.vy=0;sling.cargo.x=z.x;sling.cargo.z=z.z;sling.cargo.vx=sling.cargo.vz=0;},async lowerForRelease(){const {SLING}=await import('./helicopter-sling.js');const {HELICOPTER}=await import('./helicopter-rules.js');heli.y=HELICOPTER.height*.35+SLING.cable+SLING.cargoHeight+.3;heli.vy=0;},async overCrate(){const {SLING_CARGO,SLING}=await import('./helicopter-sling.js');const {HELICOPTER}=await import('./helicopter-rules.js');heli.x=SLING_CARGO.x;heli.z=SLING_CARGO.z;heli.y=SLING.cargoHeight+HELICOPTER.height*.35+SLING.cable+2;heli.vx=heli.vz=heli.vy=0;},async walkToPad(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;},player:()=>({x:player.x,z:player.z,yaw:player.yaw}),faceHeli(){player.yaw=Math.atan2(heli.x-player.x,-(heli.z-player.z));},heli:()=>({x:heli.x,y:heli.y,z:heli.z,status:heli.status,powered:heli.powered,grounded:heli.grounded,rpm:heli.rpm}),player:()=>({...player})};`;
+ const hook=`\nwindow.__heliFixture={backToPad(){heli.x=196;heli.z=120;heli.vx=heli.vz=0;},skipToLastLeg(){slingRun.index=slingRun.order.length-1;},async overPod(){const {SLING}=await import('./helicopter-sling.js');const {HELICOPTER}=await import('./helicopter-rules.js');const c=sling.cargo;heli.x=c.x;heli.z=c.z;heli.y=c.y+SLING.cargoHeight+HELICOPTER.height*.35+SLING.cable+2;heli.vx=heli.vz=heli.vy=0;},async overZone(id){const {SLING,SLING_ZONES}=await import('./helicopter-sling.js');const {HELICOPTER}=await import('./helicopter-rules.js');const {fieldGround}=await import('./helicopter-field.js');const z=SLING_ZONES.find(z=>z.id===id);heli.x=z.x;heli.z=z.z;heli.y=fieldGround(z.x,z.z)+HELICOPTER.height*.35+SLING.cable+SLING.cargoHeight+.3;heli.vx=heli.vz=heli.vy=0;sling.cargo.x=z.x;sling.cargo.z=z.z;sling.cargo.vx=sling.cargo.vz=0;},async lowerForRelease(){const {SLING}=await import('./helicopter-sling.js');const {HELICOPTER}=await import('./helicopter-rules.js');heli.y=HELICOPTER.height*.35+SLING.cable+SLING.cargoHeight+.3;heli.vy=0;},async overCrate(){const {SLING_CARGO,SLING}=await import('./helicopter-sling.js');const {HELICOPTER}=await import('./helicopter-rules.js');heli.x=SLING_CARGO.x;heli.z=SLING_CARGO.z;heli.y=SLING.cargoHeight+HELICOPTER.height*.35+SLING.cable+2;heli.vx=heli.vz=heli.vy=0;},async walkToPad(){const {helicopterDoorPoints}=await import('./helicopter-field.js');const d=helicopterDoorPoints(heli)[0];player.x=d.x;player.z=d.z;player.yaw=heli.yaw;},player:()=>({x:player.x,z:player.z,yaw:player.yaw}),faceHeli(){player.yaw=Math.atan2(heli.x-player.x,-(heli.z-player.z));},heli:()=>({x:heli.x,y:heli.y,z:heli.z,status:heli.status,powered:heli.powered,grounded:heli.grounded,rpm:heli.rpm}),player:()=>({...player})};`;
  route.fulfill({body:body+hook,headers:{'content-type':'text/javascript'}});
 });
 await page.goto(url);await page.waitForSelector('#vehicle-scene canvas');
@@ -70,6 +70,23 @@ assert.equal(await page.getAttribute('body','data-vehicle-kind'),'helicopter');
  await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.slingRunLeg==='1',{},{timeout:5000});
  assert.equal(await page.getAttribute('body','data-sling-run-target'),'island','next leg targets the island');assert.equal(await page.getAttribute('body','data-sling-deliveries'),'1');
  await page.screenshot({path:`${shots}/heli-sling-run.png`});
+ // Medevac (plan B): finish the supply run on the platform leg → casualty pod spawns on the island with a 90 s clock;
+ // carry it steadily to the shore medical zone and set it down → graded completion.
+ assert.equal(await page.getAttribute('body','data-medevac-status'),'locked');
+ await page.waitForFunction(()=>Number(document.body.dataset.slingRunRespawn)===0,{},{timeout:45000});
+ await page.evaluate(()=>{window.__heliFixture.skipToLastLeg();return window.__heliFixture.overCrate();});await page.waitForTimeout(150);
+ await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.slingHooked==='true',{},{timeout:5000});
+ await page.evaluate(()=>window.__heliFixture.overZone('platform'));await page.waitForFunction(()=>Number(document.body.dataset.slingCargoY)<12.6,{},{timeout:5000});
+ await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.slingRunStatus==='done',{},{timeout:5000});
+ assert.equal(await page.getAttribute('body','data-medevac-status'),'active','supply run completion starts the medevac');
+ assert.ok(Number(await page.getAttribute('body','data-heli-rockets'))>=2,'reward rockets granted');
+ await page.evaluate(()=>window.__heliFixture.overPod());await page.waitForTimeout(150);
+ await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.slingHooked==='true',{},{timeout:5000});
+ await page.evaluate(()=>window.__heliFixture.overZone('medical'));await page.waitForFunction(()=>Number(document.body.dataset.slingCargoY)<.6,{},{timeout:5000});
+ await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.medevacStatus==='done',{},{timeout:5000});
+ const grade=await page.getAttribute('body','data-medevac-grade');assert.ok(['S','A','B'].includes(grade),'graded: '+grade);
+ assert.ok(Number(await page.getAttribute('body','data-medevac-health'))>50,'teleported carry keeps the patient healthy');
+ await page.screenshot({path:`${shots}/heli-medevac.png`});
  await page.evaluate(()=>window.__heliFixture.backToPad());await page.waitForTimeout(100);
 }
 // Hold Space (brake) then descend gently with Ctrl; expect a landing, not a crash.

@@ -4,7 +4,7 @@ import {SLING,SLING_ZONES} from './helicopter-sling.js';
 import {HELICOPTER} from './helicopter-rules.js';
 export function createSlingModel(scene,sling){
  const root=new T.Group();root.name='sling';scene.add(root);
- const crateMat=new T.MeshStandardMaterial({color:0xc98a3a,roughness:.7,metalness:.1}),brokenMat=new T.MeshStandardMaterial({color:0x5a4a3a,roughness:.9});
+ const crateMat=new T.MeshStandardMaterial({color:0xc98a3a,roughness:.7,metalness:.1}),brokenMat=new T.MeshStandardMaterial({color:0x5a4a3a,roughness:.9}),podMat=new T.MeshStandardMaterial({color:0xf2f4f6,roughness:.5,metalness:.2,emissive:0xd0202a,emissiveIntensity:.35});
  const crate=new T.Mesh(new T.BoxGeometry(2.2,SLING.cargoHeight,2.2),crateMat);crate.castShadow=true;root.add(crate);
  const strap=new T.Mesh(new T.BoxGeometry(2.4,.12,.3),new T.MeshStandardMaterial({color:0x2a2f33}));strap.position.y=SLING.cargoHeight/2;crate.add(strap);
  const cableGeo=new T.BufferGeometry();cableGeo.setAttribute('position',new T.Float32BufferAttribute(new Float32Array(6),3));
@@ -14,7 +14,7 @@ export function createSlingModel(scene,sling){
  const ground=(x,z)=>0;
  return {root,crate,cable,rings,
   update(s,h,time,groundAt=ground,target=null){
-   const c=s.cargo;crate.position.set(c.x,c.y+SLING.cargoHeight/2,c.z);crate.material=c.intact?crateMat:brokenMat;
+   const c=s.cargo;crate.position.set(c.x,c.y+SLING.cargoHeight/2,c.z);crate.material=!c.intact?brokenMat:c.kind==='casualty'?podMat:crateMat;
    crate.rotation.y=s.hooked?Math.atan2(c.vx,c.vz)*.15:0;crate.rotation.z=s.hooked?-(c.vx||0)*.02:0;crate.rotation.x=s.hooked?(c.vz||0)*.02:0;
    cable.visible=s.hooked;
    if(s.hooked){const p=cable.geometry.attributes.position.array;p[0]=h.x;p[1]=h.y-HELICOPTER.height*.35;p[2]=h.z;p[3]=c.x;p[4]=c.y+SLING.cargoHeight;p[5]=c.z;cable.geometry.attributes.position.needsUpdate=true;}

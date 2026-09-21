@@ -16,3 +16,10 @@
 
 ## 音效（2026-09-21 追加）
 事件计数 `audioSling` → `VEHICLE_EVENT_SFX`：hook→`vehicle.enter`(.6)、touchdown→`player.land`(.7)、delivered→`vehicle.checkpoint`、damaged/dropped→`vehicle.impact`(.8)、run complete→`objective.complete`。复用现有合成配方，无新采样。
+
+## 方案 B：限时急救（2026-09-21 追加）
+- 触发：补给链 `complete` 时自动 `startMedevac`（`medevac.status` locked → active）。伤员吊舱出现在灯塔岛高台（`LIGHTHOUSE_ISLAND.x+4, z-10`，避开岛上补给区），目标为新增 `medical` 区（岸边 (180,100)）。
+- 规则（`helicopter-medevac.js`，纯）：`MEDEVAC` {timeLimit 90 s, health 100, swingSafe 2.5 m, swingDamage 6 hp/s/m, retryAfter 8 s}；吊挂中 `slingSummary.swing` 超过 safe 的部分按秒扣伤员生命；失败原因 casualty / timeout / damaged / dropped / wrongZone，8 s 后吊舱回岛重开（`attempts` 递增）；送达医疗区按剩余时间比与生命比评级 S(≥50%/≥80%) / A(≥25%/≥50%) / B，保留 `best`。
+- 接线：`vehicle-app.js` `medevac` 状态、`recover()` 重置、每帧 `stepMedevac` 紧随 `stepSling`，提示接管 `#vw-hint`（急救激活时替代补给提示），目标环切到医疗区，`dataset.medevac{Status,Timer,Health,Grade,Attempts}`；完成音效 `medevacsComplete → objective.extract`。`helicopter-sling-world.js` 伤员吊舱用白底红光材质（`cargo.kind==='casualty'`）。`resetCargo` 增 `groundAt` 参数让吊舱落在岛面高度。
+- 验收：`test-helicopter-medevac.mjs`（布局、locked 忽略事件、稳飞无伤/摆动扣血、五种失败与重开、评级单调与 best 不降级）PASS；`test-helicopter-sling.mjs`、`test-audio.mjs`、`test-session-lifecycle.mjs` PASS；check 659/659。浏览器：直升机场地链新增段「跳到末段→平台送达→补给链 done、急救 active、火箭已发→吊舱挂钩→医疗区放下→`medevacStatus=done`、评级 ∈ {S,A,B}、生命 >50」EXIT=0（`.tools/b22-heli-field.log`）。
+- 未做：评级写入存档；C 动力学反馈。

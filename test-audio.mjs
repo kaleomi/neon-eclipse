@@ -223,7 +223,7 @@ function fakeContext(){
  const fr=vehicleAudioEvents({rifleShots:0,frontierKills:0,frontierHits:0},{rifleShots:2,frontierKills:1,frontierHits:1});assert.deepEqual(fr.map(e=>e.name).sort(),['fire.vanguard','kill','vehicle.impact'],'frontier rifle/kill/hit events map to catalogue names');assert.deepEqual(fr.find(e=>e.name==='vehicle.impact').opts,{gain:.9});
  // Frontier presentation cues: explosions/collapses at reduced gain, mech footsteps collapse to one cue per frame however many strides happened.
  const sl=vehicleAudioEvents({slingHooks:0,slingTouchdowns:0,slingDeliveries:0,slingLosses:0,slingRunsComplete:0},{slingHooks:1,slingTouchdowns:1,slingDeliveries:1,slingLosses:1,slingRunsComplete:1});
- assert.deepEqual(sl.map(e=>e.name).sort(),['objective.complete','player.land','vehicle.checkpoint','vehicle.enter','vehicle.impact'].sort(),'sling hook/touchdown/delivery/loss/complete map to catalogue cues');
+ assert.deepEqual(sl.map(e=>e.name).sort(),['objective.complete','player.land','vehicle.checkpoint','vehicle.enter','vehicle.impact'].sort(),'sling hook/touchdown/delivery/loss/complete map to catalogue cues');assert.equal(vehicleAudioEvents({medevacsComplete:0},{medevacsComplete:1})[0].name,'objective.extract');
  assert.ok(sl.find(e=>e.name==='vehicle.enter').opts.gain<1&&sl.find(e=>e.name==='vehicle.impact').opts.gain<1,'sling hook/loss cues are attenuated');
  const fx=vehicleAudioEvents({frontierExplosions:0,frontierCollapses:0,mechSteps:0},{frontierExplosions:2,frontierCollapses:1,mechSteps:3});
  assert.deepEqual(fx.map(e=>[e.name,e.count,e.opts?.gain]),[['kill.boss',2,.7],['vehicle.impact',1,.8],['player.land',1,.45]],'presentation events map to catalogue names with gains');

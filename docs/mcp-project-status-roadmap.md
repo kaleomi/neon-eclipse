@@ -714,3 +714,9 @@
 - 源码接线：`audio/vehicle-audio.js` `VEHICLE_EVENT_SFX` 增 `slingHooks/slingTouchdowns/slingDeliveries/slingLosses/slingRunsComplete`（复用 vehicle.enter / player.land / vehicle.checkpoint / vehicle.impact / objective.complete，前两者与损失衰减），`vehicle-app.js` `audioSling` 计数器随 toggleHook / stepSling / stepSlingRun 事件递增并并入 `vehicleAudio.events`。无新采样。
 - 规则：`test-audio.mjs` 增映射与衰减断言 PASS。
 - 浏览器：`test-helicopter-field-browser.mjs` 挂钩后 `sfx.stats().played` 递增 EXIT=0（`.tools/b21-heli-field.log`）。
+
+## 2026-09-21：直升机限时急救（方案 B）
+
+- 源码接线：新 `helicopter-medevac.js`（计时/伤员生命/摆动扣血/失败重开/S-A-B 评级），`helicopter-sling.js` 增 `medical` 区与 `resetCargo(groundAt)`，`vehicle-app.js` 补给链完成后自动开始急救并接 HUD/dataset/音效，`helicopter-sling-world.js` 伤员吊舱材质。
+- 规则：新 `test-helicopter-medevac.mjs` PASS；check 659/659。
+- 浏览器：直升机场地链含急救段 EXIT=0。详见 `docs/mcp-p3-helicopter-sling-supply-run.md`。未做：评级存档、C 动力学。

@@ -9,14 +9,16 @@ try{
  const url=process.env.VEHICLE_TEST_URL||'http://127.0.0.1:5173/vehicle.html';await page.goto(url);await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='idle');
  const sentinel={'neon-eclipse.journey.v4':'flight-test-keep','neon-eclipse.combat-difficulty.v1':'hard','neon-eclipse.naval-difficulty.v1':'easy'};
  await page.evaluate(s=>{for(const [k,v] of Object.entries(s))localStorage.setItem(k,v);},sentinel);
- const start=async()=>{await page.click('#start-flight');await page.click('#start-flight');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='active');};
- await page.click('#start-flight');assert.equal(await page.getAttribute('body','data-flight-mission-status'),'idle','first click only confirms');await page.click('#start-flight');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='active');
+ await page.waitForSelector('#vehicle-mission-page-flight',{state:'attached',timeout:20000});
+ const showButton=sel=>page.evaluate((s)=>{const el=document.querySelector(s);if(!el)return;if(document.getElementById('vehicle-page-missions').hidden)document.querySelector('[data-ui-deck=vehicle] .ui-tabs [data-ui-tab=missions]')?.click();let n=el.parentElement;while(n&&n!==document.body){if(n.classList&&n.classList.contains('ui-tab-page')&&n.hidden){document.querySelector('[aria-controls="'+n.id+'"]')?.click();}n=n.parentElement;}},sel);
+ const start=async()=>{await showButton('#start-flight');await page.click('#start-flight');await page.click('#start-flight');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='active');};
+ await showButton('#start-flight');await page.click('#start-flight');assert.equal(await page.getAttribute('body','data-flight-mission-status'),'idle','first click only confirms');await page.click('#start-flight');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='active');
  assert.equal(await page.getAttribute('body','data-vehicle-kind'),'plane');assert.equal(await page.getAttribute('body','data-chase-status'),'idle');
  await page.keyboard.press('KeyE');assert.equal(await page.getAttribute('body','data-vehicle-kind'),'plane','mission blocks exit');
  await page.keyboard.down('KeyR');await page.waitForTimeout(1800);await page.keyboard.up('KeyR');assert.equal(await page.getAttribute('body','data-flight-mission-status'),'active','mission blocks quick recovery');
  await page.keyboard.press('Escape');const before=await page.evaluate(()=>[document.body.dataset.flightMissionRemaining,document.body.dataset.flightPlane]);await page.waitForTimeout(300);assert.deepEqual(await page.evaluate(()=>[document.body.dataset.flightMissionRemaining,document.body.dataset.flightPlane]),before);
  await page.screenshot({path:path.join(screenshots,'flight-task-briefing.png')});
- await page.click('#flight-free-drive');await page.click('#flight-free-drive');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='idle');assert.equal(await page.getAttribute('body','data-vehicle-kind'),'walking');await page.keyboard.press('Escape');await start();
+ await showButton('#flight-free-drive');await page.click('#flight-free-drive');await page.click('#flight-free-drive');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='idle');assert.equal(await page.getAttribute('body','data-vehicle-kind'),'walking');await page.keyboard.press('Escape');await start();
  const held=new Set();async function keys(next){for(const k of [...held])if(!next.includes(k)){await page.keyboard.up(k);held.delete(k);}for(const k of next)if(!held.has(k)){await page.keyboard.down(k);held.add(k);}}
  const read=()=>page.evaluate(()=>({status:document.body.dataset.flightMissionStatus,phase:document.body.dataset.flightMissionPhase,route:{index:+document.body.dataset.flightMissionGate},remaining:+document.body.dataset.flightMissionRemaining,p:JSON.parse(document.body.dataset.flightPlane)}));
  const phases=new Set(),deadline=Date.now()+240000;let last='',snapshot=false;
@@ -34,18 +36,18 @@ try{
  assert.equal(await page.getAttribute('[data-task=return][data-rules=return-v1]','data-count'),'1','actual win automatically commits one local score');
 
  const terminal=await page.getAttribute('body','data-flight-mission-remaining');await page.keyboard.press('Escape');await page.waitForTimeout(200);assert.equal(await page.getAttribute('body','data-drive-active'),'false');assert.equal(await page.getAttribute('body','data-flight-mission-remaining'),terminal);
- await page.click('#retry-flight');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='active');assert.equal((await read()).route.index,0);assert((await read()).remaining>297);assert.equal((await read()).p.landings,0);
+ await showButton('#retry-flight');await page.click('#retry-flight');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='active');assert.equal((await read()).route.index,0);assert((await read()).remaining>297);assert.equal((await read()).p.landings,0);
  // Take off with real keys, then retain full climb until the northern field boundary fails.
  await page.keyboard.down('Shift');await page.keyboard.down('KeyS');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='lost',{},{timeout:60000});await page.keyboard.up('Shift');await page.keyboard.up('KeyS');
  assert.match(await page.locator('#drive-overlay-title').textContent(),/任务失败/);assert(await page.locator('#resume-drive').isHidden());
- await page.screenshot({path:path.join(screenshots,'flight-return-failure.png')});await page.click('#finish-flight-free');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='idle');
+ await page.screenshot({path:path.join(screenshots,'flight-return-failure.png')});await showButton('#finish-flight-free');await page.click('#finish-flight-free');await page.waitForFunction(()=>document.body.dataset.flightMissionStatus==='idle');
  await page.keyboard.press('Escape');await start();
  for(const [width,height] of [[1280,720],[960,640],[390,640],[390,844]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(120);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'horizontal overflow '+width);
-  const overlaps=await page.evaluate(()=>{const r=['.drive-objective','#flight-instruments','.drive-instruments'].map(s=>document.querySelector(s).getBoundingClientRect());return r.some((a,i)=>r.some((b,j)=>i<j&&a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top));});assert(!overlaps,'flight HUD overlaps '+width+'x'+height);
+  const overlaps=await page.evaluate(()=>{const r=['.drive-objective','#flight-instruments','.drive-instruments','#vehicle-weapon-panel'].map(s=>document.querySelector(s)).filter(e=>e&&!e.hidden).map(e=>e.getBoundingClientRect());return r.some((a,i)=>r.some((b,j)=>i<j&&a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top));});assert(!overlaps,'flight HUD overlaps '+width+'x'+height);
  }
- await page.keyboard.press('Escape');await page.click('#start-chase');await page.click('#start-chase');await page.waitForFunction(()=>document.body.dataset.chaseStatus==='active');assert.equal(await page.getAttribute('body','data-flight-mission-status'),'idle');assert(await page.locator('#flight-instruments').isHidden());
+ await page.keyboard.press('Escape');await showButton('#start-chase');await page.click('#start-chase');await page.click('#start-chase');await page.waitForFunction(()=>document.body.dataset.chaseStatus==='active');assert.equal(await page.getAttribute('body','data-flight-mission-status'),'idle');assert(await page.locator('#flight-instruments').isHidden());
  await page.keyboard.press('Escape');await start();assert.equal(await page.getAttribute('body','data-chase-status'),'idle');assert.equal(await page.getAttribute('body','data-sea-projectiles'),'0');
  await page.evaluate(()=>window.dispatchEvent(new Event('blur')));await page.waitForFunction(()=>document.body.dataset.driveActive==='false');const frozen=await page.getAttribute('body','data-flight-mission-remaining');await page.waitForTimeout(250);assert.equal(await page.getAttribute('body','data-flight-mission-remaining'),frozen);
  assert.deepEqual(await page.evaluate(s=>Object.fromEntries(Object.keys(s).map(k=>[k,localStorage.getItem(k)])),sentinel),sentinel);

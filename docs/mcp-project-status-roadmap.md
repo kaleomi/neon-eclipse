@@ -726,3 +726,9 @@
 - 源码接线：`helicopter-rules.js` 可选 `site.load`（附加重量 + 水平拉力，无载荷时逐位不变），`helicopter-sling.js` `slingLoad`，`vehicle-app.js` 接入直升机 site。
 - 规则：`test-helicopter-sling.mjs` 新块 PASS；所有 `test-helicopter*.mjs` PASS；check 659/659。
 - 浏览器：直升机场地链与原型链 EXIT=0，既有阈值未重采。详见 `docs/mcp-p3-helicopter-sling-supply-run.md`。A/B/C 三案至此全部落地；剩余：评级存档。
+
+## 2026-09-21：J01/J02 两项视觉问题修复
+
+- J02：`vehicle.css` 武装飞机小视口仪表改底部/窄栏布局，九视口四面板零交集；飞行任务链接管扩展断言 EXIT=0。
+- J01：`vehicle-app.js` 恢复非漫游车 C 前向视角（原被 gunner 初始值挡住）；雷达拱下移后移为用户工作区模型改动、未提交；截图证前方无遮挡；sea-air 链新增 hood 回归 EXIT=0。
+- 连带：`test-flight-mission-browser.mjs` 适配双层 tab deck 回绿。check 659/659。详见 `docs/mcp-visual-fixes-j01-j02-2026-09-21.md`。

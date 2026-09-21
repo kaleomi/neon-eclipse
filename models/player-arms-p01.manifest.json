@@ -1,0 +1,50 @@
+{
+  "asset": "player-arms-p01.glb",
+  "version": "p01-v1",
+  "role": "player-first-person-arms",
+  "axis": "+Y up, -Z forward (camera space)",
+  "units": "metres",
+  "description": "Original SENTINEL first-person arm/forearm assembly; rigid articulated armor joints, gloves, shoulder/chest collar housing. Not a skinned human.",
+  "meshes": 41,
+  "triangles": 4880,
+  "materials": 6,
+  "articulatedNodes": 13,
+  "animations": [
+    {
+      "name": "Idle",
+      "seconds": 2.4,
+      "tracks": 26
+    },
+    {
+      "name": "Sprint",
+      "seconds": 0.55,
+      "tracks": 26
+    },
+    {
+      "name": "Reload",
+      "seconds": 2.4,
+      "tracks": 26
+    },
+    {
+      "name": "Melee",
+      "seconds": 0.55,
+      "tracks": 26
+    },
+    {
+      "name": "Hit",
+      "seconds": 0.35,
+      "tracks": 26
+    }
+  ],
+  "bytes": 661320,
+  "sha256": "7243c27ddcddc6b918ce717f79abcaf9d0000ea29553405d4ef33d1ec59de89b",
+  "sourceHashes": {
+    "characters/player-arms/player-arms.js": "b7a7b48e94b3a22aed2d2e4d40d9cebec8b9c3ade53b8d94a4d874817042a5df"
+  },
+  "generator": {
+    "three": "186",
+    "node": "20.20.2"
+  },
+  "textures": 0,
+  "externalDependencies": 0
+}

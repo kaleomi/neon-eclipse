@@ -1,5 +1,6 @@
 import {reloadPose} from './action-poses.js';
 import * as T from './node_modules/three/build/three.module.js';
+import {attachPlayerArmsViewModel,updatePlayerArmsViewModel} from './characters/player-arms-viewmodel.js';
 const material=(color,metalness=.35,roughness=.48)=>new T.MeshStandardMaterial({color,metalness,roughness});
 const steel=material(0x829ca9,.85,.22),body=material(0x2a3944,.6,.38),dark=material(0x111b22,.7,.35),rubber=material(0x151f24,.1,.82),glove=material(0x485860,.15,.75);
 const casing=material(0x9b4932,.2,.55),brass=material(0xd4ab62,.85,.26);
@@ -14,18 +15,15 @@ function box(g,w,h,d,x,y,z,m=body,bevel=false){
 }
 function tube(g,r,len,x,y,z,m=steel){const mesh=new T.Mesh(new T.CylinderGeometry(r,r,len,16),m);mesh.rotation.x=Math.PI/2;mesh.position.set(x,y,z);g.add(mesh);return mesh;}
 function ring(g,r,x,y,z){const mesh=new T.Mesh(new T.TorusGeometry(r,.012,6,20),steel);mesh.position.set(x,y,z);g.add(mesh);return mesh;}
+// Empty grip/support anchor groups: the P01 articulated arms solve onto these each frame;
+// anchor transforms remain the single layout source of truth for hand placement.
 function hand(parent,x,y,z){
- const h=new T.Group();h.position.set(x,y,z);parent.add(h);
- const palm=new T.Mesh(new T.SphereGeometry(1,12,8),glove);palm.scale.set(.088,.075,.105);h.add(palm);
- for(let i=0;i<8;i++){const finger=new T.Mesh(new T.CapsuleGeometry(.018,.065,3,7),dark);finger.rotation.x=Math.PI/2;finger.position.set(-.058+i*.038,-.052,-.055);h.add(finger);}
- const thumb=new T.Mesh(new T.CapsuleGeometry(.025,.065,3,7),glove);thumb.rotation.z=-.55;thumb.position.set(.075,-.01,-.03);h.add(thumb);
- tube(h,.085,.045,0,0,.12,dark);
- const sleeve=new T.Mesh(new T.CylinderGeometry(.085,.105,.33,12),body);sleeve.rotation.x=Math.PI/2-.18;sleeve.position.set(0,-.03,.30);h.add(sleeve);
+ const h=new T.Group();h.position.set(x,y,z);h.userData.gripAnchor=true;parent.add(h);
  return h;
 }
 function label(g,text,color){const c=document.createElement('canvas');c.width=256;c.height=64;const ctx=c.getContext('2d');ctx.fillStyle='#152833';ctx.fillRect(0,0,256,64);ctx.fillStyle=color;ctx.font='bold 26px monospace';ctx.fillText(text,10,29);ctx.fillStyle='#8c9ca3';ctx.font='13px monospace';ctx.fillText('K-19 / FIELD SYSTEM',10,51);const map=new T.CanvasTexture(c);map.colorSpace=T.SRGBColorSpace;const mesh=new T.Mesh(new T.PlaneGeometry(.28,.07),new T.MeshBasicMaterial({map}));mesh.position.set(-.126,.022,.03);mesh.rotation.y=-Math.PI/2;g.add(mesh);}
 export function createWeapons(camera){
- const gun=new T.Group();camera.add(gun);const models=[],pumps=[],hands=[],shells=[],magazines=[],supports=[],bolts=[];
+ const gun=new T.Group();camera.add(gun);const models=[],pumps=[],hands=[],shells=[],magazines=[],supports=[],bolts=[];let pumpSupport=null;
  for(let i=0;i<8;i++){
   const g=new T.Group();g.scale.setScalar(.65);gun.add(g);models.push(g);
   if(i===7){
@@ -36,7 +34,7 @@ export function createWeapons(camera){
    for(const x of [-.09,.09]){tube(g,.059,.46,x,.05,-.47,steel);tube(g,.072,.1,x,.05,-.72,dark);ring(g,.06,x,.05,-.775).material=energy;}
    box(g,.27,.13,.25,0,.015,-.32,dark,true);for(let k=0;k<4;k++){box(g,.018,.09,.028,-.151,.03,-.42+k*.07,energy);box(g,.018,.09,.028,.151,.03,-.42+k*.07,energy);}
    const mag=new T.Group();g.add(mag);magazines[i]=mag;box(mag,.20,.22,.20,0,-.21,-.045,dark,true);for(let k=0;k<3;k++)box(mag,.022,.13,.09,-.115,-.21,-.1+k*.055,energy);box(mag,.23,.035,.22,0,-.335,-.045,steel);
-   hand(g,.015,-.16,.26);supports[i]=hand(g,-.02,-.115,-.28);supports[i].rotation.z=-.25;label(g,'VT-06','#92f8ff');continue;
+   hands[i]=hand(g,.015,-.16,.26);supports[i]=hand(g,-.02,-.115,-.28);supports[i].rotation.z=-.25;label(g,'VT-06','#92f8ff');continue;
   }
   if(i===6){
    g.name='RAILSPIKE';g.userData.weaponId='railspike';
@@ -48,7 +46,7 @@ export function createWeapons(camera){
    for(let k=0;k<4;k++){const coil=ring(g,.09,0,.07,-.14-k*.115);coil.material=energy;}
    box(g,.12,.05,.09,0,.21,.08,dark);box(g,.012,.025,.015,0,.235,.10,cyan);
    const mag=new T.Group();g.add(mag);magazines[i]=mag;box(mag,.11,.20,.12,0,-.24,.18,dark);box(mag,.14,.03,.15,0,-.345,.18,energy);
-   hand(g,.015,-.16,.26);label(g,'RS-01','#ffc18b');continue;
+   hands[i]=hand(g,.015,-.16,.26);label(g,'RS-01','#ffc18b');continue;
   }
   if(i===5){
    g.name='HALO';g.userData.weaponId='halo';
@@ -60,7 +58,7 @@ export function createWeapons(camera){
    box(g,.12,.055,.24,0,.22,-.01,steel);tube(g,.079,.30,0,.32,-.02,dark);ring(g,.064,0,.32,-.18);ring(g,.064,0,.32,.14);
    box(g,.011,.014,.02,0,.32,-.19,cyan);box(g,.018,.035,.18,-.13,.04,.03,amber);
    const mag=new T.Group();g.add(mag);magazines[i]=mag;box(mag,.11,.29,.17,0,-.23,-.055,dark,true);box(mag,.145,.032,.19,0,-.385,-.055,steel,true);
-   hand(g,.015,-.16,.26);supports[i]=hand(g,-.02,-.115,-.28);supports[i].rotation.z=-.25;
+   hands[i]=hand(g,.015,-.16,.26);supports[i]=hand(g,-.02,-.115,-.28);supports[i].rotation.z=-.25;
    label(g,'HL-24','#cbb8ff');continue;
   }
   if(i===4){
@@ -76,7 +74,7 @@ export function createWeapons(camera){
    const mag=new T.Group();g.add(mag);magazines[i]=mag;
    box(mag,.11,.32,.12,0,-.22,-.1,dark,true);box(mag,.135,.032,.14,0,-.385,-.1,steel,true);
    box(mag,.013,.20,.075,-.064,-.24,-.1,amber);
-   hand(g,.015,-.16,.24);supports[i]=hand(g,-.02,-.115,-.28);supports[i].rotation.z=-.25;
+   hands[i]=hand(g,.015,-.16,.24);supports[i]=hand(g,-.02,-.115,-.28);supports[i].rotation.z=-.25;
    label(g,'TM-36','#c3ec9b');continue;
   }
   if(i===3){
@@ -87,7 +85,7 @@ export function createWeapons(camera){
    const geo=new T.ExtrudeGeometry(shape,{depth:.028,bevelEnabled:true,bevelThickness:.009,bevelSize:.006,bevelSegments:1,steps:1});
    const blade=new T.Mesh(geo,steel);blade.position.set(0,.21,-.03);blade.rotation.x=-.32;g.add(blade);
    box(blade,.014,.5,.012,-.07,.28,.047,cyan);box(blade,.036,.27,.008,.013,.21,.049,dark);
-   hand(g,0,-.07,.11);continue;
+   hands[i]=hand(g,0,-.07,.11);continue;
   }
   const shotgun=i===1,pistol=i===2;
   box(g,pistol?.17:.24,pistol?.13:.2,pistol?.34:.46,0,.025,.035,body,true);
@@ -114,7 +112,7 @@ export function createWeapons(camera){
     for(let k=0;k<4;k++){tube(g,.024,.13,-.157,.025,-.1+k*.085,casing).rotation.x=0;tube(g,.027,.02,-.157,-.044,-.1+k*.085,brass).rotation.x=0;}
     box(g,.035,.055,.035,0,.15,-.82,dark);box(g,.02,.015,.015,0,.185,-.82,amber);
     const shell=new T.Group();g.add(shell);tube(shell,.031,.14,0,0,0,casing);tube(shell,.034,.022,0,0,.07,brass);shell.visible=false;shells[i]=shell;
-    const support=hand(fore,-.025,-.125,.06);support.rotation.z=-.25;hands[4]=support;
+    const support=hand(fore,-.025,-.125,.06);support.rotation.z=-.25;pumpSupport=support;
    }else{
     const mag=new T.Group();g.add(mag);magazines[i]=mag;box(mag,.14,.29,.19,0,-.21,-.08,dark,true).rotation.x=.18;box(mag,.16,.035,.2,0,-.365,-.045,steel,true);
     box(g,.13,.035,.22,0,.205,.02,dark);for(const x of [-.07,.07])box(g,.025,.12,.1,x,.27,.015,steel,true);box(g,.16,.023,.1,0,.33,.015,steel,true);
@@ -123,7 +121,9 @@ export function createWeapons(camera){
   }
   label(g,['VG-30','BR-08','GH-15'][i],shotgun?'#edb477':'#7bdacb');
  }
- const flash=new T.Mesh(new T.IcosahedronGeometry(.09,0),new T.MeshBasicMaterial({color:0xffd79c,transparent:true,opacity:.9}));gun.add(flash);flash.visible=false;
+ const grips=hands.slice();
+  const arms=attachPlayerArmsViewModel(gun,{hands:grips,supports,pumpSupport});
+  const flash=new T.Mesh(new T.IcosahedronGeometry(.09,0),new T.MeshBasicMaterial({color:0xffd79c,transparent:true,opacity:.9}));gun.add(flash);flash.visible=false;
  function select(index){gun.userData.weaponId=['vanguard','breacher','ghost','arc-blade','tempest','halo','railspike','volt'][index];models.forEach((m,i)=>m.visible=i===index);flash.position.set(0,.036,index===2?-.38:index===4?-.40:index===5?-.74:index===6?-.42:index===7?-.51:-.66);}
  function animate(index,recoil,reloadProgress,charge=0){
   models[6].userData.railEnergy.emissiveIntensity=.3+(index===6?charge*3:0);
@@ -131,10 +131,11 @@ export function createWeapons(camera){
   const p=reloadPose(reloadProgress,index===1);
   if(pumps[1])pumps[1].position.z=-.39+(index===1?recoil*.1:0);
   if(shells[1]){shells[1].visible=index===1&&reloadProgress>0&&reloadProgress<.82;shells[1].position.set(-.16*(1-p.hand*.6),-.4+p.hand*.32,.18-p.hand*.14);shells[1].rotation.x=p.hand*.8;}
-  if(hands[4]){const feed=index===1?p.hand:0;hands[4].position.set(-.025-feed*.1,-.125-feed*.1,.06+feed*.35);hands[4].rotation.x=-feed*.7;}
+  if(pumpSupport){const feed=index===1?p.hand:0;pumpSupport.position.set(-.025-feed*.1,-.125-feed*.1,.06+feed*.35);pumpSupport.rotation.x=-feed*.7;}
   magazines.forEach((mag,i)=>{const n=i===index?p.mag:0;mag.position.set(-.1*n,-.38*n,.12*n);mag.rotation.z=-.25*n;});
   supports.forEach((h,i)=>{const n=i===index?p.hand:0;h.position.set((i===2?-.15:-.02)-.06*n,(i===2?-.18:-.115)-.3*n,(i===2?.22:-.28)+.22*n);h.rotation.x=-.8*n;});
   bolts.forEach((b,i)=>{b.position.z=-.01+(i===index?recoil*.035+p.bolt*.065:0);});
+  updatePlayerArmsViewModel(gun,arms,{selected:index,hands:grips,supports,pumpSupport,recoil,reload:reloadProgress});
  }
  select(0);return {gun,flash,select,animate};
 }

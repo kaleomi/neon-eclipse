@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import {createSling,stepSling,toggleHook,hookBlocked,zoneAt,slingSummary,slingHint,SLING,SLING_CARGO,SLING_ZONES} from './helicopter-sling.js';
+import {createSling,stepSling,toggleHook,hookBlocked,zoneAt,slingSummary,slingHint,SLING,SLING_CARGO,SLING_ZONES,SLING_RUN,createSlingRun,stepSlingRun,slingRunTarget,slingRunHint,slingRunSummary,claimSlingReward} from './helicopter-sling.js';
 import {createHelicopter,startHelicopter,HELICOPTER} from './helicopter-rules.js';
 import {fieldGround,HELI_PADS} from './helicopter-field.js';
-import {isFootSurface} from './maritime-rules.js';
+import {isFootSurface,PLATFORM} from './maritime-rules.js';
 const hover=(x,z,y)=>{const h=createHelicopter({x,y,z});startHelicopter(h);h.grounded=false;h.rpm=1;h.vx=h.vz=h.vy=0;return h;};
 const hookY=c=>c.y+SLING.cargoHeight+HELICOPTER.height*.35+SLING.cable+2;// belly hook inside the band and above cable length so the load actually lifts
 // Rule sanity: the hook band must allow a hover above cable length, otherwise the crate can never leave the ground.
@@ -57,4 +57,35 @@ assert.ok(SLING.cable+2<=SLING.hookMaxHeight&&SLING.hookMinHeight<SLING.cable);
 }
 // Inert on bad dt; createSling copies zones (no shared mutation).
 {const s=createSling();assert.equal(stepSling(s,createHelicopter(),0),null);assert.equal(stepSling(s,createHelicopter(),NaN),null);s.zones[0].delivered=5;assert.equal(createSling().zones[0].delivered,undefined);}
-console.log('PASS: helicopter sling load — layout on walkable ground, hook gate reasons, cable hang + spring lag + settle, touchdown/slack, delivery in zone, damage on hard drop, dropped outside zone, crash release, inert dt');
+// Supply run (plan A): ordered legs garage → island → platform, respawn after delivery/loss, one-shot reward.
+{
+ const s=createSling();const run=createSlingRun();
+ assert.equal(slingRunTarget(run,s).id,'garage');assert.match(slingRunHint(run,s),/1\/3 → 车库/);
+ assert.equal(stepSlingRun(run,s,null,.05),null,'no event: nothing');assert.equal(stepSlingRun(run,s,'delivered',0),null,'bad dt inert');
+ // Deliver in the wrong zone (platform first): penalised respawn, index unchanged.
+ s.cargo.x=SLING_ZONES[2].x;s.cargo.z=SLING_ZONES[2].z;s.cargo.y=fieldGround(s.cargo.x,s.cargo.z);
+ assert.equal(stepSlingRun(run,s,'delivered',.05),'wrongZone');assert.equal(run.index,0);assert.equal(run.respawn,SLING_RUN.respawnAfterLoss);
+ assert.match(slingRunHint(run,s),/投错区域/);
+ let ev=null;for(let i=0;i<200&&ev!=='respawn';i++)ev=stepSlingRun(run,s,null,.05);
+ assert.equal(ev,'respawn');assert.equal(s.cargo.x,SLING_CARGO.x);assert.ok(s.cargo.resting&&s.cargo.intact&&!s.hooked);
+ // Correct legs in order.
+ const deliverAt=z=>{s.cargo.x=z.x;s.cargo.z=z.z;return stepSlingRun(run,s,'delivered',.05);};
+ assert.equal(deliverAt(SLING_ZONES[0]),'leg');assert.equal(run.index,1);assert.equal(run.respawn,SLING_RUN.respawnAfterDelivery);
+ assert.equal(deliverAt(SLING_ZONES[1]),null,'events ignored while respawning');
+ for(let i=0;i<100;i++)stepSlingRun(run,s,null,.05);assert.equal(run.respawn,0);
+ assert.equal(deliverAt(SLING_ZONES[1]),'leg');for(let i=0;i<100;i++)stepSlingRun(run,s,null,.05);
+ // Loss on the last leg: damaged crate respawns, run still active.
+ assert.equal(stepSlingRun(run,s,'damaged',.05),'lost');assert.match(slingRunHint(run,s),/吊箱损失/);for(let i=0;i<200;i++)stepSlingRun(run,s,null,.05);
+ assert.equal(slingRunTarget(run,s).id,'platform');
+ assert.equal(deliverAt(SLING_ZONES[2]),'complete');assert.equal(run.status,'done');assert.deepEqual(run.legs,['garage','island','platform']);
+ assert.equal(slingRunTarget(run,s),null);assert.match(slingRunHint(run,s),/补给链完成/);
+ assert.deepEqual(claimSlingReward(run),{rockets:SLING_RUN.rewardRockets,refillBelt:true});assert.equal(claimSlingReward(run),null,'reward is one-shot');
+ assert.equal(stepSlingRun(run,s,'delivered',.05),null,'done run ignores events');
+ const sum=slingRunSummary(run,s);assert.equal(sum.leg,3);assert.equal(sum.legs,3);assert.ok(sum.rewardClaimed);
+ // Fresh run has no reward to claim; dropped outside a zone is a loss.
+ const r2=createSlingRun();assert.equal(claimSlingReward(r2),null);assert.equal(stepSlingRun(r2,createSling(),'dropped',.05),'lost');
+ // Layout: every ordered zone exists and the new platform zone sits on the platform deck.
+ for(const id of SLING_RUN.order)assert.ok(SLING_ZONES.some(z=>z.id===id),id);
+ assert.equal(fieldGround(SLING_ZONES[2].x,SLING_ZONES[2].z),PLATFORM.h);
+}
+console.log('PASS: helicopter sling load — layout on walkable ground, hook gate reasons, cable hang + spring lag + settle, touchdown/slack, delivery in zone, damage on hard drop, dropped outside zone, crash release, inert dt; supply run legs/wrong zone/loss/respawn/reward');

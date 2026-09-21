@@ -1,7 +1,7 @@
 // Helicopter sling load: pick up a cargo crate from a hover, carry it on a cable, set it down in a drop zone.
 // Pure rules (no DOM/three). Cargo follows the hook point with a damped spring so it lags/swings under acceleration.
 import {HELICOPTER} from './helicopter-rules.js';
-import {LIGHTHOUSE_ISLAND} from './maritime-rules.js';
+import {LIGHTHOUSE_ISLAND,PLATFORM} from './maritime-rules.js';
 export const SLING=Object.freeze({
  cable:9,            // m from belly hook to cargo top when taut
  hookRadius:4,       // horizontal m within which F hooks a resting crate
@@ -14,7 +14,8 @@ export const SLING=Object.freeze({
 export const SLING_CARGO=Object.freeze({id:'crate',x:214,z:104,name:'物资吊箱'});
 export const SLING_ZONES=Object.freeze([
  {id:'garage',x:-92,z:118,name:'车库物资区'},
- {id:'island',x:LIGHTHOUSE_ISLAND.x-10,z:LIGHTHOUSE_ISLAND.z+6,name:'灯塔岛平台'}
+ {id:'island',x:LIGHTHOUSE_ISLAND.x-10,z:LIGHTHOUSE_ISLAND.z+6,name:'灯塔岛平台'},
+ {id:'platform',x:(PLATFORM.minX+PLATFORM.maxX)/2,z:(PLATFORM.minZ+PLATFORM.maxZ)/2,name:'海上平台'}
 ]);
 export function createSling(cargo=SLING_CARGO,zones=SLING_ZONES){
  return {cargo:{x:cargo.x,y:0,z:cargo.z,vx:0,vz:0,vy:0,resting:true,intact:true},hooked:false,cable:0,zones:zones.map(z=>({...z})),deliveries:0,drops:0,damaged:0,lastEvent:null,elapsedHooked:0};
@@ -67,4 +68,38 @@ export function slingSummary(s,h){
 export function slingHint(s,h,groundAt){
  if(s.hooked)return '吊挂中 · 保持平稳飞行 · 到投放区上空缓慢下降，吊箱触地后按 F 脱钩';
  const why=hookBlocked(s,h,groundAt);return why?('吊挂：'+why):'吊挂就位 · 按 F 挂钩';
+}
+
+// ── Supply run (plan A) ───────────────────────────────────────────────────────────────────────────
+// A fixed sequence of deliveries: crate spawns at the shore pad, must go to zones in order; a delivered crate
+// respawns for the next leg, a smashed / stray / wrong-zone crate respawns after a wait. Finishing every leg
+// arms a one-shot reward the app applies (rockets + belt). Pure state; consumes stepSling events.
+export const SLING_RUN=Object.freeze({order:['garage','island','platform'],respawnAfterLoss:8,respawnAfterDelivery:3,rewardRockets:2});
+export function createSlingRun(order=SLING_RUN.order){
+ return {order:[...order],index:0,status:'active',respawn:0,pendingReason:null,legs:[],reward:false,rewardClaimed:false};
+}
+export function slingRunTarget(run,s){return run.status==='active'?s.zones.find(z=>z.id===run.order[run.index])||null:null;}
+export function resetCargo(s,cargo=SLING_CARGO){s.hooked=false;s.cable=0;Object.assign(s.cargo,{x:cargo.x,y:0,z:cargo.z,vx:0,vy:0,vz:0,resting:true,intact:true});s.elapsedHooked=0;}
+// Feed each stepSling event + dt. Returns a run event: 'leg' (target delivered), 'wrongZone', 'lost', 'respawn', 'complete' or null.
+export function stepSlingRun(run,s,ev,dt){
+ if(!Number.isFinite(dt)||dt<=0)return null;
+ if(run.respawn>0){run.respawn=Math.max(0,run.respawn-dt);if(run.respawn===0){resetCargo(s);run.pendingReason=null;return 'respawn';}return null;}
+ if(run.status!=='active'||!ev)return null;
+ if(ev==='delivered'){
+  const zone=zoneAt(s,s.cargo.x,s.cargo.z);const target=run.order[run.index];
+  if(zone&&zone.id===target){run.legs.push(zone.id);run.index++;
+   if(run.index>=run.order.length){run.status='done';run.reward=true;return 'complete';}
+   run.respawn=SLING_RUN.respawnAfterDelivery;run.pendingReason='leg';return 'leg';}
+  run.respawn=SLING_RUN.respawnAfterLoss;run.pendingReason='wrongZone';return 'wrongZone';
+ }
+ if(ev==='damaged'||ev==='dropped'){run.respawn=SLING_RUN.respawnAfterLoss;run.pendingReason='lost';return 'lost';}
+ return null;
+}
+// Reward is applied once by the caller; returns what to grant or null.
+export function claimSlingReward(run){if(!run.reward||run.rewardClaimed)return null;run.rewardClaimed=true;return {rockets:SLING_RUN.rewardRockets,refillBelt:true};}
+export function slingRunSummary(run,s){const t=slingRunTarget(run,s);return {status:run.status,leg:Math.min(run.index+1,run.order.length),legs:run.order.length,target:t?t.id:null,targetName:t?t.name:null,respawn:run.respawn,reward:run.reward,rewardClaimed:run.rewardClaimed};}
+export function slingRunHint(run,s){
+ if(run.status==='done')return '补给链完成 · 火箭 +'+SLING_RUN.rewardRockets+'、弹链补满';
+ if(run.respawn>0)return (run.pendingReason==='leg'?'吊箱送达':run.pendingReason==='wrongZone'?'投错区域':'吊箱损失')+' · 新吊箱 '+Math.ceil(run.respawn)+' s 后出现在停机坪旁';
+ const t=slingRunTarget(run,s);return t?'补给 '+(run.index+1)+'/'+run.order.length+' → '+t.name:'';
 }

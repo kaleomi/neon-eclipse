@@ -1,7 +1,8 @@
 // ABYSS water-cooled mainframe: pure rules for chapter 08. The world owns the tide; rules receive the water level.
 import {WATER_HIGH} from './datacenter-data.js';
 export const ABYSS_MAX_HP=1500;
-export const ABYSS_POSITION={x:0,z:-12,y:3.2};
+// Keep the damageable core in front of the solid cabinet (front face z=-9), not buried inside it.
+export const ABYSS_POSITION={x:0,z:-7.7,y:3.2};
 export const ABYSS_EXPOSE_LEVEL=.3;     // core is reachable while the water is below this
 export const ABYSS_SUMMON=2;            // stalkers called per HIGH phase (tier 2: 3)
 export const ABYSS_SUMMON_CAP=4;

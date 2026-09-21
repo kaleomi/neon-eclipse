@@ -650,3 +650,10 @@
 - 运行 35554714101（`fbacd00`）、35555590326（`c035d99`）node-tests 失败：`test-enemy-roster-world.mjs` 读取 gitignored 的 `.tools/qa-enemy-roster/baseline-worlds.json`（旧版世界源码快照），干净检出 ENOENT。该测试来自 `ed4fb82` 打包的批次，本地一直通过所以未被发现。
 - 修改：基线不存在时打印 SKIP 并以 0 退出（迁移证据本就不进 Git）；本地有基线时仍执行完整对照。干净工作树 integration 55/55。
 - 教训补充到 `test-import-graph` 之外：提交前应在干净工作树跑一次 `--layer integration`，而不只是 import 图。
+
+## 2026-09-21：第八章 ABYSS 核心不可命中修复（用户反馈）
+
+- 原因：`ABYSS_POSITION` 自 `29ef072` 起为 (0, 3.2, −12)，正处于 6×6×5 m 实心主机碰撞盒（z −15…−9）中心，所有射线先命中盒子；新 arena-boss 视觉只是让问题更显眼。
+- 修改：`abyss-rules.js` 核心移到 (0, 3.2, −7.7)，即主机前面板（z=−9）外的检修口；规则、护罩水位门槛、伤害均不变。视觉：新模型 Hull 的检修口正好包住核心，护罩阶段旧 cage 仍显示，无重叠。
+- 新增测试：`test-abyss-core-access.mjs`（正面／两侧真实几何射线先命中核心，盒外近战可及，高水位仍拒伤）；`test-abyss-browser.mjs`（原生开火＋电弧战刃击破 1500 HP、存档点恢复、后续四守卫与撤离）；`test-boss-core-access-browser.mjs`（八章 Boss 核心均能从真实可站立位置射到）。
+- 验证：`test-abyss`、`test-datacenter`、`test-enemy-roster-world` 通过；两条浏览器链 EXIT=0（`.tools/b9-abyss.log`、`.tools/b9-coreaccess.log`）；截图 `.tools/qa-abyss/abyss-exposed-front.png`、`abyss-exposed-side.png`。

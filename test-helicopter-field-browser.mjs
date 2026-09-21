@@ -54,6 +54,7 @@ assert.equal(await page.getAttribute('body','data-vehicle-kind'),'helicopter');
  await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.slingHooked==='true',{},{timeout:5000});
  await page.waitForFunction(n=>window.neonVehicleAudio.sfx.stats().played>n,sfxBeforeHook,{timeout:5000});// hook latch cue
  await page.waitForFunction(()=>Number(document.body.dataset.slingCargoY)>1,{},{timeout:5000});
+ assert.equal(await page.getAttribute('body','data-sling-load'),'true','taut cable feeds load into the flight model');
  await page.screenshot({path:`${shots}/heli-sling.png`});
  await page.evaluate(()=>window.__heliFixture.lowerForRelease());await page.waitForFunction(()=>Number(document.body.dataset.slingCargoY)<.6,{},{timeout:5000});
  await page.keyboard.press('KeyF');await page.waitForFunction(()=>document.body.dataset.slingHooked==='false',{},{timeout:5000});

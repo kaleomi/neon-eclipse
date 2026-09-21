@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createSling,stepSling,toggleHook,hookBlocked,zoneAt,slingSummary,slingHint,SLING,SLING_CARGO,SLING_ZONES,SLING_RUN,createSlingRun,stepSlingRun,slingRunTarget,slingRunHint,slingRunSummary,claimSlingReward} from './helicopter-sling.js';
+import {createSling,stepSling,toggleHook,hookBlocked,zoneAt,slingSummary,slingHint,slingLoad,SLING,SLING_CARGO,SLING_ZONES,SLING_RUN,createSlingRun,stepSlingRun,slingRunTarget,slingRunHint,slingRunSummary,claimSlingReward} from './helicopter-sling.js';
 import {createHelicopter,startHelicopter,HELICOPTER} from './helicopter-rules.js';
 import {fieldGround,HELI_PADS} from './helicopter-field.js';
 import {isFootSurface,PLATFORM} from './maritime-rules.js';
@@ -88,4 +88,29 @@ assert.ok(SLING.cable+2<=SLING.hookMaxHeight&&SLING.hookMinHeight<SLING.cable);
  for(const id of SLING_RUN.order)assert.ok(SLING_ZONES.some(z=>z.id===id),id);
  assert.equal(fieldGround(SLING_ZONES[2].x,SLING_ZONES[2].z),PLATFORM.h);
 }
-console.log('PASS: helicopter sling load — layout on walkable ground, hook gate reasons, cable hang + spring lag + settle, touchdown/slack, delivery in zone, damage on hard drop, dropped outside zone, crash release, inert dt; supply run legs/wrong zone/loss/respawn/reward');
+// Load feedback (plan C): a taut sling adds hover weight and pulls the airframe toward the swung cargo; no load → identical flight.
+{
+ const {stepHelicopter}=await import('./helicopter-rules.js');
+ const s=createSling();const c=s.cargo;
+ assert.equal(slingLoad(s,hover(c.x,c.z,hookY(c))),null,'unhooked: no load');
+ const h=hover(c.x,c.z,hookY(c));toggleHook(s,h);assert.ok(slingLoad(s,h),'hooking marks the cargo airborne, so load applies at once');
+ for(let i=0;i<40;i++)stepSling(s,h,.05);
+ const straight=slingLoad(s,h);assert.ok(straight.weight>0&&Math.abs(straight.ax)<1e-6&&Math.abs(straight.az)<1e-6,'cargo under the hook: pure weight');
+ assert.ok(Math.abs(straight.weight-HELICOPTER.gravity*SLING.loadRatio)<1e-9);
+ h.x+=6;stepSling(s,h,.05);const swung=slingLoad(s,h);assert.ok(swung.ax<0&&Math.abs(swung.az)<1e-6,'cargo lagging behind (-x) pulls the helicopter back toward it');
+ assert.ok(Math.hypot(swung.ax,swung.az)<swung.weight,'horizontal pull never exceeds the load weight');
+ // Same input, same site, with and without load: loaded craft climbs slower and drifts toward the pull.
+ const site={ground:()=>0,obstacles:[]};
+ const fly=(load)=>{const a=createHelicopter({x:0,y:30,z:0});startHelicopter(a);a.grounded=false;a.rpm=1;a.collective=.5;for(let i=0;i<20;i++)stepHelicopter(a,{lift:1},.1,{...site,load});return a;};// maxFrame clamps a single call to 0.1 s
+ const free=fly(null),loaded=fly({weight:HELICOPTER.gravity*SLING.loadRatio,ax:0,az:0}),pulled=fly({weight:HELICOPTER.gravity*SLING.loadRatio,ax:-1.2,az:0}),zero=fly({weight:0,ax:0,az:0});
+ assert.ok(loaded.y<free.y,'weight slows the climb: '+loaded.y.toFixed(2)+' < '+free.y.toFixed(2));
+ assert.ok(pulled.x<-0.5&&Math.abs(free.x)<1e-6,'horizontal pull drifts the airframe');
+ assert.equal(zero.y,free.y);assert.equal(zero.x,free.x);
+ const viaFn=fly(()=>({weight:HELICOPTER.gravity*SLING.loadRatio,ax:0,az:0}));assert.equal(viaFn.y,loaded.y,'site.load may be a function');
+ // Hover still reachable under load: collective stays inside [0,1] and the craft does not sink.
+ const hov=createHelicopter({x:0,y:30,z:0});startHelicopter(hov);hov.grounded=false;hov.rpm=1;for(let i=0;i<40;i++)stepHelicopter(hov,{},.1,{...site,load:{weight:HELICOPTER.gravity*SLING.loadRatio,ax:0,az:0}});
+ assert.ok(hov.y>28&&hov.collective<=1,'loaded hover holds altitude: '+hov.y.toFixed(2));
+ const hovFree=createHelicopter({x:0,y:30,z:0});startHelicopter(hovFree);hovFree.grounded=false;hovFree.rpm=1;for(let i=0;i<40;i++)stepHelicopter(hovFree,{},.1,site);
+ assert.ok(hov.collective>hovFree.collective+.05,'hover collective works harder under load: '+hov.collective.toFixed(3)+' vs '+hovFree.collective.toFixed(3));
+}
+console.log('PASS: helicopter sling load — layout on walkable ground, hook gate reasons, cable hang + spring lag + settle, touchdown/slack, delivery in zone, damage on hard drop, dropped outside zone, crash release, inert dt; supply run legs/wrong zone/loss/respawn/reward; load weight + swing pull feedback');

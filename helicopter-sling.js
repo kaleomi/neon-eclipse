@@ -3,6 +3,8 @@
 import {HELICOPTER} from './helicopter-rules.js';
 import {LIGHTHOUSE_ISLAND,PLATFORM} from './maritime-rules.js';
 export const SLING=Object.freeze({
+ loadRatio:.18,      // cargo mass / helicopter mass: extra hover weight and the horizontal pull of a swinging cable
+ loadPull:.6,        // fraction of the cable's horizontal lean transmitted as pull (the rest is absorbed by the airframe)
  cable:9,            // m from belly hook to cargo top when taut
  hookRadius:4,       // horizontal m within which F hooks a resting crate
  hookMinHeight:5,hookMaxHeight:14, // hover band above the crate for hooking
@@ -60,6 +62,14 @@ export function stepSling(s,h,dt,groundAt=()=>0){
    else{const zone=zoneAt(s,c.x,c.z);if(zone){s.deliveries++;zone.delivered=(zone.delivered||0)+1;event='delivered';}else{s.drops++;event='dropped';}}}
  }
  if(event)s.lastEvent=event;return event;
+}
+// Force the hanging load applies to the airframe, in m/s² (helicopter-rules `site.load`). Only while the cable is taut:
+// extra weight = g·ratio, and the lean of the cable pulls the helicopter toward the cargo. Resting/free cargo → null.
+export function slingLoad(s,h){
+ if(!s.hooked||s.cargo.resting)return null;
+ const c=s.cargo,dx=c.x-h.x,dz=c.z-h.z,len=Math.max(SLING.cable,Math.hypot(dx,dz,SLING.cable));
+ const g=HELICOPTER.gravity*SLING.loadRatio;
+ return {weight:g,ax:g*SLING.loadPull*dx/len,az:g*SLING.loadPull*dz/len};
 }
 // Extra body pitch/roll the pilot feels: load lag pulls the nose toward the crate. Pure helper for the renderer/HUD.
 export function slingSummary(s,h){

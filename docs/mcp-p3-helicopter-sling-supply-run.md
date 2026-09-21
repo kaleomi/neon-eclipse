@@ -23,3 +23,11 @@
 - 接线：`vehicle-app.js` `medevac` 状态、`recover()` 重置、每帧 `stepMedevac` 紧随 `stepSling`，提示接管 `#vw-hint`（急救激活时替代补给提示），目标环切到医疗区，`dataset.medevac{Status,Timer,Health,Grade,Attempts}`；完成音效 `medevacsComplete → objective.extract`。`helicopter-sling-world.js` 伤员吊舱用白底红光材质（`cargo.kind==='casualty'`）。`resetCargo` 增 `groundAt` 参数让吊舱落在岛面高度。
 - 验收：`test-helicopter-medevac.mjs`（布局、locked 忽略事件、稳飞无伤/摆动扣血、五种失败与重开、评级单调与 best 不降级）PASS；`test-helicopter-sling.mjs`、`test-audio.mjs`、`test-session-lifecycle.mjs` PASS；check 659/659。浏览器：直升机场地链新增段「跳到末段→平台送达→补给链 done、急救 active、火箭已发→吊舱挂钩→医疗区放下→`medevacStatus=done`、评级 ∈ {S,A,B}、生命 >50」EXIT=0（`.tools/b22-heli-field.log`）。
 - 未做：评级写入存档；C 动力学反馈。
+
+## 方案 C：吊重对飞行动力学反馈（2026-09-21 追加）
+- 规则：`helicopter-rules.js` `integrate` 新增可选 `site.load`（对象或 `(s)=>` 函数，返回 `{weight, ax, az}`，m/s²）：`weight` 加进悬停所需推力与竖向加速度，`ax/az` 直接加到水平加速度。无 load / 零 load 时数值与原模型逐位相同（测试断言）。
+- `helicopter-sling.js` `slingLoad(s,h)`：仅挂钩且吊箱离地时返回 `{weight:g·loadRatio, ax/az:g·loadRatio·loadPull·(dx,dz)/len}`（`loadRatio .18`、`loadPull .6`）；水平拉力方向指向滞后的吊箱，幅值恒小于附加重量。
+- 接线：`vehicle-app.js` 直升机 `stepHelicopter` 的 site 加 `load:s=>slingLoad(sling,s)`；`dataset.slingLoad`。
+- 效果：挂重后悬停 collective 明显上升（测试 ≥ +0.05）、爬升变慢、急转时机身被吊箱向后拽；`hookMaxHeight` 之外 / 吊箱触地（缆绳松弛）时无附加载荷，脱钩瞬间恢复。
+- 验收：`test-helicopter-sling.mjs` 新块（无载荷 null、竖直悬吊纯重量、滞后拉力方向与幅值上限、载荷爬升更慢、拉力致漂移、零载荷逐位一致、函数形式 site.load、载荷悬停保高且 collective 更高）PASS；全部 `test-helicopter*.mjs` 头less 用例 PASS；check 659/659。浏览器：直升机场地链（含 `data-sling-load=true` 断言，既有悬停/降落阈值**未改**）EXIT=0（`.tools/b23-heli-field.log`）；`test-helicopter-browser.mjs` 原型链 10/10 EXIT=0（`.tools/b23-heli-proto.log`）。
+- 手感风险评估：因 loadRatio 取 .18，现有场地链与原型链的降落/悬停断言无需重采；急救段（方案 B）在有载荷下仍以 S/A/B 完成。

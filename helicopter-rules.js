@@ -56,16 +56,19 @@ function integrate(s,input,h,site){
   // Beginner landing assist is a velocity target, not teleportation or a ground snap from the air.
   const groundBefore=siteGround(site,s.x,s.z);
   if(s.y-groundBefore<4&&verticalTarget<0)verticalTarget=Math.max(verticalTarget,-HELICOPTER.landingDescent);
+  // Optional external load (sling): {weight, ax, az} in m/s². Absent/zero load leaves the flight model untouched.
+  const load=typeof site.load==='function'?site.load(s):site.load;
+  const loadWeight=load?Math.max(0,Number(load.weight)||0):0,loadAx=load?Number(load.ax)||0:0,loadAz=load?Number(load.az)||0:0;
   const up=Math.cos(s.pitch)*Math.cos(s.roll);
-  const desired=(HELICOPTER.gravity+(verticalTarget-s.vy)*3.5)/(HELICOPTER.lift*Math.max(.01,s.rpm*s.rpm)*up);
+  const desired=(HELICOPTER.gravity+loadWeight+(verticalTarget-s.vy)*3.5)/(HELICOPTER.lift*Math.max(.01,s.rpm*s.rpm)*up);
   const collective=wasGrounded&&(lift<=0||brake)?0:clamp(desired,0,1);
   s.collective=smooth(s.collective,s.powered?collective:0,9,h);
   const thrust=HELICOPTER.lift*s.collective*s.rpm*s.rpm;
   const f=thrust*Math.sin(s.pitch)*Math.cos(s.roll),r=thrust*Math.sin(s.roll);
   const drag=brake?2.8:(Math.abs(forward)+Math.abs(right)<.01?1.55:.42);
-  s.vx+=(f*Math.sin(s.yaw)+r*Math.cos(s.yaw)-s.vx*drag)*h;
-  s.vz+=(-f*Math.cos(s.yaw)+r*Math.sin(s.yaw)-s.vz*drag)*h;
-  s.vy+=(thrust*up-HELICOPTER.gravity-.12*s.vy)*h;
+  s.vx+=(f*Math.sin(s.yaw)+r*Math.cos(s.yaw)-s.vx*drag+loadAx)*h;
+  s.vz+=(-f*Math.cos(s.yaw)+r*Math.sin(s.yaw)-s.vz*drag+loadAz)*h;
+  s.vy+=(thrust*up-HELICOPTER.gravity-loadWeight-.12*s.vy)*h;
   s.x+=s.vx*h;s.z+=s.vz*h;s.y+=s.vy*h;
   const skidClearance=helicopterSkidClearance(s),ground=siteGround(site,s.x,s.z);
   if(s.y-ground<=skidClearance){

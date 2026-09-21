@@ -106,7 +106,7 @@ import {installTestProbes} from './app-probes.js';
 import {createSessionFlow} from './session-flow.js';
 import {bindSessionInput} from './session-input.js';
 import {createP4Bridge} from './p4-bridge.js';
-import {chapterEnemyTypes,warmModels,sfxFilesForMap} from './asset-preload.js';
+import {chapterEnemyTypes,warmModels,sfxFilesForMap,warmupRequested} from './asset-preload.js';
 import {loadGuardVariantAsset} from './characters/guard-variants-runtime.js';
 import {loadRangedGuardAsset} from './characters/ranged-guard-runtime.js';
 import {loadEngineerAsset} from './characters/engineer-guard-runtime.js';
@@ -135,7 +135,7 @@ const mission=createMission();
 // Chapter warm-up: start the GLB loaders for every enemy type this chapter's roster can spawn while the menu is up,
 // so the first appearance of each type no longer waits on network + decode. Same cached loaders the attach path uses;
 // P4 modes build their own rosters and are left to lazy loading.
-const assetWarmup=p4Requested()?Promise.resolve(null):warmModels(chapterEnemyTypes(STAGES),{
+const assetWarmup=p4Requested()||!warmupRequested(location.search)?Promise.resolve(null):warmModels(chapterEnemyTypes(STAGES),{
  guardVariant:loadGuardVariantAsset,ranged:loadRangedGuardAsset,engineer:loadEngineerAsset,commander:loadCommanderAsset,
  sniper:loadSniperAsset,shield:loadShieldAsset,roster:loadRosterUnit,rosterTypes:new Set(Object.keys(ROSTER_UNITS)),
 });window.__assetWarmup=assetWarmup;

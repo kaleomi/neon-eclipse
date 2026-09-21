@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {chapterEnemyTypes,loaderForType,warmModels,sfxEventsForMap,sfxFilesForMap} from './asset-preload.js';
+import {chapterEnemyTypes,loaderForType,warmModels,sfxEventsForMap,sfxFilesForMap,warmupRequested} from './asset-preload.js';
 import {RECORDED_EVENTS} from './audio/recorded-audio.js';
 
 // Reactor stages have no explicit roles: ROLE_SETS fallback by stage id.
@@ -44,3 +44,11 @@ assert(sfxFilesForMap('reactor').includes('metal-crash'));
 const full=new Set(Object.values(RECORDED_EVENTS).flatMap(r=>r.files));
 assert(sfxFilesForMap('reactor').length<full.size,'reactor subset is smaller than the full bank');
 console.log('asset-preload rules ok');
+
+// `?warm=0` is the only opt-out; anything else (absent, warm=1, unrelated params) keeps warm-up on.
+assert.equal(warmupRequested(''),true);
+assert.equal(warmupRequested('?map=reactor'),true);
+assert.equal(warmupRequested('?warm=1'),true);
+assert.equal(warmupRequested('?map=reactor&warm=0'),false);
+assert.equal(warmupRequested(undefined),true);
+console.log('asset-preload: warmupRequested opt-out ok');

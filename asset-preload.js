@@ -45,3 +45,9 @@ export function sfxEventsForMap(mapId){
 export function sfxFilesForMap(mapId){
  return [...new Set(sfxEventsForMap(mapId).flatMap(name=>RECORDED_EVENTS[name].files))];
 }
+
+// Test-only opt-out: `?warm=0` skips the chapter warm-up so a smoke run that only checks boot/menu paths
+// does not pay for every roster GLB on a software renderer. Players never pass it; lazy loading still works.
+export function warmupRequested(search){
+  return new URLSearchParams(search||'').get('warm')!=='0';
+}

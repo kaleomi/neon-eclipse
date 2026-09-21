@@ -40,7 +40,7 @@ try{
  for(const m of MAP_REGISTRY){
   await step(`chapter ${m.id} boots`,async()=>{
    const {page,errors}=await newPage(context);
-   await page.goto(`${server.base}/index.html?map=${m.id}`);
+   await page.goto(`${server.base}/index.html?map=${m.id}&warm=0`);
    await menuOpen(page);
    assert.equal(await page.getAttribute('body','data-map'),m.id);
    assert.ok(await page.locator('#game canvas').count()>=1,'canvas present');
@@ -56,7 +56,7 @@ try{
  // 2. Chapter 1: new game -> playing -> Esc pause -> retry stage -> playing; storage sentinel untouched.
  await step('start / pause / retry loop',async()=>{
   const {page,errors}=await newPage(context);
-  await page.goto(`${server.base}/index.html`);await menuOpen(page);
+  await page.goto(`${server.base}/index.html?warm=0`);await menuOpen(page);
   await page.evaluate(k=>localStorage.setItem(k,'keep'),SENTINEL);
   await page.click('#menu-new');await page.click('#menu-begin');await confirmIfShown(page);await playing(page);
   assert.equal(await page.getAttribute('body','data-play-state'),'playing');
@@ -75,7 +75,7 @@ try{
  // firing / reload / telegraphs run without console errors, and the settings panel round-trips.
  await step('audio: unlock, pause suspend, volume persistence, sfx during play',async()=>{
   const {page,errors}=await newPage(context);
-  await page.goto(`${server.base}/index.html`);await menuOpen(page);
+  await page.goto(`${server.base}/index.html?warm=0`);await menuOpen(page);
   assert.equal(await page.evaluate(()=>window.neonAudio?.bus.snapshot().state),'none','no AudioContext before a gesture');
   await page.click('#menu-new');await page.click('#menu-begin');await confirmIfShown(page);await playing(page);
   await page.waitForTimeout(400);
@@ -113,7 +113,7 @@ try{
  await step('legacy journey v3 migration keeps old key',async()=>{
   const ctx=await browser.newContext({viewport:{width:1280,height:850}});
   const {page,errors}=await newPage(ctx);
-  await page.goto(`${server.base}/index.html`);await menuOpen(page);
+  await page.goto(`${server.base}/index.html?warm=0`);await menuOpen(page);
   const legacy={version:3,status:'between',next:'roof',results:[{time:120,kills:10},{time:140,kills:12}],checkpoint:null};
   await page.evaluate(v=>{localStorage.clear();localStorage.setItem('neon-eclipse.journey.v3',JSON.stringify(v));},legacy);
   await page.reload();await menuOpen(page);
@@ -127,7 +127,7 @@ try{
  // 4. Settings: SaveHub health/export/import round trip + telemetry toggle, all inside the isolated context.
  await step('settings: save hub export/import and telemetry toggle',async()=>{
   const {page,errors}=await newPage(context);
-  await page.goto(`${server.base}/index.html`);await menuOpen(page);
+  await page.goto(`${server.base}/index.html?warm=0`);await menuOpen(page);
   await page.evaluate(()=>{localStorage.setItem('neon-eclipse.combat-difficulty.v1','hard');localStorage.setItem('neon-eclipse.stars.v1',JSON.stringify({version:3,stars:['reactor'],legacyRequired:0}));});
   await page.reload();await menuOpen(page);
   await page.click('#menu-settings');await page.click('#settings-tab-data');
@@ -174,7 +174,7 @@ try{
  //    We verify the plumbing instead: telemetry object exposed, enabled, store readable, and a synthetic record round-trips through IndexedDB in this origin.
  await step('telemetry store round trip in browser IndexedDB',async()=>{
   const {page,errors}=await newPage(context);
-  await page.goto(`${server.base}/index.html`);await menuOpen(page);
+  await page.goto(`${server.base}/index.html?warm=0`);await menuOpen(page);
   const r=await page.evaluate(async()=>{
    const t=window.neonTelemetry;if(!t)return {ok:false,code:'no-hook'};
    const mod=await import('./telemetry.js');
@@ -194,7 +194,7 @@ try{
  // 6. Vehicle proving ground page boots and the entry dialog from the FPS menu exists.
  await step('vehicle page boots and menu entry exists',async()=>{
   const {page,errors}=await newPage(context);
-  await page.goto(`${server.base}/index.html`);await menuOpen(page);
+  await page.goto(`${server.base}/index.html?warm=0`);await menuOpen(page);
   await page.click('#menu-new');await page.click('#menu-levels');
   assert.ok(await page.locator('#menu-rover').isVisible(),'vehicle entry visible on level select');
   await page.click('#menu-rover');

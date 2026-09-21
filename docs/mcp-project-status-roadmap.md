@@ -701,3 +701,4 @@
 ## 2026-09-21：直升机吊运玩法方案
 
 - 文档：`docs/mcp-p3-helicopter-sling-gameplay-options.md`，三案 A 补给链 / B 限时急救 / C 动力学反馈，建议先 A。仅方案，未改代码，等用户选择。
+- CI 实测（run 35606431811，`fcb3c4a`）：smoke 494 s → 409 s（−17%），browser-smoke job 14.7 → 12.6 min；九章 boot 78 → 69 s。收益远小于本地的 ×2.2：CI 2 vCPU 上主要成本是场景本身（~1000 draw calls 软件光栅），预热网络/解码只占小头。剩余大头为 expedition+archive 步 4.3 min 与 audio 步 138 s。结论：`?warm=0` 保留（无害且省 1.5 min），进一步缩短需减少 smoke 的真实渲染帧数或拆 job 并行，留待需要时再做。

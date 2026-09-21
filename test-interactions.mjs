@@ -54,3 +54,9 @@ for(const [map,[file,fn]] of Object.entries(STAGE_MODULES)){
  }
 }
 console.log('PASS vent hold/zone/duration/cooldown/floor, light latch/toggle, director modifiers (slow, no telegraph, dark range/speed, multiplicative), nine-chapter placements clear of solids/trials/objectives/spawn exclusions');
+// Hold progress is surfaced in the hint while holding, cleared on release / completion; hold length and gating unchanged.
+{const {holdSuffix}=await import('./interaction-rules.js');assert.equal(holdSuffix(0,1.5),'');assert.equal(holdSuffix(.6,1.5),' · 40%');assert.equal(holdSuffix(1.5,1.5),' · 99%');assert.equal(holdSuffix(.3,0),'');
+ const v=createVentConsole({x:0,z:0,zone:{x:0,z:-3}}),near={x:1,z:0};assert(!/%/.test(v.hint));v.tick(.6,{player:near,held:true});assert(v.hint.endsWith('40%'),v.hint);v.tick(.1,{player:near,held:false});assert(!/%/.test(v.hint),'release clears');
+ v.tick(1.5,{player:near,held:true});assert.equal(v.state.uses,1);assert(!/%/.test(v.hint),'completion clears');
+ const l=createLightSwitch({x:0,z:0});l.tick(.3,{player:near,held:true});assert(l.hint.endsWith('50%'),l.hint);l.tick(.3,{player:near,held:true});assert(!l.lit&&!/%/.test(l.hint));}
+console.log('PASS interaction hold progress suffix');

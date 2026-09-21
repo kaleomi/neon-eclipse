@@ -33,7 +33,7 @@ try{
   url.search='?map='+map+'&menu=chapter';await p.goto(url.href);await p.waitForFunction(()=>!!window.__env);let s=await run('fresh');const L=await run('layout');assert(s.theme.includes('/'),map+' theme');
   // settle on the console floor, no enemies; hint appears; hold native E for the vent
   s=await run('goto',L.vent.x+1,L.vent.z,L.vent.y||0);s=await run('tick',.05,20);assert(s.grounded,map+' grounded '+JSON.stringify({feet:s.feet}));assert(s.toast.includes('排气阀')||s.toast.includes('按住 E'),map+' vent hint: '+s.toast);
-  await p.keyboard.down('e');s=await run('tick',.05,40);await p.keyboard.up('e');assert(s.vent.uses===1&&s.vent.active>0,map+' native E started the vent: '+JSON.stringify(s.vent));assert(s.toast.includes('冷却剂')||s.toast.includes('喷射'),map+' vent toast '+s.toast);
+  await p.keyboard.down('e');s=await run('tick',.05,12);assert(/按住 E.*\d+%$/.test(s.toast),map+' hold progress in prompt: '+s.toast);s=await run('tick',.05,28);await p.keyboard.up('e');assert(s.vent.uses===1&&s.vent.active>0,map+' native E started the vent: '+JSON.stringify(s.vent));assert(s.toast.includes('冷却剂')||s.toast.includes('喷射'),map+' vent toast '+s.toast);
   // guard inside the cloud is slowed and takes damage; guard outside is untouched
   const zy=L.vent.zone.y??L.vent.y??0;s=await run('place','assault',L.vent.zone.x,L.vent.zone.z,zy);s=await run('place','assault',L.vent.zone.x+12,L.vent.zone.z+12,zy);const hp0=s.enemies.map(e=>e.hp);
   s=await run('tick',.05,20);assert(s.enemies[0].slow<.6,map+' inside slowed '+s.enemies[0].slow);assert(s.enemies[0].hp<hp0[0],map+' cloud damages guard');

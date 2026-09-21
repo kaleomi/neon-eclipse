@@ -6,6 +6,8 @@
 export const VENT=Object.freeze({hold:1.5,duration:5,radius:3.2,slow:.5,dps:6,cooldown:12,reach:2.2});
 export const LIGHTS=Object.freeze({hold:.6,reach:2.2,darkRangeScale:.65,darkSpeedScale:1.25,darkTypes:Object.freeze(['stalker','hound']),rangedTypes:Object.freeze(['ranged','sniper','commander'])});
 const finite=n=>Number.isFinite(n);
+// Live hold progress for the HUD prompt (" · 40%"); empty until the player starts holding. Never changes hold length or gating.
+export function holdSuffix(hold,duration){return hold>0&&duration>0?' · '+Math.min(99,Math.floor(hold/duration*100))+'%':'';}
 export function createVentConsole({x,z,y=0,zone,rules=VENT}={}){
  if(!finite(x)||!finite(z)||!zone||!finite(zone.x)||!finite(zone.z))throw new TypeError('Invalid vent console');
  const state={hold:0,active:0,cooldown:0,uses:0};
@@ -22,7 +24,7 @@ export function createVentConsole({x,z,y=0,zone,rules=VENT}={}){
  }
  function reset(){state.hold=0;state.active=0;state.cooldown=0;state.uses=0;}
  return {x,z,y,zone,rules,state,tick,reset,inReach,inZone,get progress(){return Math.min(1,state.hold/rules.hold);},get ready(){return state.active===0&&state.cooldown===0;},
-  get hint(){return state.active>0?'冷却剂喷射中 // 区域内敌人减速，无法预警，持续 '+Math.ceil(state.active)+'s':state.cooldown>0?'排气阀充压中 // '+Math.ceil(state.cooldown)+'s':'按住 E 打开排气阀 // 1.5 秒 · 向前方区域喷射冷却剂';}};
+  get hint(){return state.active>0?'冷却剂喷射中 // 区域内敌人减速，无法预警，持续 '+Math.ceil(state.active)+'s':state.cooldown>0?'排气阀充压中 // '+Math.ceil(state.cooldown)+'s':'按住 E 打开排气阀 // 1.5 秒 · 向前方区域喷射冷却剂'+holdSuffix(state.hold,rules.hold);}};
 }
 export function createLightSwitch({x,z,y=0,rules=LIGHTS}={}){
  if(!finite(x)||!finite(z))throw new TypeError('Invalid light switch');
@@ -38,7 +40,7 @@ export function createLightSwitch({x,z,y=0,rules=LIGHTS}={}){
  }
  function reset(){state.hold=0;state.lit=true;state.toggles=0;state.latch=false;}
  return {x,z,y,rules,state,tick,reset,inReach,get lit(){return state.lit;},get progress(){return Math.min(1,state.hold/rules.hold);},
-  get hint(){return state.lit?'按住 E 切断区域照明 // 黑暗中远程守卫射程缩短，潜行者与猎犬更快':'按住 E 恢复区域照明 // 远程守卫射程恢复，潜行者与猎犬减速';}};
+  get hint(){return (state.lit?'按住 E 切断区域照明 // 黑暗中远程守卫射程缩短，潜行者与猎犬更快':'按住 E 恢复区域照明 // 远程守卫射程恢复，潜行者与猎犬减速')+holdSuffix(state.hold,rules.hold);}};
 }
 // Combat modifiers consumed by the enemy director. `zoneTest(enemy)` is any predicate; missing pieces mean "no change".
 // `weather` is a pre-resolved modifier object ({range,speed}) from weather-rules.js; it never touches telegraphs or DPS.

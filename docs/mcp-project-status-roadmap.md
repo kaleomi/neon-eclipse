@@ -631,3 +631,10 @@
 
 - `ed4fb82` 提交角色批次后，`app.js` `warmModels` 恢复 `shield:loadShieldAsset`、`roster:loadRosterUnit` 与 `rosterTypes`（`4256b35` 因未跟踪模块暂时移除）；`test-asset-warmup-browser.mjs` 恢复原期望（反应堆 warden、极地 hound 亦在菜单期预热）。
 - 验证：`test-import-graph` 320 模块全部已跟踪；`test-asset-preload` 通过；预热浏览器链 EXIT=0（反应堆 7 个 GLB、极地 5 个）；smoke 15/15（408.7 s）。
+
+## 2026-09-21：环境控制台（排气阀／照明）按住 E 显示实时进度
+
+- 问题：Boss 阶段任务交互框被隐藏，剩余可按 E 的排气阀／照明开关提示走 toast，只有文字、没有进度，玩家不知道是否在生效（用户在第八章反馈）。
+- 修改：`interaction-rules.js` 新增 `holdSuffix(hold,duration)`，vent／light 的 `hint` 在按住期间追加 ` · NN%`（0→99，松开或完成即清空）；`app.js` 在提示文本变化时刷新 toast（原本 0.6 s 内不刷新，百分比会卡住）。不改 hold 时长、判定、busy 条件。
+- 验证：`test-interactions.mjs` 新增后缀断言；`test-interactions-world.mjs` 通过；`test-interactions-browser.mjs` 新增「按住 12 帧后 toast 以百分比结尾」断言，九章全部通过（`.tools/b7-inter.log`，EXIT=0）。
+- 未处理（另一个会话正在改）：ABYSS 核心位于主机实心碰撞盒内导致打不到（`abyss-rules.js` 的 `ABYSS_POSITION` 正被移到 z=−7.7，含 `test-abyss-core-access.mjs`）。

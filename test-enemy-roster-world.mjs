@@ -3,7 +3,12 @@ import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import * as T from './node_modules/three/build/three.module.js';
 import {SKYHOOK,LEVIATHAN} from './siege-data.js';
-const baseline=JSON.parse(await readFile(new URL('./.tools/qa-enemy-roster/baseline-worlds.json',import.meta.url)));
+import {existsSync} from 'node:fs';
+// One-off migration proof against pre-arena-boss world sources captured in gitignored .tools/ (see docs/mcp-enemy-roster-final-2026-09-21.md).
+// Without that local capture (clean checkout / CI) there is nothing to compare, so state that and exit 0 instead of failing.
+const baselineURL=new URL('./.tools/qa-enemy-roster/baseline-worlds.json',import.meta.url);
+if(!existsSync(baselineURL)){console.log('SKIP enemy-roster world side-by-side: local baseline .tools/qa-enemy-roster/baseline-worlds.json not present (migration evidence lives outside Git)');process.exit(0);}
+const baseline=JSON.parse(await readFile(baselineURL));
 globalThis.document={createElement:()=>({style:{},dataset:{},append(){},remove(){},classList:{add(){},remove(){}}}),body:{append(){}}};globalThis.innerWidth=1280;globalThis.innerHeight=800;
 const actualPerformance=globalThis.performance;Object.defineProperty(globalThis,'performance',{value:{now:()=>12345},configurable:true});
 const entries=[['overseer','overseer-world.js','createOverseerWorld'],['switchyard','switchyard-world.js','createSwitchyardWorld'],['elevator','elevator-world.js','createElevatorWorld'],['tether','tether-world.js','createTetherWorld'],['abyss','abyss-world.js','createAbyssWorld'],['glacier','glacier-world.js','createGlacierWorld'],['skyhook','siege-world.js','createSiegeWorld'],['leviathan','siege-world.js','createSiegeWorld']];

@@ -644,3 +644,9 @@
 - 问题：`ui-clean.css` 只覆盖了 `.interact-prompt` 的 `bottom:92px`，`mission.css` 的 `top:calc(50% + 110px)` 仍生效，元素被同时钉住上下边缘而拉高（1280×720 下 260×193 px，一行文字下方大片空白），且与底部 toast／电台叠放区重叠。
 - 修改：仅 `ui-clean.css`：交互框改为 `top:calc(50% + 62px); bottom:auto; height:auto`（窄屏 `+48px`），高度随内容（约 55 px），位于准星下方、叠放区上方。不改 `mission-ui.js` 逻辑与文案。
 - 验证：`test-hud-polish-browser.mjs` 新增三档视口断言（紧凑、不出屏、不压准星／叠放区）；旧 CSS 下该断言失败（高 278 px、重叠），修复后全链 EXIT=0（`.tools/b8-hud.log`）。截图：`.tools/ci-verify/.tools/shot-mission-hold.png`、`shot-vent-hold.png`（临时工作树）。
+
+## 2026-09-21：CI 修复——`test-enemy-roster-world.mjs` 依赖本地 `.tools/` 基线
+
+- 运行 35554714101（`fbacd00`）、35555590326（`c035d99`）node-tests 失败：`test-enemy-roster-world.mjs` 读取 gitignored 的 `.tools/qa-enemy-roster/baseline-worlds.json`（旧版世界源码快照），干净检出 ENOENT。该测试来自 `ed4fb82` 打包的批次，本地一直通过所以未被发现。
+- 修改：基线不存在时打印 SKIP 并以 0 退出（迁移证据本就不进 Git）；本地有基线时仍执行完整对照。干净工作树 integration 55/55。
+- 教训补充到 `test-import-graph` 之外：提交前应在干净工作树跑一次 `--layer integration`，而不只是 import 图。

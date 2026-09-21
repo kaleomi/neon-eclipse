@@ -697,3 +697,7 @@
 - 变更：`asset-preload.js` 新增 `warmupRequested(search)`（仅 `?warm=0` 关闭）；`app.js` 预热改为 `p4Requested()||!warmupRequested(...)` 时跳过；`test-smoke-browser.mjs` 全部页面加 `warm=0`。玩家路径不变；`test-asset-warmup-browser.mjs` 仍以默认参数验证预热真实发生。
 - 规则：`test-asset-preload.mjs` 增 5 条断言；`check` 层 651/651。
 - 浏览器：本地 smoke 15/15，408.7 s → 188.1 s（`.tools/b6-smoke.log` vs `.tools/b19-smoke.log`）。CI 用时见后续 run 记录。
+
+## 2026-09-21：直升机吊运玩法方案
+
+- 文档：`docs/mcp-p3-helicopter-sling-gameplay-options.md`，三案 A 补给链 / B 限时急救 / C 动力学反馈，建议先 A。仅方案，未改代码，等用户选择。

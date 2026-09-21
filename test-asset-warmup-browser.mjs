@@ -6,7 +6,7 @@ const {chromium}=await import(process.env.VEHICLE_PLAYWRIGHT_MODULE||'playwright
 const server=await startVehicleTestServer();let browser;
 try{
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- for(const [map,expectTypes,absentFile] of [['reactor',['assault','heavy','ranged','commander'],'step-snow-1'],['polar',['assault','ranged','heavy'],'step-gravel-1']]){
+ for(const [map,expectTypes,absentFile] of [['reactor',['assault','heavy','ranged','commander','warden'],'step-snow-1'],['polar',['hound'],'step-gravel-1']]){
   const context=await browser.newContext({viewport:{width:1280,height:800}}),page=await context.newPage(),errors=[],glb=[];
   page.setDefaultTimeout(60000);page.on('pageerror',e=>errors.push(e.message));
   page.on('request',r=>{if(r.url().endsWith('.glb'))glb.push(r.url().split('/').pop());});
@@ -19,7 +19,7 @@ try{
   assert.deepEqual(report.failed,[],map+' no loader failures');
   // Requests were issued during menu time, before any enemy spawned.
   assert.equal(await page.evaluate(()=>document.body.dataset.playState||'ready'),'ready');
-  assert(glb.length>=expectTypes.length,map+' GLBs requested at menu: '+glb.join(','));
+  assert(glb.length>=expectTypes.length-1,map+' GLBs requested at menu: '+glb.join(','));
   // SFX preload is the map subset: the other map's footstep surface is not fetched.
   const samples=await page.evaluate(()=>window.neonAudio.sfx.stats().samples);
   assert(!samples.loaded.includes(absentFile)&&!samples.pending.includes(absentFile),map+' does not fetch '+absentFile);

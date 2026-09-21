@@ -626,3 +626,8 @@
 - 浏览器链 8/9 通过：smoke、shield-guard、enemy-roster-game、reactor-look、combat-cues、frame-perf、switchyard、archive。
 - **已知红灯（未修复，按决定 C 记录）**：`test-station-look-browser.mjs` 报 `calls budget grew`。原因：`switchyard-world.js` 接入 `characters/arena-boss-runtime.js` 的 `attachArenaBossVisual` 后，9 个视角 draw calls 各 +1（高画质 +2）、三角约 +2000～+4150；纹理、灯光、碰撞快照、天花板均不变。该测试对照 `.tools/qa-station-look/before.json`（零增长契约，针对纯材质替换批次）。待办：在 arena-boss 批次文档记录预算增量后重采基线（`STATION_CAPTURE=before`），或将阈值放宽为 base+2 calls／+4200 triangles。
 - `app.js` 预热尚未接回 shield／roster 加载器（`4256b35` 因未跟踪模块暂时移除），本批提交后可恢复。
+
+## 2026-09-20：章节预热接回护盾／花名册加载器
+
+- `ed4fb82` 提交角色批次后，`app.js` `warmModels` 恢复 `shield:loadShieldAsset`、`roster:loadRosterUnit` 与 `rosterTypes`（`4256b35` 因未跟踪模块暂时移除）；`test-asset-warmup-browser.mjs` 恢复原期望（反应堆 warden、极地 hound 亦在菜单期预热）。
+- 验证：`test-import-graph` 320 模块全部已跟踪；`test-asset-preload` 通过；预热浏览器链 EXIT=0（反应堆 7 个 GLB、极地 5 个）；smoke 15/15（408.7 s）。

@@ -112,6 +112,9 @@ import {loadRangedGuardAsset} from './characters/ranged-guard-runtime.js';
 import {loadEngineerAsset} from './characters/engineer-guard-runtime.js';
 import {loadCommanderAsset} from './characters/commander-guard-runtime.js';
 import {loadSniperAsset} from './characters/sniper-guard-runtime.js';
+import {loadShieldAsset} from './characters/shield-guard-runtime.js';
+import {loadRosterUnit} from './characters/roster-runtime.js';
+import {ROSTER_UNITS} from './characters/roster-units.js';
 
 const fieldRecord=createFieldRecord();
 const telemetry=createTelemetry(),frameStats=createFrameStats();let telemetryAttempt=null,telemetryShots=[0,0,0,0,0,0,0,0];
@@ -131,10 +134,10 @@ const combatUI=createCombatUI();
 const mission=createMission();
 // Chapter warm-up: start the GLB loaders for every enemy type this chapter's roster can spawn while the menu is up,
 // so the first appearance of each type no longer waits on network + decode. Same cached loaders the attach path uses;
-// P4 modes build their own rosters and are left to lazy loading. Shield / roster-unit loaders belong to work that is not
-// committed yet; `loaderForType` simply skips those types until they are wired here.
+// P4 modes build their own rosters and are left to lazy loading.
 const assetWarmup=p4Requested()?Promise.resolve(null):warmModels(chapterEnemyTypes(STAGES),{
- guardVariant:loadGuardVariantAsset,ranged:loadRangedGuardAsset,engineer:loadEngineerAsset,commander:loadCommanderAsset,sniper:loadSniperAsset,
+ guardVariant:loadGuardVariantAsset,ranged:loadRangedGuardAsset,engineer:loadEngineerAsset,commander:loadCommanderAsset,
+ sniper:loadSniperAsset,shield:loadShieldAsset,roster:loadRosterUnit,rosterTypes:new Set(Object.keys(ROSTER_UNITS)),
 });window.__assetWarmup=assetWarmup;
 const missionUI=createMissionUI();
 const enemyUI=createEnemyUI();

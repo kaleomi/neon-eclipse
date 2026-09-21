@@ -638,3 +638,9 @@
 - 修改：`interaction-rules.js` 新增 `holdSuffix(hold,duration)`，vent／light 的 `hint` 在按住期间追加 ` · NN%`（0→99，松开或完成即清空）；`app.js` 在提示文本变化时刷新 toast（原本 0.6 s 内不刷新，百分比会卡住）。不改 hold 时长、判定、busy 条件。
 - 验证：`test-interactions.mjs` 新增后缀断言；`test-interactions-world.mjs` 通过；`test-interactions-browser.mjs` 新增「按住 12 帧后 toast 以百分比结尾」断言，九章全部通过（`.tools/b7-inter.log`，EXIT=0）。
 - 未处理（另一个会话正在改）：ABYSS 核心位于主机实心碰撞盒内导致打不到（`abyss-rules.js` 的 `ABYSS_POSITION` 正被移到 z=−7.7，含 `test-abyss-core-access.mjs`）。
+
+## 2026-09-21：任务交互框（按住 E）尺寸修正
+
+- 问题：`ui-clean.css` 只覆盖了 `.interact-prompt` 的 `bottom:92px`，`mission.css` 的 `top:calc(50% + 110px)` 仍生效，元素被同时钉住上下边缘而拉高（1280×720 下 260×193 px，一行文字下方大片空白），且与底部 toast／电台叠放区重叠。
+- 修改：仅 `ui-clean.css`：交互框改为 `top:calc(50% + 62px); bottom:auto; height:auto`（窄屏 `+48px`），高度随内容（约 55 px），位于准星下方、叠放区上方。不改 `mission-ui.js` 逻辑与文案。
+- 验证：`test-hud-polish-browser.mjs` 新增三档视口断言（紧凑、不出屏、不压准星／叠放区）；旧 CSS 下该断言失败（高 278 px、重叠），修复后全链 EXIT=0（`.tools/b8-hud.log`）。截图：`.tools/ci-verify/.tools/shot-mission-hold.png`、`shot-vent-hold.png`（临时工作树）。

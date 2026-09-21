@@ -34,6 +34,18 @@ try{
   if(scale===1)await p.screenshot({path:`.tools/qa-hud-polish/alerts-${width}.png`});
  }
  console.log('PASS 9 alert layouts: clear reticle/task/rack, separate warnings, health/ammo contained, reduced-motion');
+ // Interaction prompt with a hold in progress: compact (no phantom empty area below the bar), clear of reticle and context stack.
+ for(const [width,height] of [[1440,960],[1024,640],[390,844]]){
+  await p.setViewportSize({width,height});
+  const r=await p.evaluate(()=>{const el=document.querySelector('.interact-prompt');el.hidden=false;el.querySelector('span').textContent='按住 E · 解除闸门（松开或受击会中断）';el.querySelector('i').style.width='40%';
+   const stack=document.querySelector('.ui-context-stack');let toast=stack?.querySelector('.toast');if(stack&&!toast){toast=document.createElement('div');toast.className='toast';stack.append(toast);}if(toast){toast.textContent='中继员 // 测试提示';toast.style.opacity='1';}
+   const b=el.getBoundingClientRect(),s=stack?stack.getBoundingClientRect():null,c={left:innerWidth/2-24,right:innerWidth/2+24,top:innerHeight/2-24,bottom:innerHeight/2+24};
+   const overlap=(a,b)=>a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top;const text=el.querySelector('span').getBoundingClientRect(),bar=el.querySelector('[role=progressbar]').getBoundingClientRect();
+   if(toast)toast.textContent='';el.hidden=true;
+   return {height:b.height,compact:b.height<=bar.bottom-text.top+40,inside:b.top>=0&&b.bottom<=innerHeight,clear:!overlap(b,c)&&(!s||s.height===0||!overlap(b,s))};});
+  assert(r.compact&&r.inside&&r.clear,JSON.stringify({width,height,r}));
+ }
+ console.log('PASS 3 interaction prompt layouts: compact box, clear of reticle and context stack');
  await p.evaluate(()=>window.__hudCombat.update(.016,{...window.__hudInfo,reloading:.7,ammo:0}));assert.equal(await p.locator('.ammo-warning').textContent(),'');assert.equal(await p.locator('.reload-status').getAttribute('aria-valuenow'),'50');
  await p.evaluate(()=>window.__hudCombat.update(.016,{...window.__hudInfo,ammo:0,reserve:0}));assert.match(await p.locator('.ammo-warning').textContent(),/耗尽/);
  await p.evaluate(()=>window.__hudCombat.update(.016,{...window.__hudInfo,melee:true,ammo:Infinity,capacity:Infinity,health:100}));assert.equal(await p.locator('.ammo-warning').textContent(),'');assert(await p.locator('.low-health').isHidden());assert.equal(await p.locator('#player-hud .ammo').getAttribute('data-ammo-state'),'normal');

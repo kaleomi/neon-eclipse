@@ -732,3 +732,8 @@
 - J02：`vehicle.css` 武装飞机小视口仪表改底部/窄栏布局，九视口四面板零交集；飞行任务链接管扩展断言 EXIT=0。
 - J01：`vehicle-app.js` 恢复非漫游车 C 前向视角（原被 gunner 初始值挡住）；雷达拱下移后移为用户工作区模型改动、未提交；截图证前方无遮挡；sea-air 链新增 hood 回归 EXIT=0。
 - 连带：`test-flight-mission-browser.mjs` 适配双层 tab deck 回绿。check 659/659。详见 `docs/mcp-visual-fixes-j01-j02-2026-09-21.md`。
+
+## 2026-09-22：噩梦难度 + 新游戏页难度选择
+
+- 噩梦：双倍刷怪（Boss 阶段除外，点位不足优雅降级）、受伤 200%、输出 50%、攻击间隔 50%；难度选择进入新游戏/战备页，设置页同步保留。
+- 验收：test-difficulty 四档与生成点池 PASS；difficulty 浏览器链（新游戏页选择/持久化/同步）EXIT=0；menu-polish EXIT=0；smoke 15/15；check 663/663。详见 `docs/mcp-nightmare-difficulty-2026-09-22.md`。

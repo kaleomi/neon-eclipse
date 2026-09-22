@@ -31,7 +31,7 @@ export const SLOTS=Object.freeze([
  {key:'neon-eclipse.stars.v1',group:'collection',title:'隐藏星星',validate:versioned([1,2,3,4,5,6],v=>Array.isArray(v.stars))},
  {key:'neon-eclipse.chapter-achievements.v1',group:'collection',title:'单章成就',validate:versioned([1],v=>Array.isArray(v.awards))},
  {key:'neon-eclipse.achievement-notices.v1',group:'collection',title:'成就提示状态',validate:text=>parse(text).ok?'ok':'corrupt'},
- {key:'neon-eclipse.combat-difficulty.v1',group:'settings',title:'主线战斗难度',validate:oneOf(['easy','normal','hard'])},
+ {key:'neon-eclipse.combat-difficulty.v1',group:'settings',title:'主线战斗难度',validate:oneOf(['easy','normal','hard','nightmare'])},
  {key:'neon-eclipse.naval-difficulty.v1',group:'settings',title:'海上任务难度',validate:oneOf(['easy','normal','hard'])},
  {key:'neon-eclipse.presentation.v1',group:'settings',title:'画质与 HUD 偏好',validate:text=>{const p=parse(text);return p.ok&&p.value&&typeof p.value==='object'?'ok':'corrupt';}},
  {key:'neon-eclipse.controls.v1',group:'settings',title:'操作设置',validate:text=>{const p=parse(text);return p.ok&&p.value&&typeof p.value==='object'?'ok':'corrupt';}},

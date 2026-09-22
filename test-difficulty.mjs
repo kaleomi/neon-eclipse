@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {DIFFICULTIES,DIFFICULTY_KEY,normalizeDifficulty,readDifficulty,writeDifficulty,incomingDamage,outgoingDamage,attackCooldown} from './combat-difficulty.js';
+import {DIFFICULTIES,DIFFICULTY_KEY,normalizeDifficulty,readDifficulty,writeDifficulty,incomingDamage,outgoingDamage,attackCooldown,spawnScale} from './combat-difficulty.js';
 for(const value of [undefined,null,'bad','toString','__proto__'])assert.equal(normalizeDifficulty(value),'normal');
 const data=new Map([['campaign-sentinel','preserved']]),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v)};
 assert.equal(readDifficulty(storage),'normal');
-for(const id of ['easy','normal','hard']){
+for(const id of ['easy','normal','hard','nightmare']){
  assert(writeDifficulty(id,storage));assert.equal(readDifficulty(storage),id);
  assert.equal(incomingDamage(20,id),20*DIFFICULTIES[id].incoming);
  assert.equal(outgoingDamage(40,id),40*DIFFICULTIES[id].outgoing);
@@ -14,6 +14,9 @@ for(const id of ['easy','normal','hard']){
 assert.equal(data.get('campaign-sentinel'),'preserved');assert.equal(data.size,2);
 assert.equal(incomingDamage(20,'normal'),20);assert.equal(outgoingDamage(40,'normal'),40);assert.equal(attackCooldown(2,'normal'),2);
 assert(incomingDamage(20,'easy')<incomingDamage(20,'normal'));assert(incomingDamage(20,'hard')>incomingDamage(20,'normal'));
+assert.equal(incomingDamage(20,'nightmare'),40);assert.equal(outgoingDamage(40,'nightmare'),20);assert.equal(attackCooldown(2,'nightmare'),1);
+assert.equal(spawnScale('nightmare'),2);for(const id of ['easy','normal','hard'])assert.equal(spawnScale(id),1);
+assert.equal(spawnScale(),1,'module default stays normal scale');assert.equal(spawnScale(readDifficulty(storage)),2,'storage-selected nightmare doubles spawns');
 assert(outgoingDamage(40,'easy')>outgoingDamage(40,'hard'));assert(attackCooldown(2,'easy')>attackCooldown(2,'hard'));
 const denied={getItem(){throw Error('denied')},setItem(){throw Error('quota')}};assert.equal(readDifficulty(denied),'normal');assert.equal(writeDifficulty('hard',denied),false);
 data.set(DIFFICULTY_KEY,'corrupt');assert.equal(readDifficulty(storage),'normal');
@@ -28,9 +31,21 @@ for(const id of ['easy','normal','hard']){const p4={difficulty:id,params:{incomi
 assert(app.includes('const bossDamage=p4Incoming(overseer?.update('));
 assert(app.includes('overseer.hit(impact.object,p4Outgoing(damageAtDistance('));
 assert(app.includes('const baseDamage=p4Outgoing(damageAtDistance('));
-assert(app.includes('scaleCooldown:p4Cooldown'));assert(ai.includes('enemy.attack=scaleCooldown('));
+assert(app.includes('scaleCooldown:p4Cooldown'));
+assert(app.includes('const scale=spawnScale();'),'nightmare spawn scaling wired into spawnEncounter');
+assert(app.includes("const bossStage=Array.from({length:stage.count},(_,i)=>roleForStage(stage,i)).includes('warden');"),'boss stages never doubled');
+assert(app.includes('const count=Math.min(want,spots.length);'),'graceful when spawn sites run out');
+const missionSrc=fs.readFileSync(new URL('./mission.js',import.meta.url),'utf8');
+assert(missionSrc.includes('chooseEncounterSpawns(stage,player,obstacles,count=stage.count)'),'spawn site pool honors requested count');assert(ai.includes('enemy.attack=scaleCooldown('));
 assert(!app.includes('incomingDamage(hazard.damage)'),'environment damage deliberately unchanged');
-console.log('PASS: three difficulty profiles, normal identity, damage/cooldown ordering, zero shield damage, persistence/fallback/save isolation, ordinary and special boss integration');
+console.log('PASS: four difficulty profiles, normal identity, damage/cooldown ordering, zero shield damage, persistence/fallback/save isolation, ordinary and special boss integration');
+const {chooseEncounterSpawns}=await import('./mission.js');
+const fakeStage={count:4,x:0,z:0};
+const baseSpots=chooseEncounterSpawns(fakeStage,{x:0,z:0},[]);
+assert.equal(baseSpots.length,4,'default count unchanged');
+const doubleSpots=chooseEncounterSpawns(fakeStage,{x:0,z:0},[],8);
+assert.equal(doubleSpots.length,8,'nightmare can draw double spawn sites');
+console.log('PASS: encounter spawn pool scales with requested nightmare count');
 const T=await import('./node_modules/three/build/three.module.js');
 const {createEnemyDirector}=await import('./enemy-ai.js');
 const {createEnemyModel}=await import('./enemy-model.js');

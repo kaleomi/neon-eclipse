@@ -44,7 +44,7 @@ import {BARREL,blastDamage,blastVisible} from './barrel-rules.js';
 import {createHaloBurst,registerHaloWeakHit,stepHaloMark} from './weapons/halo-rules.js';
 import {haloCheckpoint,supplementHaloSupply} from './weapons/runtime.js';
 import {createRuntimeWeapons,canSprintWithWeapon,tempestCheckpoint,restoreRuntimeAmmo,supplementTempestSupply,legacySelected} from './weapons/runtime.js';
-import {DIFFICULTIES,currentDifficulty,incomingDamage,outgoingDamage,attackCooldown} from './combat-difficulty.js';
+import {DIFFICULTIES,currentDifficulty,incomingDamage,outgoingDamage,attackCooldown,spawnScale} from './combat-difficulty.js';
 import {createMeleeSweep} from './melee-sweep.js';
 import {createParry} from './parry-rules.js';
 import {createParryUI} from './parry-ui.js';
@@ -307,9 +307,12 @@ function spawnEncounter(stage){
  if(art.setStage?.(mission.state.index)){navigation.invalidate();roofEnemyNavigation?.invalidate?.();}
  overseer?.setStage(mission.state.index);
  wave=stage.level;
- const count=stage.count;
- const spots=chooseEncounterSpawns(stage,camera.position,obstacles);
- if(spots.length<count)throw new Error('Not enough safe encounter spawn points');
+ const scale=spawnScale();
+ const bossStage=Array.from({length:stage.count},(_,i)=>roleForStage(stage,i)).includes('warden');
+ const want=bossStage?stage.count:Math.round(stage.count*scale);
+ const spots=chooseEncounterSpawns(stage,camera.position,obstacles,want);
+ if(spots.length<stage.count)throw new Error('Not enough safe encounter spawn points');
+ const count=Math.min(want,spots.length);
  for(let i=0;i<count;i++) {
   const type=roleForStage(stage,i),profile=ENEMY_TYPES[type],boss=type==='warden';
   const group=createEnemyModel(type);group.scale.setScalar(profile.scale);

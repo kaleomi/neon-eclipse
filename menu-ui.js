@@ -62,6 +62,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
         <div class="menu-page-heading"><div><p class="menu-eyebrow">PREPARE / 01</p><h2 id="menu-prepare-title" tabindex="-1">准备出发</h2></div><p>先选战备，再开始。返回不会覆盖任何战役进度。</p></div>
         <div class="menu-deployment-brief"><span>九章连续战役</span><strong>从反应堆开始，穿越整条前线。</strong><p>主武器与投掷物由你选择，副武器和近战随队携带。</p></div>
         <div id="menu-deployment"></div>
+        <div id="menu-prepare-difficulty"></div>
         <div class="menu-deployment-actions"><button type="button" id="menu-begin" class="menu-primary">开始游戏 ${menuIcon('arrow')}</button><button type="button" id="menu-levels" class="menu-secondary">选择关卡 ${menuIcon('levels')}</button></div>
         <p class="ui-muted">选择关卡：独立章节、海陆空先遣与行动中枢。战备选择用于上方的新战役。</p>
       </section>
@@ -392,6 +393,7 @@ export function createGameMenu({overlay, journey, campaign, getSession, actions}
   $('#menu-achievements').addEventListener('click', () => show('achievements'));
   bindFlightPitchSetting($('#menu-flight-pitch'));
   bindCombatDifficulty($('#menu-combat-difficulty'));
+  bindCombatDifficulty($('#menu-prepare-difficulty'));
   bindSaveHub($('#menu-save-hub'), {records: createFlightRecordStore(), onChanged: () => { if (getSession().state !== 'playing') refresh(); }});
   bindTelemetrySetting($('#menu-telemetry'), window.neonTelemetry);
   bindAudioSettings($('#menu-audio'), window.neonAudio);

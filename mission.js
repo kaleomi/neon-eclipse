@@ -54,10 +54,10 @@ export function applySupply(type,health,reserves,weapons){
  return {health:nextHealth,reserves:next,changed:nextHealth!==health||next.some((v,i)=>v!==reserves[i])};
 }
 // Rank nearby safe sites, exclude the player's immediate vicinity and avoid overlapping spawns.
-export function chooseEncounterSpawns(stage,player,obstacles){
+export function chooseEncounterSpawns(stage,player,obstacles,count=stage.count){
  const feetY=stage.spawnFeetY??stage.feetY??0;
  // Spawn entries are `[x,z]` on the stage's level or `{x,z,feetY}` for a specific layer (chapter 07 rings).
- if(stage.spawns)return stage.spawns.map(s=>Array.isArray(s)?{x:s[0],z:s[1],y:feetY}:{x:s.x,z:s.z,y:s.feetY??feetY}).filter(p=>Math.hypot(p.x-player.x,p.z-player.z,p.y-(player.feetY??((player.y??1.7)-1.7)))>=6&&!obstacles.some(o=>Math.abs(p.x-o.x)<o.w/2+1.3&&Math.abs(p.z-o.z)<o.d/2+1.3&&p.y<(o.top??o.h)-1e-5&&p.y+2.4>(o.bottom??0)+1e-5)).slice(0,stage.count);
+ if(stage.spawns)return stage.spawns.map(s=>Array.isArray(s)?{x:s[0],z:s[1],y:feetY}:{x:s.x,z:s.z,y:s.feetY??feetY}).filter(p=>Math.hypot(p.x-player.x,p.z-player.z,p.y-(player.feetY??((player.y??1.7)-1.7)))>=6&&!obstacles.some(o=>Math.abs(p.x-o.x)<o.w/2+1.3&&Math.abs(p.z-o.z)<o.d/2+1.3&&p.y<(o.top??o.h)-1e-5&&p.y+2.4>(o.bottom??0)+1e-5)).slice(0,count);
  const candidates=[];
  for(let x=-34;x<=34;x+=8)for(let z=-34;z<=34;z+=8){
   if(Math.hypot(x-player.x,z-player.z)<14)continue;
@@ -65,5 +65,5 @@ export function chooseEncounterSpawns(stage,player,obstacles){
   candidates.push({x,z,score:Math.hypot(x-stage.x,z-stage.z)});
  }
  candidates.sort((a,b)=>a.score-b.score||a.x-b.x||a.z-b.z);
- return candidates.slice(0,stage.count);
+ return candidates.slice(0,count);
 }

@@ -1,0 +1,141 @@
+{
+  "version": "1.5.4",
+  "electron": "44.4.1",
+  "checks": [
+    {
+      "map": "reactor",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "station",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "roof",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "tower",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "train",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "harbor",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    },
+    {
+      "map": "vehicle",
+      "webgl": true,
+      "storage": true,
+      "naval": true,
+      "flight": true,
+      "paused": true,
+      "reset": true,
+      "recon": true,
+      "reconReset": true,
+      "recordsWrite": true,
+      "recordsDedupe": true,
+      "recordsRead": true,
+      "recordsReload": true
+    }
+  ],
+  "errors": [],
+  "musicSmoke": {
+    "ok": true,
+    "results": [
+      {
+        "path": "./audio/music/last-and-first-light.mp3",
+        "ok": true,
+        "duration": 468.796281
+      },
+      {
+        "path": "./audio/music/legionnaire.mp3",
+        "ok": true,
+        "duration": 184
+      },
+      {
+        "path": "./audio/music/pathfinder.mp3",
+        "ok": true,
+        "duration": 204.321927
+      },
+      {
+        "path": "./audio/music/the-fury.mp3",
+        "ok": true,
+        "duration": 425.828889
+      },
+      {
+        "path": "./audio/music/titan.mp3",
+        "ok": true,
+        "duration": 175.756735
+      },
+      {
+        "path": "./audio/samples/music-explore.ogg",
+        "ok": true,
+        "duration": 60
+      }
+    ]
+  },
+  "assetSmoke": {
+    "ok": true,
+    "results": [
+      {
+        "path": "./audio/music/last-and-first-light.mp3",
+        "status": 200,
+        "type": "audio/mpeg",
+        "bytes": 7502158
+      },
+      {
+        "path": "./audio/samples/music-explore.ogg",
+        "status": 200,
+        "type": "audio/ogg",
+        "bytes": 845130
+      },
+      {
+        "path": "./models/heavy-cover.glb",
+        "status": 200,
+        "type": "model/gltf-binary",
+        "bytes": 78028
+      },
+      {
+        "path": "./maps/art/reactor.jpg",
+        "status": 200,
+        "type": "image/jpeg",
+        "bytes": 209124
+      }
+    ]
+  },
+  "ok": true
+}

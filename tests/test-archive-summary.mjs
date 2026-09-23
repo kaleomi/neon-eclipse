@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {prepareArchive,filterArchive,summarizeArchive,exportArchive,duration} from '../src/archive-summary.js';
+const now=Date.UTC(2026,8,19),base={schema:1,id:'a',map:'reactor',mode:'campaign',difficulty:'normal',startStage:0,endStage:4,won:true,fromCheckpoint:false,kills:10,time:60,damage:5,shots:6,weaponShots:[3,0,1,9,0,0,0,0],death:null,stages:[{stage:0,seconds:20,damage:5,shots:6,died:false}],startedAt:now-60000,finishedAt:now};
+const raw=[base,{...base,id:'b',fromCheckpoint:true,time:1},{...base,id:'c',mode:'replay',time:2},{...base,id:'d',startStage:3,time:3},{...base,id:'e',won:false,map:'__proto__',weaponShots:null,death:{stage:2,x:2,z:3}},{...base,id:'f',schema:99},null,{...base,id:'g',stages:[null]},base];
+const original=JSON.stringify(raw),p=prepareArchive(raw);assert.equal(p.records.length,5);assert.equal(p.rejected,3);assert.equal(p.duplicates,1);assert.equal(JSON.stringify(raw),original);
+const summary=summarizeArchive(p.records);assert.equal(summary.best,60);assert.equal(summary.weapons[3],0);assert.equal(summary.unclassified,14);assert.equal(summary.maps.find(m=>m.map==='__proto__').deaths[0][0],2);assert.equal(summary.stageSeconds,100);
+assert.equal(filterArchive(p.records,{origin:'resumed'}).length,1);assert.equal(filterArchive(p.records,{mode:'replay'}).length,1);assert.equal(filterArchive(p.records,{difficulty:'hard'}).length,0);
+assert.equal(filterArchive(p.records,{days:'7'},now+8*86400000).length,0);assert.equal(filterArchive(p.records,{days:'7'},now).length,5);
+const exported=JSON.parse(exportArchive(p.records,{map:'all'},now));assert.equal(exported.type,'read-only-operations-archive');assert.deepEqual(exported.records.find(r=>r.id==='e').death,{stage:2});assert(!JSON.stringify(exported).includes('"x":'));
+const many=prepareArchive(Array.from({length:2010},(_,i)=>({...base,id:String(i)})));assert.equal(many.records.length,2000);assert(many.truncated);assert.equal(duration(3661),'1:01:01');assert.equal(duration(NaN),'—');assert.equal(summarizeArchive([]).winRate,null);
+console.log('PASS archive filtering, malformed/future/dedup limits, prototype map, strict best-time eligibility, blade excluded, coordinate-free export and immutable inputs');

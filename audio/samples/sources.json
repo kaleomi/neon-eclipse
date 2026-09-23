@@ -22,10 +22,10 @@
   {
     "file": "rover-drive.ogg",
     "audition": "03",
-    "start": 8,
-    "seconds": 7.650022675736961,
+    "start": 10,
+    "seconds": 4.300022675736962,
     "loop": true,
-    "sha256": "36c99194feff4be7cd63d07516479c6ea3767f45ec5c9ad98f342a7dbced55e9",
+    "sha256": "f5dae5ff42cd798219c8fe0fd063ac3526b03b12fc7e6ca748eff49bed88e3ee",
     "source": {
       "part": 4,
       "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 4of8/Pole Position - Jeep SRT8 2014/Jeep_SRT8_t9_Onbrd_Fast_Drive_Short_Stop_Engine_Right_DPA4061.wav",
@@ -37,7 +37,8 @@
       "seconds": 42.7,
       "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%204of8.zip",
       "sha256": "c7914406cafc317abe6019e02e080058c14eed39235d6e24af7906aed37bf457"
-    }
+    },
+    "processing": "Steady onboard engine section; slow RMS leveling; 0.7 second equal-power loop overlap; RMS 0.095; mono 44.1 kHz Vorbis"
   },
   {
     "file": "rotor.ogg",
@@ -301,63 +302,69 @@
   },
   {
     "file": "step-snow-1.ogg",
-    "audition": "12",
-    "start": 0.11500000000000002,
-    "seconds": 0.3,
+    "audition": "oga-corsica-snow",
+    "start": 0.022,
+    "seconds": 0.36,
     "loop": false,
-    "sha256": "1eac2da67dfb108195bda780e04d7cf6e41bd0298926c567b941daadd7ffa16a",
+    "sha256": "0d7d5297d40ddb8fa61837e959a17f9f06bb5c0be17512647a24c7677ca50cd5",
     "source": {
-      "part": 6,
-      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Snow_Singles_Sequence.wav",
-      "bytes": 8054210,
-      "id": "12",
+      "pack": "42 Snow and Gravel Footsteps (OpenGameArt)",
+      "name": "Corsica_S-Walking_in_Snow/Corsica_S-Walking_on_snow_covered_gravel_02.flac",
+      "author": "Corsica_S (extracted by Iwan 'qubodup' Gabovitch)",
+      "license": "CC0 1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "title": "雪地脚步",
       "category": "脚步",
-      "file": "samples/12.wav",
-      "seconds": 12.3,
-      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
-      "sha256": "101560f7781eb7ef928ca6433e7929dc088da4843015abeed233d76e8d1eac1a"
-    }
+      "source": "https://opengameart.org/content/42-snow-and-gravel-footsteps",
+      "download": "https://opengameart.org/sites/default/files/corsica_s-walking_in_snow.7z",
+      "sha256": "799c07881c8a49f618401b66403938966c73b2374a19f41dfe6117e89589e7ea",
+      "replaced": "2026-09-22: replaced Sonniss S23 snow singles (too loud/sharp per user feedback)"
+    },
+    "processing": "mono 44.1 kHz, 0.36 s trim from onset, 5.5 kHz low-pass, 80 ms fade-out, peak -9 dBFS, Vorbis"
   },
   {
     "file": "step-snow-2.ogg",
-    "audition": "12",
-    "start": 0.595,
-    "seconds": 0.3,
+    "audition": "oga-corsica-snow",
+    "start": 0.007,
+    "seconds": 0.36,
     "loop": false,
-    "sha256": "70e5669278323037df9a46acccbb0e814a7263107832a2c1e078f72d7c562858",
+    "sha256": "346c16ee7cfcaab13b1477a12bb53e6660951e8effb243fdcaef74370175b35b",
     "source": {
-      "part": 6,
-      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Snow_Singles_Sequence.wav",
-      "bytes": 8054210,
-      "id": "12",
+      "pack": "42 Snow and Gravel Footsteps (OpenGameArt)",
+      "name": "Corsica_S-Walking_in_Snow/Corsica_S-Walking_on_snow_covered_gravel_06.flac",
+      "author": "Corsica_S (extracted by Iwan 'qubodup' Gabovitch)",
+      "license": "CC0 1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "title": "雪地脚步",
       "category": "脚步",
-      "file": "samples/12.wav",
-      "seconds": 12.3,
-      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
-      "sha256": "101560f7781eb7ef928ca6433e7929dc088da4843015abeed233d76e8d1eac1a"
-    }
+      "source": "https://opengameart.org/content/42-snow-and-gravel-footsteps",
+      "download": "https://opengameart.org/sites/default/files/corsica_s-walking_in_snow.7z",
+      "sha256": "8eca849ddb6a5d084cf530fd0abb4e3706f9bb626a05e7cfc40bed2a3109e64f",
+      "replaced": "2026-09-22: replaced Sonniss S23 snow singles (too loud/sharp per user feedback)"
+    },
+    "processing": "mono 44.1 kHz, 0.36 s trim from onset, 5.5 kHz low-pass, 80 ms fade-out, peak -9 dBFS, Vorbis"
   },
   {
     "file": "step-snow-3.ogg",
-    "audition": "12",
-    "start": 1.0950000000000002,
-    "seconds": 0.3,
+    "audition": "oga-corsica-snow",
+    "start": 0.004,
+    "seconds": 0.36,
     "loop": false,
-    "sha256": "dabefb127fbe3058c420ed3b6ac72ddcca051e2cf1325e66d7c04d516c450927",
+    "sha256": "80e8a8a9396f068bc7414b37755343724684adb8b31d459ec2db13d6c155ebea",
     "source": {
-      "part": 6,
-      "name": "Sonniss.com - GDC 2019 - Game Audio Bundle Part 6of8/Studio 23 - Ultimate Footstep Collection/S23_SFX_Footsteps_Snow_Singles_Sequence.wav",
-      "bytes": 8054210,
-      "id": "12",
+      "pack": "42 Snow and Gravel Footsteps (OpenGameArt)",
+      "name": "Corsica_S-Walking_in_Snow/Corsica_S-Walking_on_snow_covered_gravel_13.flac",
+      "author": "Corsica_S (extracted by Iwan 'qubodup' Gabovitch)",
+      "license": "CC0 1.0",
+      "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
       "title": "雪地脚步",
       "category": "脚步",
-      "file": "samples/12.wav",
-      "seconds": 12.3,
-      "source": "https://ftpmirror.your.org/pub/misc/sonniss2019/Sonniss.com%20-%20GDC%202019%20-%20Game%20Audio%20Bundle%20Part%206of8.zip",
-      "sha256": "101560f7781eb7ef928ca6433e7929dc088da4843015abeed233d76e8d1eac1a"
-    }
+      "source": "https://opengameart.org/content/42-snow-and-gravel-footsteps",
+      "download": "https://opengameart.org/sites/default/files/corsica_s-walking_in_snow.7z",
+      "sha256": "c56a4c63d54add25e3eb73f347311178bc973825004394339d5efc7fd9c37e2a",
+      "replaced": "2026-09-22: replaced Sonniss S23 snow singles (too loud/sharp per user feedback)"
+    },
+    "processing": "mono 44.1 kHz, 0.36 s trim from onset, 5.5 kHz low-pass, 80 ms fade-out, peak -9 dBFS, Vorbis"
   },
   {
     "file": "step-gravel-1.ogg",

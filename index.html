@@ -4,38 +4,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>NEON ECLIPSE // FPS</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="emp.css" />
-  <link rel="stylesheet" href="game.css" />
-  <link rel="stylesheet" href="art.css" />
-  <link rel="stylesheet" href="combat.css" />
-  <link rel="stylesheet" href="mission.css" />
-  <link rel="stylesheet" href="enemies.css" />
-  <link rel="stylesheet" href="campaign.css" />
-  <link rel="stylesheet" href="weapons.css" />
-  <link rel="stylesheet" href="hud.css" />
-  <link rel="stylesheet" href="levels.css" />
-  <link rel="stylesheet" href="hologram.css" />
-  <link rel="stylesheet" href="journey.css" />
-  <link rel="stylesheet" href="presentation.css" />
-  <link rel="stylesheet" href="presentation-fx.css" />
-  <link rel="stylesheet" href="impact.css" />
-  <link rel="stylesheet" href="menu.css" />
-  <link rel="stylesheet" href="hud-counter-art.css" />
-  <link rel="stylesheet" href="challenge-progress.css" />
-  <link rel="stylesheet" href="tempest.css" />
-  <link rel="stylesheet" href="halo.css" /><link rel="stylesheet" href="railspike.css"><link rel="stylesheet" href="volt.css"><link rel="stylesheet" href="swarm-coordination.css">
-  <link rel="stylesheet" href="weapon-hud.css" />
+  <link rel="stylesheet" href="./styles/style.css" />
+  <link rel="stylesheet" href="./styles/emp.css" />
+  <link rel="stylesheet" href="./styles/game.css" />
+  <link rel="stylesheet" href="./styles/art.css" />
+  <link rel="stylesheet" href="./styles/combat.css" />
+  <link rel="stylesheet" href="./styles/mission.css" />
+  <link rel="stylesheet" href="./styles/enemies.css" />
+  <link rel="stylesheet" href="./styles/campaign.css" />
+  <link rel="stylesheet" href="./styles/weapons.css" />
+  <link rel="stylesheet" href="./styles/hud.css" />
+  <link rel="stylesheet" href="./styles/levels.css" />
+  <link rel="stylesheet" href="./styles/hologram.css" />
+  <link rel="stylesheet" href="./styles/journey.css" />
+  <link rel="stylesheet" href="./styles/presentation.css" />
+  <link rel="stylesheet" href="./styles/presentation-fx.css" />
+  <link rel="stylesheet" href="./styles/impact.css" />
+  <link rel="stylesheet" href="./styles/menu.css" />
+  <link rel="stylesheet" href="./styles/hud-counter-art.css" />
+  <link rel="stylesheet" href="./styles/challenge-progress.css" />
+  <link rel="stylesheet" href="./styles/tempest.css" />
+  <link rel="stylesheet" href="./styles/halo.css" /><link rel="stylesheet" href="./styles/railspike.css"><link rel="stylesheet" href="./styles/volt.css"><link rel="stylesheet" href="./styles/swarm-coordination.css">
+  <link rel="stylesheet" href="./styles/weapon-hud.css" />
   <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
   <!-- Warm the deepest/heaviest modules in parallel with app.js instead of discovering them layer by layer. -->
   <link rel="modulepreload" href="./node_modules/three/build/three.module.js">
-  <link rel="modulepreload" href="./menu-ui.js">
-  <link rel="modulepreload" href="./enemy-model.js">
-  <link rel="modulepreload" href="./weapon-models.js">
-  <link rel="modulepreload" href="./session-flow.js">
-  <link rel="modulepreload" href="./map-world.js">
+  <link rel="modulepreload" href="./src/menu-ui.js">
+  <link rel="modulepreload" href="./src/enemy-model.js">
+  <link rel="modulepreload" href="./src/weapon-models.js">
+  <link rel="modulepreload" href="./src/session-flow.js">
+  <link rel="modulepreload" href="./src/map-world.js">
   <link rel="modulepreload" href="./node_modules/three/examples/jsm/loaders/GLTFLoader.js">
-<link rel="stylesheet" href="./ui-clean.css">
+<link rel="stylesheet" href="./styles/ui-clean.css">
 </head>
 <body class="ui-clean" data-ui-page="fps">
   <div id="game"></div>
@@ -48,7 +48,7 @@
     <div class="health"><span class="eyebrow">生命 / HP</span><div class="bar"><i id="healthbar"></i></div><b id="health">100</b></div>
     <div class="ammo" aria-label="当前弹匣和备用弹药"><span>弹药</span><div><b id="ammo">30</b><i>/ 150</i></div></div>
   </footer>
-  <script type="module" src="app.js"></script>
-  <script type="module" src="hologram-ui.js"></script>
-<script type="module" src="./ui-shell.js"></script>
+  <script type="module" src="./src/app.js"></script>
+  <script type="module" src="./src/hologram-ui.js"></script>
+<script type="module" src="./src/ui-shell.js"></script>
 </body></html>

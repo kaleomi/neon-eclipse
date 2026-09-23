@@ -1,0 +1,50 @@
+{
+  "asset": "vehicle-helicopter-v04.glb",
+  "id": "V04",
+  "name": "战术运输直升机",
+  "type": "helicopter",
+  "version": "vehicles-v2",
+  "units": "metres",
+  "axis": "+Y up, -Z front",
+  "pivot": "original ground-level chassis origin",
+  "meshes": 6,
+  "triangles": 2350,
+  "materials": 6,
+  "bounds": {
+    "min": [
+      -4.619999885559082,
+      0.0010000003967434168,
+      -4.480000019073486
+    ],
+    "max": [
+      4.619999885559082,
+      3.369999885559082,
+      5.71999979019165
+    ]
+  },
+  "bytes": 435272,
+  "sha256": "796541763b3a3909c2c1f14ec69e12cac85505a19c7c589914eaa93c81dfec36",
+  "sourceHashes": {
+    "src/vehicle-models.js": "2fe4617cf3e3b764f77cf8ff5128af299499c790608d6d49f834e86e2ade914a",
+    "scripts/build-vehicle-models.mjs": "2f3af084e65e75a063b60ab95857976e306c366993176a68d1dab394b67639bc"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "rig": {
+    "skins": 6,
+    "joints": 4,
+    "jointNames": [
+      "V04_Attitude",
+      "V04_Rotor",
+      "V04_RotorBlades",
+      "V04_TailRotor"
+    ],
+    "mode": "rigid one-joint-per-vertex skinning"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Same authored geometry and rigid joints in driving pages; no network GLB loading. Rotor blur is a separate runtime-only effect."
+}

@@ -1,0 +1,99 @@
+{
+  "asset": "weapon-arcblade-w04.glb",
+  "id": "W04",
+  "code": "ARC-01",
+  "name": "电弧战刃",
+  "weaponId": "arc-blade",
+  "weaponIndex": 3,
+  "version": "weapons-v2",
+  "units": "metres",
+  "axis": "+Y up, -Z front",
+  "pivot": "original weapon-local origin; canonical export scale 1",
+  "viewmodelScale": 0.65,
+  "meshes": 7,
+  "triangles": 1184,
+  "materials": 7,
+  "joints": 3,
+  "bounds": {
+    "min": [
+      -0.1469999998807907,
+      -0.18150000274181366,
+      -0.27027949690818787
+    ],
+    "max": [
+      0.1469999998807907,
+      0.8941870331764221,
+      0.12494626641273499
+    ]
+  },
+  "bytes": 227428,
+  "sha256": "784196b919f3dfa9da51ff1310c02981df52684e87db759592eb4478568ad76e",
+  "sourceHashes": {
+    "src/weapon-asset-models.js": "592cad5fc2fa6d18e4405e81156069c39d8b395b3f1a97907bf214ae7663c872",
+    "scripts/build-weapon-models.mjs": "657397532bc1929fbfe5c7f8efc04e96bf675dc96761129de79d0b8bbc326100"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "rig": {
+    "skins": 7,
+    "jointNames": [
+      "W04_Body",
+      "W04_Grip_R",
+      "W04_Tip"
+    ],
+    "mode": "rigid one-joint-per-vertex weights",
+    "controls": {}
+  },
+  "attachments": {
+    "right": {
+      "node": "W04_Grip_R",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        -0.07,
+        0.11,
+        1
+      ]
+    },
+    "left": null,
+    "pumpSupport": null,
+    "muzzle": {
+      "node": "W04_Tip",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.055,
+        0.9,
+        -0.255,
+        1
+      ]
+    }
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Same geometry; original .65 viewmodel scale and P01 grip trajectories. No arms, flash, feed-shell or weapon GLB network loading added."
+}

@@ -1,0 +1,48 @@
+{
+  "asset": "vehicle-aircraft-v03.glb",
+  "id": "V03",
+  "name": "高空侦察机",
+  "type": "aircraft",
+  "version": "vehicles-v2",
+  "units": "metres",
+  "axis": "+Y up, -Z front",
+  "pivot": "original fuselage/flight origin",
+  "meshes": 6,
+  "triangles": 2052,
+  "materials": 6,
+  "bounds": {
+    "min": [
+      -6.196000099182129,
+      -1.2999999523162842,
+      -4.460000038146973
+    ],
+    "max": [
+      6.196000099182129,
+      1.8700000047683716,
+      4.090000152587891
+    ]
+  },
+  "bytes": 380772,
+  "sha256": "ac2b2ce5a80cba3883cf8cd2c823bdd68436f7b23344553937f2059e45ae364c",
+  "sourceHashes": {
+    "src/vehicle-models.js": "2fe4617cf3e3b764f77cf8ff5128af299499c790608d6d49f834e86e2ade914a",
+    "scripts/build-vehicle-models.mjs": "2f3af084e65e75a063b60ab95857976e306c366993176a68d1dab394b67639bc"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "rig": {
+    "skins": 6,
+    "joints": 2,
+    "jointNames": [
+      "V03_Airframe",
+      "V03_Propeller"
+    ],
+    "mode": "rigid one-joint-per-vertex skinning"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Same authored geometry and rigid joints in driving pages; no network GLB loading. Rotor blur is a separate runtime-only effect."
+}

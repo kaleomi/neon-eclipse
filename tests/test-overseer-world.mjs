@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import * as T from '../node_modules/three/build/three.module.js';
+import {OVERSEER_MAX_HP} from '../src/overseer-rules.js';
+import {createOverseerWorld} from '../src/overseer-world.js';
+const ui=[];globalThis.document={createElement:()=>{const el={style:{},dataset:{},append(){}};ui.push(el);return el;},body:{append(){}}};
+const scene=new T.Scene(),w=createOverseerWorld(scene,[]);
+w.setStage(2);assert.equal(w.blocking,false);w.setStage(3);assert.equal(w.blocking,true);
+const nodes=w.targets.filter(m=>Number.isInteger(m.userData.overseer)),core=w.targets.find(m=>m.userData.overseer==='core');
+assert.equal(w.hit(core,999).damage,0);w.hit(nodes[0],65);w.setStage(3);assert.equal(w.targets.filter(m=>Number.isInteger(m.userData.overseer)).length,1);
+w.hit(nodes[1],65);assert(ui.some(el=>el.textContent?.includes('1920 / 1920')));w.hit(core,OVERSEER_MAX_HP/2);assert(ui.some(el=>el.textContent?.includes('960 / 1920')));assert(ui.some(el=>el.style.width==='50%'));assert.equal(w.hit(core,OVERSEER_MAX_HP).killed,true);assert.equal(w.targets.length,0);w.setStage(3);assert.equal(w.blocking,false);
+w.clear();w.setStage(3);assert.equal(w.targets.filter(m=>Number.isInteger(m.userData.overseer)).length,2);
+const p=new T.Vector3(10,1.7,-11);w.update(2,p,0,true);scene.updateMatrixWorld(true);
+const lane=scene.children[0].children.find(m=>m.geometry?.type==='PlaneGeometry');
+const axis=new T.Vector3(0,1,0).transformDirection(lane.matrixWorld),direction=new T.Vector3(10,0,10).normalize();assert.ok(Math.abs(axis.dot(direction))>.999);
+assert.equal(w.update(0,p,0,false),0);assert.equal(w.update(1.5,p,0,true),18);assert.equal(w.update(.1,p,0,true),0);
+w.setStage(4);assert.equal(w.blocking,false);assert.equal(w.update(2,p,0,true),0);
+console.log('PASS: Three.js integration: shield hits, nodes, kill, idempotent defense spawn, retry, warning plane alignment, pause and stage cleanup');

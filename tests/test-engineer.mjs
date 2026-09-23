@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {ENGINEER,chooseEngineerSite,engineerSiteSafe} from '../src/engineer-rules.js';
+import {ENEMY_TYPES,roleForStage} from '../src/enemy-rules.js';
+import {STAGES} from '../src/mission.js';
+const e={hp:90,radius:.65,group:{position:{x:0,y:0,z:0},rotation:{y:0}}},player={x:0,z:10};
+const site=chooseEngineerSite(e,player,[],[e]);assert(site);assert(engineerSiteSafe(site,e,player,[],[e]));assert.equal(site.z,2.5);
+assert(!engineerSiteSafe({...site,x:NaN},e,player,[],[e]));assert(!engineerSiteSafe({...site,y:2},e,player,[],[e]));assert(!engineerSiteSafe({x:0,y:0,z:0},e,player,[],[e]));assert(!engineerSiteSafe({x:0,y:0,z:5},e,player,[],[e]));assert(!engineerSiteSafe(site,e,site,[],[e]));assert(!engineerSiteSafe(site,e,player,[],[e],[site]));assert(!engineerSiteSafe(site,e,player,[],[e,{hp:1,group:{position:site}}]));
+assert.equal(chooseEngineerSite(e,player,[{x:0,z:0,w:100,d:100,h:5}],[e]),null);assert.equal(chooseEngineerSite(e,player,[],[e],[],()=>false),null);
+assert(engineerSiteSafe(site,e,player,[{x:site.x,z:site.z,w:1,d:1,bottom:4,top:5}],[e]),'overhead objects above turret are not floor blockers');
+assert.equal(ENGINEER.warning,2.5);assert.equal(ENEMY_TYPES.engineer.hp,90);assert.equal(ENEMY_TYPES.engineer.behavior,'ranged');assert.deepEqual(STAGES.filter(s=>s.defenseRoles?.includes('engineer')).map(s=>s.id),['access']);assert.equal(STAGES[1].count,6);assert.equal(STAGES[1].defenseCount,3);assert.deepEqual(STAGES[1].defenseRoles,['engineer','assault','heavy']);assert(!Array.from({length:6},(_,i)=>roleForStage(STAGES[1],i)).includes('engineer'));
+console.log('PASS: finite grounded local safe deployment, player/enemy/obstacle/objective/supply clearance, no unsafe or through-wall fallback, reactor defense role opt-in only and preserved encounter counts');

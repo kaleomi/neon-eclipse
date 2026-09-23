@@ -1,0 +1,49 @@
+{
+  "asset": "cover-relay-cp03.glb",
+  "id": "CP03",
+  "name": "天穹中继柜",
+  "theme": "relay",
+  "chapter": "03 OVERSEER",
+  "source": "ROOF_COVER[3]",
+  "version": "cover-props-v1",
+  "units": "metres",
+  "axis": "+Y up, +Z front",
+  "pivot": "floor centre (y=0)",
+  "size": [
+    5,
+    2.4,
+    3
+  ],
+  "bounds": {
+    "min": [
+      -2.5209999084472656,
+      -4.768371586472142e-8,
+      -1.5119999647140503
+    ],
+    "max": [
+      2.5209999084472656,
+      3.5,
+      1.5440000295639038
+    ]
+  },
+  "meshes": 5,
+  "triangles": 200,
+  "bytes": 19352,
+  "sha256": "da5b7897f46c51bdd301140dc0166034e6bacbc4d1baed98d79cf25349fcec34",
+  "sourceHashes": {
+    "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+    "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "budgets": {
+    "triangles": 4000,
+    "meshes": 8
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+}

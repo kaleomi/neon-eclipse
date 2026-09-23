@@ -1,0 +1,125 @@
+{
+  "asset": "weapon-breacher-w02.glb",
+  "id": "W02",
+  "code": "BR-08",
+  "name": "破门霰弹枪",
+  "weaponId": "breacher",
+  "weaponIndex": 1,
+  "version": "weapons-v2",
+  "units": "metres",
+  "axis": "+Y up, -Z front",
+  "pivot": "original weapon-local origin; canonical export scale 1",
+  "viewmodelScale": 0.65,
+  "meshes": 7,
+  "triangles": 3060,
+  "materials": 7,
+  "joints": 6,
+  "bounds": {
+    "min": [
+      -0.1809999942779541,
+      -0.3287275433540344,
+      -1.0149999856948853
+    ],
+    "max": [
+      0.13850000500679016,
+      0.17949999868869781,
+      0.640500009059906
+    ]
+  },
+  "bytes": 567168,
+  "sha256": "afe1569e1042754ebd5e943a7b5c96cf4c3a584907feae5921318b7a09b3dc27",
+  "sourceHashes": {
+    "src/weapon-asset-models.js": "592cad5fc2fa6d18e4405e81156069c39d8b395b3f1a97907bf214ae7663c872",
+    "scripts/build-weapon-models.mjs": "657397532bc1929fbfe5c7f8efc04e96bf675dc96761129de79d0b8bbc326100"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "rig": {
+    "skins": 7,
+    "jointNames": [
+      "W02_Body",
+      "W02_Grip_R",
+      "W02_Bolt",
+      "W02_Pump",
+      "W02_PumpSupport",
+      "W02_Muzzle"
+    ],
+    "mode": "rigid one-joint-per-vertex weights",
+    "controls": {
+      "bolt": "W02_Bolt",
+      "pump": "W02_Pump"
+    }
+  },
+  "attachments": {
+    "right": {
+      "node": "W02_Grip_R",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.015,
+        -0.16,
+        0.26,
+        1
+      ]
+    },
+    "left": null,
+    "pumpSupport": {
+      "node": "W02_PumpSupport",
+      "matrix": [
+        0.9689124217106447,
+        -0.24740395925452294,
+        0,
+        0,
+        0.24740395925452294,
+        0.9689124217106447,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.025,
+        -0.125,
+        -0.33,
+        1
+      ]
+    },
+    "muzzle": {
+      "node": "W02_Muzzle",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0.055,
+        -1.007,
+        1
+      ]
+    }
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Same geometry; original .65 viewmodel scale and P01 grip trajectories. No arms, flash, feed-shell or weapon GLB network loading added."
+}

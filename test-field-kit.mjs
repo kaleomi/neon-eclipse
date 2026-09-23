@@ -1,5 +1,0 @@
-import assert from 'node:assert/strict';
-import {defaultKit,validKit,restoreKit,kitAllows,kitProfile} from './field-kit-rules.js';
-const original={spread:.1,kick:.1,reload:2,reserve:100,damage:20,cap:30},kit=defaultKit();assert(validKit(kit));assert.equal(restoreKit().heavy,2);assert.equal(restoreKit({...kit,heavy:0}).heavy,0);assert.equal(restoreKit({version:2}).heavy,0);assert(!validKit({...kit,slots:[0,0]}));assert(!validKit({...kit,mods:[1]}));
-kit.mode='light';kit.slots=[4,7];kit.mods[4]=1;const p=kitProfile(original,kit,4);assert.equal(p.reserve,65);assert.equal(p.spread,.072);assert(Math.abs(p.reload-2.24)<1e-8);assert.equal(p.damage,20);assert.equal(p.cap,30);assert.equal(original.reload,2);assert(kitAllows(kit,3));assert(kitAllows(kit,4));assert(!kitAllows(kit,0));assert(!kitAllows(kit,8));kit.mods[4]=2;assert.equal(kitProfile(original,kit,4).reload,1.6);const restored=restoreKit(kit);restored.slots[0]=0;assert.equal(kit.slots[0],4);
-console.log('PASS versioned kit, old/zero/invalid state, immutable profiles, tradeoffs, ammo cap and two-slot carry');

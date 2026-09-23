@@ -1,6 +1,14 @@
 # NEON ECLIPSE 文档入口
 
 - **当前状态（唯一摘要入口）**：`docs/mcp-project-status-roadmap.md`
+- **冻结批次联合复核 / 快艇视野与 HUD 待修**：`docs/mcp-models-joint-acceptance-2026-09-21.md`
+- **14 件模型联合验收 / 未全绿与复验项**：`docs/mcp-remake-joint-acceptance-2026-09-21.md`
+- **联合验收补充复核 / 反应堆同框 census 与载具截图**：`docs/mcp-joint-coexistence-supplement-2026-09-21.md`
+- **W01–W08 第一人称武器重制 / 14 件队列收尾**：`docs/mcp-weapon-models-v2-2026-09-21.md`
+- **四款海陆空载具 V01–V04 重制 / 同源接入**：`docs/mcp-vehicle-models-v2-2026-09-21.md`
+- **B01 高爆压缩燃料桶 / E01 EMP 脉冲发生器重制**：`docs/mcp-interactive-props-v3-2026-09-21.md`
+- **环境模型四件套 EV01 / EL01 / EV02 / EN01**：`docs/mcp-environment-props-refinement-2026-09-21.md`
+- **模型缺口复核 / 第一批任务道具 M01、A01、T01**：`docs/mcp-model-gap-fill-2026-09-21.md`
 - **短期稳定性计划与人工验收**：`docs/mcp-stability-plan.md`
 - **改动归属、提交与回退边界**：`docs/mcp-change-ownership-2026-09-18.md`
 - **先遣队备份/检查点交付**：`docs/mcp-p3-expedition-backup-recovery.md`

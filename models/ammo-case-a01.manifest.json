@@ -1,0 +1,40 @@
+{
+  "asset": "ammo-case-a01.glb",
+  "id": "A01",
+  "name": "弹药补给箱",
+  "type": "ammo",
+  "version": "props-v1",
+  "units": "metres",
+  "axis": "+Y up, +Z front",
+  "pivot": "pickup bobbing centre",
+  "meshes": 7,
+  "triangles": 982,
+  "materials": 6,
+  "bounds": {
+    "min": [
+      -0.42500001192092896,
+      -0.25,
+      -0.34599998593330383
+    ],
+    "max": [
+      0.42500001192092896,
+      0.26300000000000007,
+      0.346
+    ]
+  },
+  "bytes": 75724,
+  "sha256": "45ddd79425c2e97dc46242a5400503b390d99539cfae93f65dd5e1c0336578bf",
+  "sourceHashes": {
+    "src/mission-prop-models.js": "926c14427e2cb3b138ec4e6364890c8f50be62c6fad09e081ad75bb9be431f5b",
+    "src/supply-symbols.js": "6c7b9a1c656f32be7cba4d5e3b9957c2f6eb8e8c3031e2e09fafb33363800543",
+    "scripts/build-mission-props.mjs": "53e786e6685614f7f99be0f64b371dae4a3c5c5709759bb50aa9ee3e78f84e95"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Shared procedural source, identical authored geometry; no async GLB loading in mission world."
+}

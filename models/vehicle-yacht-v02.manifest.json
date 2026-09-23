@@ -1,0 +1,45 @@
+{
+  "asset": "vehicle-yacht-v02.glb",
+  "id": "V02",
+  "name": "战斧巡逻快艇",
+  "type": "yacht",
+  "version": "vehicles-v2",
+  "units": "metres",
+  "axis": "+Y up, -Z front",
+  "pivot": "original waterline origin",
+  "meshes": 6,
+  "triangles": 2158,
+  "materials": 6,
+  "bounds": {
+    "min": [
+      -2.412410020828247,
+      -0.4399999976158142,
+      -6.300000190734863
+    ],
+    "max": [
+      2.412410020828247,
+      3.2699999809265137,
+      4.96999979019165
+    ]
+  },
+  "bytes": 239596,
+  "sha256": "abcaf379b3078378330326cfd601be3a2b5a0091543e3c85bdb1ff376275c155",
+  "sourceHashes": {
+    "src/vehicle-models.js": "2fe4617cf3e3b764f77cf8ff5128af299499c790608d6d49f834e86e2ade914a",
+    "scripts/build-vehicle-models.mjs": "2f3af084e65e75a063b60ab95857976e306c366993176a68d1dab394b67639bc"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "rig": {
+    "skins": 0,
+    "joints": 0,
+    "jointNames": [],
+    "mode": "static material batches"
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Same authored geometry and rigid joints in driving pages; no network GLB loading. Rotor blur is a separate runtime-only effect."
+}

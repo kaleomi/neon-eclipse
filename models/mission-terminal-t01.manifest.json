@@ -1,0 +1,40 @@
+{
+  "asset": "mission-terminal-t01.glb",
+  "id": "T01",
+  "name": "任务交互终端",
+  "type": "terminal",
+  "version": "props-v1",
+  "units": "metres",
+  "axis": "+Y up, +Z front",
+  "pivot": "floor centre",
+  "meshes": 5,
+  "triangles": 1052,
+  "materials": 5,
+  "bounds": {
+    "min": [
+      -0.8999999761581421,
+      1.490116086078075e-10,
+      -0.5
+    ],
+    "max": [
+      0.8999999761581421,
+      1.399999976158142,
+      0.5009999871253967
+    ]
+  },
+  "bytes": 80212,
+  "sha256": "a0bc8fdfc46fcb472d797a929b809b6feadfb4543015f1be66e78af1a2ca1179",
+  "sourceHashes": {
+    "src/mission-prop-models.js": "926c14427e2cb3b138ec4e6364890c8f50be62c6fad09e081ad75bb9be431f5b",
+    "src/supply-symbols.js": "6c7b9a1c656f32be7cba4d5e3b9957c2f6eb8e8c3031e2e09fafb33363800543",
+    "scripts/build-mission-props.mjs": "53e786e6685614f7f99be0f64b371dae4a3c5c5709759bb50aa9ee3e78f84e95"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Shared procedural source, identical authored geometry; no async GLB loading in mission world."
+}

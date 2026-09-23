@@ -1,0 +1,49 @@
+{
+  "asset": "cover-snowbank-cp09a.glb",
+  "id": "CP09A",
+  "name": "极地雪堆",
+  "theme": "snowbank",
+  "chapter": "09 GLACIER",
+  "source": "POLAR_BANKS[0]",
+  "version": "cover-props-v1",
+  "units": "metres",
+  "axis": "+Y up, +Z front",
+  "pivot": "floor centre (y=0)",
+  "size": [
+    6,
+    1.2,
+    1.4
+  ],
+  "bounds": {
+    "min": [
+      -3.0726001262664795,
+      0,
+      -0.6989648342132568
+    ],
+    "max": [
+      3.0726001262664795,
+      1.2496817111968994,
+      0.6989648342132568
+    ]
+  },
+  "meshes": 2,
+  "triangles": 824,
+  "bytes": 26512,
+  "sha256": "322a90454bf3395ac9db6e832e3fabb3b0889bb23c30afc1a28e0ddf57993633",
+  "sourceHashes": {
+    "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+    "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "budgets": {
+    "triangles": 4000,
+    "meshes": 8
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+}

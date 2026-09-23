@@ -1,0 +1,125 @@
+{
+  "asset": "weapon-volt-w08.glb",
+  "id": "W08",
+  "code": "VT-06",
+  "name": "雷霆电弧霰弹枪",
+  "weaponId": "volt",
+  "weaponIndex": 7,
+  "version": "weapons-v2",
+  "units": "metres",
+  "axis": "+Y up, -Z front",
+  "pivot": "original weapon-local origin; canonical export scale 1",
+  "viewmodelScale": 0.65,
+  "meshes": 8,
+  "triangles": 4362,
+  "materials": 8,
+  "joints": 6,
+  "bounds": {
+    "min": [
+      -0.16300000250339508,
+      -0.34049999713897705,
+      -0.7760000228881836
+    ],
+    "max": [
+      0.16200000047683716,
+      0.20000000298023224,
+      0.4805000126361847
+    ]
+  },
+  "bytes": 803912,
+  "sha256": "c1a3f409bc16c94060c8abd3505a9ba7467b4d8622cf4762827eeca23bc6c7e2",
+  "sourceHashes": {
+    "src/weapon-asset-models.js": "592cad5fc2fa6d18e4405e81156069c39d8b395b3f1a97907bf214ae7663c872",
+    "scripts/build-weapon-models.mjs": "657397532bc1929fbfe5c7f8efc04e96bf675dc96761129de79d0b8bbc326100"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "rig": {
+    "skins": 8,
+    "jointNames": [
+      "W08_Body",
+      "W08_Grip_R",
+      "W08_Bolt",
+      "W08_Magazine",
+      "W08_Support_L",
+      "W08_Muzzle"
+    ],
+    "mode": "rigid one-joint-per-vertex weights",
+    "controls": {
+      "bolt": "W08_Bolt",
+      "magazine": "W08_Magazine"
+    }
+  },
+  "attachments": {
+    "right": {
+      "node": "W08_Grip_R",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.015,
+        -0.16,
+        0.26,
+        1
+      ]
+    },
+    "left": {
+      "node": "W08_Support_L",
+      "matrix": [
+        0.9689124217106447,
+        -0.24740395925452294,
+        0,
+        0,
+        0.24740395925452294,
+        0.9689124217106447,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.02,
+        -0.115,
+        -0.28,
+        1
+      ]
+    },
+    "pumpSupport": null,
+    "muzzle": {
+      "node": "W08_Muzzle",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0.05,
+        -0.775,
+        1
+      ]
+    }
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Same geometry; original .65 viewmodel scale and P01 grip trajectories. No arms, flash, feed-shell or weapon GLB network loading added."
+}

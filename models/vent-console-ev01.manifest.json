@@ -1,0 +1,45 @@
+{
+  "asset": "vent-console-ev01.glb",
+  "id": "EV01",
+  "name": "隔离阀控制台",
+  "type": "vent",
+  "version": "environment-props-v1",
+  "units": "metres",
+  "axis": "+Y up, +Z front",
+  "pivot": "floor centre (y=0)",
+  "meshes": 6,
+  "triangles": 2988,
+  "materials": 6,
+  "bounds": {
+    "min": [
+      -0.296999990940094,
+      1.19209286886246e-09,
+      -0.29499998688697815
+    ],
+    "max": [
+      0.296999990940094,
+      1.090000033378601,
+      0.29500001668930054
+    ]
+  },
+  "bytes": 220472,
+  "sha256": "49c60d3a575579e9d232d6ace3e417d4eb6e6bd60158b7cdd26f7012ead6f3ce",
+  "sourceHashes": {
+    "src/environment-prop-models.js": "bc995ac7f121c341aac625102d6db0a6b3948b47dc00815c01850de71cbbd617",
+    "scripts/build-environment-props.mjs": "e4e585e43d2d92d99882964824908753c0b631db800b0765d65f6e5c2f89feb4"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "parts": {},
+  "budgets": {
+    "triangles": 6000,
+    "meshes": 6,
+    "materials": 7
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Shared authored procedural source. Game does not request these GLBs. Original gameplay proxies and rules are retained."
+}

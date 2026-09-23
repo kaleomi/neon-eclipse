@@ -6,4 +6,18 @@ License: https://creativecommons.org/licenses/by/4.0/
 Game edits: excerpts, loop crossfade, peak normalization, 32 kHz stereo OGG encoding.
 Firearms: Ben Jaszczak, Brian Nelson, Kevin Heras, Matthew Nanney / The Free Firearm Sound Library, CC0.
 Gun mechanisms: Joseph SARDIN / BigSoundBank, CC0.
+Snow footsteps: Corsica_S, extracted by Iwan 'qubodup' Gabovitch / OpenGameArt "42 Snow and Gravel Footsteps", CC0. https://opengameart.org/content/42-snow-and-gravel-footsteps
 Aircraft: Sonniss GameAudioGDC 2019 license. Original source metadata and SHA256 in sources-round2.json.
+
+Current full-length playlist (audio/music):
+'Titan' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au
+https://www.scottbuckley.com.au/library/titan/
+'Last And First Light' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au
+https://www.scottbuckley.com.au/library/last-and-first-light/
+'Legionnaire (Original)' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au
+https://www.scottbuckley.com.au/library/legionnaire/
+'Pathfinder' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au
+https://www.scottbuckley.com.au/library/pathfinder/
+'The Fury' by Scott Buckley - released under CC-BY 4.0. www.scottbuckley.com.au
+https://www.scottbuckley.com.au/library/the-fury/
+Full playlist edits: loudness normalization and 128 kbps MP3 encoding; no excerpts. License: https://creativecommons.org/licenses/by/4.0/

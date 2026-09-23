@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "version": "1.5.2",
+  "assets": 569,
+  "runtimeCounts": {
+    "recorded audio": 33,
+    "recorded music": 5,
+    "GLB models": 49,
+    "map artwork": 13
+  },
+  "exe": "NEON-ECLIPSE-1.5.2-win-x64.exe",
+  "bytes": 130355562,
+  "sha256": "43e8945f905ded98eeb2b5246d47f1e577c17c8b8bd72593f13e1a236b969c04",
+  "scope": "Unpacked app.asar verified against generated offline manifest; portable EXE hashed, with separate smoke test required."
+}

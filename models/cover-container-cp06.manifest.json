@@ -1,0 +1,49 @@
+{
+  "asset": "cover-container-cp06.glb",
+  "id": "CP06",
+  "name": "港口集装箱",
+  "theme": "container",
+  "chapter": "06 LEVIATHAN",
+  "source": "HARBOR_CONTAINERS[2]",
+  "version": "cover-props-v1",
+  "units": "metres",
+  "axis": "+Y up, +Z front",
+  "pivot": "floor centre (y=0)",
+  "size": [
+    4.4,
+    3.4,
+    3
+  ],
+  "bounds": {
+    "min": [
+      -2.319999933242798,
+      -4.768371586472142e-8,
+      -1.5540000200271606
+    ],
+    "max": [
+      2.319999933242798,
+      3.4000000953674316,
+      1.5809999704360962
+    ]
+  },
+  "meshes": 5,
+  "triangles": 452,
+  "bytes": 35868,
+  "sha256": "ecf640ed799dc6893be7bfa9501cf314632b78f1940ef15801ceb449bc0ebac9",
+  "sourceHashes": {
+    "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+    "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "budgets": {
+    "triangles": 4000,
+    "meshes": 8
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+}

@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {selectAchievementGallery,createAchievementNotices,ACHIEVEMENT_NOTICE_KEY,HONORS} from '../src/achievement-gallery.js';
+import {createAchievementStore,createChapterAttempt,CHALLENGE_MAPS,ACHIEVEMENTS,ACHIEVEMENT_KEY} from '../src/chapter-achievements.js';
+const awards=[{id:'blade',map:'roof'},{id:'survivor',map:'harbor'},{id:'counter',map:'harbor'}];
+const before=JSON.stringify(awards);
+assert.equal(selectAchievementGallery(awards).length,5);
+assert.deepEqual(selectAchievementGallery(awards,{status:'unlocked'}).map(a=>a.id),['blade','survivor','counter']);
+assert.equal(selectAchievementGallery(awards,{chapter:'current',currentMap:'reactor',status:'unlocked'}).length,0);
+assert.deepEqual(selectAchievementGallery(awards,{chapter:'roof',status:'unlocked'}).map(a=>a.id),['blade']);
+assert.equal(selectAchievementGallery(awards,{chapter:'roof',status:'locked'}).length,3);
+assert.equal(selectAchievementGallery(awards,{chapter:'harbor',status:'locked'}).length,3);
+for(const map of CHALLENGE_MAPS){
+ const all=selectAchievementGallery(awards,{chapter:map});
+ assert.equal(all.length,map==='harbor'?5:4);
+ for(const row of all)assert.equal(row.unlocked,awards.some(a=>a.id===row.id&&a.map===map));
+}
+assert.equal(JSON.stringify(awards),before);
+for(const a of ACHIEVEMENTS)assert(HONORS[a.id].mark&&HONORS[a.id].title);
+const data=new Map([[ACHIEVEMENT_KEY,JSON.stringify({version:1,awards})]]);
+const storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
+const store=createAchievementStore(storage),prefs=createAchievementNotices(storage),saved=data.get(ACHIEVEMENT_KEY);
+assert(prefs.enabled);assert(prefs.setEnabled(false));assert.equal(data.get(ACHIEVEMENT_NOTICE_KEY),'off');assert.equal(createAchievementNotices(storage).enabled,false);
+assert.equal(data.get(ACHIEVEMENT_KEY),saved);
+assert.equal(createAchievementNotices(null).setEnabled(false),false);
+const blocked=createAchievementNotices({getItem(){throw Error();},setItem(){throw Error();}});
+assert(blocked.enabled);assert.equal(blocked.setEnabled(false),false);assert.equal(blocked.enabled,false);
+const run=createChapterAttempt();run.begin({map:'roof'});run.hit(3,1);const earned=run.finish(true);
+const first=store.unlock(earned,'roof');assert(!first.error);assert(first.added.length>0);
+assert.deepEqual(store.unlock(earned,'roof').added,[],'retries cannot create duplicate notices');
+const corrupt=createAchievementStore({getItem:()=>'{bad',setItem:()=>assert.fail('must not overwrite')});
+assert(corrupt.unlock(['blade'],'roof').error);
+console.log('PASS: chapter/status filters, harbor-only honor, read-only history, cosmetic titles, preference isolation/failure, saved-only deduplication');

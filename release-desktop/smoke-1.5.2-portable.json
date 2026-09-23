@@ -1,0 +1,34 @@
+{
+  "version": "1.5.2",
+  "electron": "44.4.1",
+  "checks": [
+    {
+      "map": "reactor",
+      "menu": true,
+      "canvas": true,
+      "webgl": true,
+      "storage": true,
+      "width": 1424,
+      "height": 861
+    }
+  ],
+  "errors": [
+    "Error: Background music decode smoke check failed\n    at C:\\Users\\Administrator\\AppData\\Local\\Temp\\3JfIALpxiereWLmcCC124oxpaqy\\resources\\app.asar\\main.cjs:45:817"
+  ],
+  "musicSmoke": {
+    "ok": false,
+    "results": [
+      {
+        "path": "./audio/music/last-and-first-light.mp3",
+        "ok": false,
+        "error": 4
+      },
+      {
+        "path": "./audio/samples/music-explore.ogg",
+        "ok": false,
+        "error": 4
+      }
+    ]
+  },
+  "ok": false
+}

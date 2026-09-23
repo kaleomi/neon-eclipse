@@ -1,0 +1,125 @@
+{
+  "asset": "weapon-tempest-w05.glb",
+  "id": "W05",
+  "code": "TM-36",
+  "name": "风暴冲锋枪",
+  "weaponId": "tempest",
+  "weaponIndex": 4,
+  "version": "weapons-v2",
+  "units": "metres",
+  "axis": "+Y up, -Z front",
+  "pivot": "original weapon-local origin; canonical export scale 1",
+  "viewmodelScale": 0.65,
+  "meshes": 7,
+  "triangles": 2716,
+  "materials": 7,
+  "joints": 6,
+  "bounds": {
+    "min": [
+      -0.13500000536441803,
+      -0.39899998903274536,
+      -0.5914999842643738
+    ],
+    "max": [
+      0.13500000536441803,
+      0.21850000321865082,
+      0.4334999918937683
+    ]
+  },
+  "bytes": 505196,
+  "sha256": "c58319ed64b21f58a7d87d1e66bb5c8491b07aa41daec7d0462ab87a68d0e84d",
+  "sourceHashes": {
+    "src/weapon-asset-models.js": "592cad5fc2fa6d18e4405e81156069c39d8b395b3f1a97907bf214ae7663c872",
+    "scripts/build-weapon-models.mjs": "657397532bc1929fbfe5c7f8efc04e96bf675dc96761129de79d0b8bbc326100"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "rig": {
+    "skins": 7,
+    "jointNames": [
+      "W05_Body",
+      "W05_Grip_R",
+      "W05_Bolt",
+      "W05_Magazine",
+      "W05_Support_L",
+      "W05_Muzzle"
+    ],
+    "mode": "rigid one-joint-per-vertex weights",
+    "controls": {
+      "bolt": "W05_Bolt",
+      "magazine": "W05_Magazine"
+    }
+  },
+  "attachments": {
+    "right": {
+      "node": "W05_Grip_R",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.015,
+        -0.16,
+        0.24,
+        1
+      ]
+    },
+    "left": {
+      "node": "W05_Support_L",
+      "matrix": [
+        0.9689124217106447,
+        -0.24740395925452294,
+        0,
+        0,
+        0.24740395925452294,
+        0.9689124217106447,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.02,
+        -0.115,
+        -0.28,
+        1
+      ]
+    },
+    "pumpSupport": null,
+    "muzzle": {
+      "node": "W05_Muzzle",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0.055,
+        -0.594,
+        1
+      ]
+    }
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Same geometry; original .65 viewmodel scale and P01 grip trajectories. No arms, flash, feed-shell or weapon GLB network loading added."
+}

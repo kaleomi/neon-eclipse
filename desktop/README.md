@@ -2,7 +2,7 @@
 
 ## 运行
 
-交付文件：`release-desktop/NEON-ECLIPSE-1.0.0-win-x64.exe`（相对游戏项目根目录）。
+交付文件：`release-desktop/NEON-ECLIPSE-1.4.0-win-x64.exe`（相对游戏项目根目录）。
 
 - 面向 Windows 10/11 x64；需要支持 WebGL 2 的显卡与驱动。
 - 双击 EXE，等待首次解压后进入独立游戏窗口。无需安装 Node.js、Three.js 或其他浏览器。

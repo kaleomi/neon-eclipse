@@ -27,13 +27,14 @@ const listOnly=flag('--list');
 // Helper modules live next to tests but are not tests themselves (imported by other scripts, print nothing).
 const HELPERS=new Set(['test-flight-pilot.mjs']);
 const IMPORT_RE=/from\s+['"]\.\/(test-[a-z0-9-]+\.mjs)['"]/g;
-const THREE_RE=/from\s+['"](three|\.\/node_modules\/three[^'"]*)['"]|import\(['"]three['"]\)/;
+const THREE_RE=/from\s+['"](three|\.\.?\/node_modules\/three[^'"]*)['"]|import\(['"]three['"]\)/;
 
 function discover(){
- const files=readdirSync(root).filter(f=>/^test-[a-z0-9-]+\.mjs$/.test(f)).sort();
+ const testsDir=path.join(root,'tests');
+ const files=readdirSync(testsDir).filter(f=>/^test-[a-z0-9-]+\.mjs$/.test(f)).sort();
  const meta=new Map();
  for(const f of files){
-  const source=readFileSync(path.join(root,f),'utf8');
+  const source=readFileSync(path.join(testsDir,f),'utf8');
   const imports=[...source.matchAll(IMPORT_RE)].map(m=>m[1]);
   meta.set(f,{file:f,browser:/-browser\.mjs$/.test(f),helper:HELPERS.has(f),imports,three:THREE_RE.test(source)});
  }
@@ -58,6 +59,8 @@ function classify(){
 
 function checkTargets(){
  const rootFiles=readdirSync(root).filter(f=>/\.(js|mjs|cjs)$/.test(f)&&!f.startsWith('.'));
+ try{for(const f of readdirSync(path.join(root,'src')))if(/\.js$/.test(f))rootFiles.push(path.join('src',f));}catch{}
+ try{for(const f of readdirSync(path.join(root,'tests')))if(/\.mjs$/.test(f))rootFiles.push(path.join('tests',f));}catch{}
  const desktop=path.join(root,'desktop');
  let desktopFiles=[];
  try{desktopFiles=readdirSync(desktop).filter(f=>/\.cjs$/.test(f)).map(f=>path.join('desktop',f));}catch{}
@@ -136,12 +139,12 @@ async function main(){
  }
  if(wanted.includes('rules')){
   const targets=rules.map(m=>m.file).filter(matches);
-  const results=await pool(targets,t=>run([t],t));
+  const results=await pool(targets,t=>run([path.join('tests',t)],t));
   ok=report('rules',results)&&ok;
  }
  if(wanted.includes('integration')){
   const targets=integration.map(m=>m.file).filter(matches);
-  const results=await pool(targets,t=>run([t],t));
+  const results=await pool(targets,t=>run([path.join('tests',t)],t));
   ok=report('integration',results)&&ok;
  }
  if(wanted.includes('browser')){
@@ -149,7 +152,7 @@ async function main(){
   // Browser tests share one game server and a real Chromium; keep them sequential.
   const env=browserEnv();
   if(!env.VEHICLE_PLAYWRIGHT_MODULE)console.log('browser: VEHICLE_PLAYWRIGHT_MODULE not set and no Playwright install found; tests will fail to import playwright');
-  const results=[];for(const t of targets)results.push(await run([t],t,env));
+  const results=[];for(const t of targets)results.push(await run([path.join('tests',t)],t,env));
   ok=report('browser',results)&&ok;
  }
  console.log(`total wall time ${((Date.now()-wall)/1000).toFixed(1)} s`);

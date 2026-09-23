@@ -25,7 +25,7 @@ export const RECORDED_EVENTS=Object.freeze({
  'vehicle.touchdown':{files:['metal-drop'],gain:.25,duration:.6},
  'player.land':{files:['step-metal-1','step-metal-2'],gain:.4},
  'player.step':{files:['step-metal-1','step-metal-2','step-metal-3'],gain:.3},
- 'player.step.snow':{files:['step-snow-1','step-snow-2','step-snow-3'],gain:.35},
+ 'player.step.snow':{files:['step-snow-1','step-snow-2','step-snow-3'],gain:.24},
  'player.step.gravel':{files:['step-gravel-1','step-gravel-2','step-gravel-3'],gain:.3},
 });
 export function recordedBank(bus){
@@ -82,7 +82,8 @@ export function vehicleRecordingTargets(s){
  const speed=Math.abs(s.speed||0),load=Math.min(1,Math.abs(s.throttle||0));
  const wind={gain:Math.min(.13,speed/250),rate:1};
  if(s.crashed&&s.kind)return {};
- if(s.kind==='rover'){const mix=Math.min(1,speed/18);return {'rover-idle':{gain:.24*(1-mix),rate:1+load*.12},'rover-drive':{gain:.32*mix,rate:.8+mix*.35},wind};}
+ // Keep the recorded engine bed alive at cruising speed; acceleration blends over it.
+ if(s.kind==='rover'){const mix=Math.min(1,speed/18);return {'rover-idle':{gain:.24*(1-.8*mix),rate:1+load*.12},'rover-drive':{gain:.32*mix,rate:.8+mix*.35},wind};}
  if(s.kind==='helicopter'){const rpm=Math.max(0,Math.min(1,s.rpm||0));return {rotor:{gain:rpm*.34,rate:.55+rpm*.45},wind:{gain:wind.gain*rpm}};}
  if(s.kind==='yacht')return {boat:{gain:.22+load*.08,rate:.85+Math.min(1,speed/13)*.35},water:{gain:.09+Math.min(1,speed/13)*.1},wind};
  if(s.kind==='plane'){const mix=Math.max(0,Math.min(1,s.throttle||0));return {'plane-idle':{gain:.2*(1-mix),rate:.85+mix*.3},'plane-flight':{gain:.28*mix,rate:.8+mix*.4},wind};}

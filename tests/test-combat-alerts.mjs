@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {combatAlertModel} from '../src/combat-alerts.js';
+const base={ammo:30,capacity:30,reserve:120,health:100,melee:false,reloading:0};
+assert.deepEqual(combatAlertModel(base),{ammoState:'normal',text:'',lowHealth:false});
+assert.equal(combatAlertModel({...base,ammo:6}).ammoState,'low');
+assert.equal(combatAlertModel({...base,ammo:7}).ammoState,'normal');
+assert.equal(combatAlertModel({...base,ammo:0}).ammoState,'empty');
+assert.equal(combatAlertModel({...base,ammo:0,reserve:0}).ammoState,'exhausted');
+assert.match(combatAlertModel({...base,ammo:0},'J').text,/J 换弹/);
+assert.equal(combatAlertModel({...base,ammo:0,reloading:1}).text,'');
+assert.equal(combatAlertModel({...base,health:25}).lowHealth,true);
+assert.equal(combatAlertModel({...base,health:26}).lowHealth,false);
+assert.equal(combatAlertModel({...base,ammo:Infinity,capacity:Infinity,melee:true}).text,'');
+assert.equal(combatAlertModel({...base,ammo:1,capacity:1}).text,'');
+assert.equal(combatAlertModel({...base,ammo:NaN}).text,'');
+const before=JSON.stringify(base);combatAlertModel(base);assert.equal(JSON.stringify(base),before);
+console.log('PASS 13 alert-state assertions: thresholds, empty/exhausted, melee, reloading, bound key, immutable input');

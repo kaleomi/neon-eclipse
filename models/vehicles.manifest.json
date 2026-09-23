@@ -1,0 +1,205 @@
+{
+  "version": "vehicles-v2",
+  "total": 4,
+  "assets": [
+    {
+      "asset": "vehicle-rover-v01.glb",
+      "id": "V01",
+      "name": "探索漫游车",
+      "type": "rover",
+      "version": "vehicles-v2",
+      "units": "metres",
+      "axis": "+Y up, -Z front",
+      "pivot": "original ground-level chassis origin",
+      "meshes": 6,
+      "triangles": 4486,
+      "materials": 6,
+      "bounds": {
+        "min": [
+          -1.2300000190734863,
+          0.009999997913837433,
+          -2.2019999027252197
+        ],
+        "max": [
+          1.2300000190734863,
+          2.2060000896453857,
+          2.1565001010894775
+        ]
+      },
+      "bytes": 822924,
+      "sha256": "418e19769f4f7d5b039942d0843c2d15fb75ad16cdaf929da9a0ac0970c9de3d",
+      "sourceHashes": {
+        "src/vehicle-models.js": "2fe4617cf3e3b764f77cf8ff5128af299499c790608d6d49f834e86e2ade914a",
+        "scripts/build-vehicle-models.mjs": "2f3af084e65e75a063b60ab95857976e306c366993176a68d1dab394b67639bc"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "rig": {
+        "skins": 6,
+        "joints": 10,
+        "jointNames": [
+          "V01_RigRoot",
+          "V01_Body",
+          "V01_Steer_FL",
+          "V01_Wheel_FL",
+          "V01_Steer_RL",
+          "V01_Wheel_RL",
+          "V01_Steer_FR",
+          "V01_Wheel_FR",
+          "V01_Steer_RR",
+          "V01_Wheel_RR"
+        ],
+        "mode": "rigid one-joint-per-vertex skinning"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Same authored geometry and rigid joints in driving pages; no network GLB loading. Rotor blur is a separate runtime-only effect."
+    },
+    {
+      "asset": "vehicle-yacht-v02.glb",
+      "id": "V02",
+      "name": "战斧巡逻快艇",
+      "type": "yacht",
+      "version": "vehicles-v2",
+      "units": "metres",
+      "axis": "+Y up, -Z front",
+      "pivot": "original waterline origin",
+      "meshes": 6,
+      "triangles": 2158,
+      "materials": 6,
+      "bounds": {
+        "min": [
+          -2.412410020828247,
+          -0.4399999976158142,
+          -6.300000190734863
+        ],
+        "max": [
+          2.412410020828247,
+          3.2699999809265137,
+          4.96999979019165
+        ]
+      },
+      "bytes": 239596,
+      "sha256": "abcaf379b3078378330326cfd601be3a2b5a0091543e3c85bdb1ff376275c155",
+      "sourceHashes": {
+        "src/vehicle-models.js": "2fe4617cf3e3b764f77cf8ff5128af299499c790608d6d49f834e86e2ade914a",
+        "scripts/build-vehicle-models.mjs": "2f3af084e65e75a063b60ab95857976e306c366993176a68d1dab394b67639bc"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "rig": {
+        "skins": 0,
+        "joints": 0,
+        "jointNames": [],
+        "mode": "static material batches"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Same authored geometry and rigid joints in driving pages; no network GLB loading. Rotor blur is a separate runtime-only effect."
+    },
+    {
+      "asset": "vehicle-aircraft-v03.glb",
+      "id": "V03",
+      "name": "高空侦察机",
+      "type": "aircraft",
+      "version": "vehicles-v2",
+      "units": "metres",
+      "axis": "+Y up, -Z front",
+      "pivot": "original fuselage/flight origin",
+      "meshes": 6,
+      "triangles": 2052,
+      "materials": 6,
+      "bounds": {
+        "min": [
+          -6.196000099182129,
+          -1.2999999523162842,
+          -4.460000038146973
+        ],
+        "max": [
+          6.196000099182129,
+          1.8700000047683716,
+          4.090000152587891
+        ]
+      },
+      "bytes": 380772,
+      "sha256": "ac2b2ce5a80cba3883cf8cd2c823bdd68436f7b23344553937f2059e45ae364c",
+      "sourceHashes": {
+        "src/vehicle-models.js": "2fe4617cf3e3b764f77cf8ff5128af299499c790608d6d49f834e86e2ade914a",
+        "scripts/build-vehicle-models.mjs": "2f3af084e65e75a063b60ab95857976e306c366993176a68d1dab394b67639bc"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "rig": {
+        "skins": 6,
+        "joints": 2,
+        "jointNames": [
+          "V03_Airframe",
+          "V03_Propeller"
+        ],
+        "mode": "rigid one-joint-per-vertex skinning"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Same authored geometry and rigid joints in driving pages; no network GLB loading. Rotor blur is a separate runtime-only effect."
+    },
+    {
+      "asset": "vehicle-helicopter-v04.glb",
+      "id": "V04",
+      "name": "战术运输直升机",
+      "type": "helicopter",
+      "version": "vehicles-v2",
+      "units": "metres",
+      "axis": "+Y up, -Z front",
+      "pivot": "original ground-level chassis origin",
+      "meshes": 6,
+      "triangles": 2350,
+      "materials": 6,
+      "bounds": {
+        "min": [
+          -4.619999885559082,
+          0.0010000003967434168,
+          -4.480000019073486
+        ],
+        "max": [
+          4.619999885559082,
+          3.369999885559082,
+          5.71999979019165
+        ]
+      },
+      "bytes": 435272,
+      "sha256": "796541763b3a3909c2c1f14ec69e12cac85505a19c7c589914eaa93c81dfec36",
+      "sourceHashes": {
+        "src/vehicle-models.js": "2fe4617cf3e3b764f77cf8ff5128af299499c790608d6d49f834e86e2ade914a",
+        "scripts/build-vehicle-models.mjs": "2f3af084e65e75a063b60ab95857976e306c366993176a68d1dab394b67639bc"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "rig": {
+        "skins": 6,
+        "joints": 4,
+        "jointNames": [
+          "V04_Attitude",
+          "V04_Rotor",
+          "V04_RotorBlades",
+          "V04_TailRotor"
+        ],
+        "mode": "rigid one-joint-per-vertex skinning"
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Same authored geometry and rigid joints in driving pages; no network GLB loading. Rotor blur is a separate runtime-only effect."
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "file": "titan.mp3",
+    "title": "Titan",
+    "group": "explore",
+    "duration": 175.756735,
+    "author": "Scott Buckley",
+    "source": "https://www.scottbuckley.com.au/library/titan/",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "changes": "Full composition; loudness normalization and 128 kbps MP3 encoding",
+    "sha256": "5610d982ce8f59f3d28d52be54a0e1bc5047f660a4ce1709a4d83a046124e242"
+  },
+  {
+    "file": "last-and-first-light.mp3",
+    "title": "Last And First Light",
+    "group": "explore",
+    "duration": 468.796281,
+    "author": "Scott Buckley",
+    "source": "https://www.scottbuckley.com.au/library/last-and-first-light/",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "changes": "Full composition; loudness normalization and 128 kbps MP3 encoding",
+    "sha256": "020e7164985d75bef92372f2b57b255550f57cc42779afae7e79e8ee56ff0efd"
+  },
+  {
+    "file": "legionnaire.mp3",
+    "title": "Legionnaire (Original)",
+    "group": "combat",
+    "duration": 184.0,
+    "author": "Scott Buckley",
+    "source": "https://www.scottbuckley.com.au/library/legionnaire/",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "changes": "Full composition; loudness normalization and 128 kbps MP3 encoding",
+    "sha256": "efc1b94f4af90f5d83500f252c954f7c872bd7a1fc444a8405e51bf93e437bec"
+  },
+  {
+    "file": "pathfinder.mp3",
+    "title": "Pathfinder",
+    "group": "combat",
+    "duration": 204.321927,
+    "author": "Scott Buckley",
+    "source": "https://www.scottbuckley.com.au/library/pathfinder/",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "changes": "Full composition; loudness normalization and 128 kbps MP3 encoding",
+    "sha256": "ba81063dc66402f349dd25b1c78dfea47a4ad8045adf8b52d32b75913ab0b6df"
+  },
+  {
+    "file": "the-fury.mp3",
+    "title": "The Fury",
+    "group": "combat",
+    "duration": 425.828889,
+    "author": "Scott Buckley",
+    "source": "https://www.scottbuckley.com.au/library/the-fury/",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "changes": "Full composition; loudness normalization and 128 kbps MP3 encoding",
+    "sha256": "ac76a5982a5e43a5f685c012d781ed4383c304139e04fb038a031b4f478c712f"
+  }
+]

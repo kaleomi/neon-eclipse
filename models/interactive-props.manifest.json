@@ -1,0 +1,84 @@
+{
+  "version": "props-v3",
+  "total": 2,
+  "assets": [
+    {
+      "asset": "explosive-barrel-b01.glb",
+      "id": "B01",
+      "name": "高爆压缩燃料桶",
+      "type": "barrel",
+      "version": "props-v3",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "geometric centre (y=0)",
+      "meshes": 5,
+      "triangles": 2492,
+      "materials": 5,
+      "bounds": {
+        "min": [
+          -0.5410000085830688,
+          -0.9049999713897705,
+          -0.546500027179718
+        ],
+        "max": [
+          0.5410000085830688,
+          0.9674999713897705,
+          0.5425000190734863
+        ]
+      },
+      "bytes": 184104,
+      "sha256": "e8fe6bc172406890a264053325e0d8fa41bb5e23a513ad7d4a8264df463da206",
+      "sourceHashes": {
+        "src/interactive-prop-models.js": "b5aebc9eb77805090eabd1c0b8573fc59e44eafd22042d7745153410840dc50e",
+        "scripts/build-interactive-props.mjs": "35d9547167d0ba4a950dac47d69f5bfc8caa344d157a2d4c7b92bf3b9b7041a7"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Shared procedural source, identical authored geometry; zero network GLB loading in game."
+    },
+    {
+      "asset": "emp-node-e01.glb",
+      "id": "E01",
+      "name": "EMP 脉冲发生器",
+      "type": "emp",
+      "version": "props-v3",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "centre of sphere",
+      "meshes": 5,
+      "triangles": 2332,
+      "materials": 5,
+      "bounds": {
+        "min": [
+          -0.11599999666213989,
+          -0.11500000208616257,
+          -0.11800000071525574
+        ],
+        "max": [
+          0.11599999666213989,
+          0.11699999868869781,
+          0.11800000071525574
+        ]
+      },
+      "bytes": 172400,
+      "sha256": "2bbd23a88648601d0b3bcc00b4b1dbd37e02a5350a9ad92b2a7f95cab7436017",
+      "sourceHashes": {
+        "src/interactive-prop-models.js": "b5aebc9eb77805090eabd1c0b8573fc59e44eafd22042d7745153410840dc50e",
+        "scripts/build-interactive-props.mjs": "35d9547167d0ba4a950dac47d69f5bfc8caa344d157a2d4c7b92bf3b9b7041a7"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Shared procedural source, identical authored geometry; zero network GLB loading in game."
+    }
+  ]
+}

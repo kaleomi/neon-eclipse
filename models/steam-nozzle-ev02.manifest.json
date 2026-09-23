@@ -1,0 +1,45 @@
+{
+  "asset": "steam-nozzle-ev02.glb",
+  "id": "EV02",
+  "name": "环形排气喷口",
+  "type": "nozzle",
+  "version": "environment-props-v1",
+  "units": "metres",
+  "axis": "+Y up, +Z front",
+  "pivot": "floor centre (y=0)",
+  "meshes": 5,
+  "triangles": 1896,
+  "materials": 5,
+  "bounds": {
+    "min": [
+      -0.2460000067949295,
+      0,
+      -0.2460000067949295
+    ],
+    "max": [
+      0.2460000067949295,
+      0.48899999260902405,
+      0.2460000067949295
+    ]
+  },
+  "bytes": 140988,
+  "sha256": "6031a546139299cee344f2dfb378aa53c7ee2cec834cc8a9a0e51a4d275a068e",
+  "sourceHashes": {
+    "src/environment-prop-models.js": "bc995ac7f121c341aac625102d6db0a6b3948b47dc00815c01850de71cbbd617",
+    "scripts/build-environment-props.mjs": "e4e585e43d2d92d99882964824908753c0b631db800b0765d65f6e5c2f89feb4"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "parts": {},
+  "budgets": {
+    "triangles": 4000,
+    "meshes": 5,
+    "materials": 7
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Shared authored procedural source. Game does not request these GLBs. Original gameplay proxies and rules are retained."
+}

@@ -1,0 +1,53 @@
+import {createChapterSurfaces} from './chapter-surfaces.js';
+import {createCoverProps} from './cover-props.js';
+import {surfaceMaps} from './environment-surfaces.js';
+import * as T from '../node_modules/three/build/three.module.js';
+import {ROOF_WALLS,ROOF_COVER,ROOF_GATES,ARC_ZONES} from './roof-data.js';
+import {createArcHazards} from './roof-rules.js';
+export function createRoofWorld(scene,renderer,obstacles){
+ scene.background=new T.Color(0x152a40);scene.fog=new T.FogExp2(0x40506a,.006);renderer.toneMappingExposure=1.1;
+ const metal=new T.MeshStandardMaterial({color:0x617786,metalness:.55,roughness:.48}),dark=new T.MeshStandardMaterial({color:0x273a51,metalness:.4,roughness:.55}),pale=new T.MeshStandardMaterial({color:0xa3b8c2,metalness:.55,roughness:.4});
+ const surfaces=createChapterSurfaces(scene,renderer,'roof');surfaces.coat(dark,'wall');
+ const cyan=new T.MeshBasicMaterial({color:0x84edee}),pink=new T.MeshBasicMaterial({color:0xf5a0c5}),amber=new T.MeshBasicMaterial({color:0xffc179});
+ function box(w,h,d,x,y,z,m=metal){const mesh=new T.Mesh(new T.BoxGeometry(w,h,d),m);mesh.position.set(x,y,z);scene.add(mesh);return mesh;}
+ function solid(def,m=metal){const [w,h,d,x,z]=def,mesh=box(w,h,d,x,h/2,z,m);const o={w,h,d,x,z,mesh};obstacles.push(o);return o;}
+ const sky=document.createElement('canvas');sky.width=16;sky.height=256;const sc=sky.getContext('2d'),gradient=sc.createLinearGradient(0,0,0,256);gradient.addColorStop(0,'#071128');gradient.addColorStop(.48,'#263b62');gradient.addColorStop(.7,'#a46f86');gradient.addColorStop(1,'#203a4c');sc.fillStyle=gradient;sc.fillRect(0,0,16,256);const skymap=new T.CanvasTexture(sky);skymap.colorSpace=T.SRGBColorSpace;scene.add(new T.Mesh(new T.SphereGeometry(140,32,16),new T.MeshBasicMaterial({map:skymap,side:T.BackSide,fog:false})));
+ const roofSurface=surfaceMaps('metal',12,12);box(76,.3,76,0,-.2,0,surfaces.coat(new T.MeshStandardMaterial({...roofSurface,color:0x8bafc2,roughness:.68,metalness:.38}),'floor'));
+ const covers=createCoverProps(scene,'relay');
+ ROOF_WALLS.forEach(d=>solid(d,d[1]<2?pale:dark));ROOF_COVER.forEach(d=>{const o=solid(d,d[1]>3?dark:metal);if(o.h<=4.2)covers.dress({w:o.w,h:o.h,d:o.d,x:o.x,z:o.z});});
+ // Permanent ground-level exit from the southeast star fall area; does not bypass the z=22 mission gate.
+ for(const z of [30,34])box(.12,2.8,.12,8.55,1.4,z,cyan);
+ const exitCanvas=document.createElement('canvas');exitCanvas.width=512;exitCanvas.height=128;const exitCtx=exitCanvas.getContext('2d');exitCtx.fillStyle='#122938';exitCtx.fillRect(0,0,512,128);exitCtx.fillStyle='#adffe5';exitCtx.font='bold 38px sans-serif';exitCtx.fillText('返回主路 / EXIT',30,58);exitCtx.font='24px sans-serif';exitCtx.fillText('地面通道 · 南部撤离区',32,100);const exitMap=new T.CanvasTexture(exitCanvas);exitMap.colorSpace=T.SRGBColorSpace;const exitSign=new T.Mesh(new T.PlaneGeometry(3.6,.9),new T.MeshBasicMaterial({map:exitMap,side:T.DoubleSide}));exitSign.rotation.y=Math.PI/2;exitSign.position.set(8.6,3.2,32);scene.add(exitSign);
+ for(let x=10;x<=34;x+=4){box(1.2,.025,.07,x,.04,32,cyan);const arrow=new T.Mesh(new T.ConeGeometry(.2,.5,3),cyan);arrow.rotation.z=Math.PI/2;arrow.position.set(x-.8,.1,32);scene.add(arrow);}
+ // Distant skyline is scenic only; the roof perimeter prevents access to it.
+ for(let i=0;i<32;i++){const angle=i/32*Math.PI*2,r=66+(i%4)*9,x=Math.sin(angle)*r,z=Math.cos(angle)*r,h=12+(i*17%31);box(6, h,7,x,h/2-10,z,dark);for(let y=0;y<h-2;y+=4)box(6.05,.25,7.05,x,y-9,z,i%3?cyan:pink);if(i%4===0)box(.18,5,.18,x,h-7,z,pink);}
+ for(const x of [-37.4,37.4])for(let z=-34;z<=34;z+=8){box(.15,1.8,.15,x,.9,z,pale);box(.18,.12,6,x,1.65,z,cyan);}
+ for(let x=-32;x<=32;x+=8){box(5,.12,.15,x,1.5,-37.4,cyan);box(5,.12,.15,x,1.5,37.4,cyan);}
+ for(const x of [-4,4]){box(.1,.035,13,x,.025,30,cyan);box(.1,.035,24,x,.025,8,pink);}
+ const dishes=[],ceilings=[];
+ function dish(x,z,r,y){
+  ceilings.push({x,z,w:r*2,d:r*2,bottom:y,top:y+r*.84},{x,z,w:1.4,d:1.4,bottom:0,top:y});
+  const g=new T.Group();g.position.set(x,y,z);scene.add(g);const points=[];for(let i=0;i<=12;i++){const n=i/12;points.push(new T.Vector2(r*n,r*n*n*.42));}const bowl=new T.Mesh(new T.LatheGeometry(points,32),new T.MeshStandardMaterial({color:0xa7bed0,metalness:.65,roughness:.35,side:T.DoubleSide}));g.add(bowl);
+  const rim=new T.Mesh(new T.TorusGeometry(r,.055,6,48),cyan);rim.rotation.x=Math.PI/2;rim.position.y=r*.42;g.add(rim);const feed=new T.Mesh(new T.CylinderGeometry(.07,.07,r*.85,8),pale);feed.position.y=r*.38;g.add(feed);const tip=new T.Mesh(new T.SphereGeometry(.18,8,6),pink);tip.position.y=r*.82;g.add(tip);g.rotation.z=.25;dishes.push(g);
+  const stalk=new T.Mesh(new T.CylinderGeometry(.35,.7,y,10),metal);stalk.position.set(x,y/2,z);scene.add(stalk);
+ }
+ dish(-28,16,3,3.3);dish(28,16,3,3.3);dish(22,-22,5.5,4.5);
+ for(const x of [-25,-19]){box(.12,3,.12,x,3,-13.95,cyan);for(let y=1;y<4;y+=.5)box(4,.06,.1,x,y,-13.92,pink);}
+ for(let y=3;y<12;y+=2){box(2,.12,2,0,y,-35,pale);box(.15,2,.15,0,y+1,-35,cyan);}
+ function sign(title,sub,x,y,z,w=9){const canvas=document.createElement('canvas');canvas.width=768;canvas.height=192;const c=canvas.getContext('2d');c.fillStyle='#142739';c.fillRect(0,0,768,192);c.fillStyle='#91eced';c.fillRect(0,0,10,192);c.font='bold 54px sans-serif';c.fillText(title,34,82);c.fillStyle='#efb4ca';c.font='22px monospace';c.fillText(sub,34,142);const map=new T.CanvasTexture(canvas);map.colorSpace=T.SRGBColorSpace;const p=new T.Mesh(new T.PlaneGeometry(w,w/4),new T.MeshBasicMaterial({map,side:T.DoubleSide}));p.position.set(x,y,z);scene.add(p);}
+ sign('天穹通讯枢纽','03 / SKYLINK ARRAY',0,4,22.5,11);sign('双中继 / 北部控制区','WEST + EAST RELAYS / UPLINK',0,4,-7.5,12);sign('SERVER / CONTROL','SKYLINK ACCESS',-22,3.2,-13.9,9);sign('UPLINK','BROADCAST WINDOW',0,5,-35,7);
+ const lift=new T.Mesh(new T.RingGeometry(3.7,3.9,48),new T.MeshBasicMaterial({color:0xa0efef,side:T.DoubleSide}));lift.rotation.x=-Math.PI/2;lift.position.set(0,.045,32);scene.add(lift);
+ const gates=ROOF_GATES.map(g=>{const o=solid([g.w,3,g.d,g.x,g.z],dark);for(const y of [-1,-.5,0,.5,1]){const line=new T.Mesh(new T.BoxGeometry(g.w-.1,.05,g.d+.03),cyan);line.position.y=y;o.mesh.add(line);}return {...g,o};});
+ const hazards=createArcHazards(ARC_ZONES,{randomize:true,count:2}),pads=ARC_ZONES.map(z=>{const p=new T.Mesh(new T.PlaneGeometry(z.w,z.d),new T.MeshBasicMaterial({color:0x426379,transparent:true,opacity:.38,side:T.DoubleSide,depthWrite:false}));p.rotation.x=-Math.PI/2;p.position.set(z.x,.06,z.z);scene.add(p);for(const x of [-1,1])box(.07,.08,z.d,z.x+x*z.w/2,.08,z.z,amber);return p;});
+ const notice=document.createElement('div');notice.className='hazard-notice';notice.hidden=true;document.body.append(notice);let stage=-1,bossActive=false;
+ function setStage(index){if(index===stage)return false;stage=index;hazards.reset();for(const g of gates){const closed=index<g.openAt;g.o.mesh.visible=closed;const at=obstacles.indexOf(g.o);if(closed&&at<0)obstacles.push(g.o);if(!closed&&at>=0)obstacles.splice(at,1);}return true;}
+ const bursts=[];
+ function burst(position,color,count=10){if(bursts.length>=24)return;const geometry=new T.BufferGeometry();geometry.setAttribute('position',new T.BufferAttribute(new Float32Array(count*3),3));const mesh=new T.Points(geometry,new T.PointsMaterial({color,size:.08,transparent:true,depthWrite:false}));mesh.position.copy(position);scene.add(mesh);bursts.push({mesh,life:.5,velocity:Array.from({length:count},()=>new T.Vector3((Math.random()-.5)*4,Math.random()*3,(Math.random()-.5)*4))});}
+ function clear(){for(const b of bursts){scene.remove(b.mesh);b.mesh.geometry.dispose();b.mesh.material.dispose();}bursts.length=0;hazards.reset();}
+ function update(dt,time){dishes.forEach((d,i)=>{d.rotation.y=Math.sin(time*.14+i)*.3;});notice.hidden=bossActive||stage<2||stage>=4;notice.dataset.phase=hazards.phase;notice.textContent=hazards.phase==='live'?'高压放电 / 离开红色地带':hazards.phase==='warning'?'放电预警 / 准备避开黄色地带':'高压休止 / 下一轮随机选两区';for(const [i,p] of pads.entries()){const selected=!bossActive&&stage>=2&&stage<4&&hazards.activeIndices.includes(i);p.material.color.setHex(!selected?0x36576b:hazards.phase==='live'?0xff4568:hazards.phase==='warning'?0xffc16c:0x36576b);p.material.opacity=selected&&hazards.phase!=='safe'?.66:.15;}
+  for(let i=bursts.length-1;i>=0;i--){const b=bursts[i];b.life-=dt;const a=b.mesh.geometry.attributes.position;b.velocity.forEach((v,j)=>{v.y-=dt*6;a.setXYZ(j,a.getX(j)+v.x*dt,a.getY(j)+v.y*dt,a.getZ(j)+v.z*dt)});a.needsUpdate=true;b.mesh.material.opacity=Math.max(0,b.life/.5);if(b.life<=0){scene.remove(b.mesh);b.mesh.geometry.dispose();b.mesh.material.dispose();bursts.splice(i,1);}}
+ }
+ covers.commit();
+ scene.updateMatrixWorld(true);const batches=new Map();for(const m of [...scene.children]){if(!m.isMesh||m.geometry.type!=='BoxGeometry'||gates.some(g=>g.o.mesh===m))continue;if(!batches.has(m.material))batches.set(m.material,[]);batches.get(m.material).push(m);}for(const [mat,meshes]of batches){if(meshes.length<3)continue;const b=new T.InstancedMesh(new T.BoxGeometry(1,1,1),mat,meshes.length);meshes.forEach((m,i)=>{const d=m.geometry.parameters;b.setMatrixAt(i,m.matrixWorld.clone().multiply(new T.Matrix4().makeScale(d.width,d.height,d.depth)));m.visible=false});b.computeBoundingSphere();scene.add(b);}
+ setStage(0);return {ceilings,update,clear,burst,setStage,hazards,setBossActive:active=>{bossActive=active;if(active)hazards.reset();},hazardDamage:(dt,p)=>hazards.tick(dt,p,!bossActive&&stage>=2&&stage<4),setQuality:high=>{surfaces.quality(high);scene.fog.density=high?.006:.012;}};
+}

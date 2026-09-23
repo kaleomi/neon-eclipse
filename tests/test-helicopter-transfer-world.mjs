@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import * as T from 'three';
+import {createHelicopter,startHelicopter} from '../src/helicopter-rules.js';
+import {HELICOPTER_TRANSFER,createHelicopterTransfer,setHelicopterEngine,exitHelicopter,helicopterDoors} from '../src/helicopter-transfer.js';
+import {createHelicopterHandover,HANDOVER_TERMINAL} from '../src/helicopter-handover.js';
+import {createHelicopterTransferWorld} from '../src/helicopter-transfer-world.js';
+import {disposeHelicopterObject} from '../src/helicopter-world.js';
+const s=createHelicopter(),t=createHelicopterTransfer(s),task=createHelicopterHandover(),world=createHelicopterTransferWorld();
+startHelicopter(s);world.update(t,s,task);assert(!world.pilot.visible);assert(!world.terminal.visible);
+setHelicopterEngine(t,s,false);exitHelicopter(t,s);task.stage=1;world.update(t,s,task);world.root.updateMatrixWorld(true);
+assert(world.pilot.visible&&world.terminal.visible);assert.equal(world.terminal.position.x,HANDOVER_TERMINAL.x);
+let vertices=0;world.pilot.traverse(mesh=>{if(!mesh.isMesh)return;const a=mesh.geometry.attributes.position;for(let i=0;i<a.count;i++){
+  const p=new T.Vector3().fromBufferAttribute(a,i).applyMatrix4(mesh.matrixWorld);vertices++;
+  assert(Math.hypot(p.x-t.walker.x,p.z-t.walker.z)<=HELICOPTER_TRANSFER.radius+.001);
+  assert(p.y>=0&&p.y<=HELICOPTER_TRANSFER.height+.001);
+}});
+s.yaw=Math.PI/2;world.update(t,s,task);helicopterDoors(s).forEach((p,i)=>{assert.equal(world.doors[i].position.x,p.x);assert.equal(world.doors[i].position.z,p.z);});
+s.grounded=false;task.stage=2;world.update(t,s,task);assert(world.doors.every(d=>!d.visible));assert(!world.terminal.visible);
+let disposed=0;const geometries=new Set(),materials=new Set();world.root.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)materials.add(o.material);});for(const g of geometries)g.addEventListener('dispose',()=>disposed++);
+disposeHelicopterObject(world.root);assert.equal(disposed,geometries.size);
+console.log(`PASS H-02 real Three.js: ${vertices} pilot vertices inside collision envelope; doors/terminal visibility and resource disposal (${geometries.size} geometries, ${materials.size} materials). No WebGL/browser.`);

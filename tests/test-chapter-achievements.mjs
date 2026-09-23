@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {createChapterAttempt,createAchievementStore,ACHIEVEMENT_KEY} from '../src/chapter-achievements.js';
+import {createHUDMotion} from '../src/hud-motion.js';
+const start=(options={})=>{const a=createChapterAttempt();a.begin({map:'harbor',...options});return a;};
+let a=start();a.hit(3,18);assert.deepEqual(a.finish(true),['blade','untouched','survivor']);assert.deepEqual(a.finish(true),[],'idempotent finish');
+a=start();a.shot(0);a.hit(3,18);assert(!a.finish(true).includes('blade'),'one missed shot disqualifies');
+a=start();a.shot(3);a.hit(3,18);assert(a.finish(true).includes('blade'),'blade does not count ammunition');
+a=start();a.hit(3,18);a.hurt(1);assert(!a.finish(true).includes('untouched'),'damage cannot be healed away');
+a=start();a.hit(3,18);a.die();assert.deepEqual(a.finish(true),[],'one life');
+for(const options of [{snapshot:true},{stage:4},{replay:true},{map:'bad'}]){a=start(options);a.hit(3,18);assert.deepEqual(a.finish(true),[]);}
+a=start();a.hit(3,2);assert.deepEqual(a.finish(false),[],'training stage is not chapter completion');
+a=start();[0,1,2,3].forEach(i=>a.hit(i,1));for(let i=0;i<3;i++)a.counter();assert(a.finish(true).includes('arsenal'));assert.equal(a.state.counter,3);const copy=a.state;copy.kills[0]=900;assert.notEqual(a.state.kills[0],900);
+a=start();a.counter();a.counter();assert(!a.finish(true).includes('counter'));a=start();for(let i=0;i<3;i++)a.counter();assert(a.finish(true).includes('counter'));
+a=start({map:'reactor'});for(let i=0;i<3;i++)a.counter();assert(!a.finish(true).includes('counter'));
+const saved=new Map([['neon-eclipse.stars.v1','legacy-stars'],['neon-eclipse.journey.v4','legacy-journey']]),storage={getItem:k=>saved.get(k)??null,setItem:(k,v)=>saved.set(k,v)},s=createAchievementStore(storage),other=createAchievementStore(storage);
+assert.equal(s.unlock(['blade','survivor'],'harbor').added.length,2);assert.equal(other.unlock(['blade'],'reactor').added.length,1);assert.equal(s.read().awards.length,3);assert.equal(s.unlock(['blade'],'harbor').added.length,0);assert.equal(saved.get('neon-eclipse.stars.v1'),'legacy-stars');assert.equal(saved.get('neon-eclipse.journey.v4'),'legacy-journey');
+const blocked=createAchievementStore({getItem:k=>storage.getItem(k),setItem(){throw Error('quota');}});assert(blocked.unlock(['untouched'],'harbor').error);assert.equal(s.read().awards.length,3);
+saved.set(ACHIEVEMENT_KEY,'bad');assert(s.unlock(['blade'],'harbor').error);assert.equal(saved.get(ACHIEVEMENT_KEY),'bad');assert(createAchievementStore(null).read().error);
+const motion=createHUDMotion();motion.step(.016,0,0,true,2);let p;for(let i=1;i<30;i++)p=motion.step(.016,i*.1,i*.05,true,2);assert(Math.abs(p.x)>5&&Math.abs(p.x)<=10);assert(Math.abs(p.y)<=6);p=motion.step(.016,3,1.5,false,3);assert.deepEqual(p,{x:0,y:0});
+console.log('PASS: chapter-only one-life blade/firearm miss/death/load/training disqualification, no-heal damage tracking, arsenal/counter rules, immutable/idempotent results; independent merged awards, old saves untouched, quota/corrupt storage; stronger bounded HUD motion');

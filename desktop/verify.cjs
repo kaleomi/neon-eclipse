@@ -5,7 +5,15 @@ const manifest=JSON.parse(read('web/build-manifest.json')),pkg=JSON.parse(read('
 if(pkg.version!==require('./package.json').version||manifest.version!==pkg.version)throw Error('Version mismatch');
 if(sha(read('main.cjs'))!==manifest.mainSha256)throw Error('Main process hash mismatch');
 for(const [name,hash] of Object.entries(manifest.assets))if(sha(read('web/'+name))!==hash)throw Error('Offline asset hash mismatch: '+name);
+const runtimeRequirements=[
+ ['recorded audio',/^audio\/samples\/.+\.ogg$/i,33],
+ ['recorded music',/^audio\/music\/.+\.mp3$/i,5],
+ ['GLB models',/^models\/.+\.glb$/i,49],
+ ['map artwork',/^maps\/art\/.+\.jpg$/i,13]
+];
+const runtimeCounts=Object.fromEntries(runtimeRequirements.map(([label,pattern])=>[label,Object.keys(manifest.assets).filter(name=>pattern.test(name)).length]));
+for(const [label,,minimum] of runtimeRequirements)if(runtimeCounts[label]<minimum)throw Error(`Incomplete ${label}: ${runtimeCounts[label]} < ${minimum}`);
 for(const name of ['vehicle.html','flight-mission.js','flight-mission-ui.js','flight-mission-world.js','naval-mission.js','recon-rules.js','recon-world.js','flight-records-model.js','flight-records-store.js','flight-records-ui.js'])if(!manifest.assets[name])throw Error('Missing new feature: '+name);
 const executable=path.resolve(__dirname,'../release-desktop',require('./package.json').build.portable.artifactName);
-const report={ok:true,version:pkg.version,assets:Object.keys(manifest.assets).length,exe:path.basename(executable),bytes:fs.statSync(executable).size,sha256:sha(fs.readFileSync(executable)),scope:'Unpacked app.asar verified against generated offline manifest; portable EXE hashed, with separate smoke test required.'};
+const report={ok:true,version:pkg.version,assets:Object.keys(manifest.assets).length,runtimeCounts,exe:path.basename(executable),bytes:fs.statSync(executable).size,sha256:sha(fs.readFileSync(executable)),scope:'Unpacked app.asar verified against generated offline manifest; portable EXE hashed, with separate smoke test required.'};
 fs.writeFileSync(path.resolve(__dirname,'../release-desktop/release-'+pkg.version+'.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));

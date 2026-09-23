@@ -1,2 +1,2 @@
-import {weaponName} from '../weapon-display.js';
+import {weaponName} from '../src/weapon-display.js';
 export default Object.freeze({id:'railspike',category:'secondary',combat:Object.freeze({name:weaponName(6),cap:1,reserve:18,delay:.55,damage:90,pellets:1,spread:.0015,range:90,reload:1.9,automatic:false,kick:.038,headMultiplier:1.75,falloffStart:55,minimumDamage:.7,chargeDuration:.8,penetrationTargets:3})});

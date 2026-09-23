@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {readArchive} from '../src/archive-reader.js';
+assert.equal((await readArchive({factory:null})).code,'unavailable');
+assert.equal((await readArchive({factory:{open(){throw Error('denied');}}})).code,'denied');
+assert.equal((await readArchive({factory:{open(){return {}; }},timeout:5})).code,'timeout');
+let aborted=0,closed=0,mode;
+const missing={open(){const req={transaction:{abort(){aborted++;}}};queueMicrotask(()=>req.onupgradeneeded());return req;}};
+assert.equal((await readArchive({factory:missing})).code,'empty');assert.equal(aborted,1);
+const factory={open(){const req={};queueMicrotask(()=>{req.result={version:1,objectStoreNames:{contains:()=>true},close(){closed++;},transaction(name,m){mode=m;const tx={objectStore(){return {getAll(key,limit){assert.equal(limit,2001);const q={};queueMicrotask(()=>{q.result=[{id:'fixture'}];q.onsuccess();tx.oncomplete();});return q;}};}};return tx;}};req.onsuccess();});return req;}};
+const r=await readArchive({factory});assert(r.ok);assert.equal(mode,'readonly');assert.equal(closed,1);
+const future={open(){const req={};queueMicrotask(()=>{req.result={version:2,close(){closed++;}};req.onsuccess();});return req;}};
+assert.equal((await readArchive({factory:future})).code,'unsupported');assert.equal(closed,2);
+console.log('PASS no store creation, readonly transaction, unavailable/denied/timeout/future and connection closure');

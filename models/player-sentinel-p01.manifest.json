@@ -1,0 +1,31 @@
+{
+  "asset": "player-sentinel-p01.glb",
+  "id": "P01_BODY",
+  "name": "SENTINEL_FULLBODY",
+  "label": "哨兵全身战术装甲",
+  "version": "p01-body-v1",
+  "units": "metres",
+  "axis": "+Y up, -Z front",
+  "meshes": 64,
+  "triangles": 5340,
+  "materials": 11,
+  "bounds": {
+    "min": [
+      -0.5043669276237488,
+      -0.12999999955296518,
+      -0.1850000023841858
+    ],
+    "max": [
+      0.5043669276237488,
+      1.562555195093155,
+      0.25049999356269836
+    ]
+  },
+  "bytes": 558780,
+  "sha256": "f846d718a90a6ac87dab65ca1121a95976a1b1432966e8bacc20e278eae1f55c",
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Full third-person / vehicle driver / shadow armor assembly, continuous with P01 first-person arms."
+}

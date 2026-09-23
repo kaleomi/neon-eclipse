@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>NEON ECLIPSE · 资产渲染</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#10191c;color:#d8e5df;font:14px system-ui}#stage{width:1200px;height:800px;position:relative}canvas{width:100%;height:100%;display:block}
+</style><script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script></head>
+<body><div id="stage"></div>
+<script type="module">
+import * as T from './node_modules/three/build/three.module.js';
+import {GLTFLoader} from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+
+const stage = document.getElementById('stage');
+const scene = new T.Scene(); scene.background = new T.Color(0x10191c);
+const renderer = new T.WebGLRenderer({antialias:true, preserveDrawingBuffer:true});
+renderer.setSize(1200, 800);
+renderer.toneMapping = T.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.6;
+stage.appendChild(renderer.domElement);
+
+const camera = new T.PerspectiveCamera(34, 1200/800, 0.01, 100);
+scene.add(new T.HemisphereLight(0xd5ebef, 0x39433a, 3));
+for (const [color, intensity, pos] of [[0xffead1, 4, [3, 5, 4]], [0xa5d9ff, 3, [-3, 2, -2]], [0xe5ffe3, 2, [0, 3, -4]]]) {
+  const light = new T.DirectionalLight(color, intensity);
+  light.position.set(...pos);
+  scene.add(light);
+}
+
+const plinth = new T.Mesh(new T.CylinderGeometry(2.5, 2.6, 0.1, 64), new T.MeshStandardMaterial({color: 0x25332e, metalness: .4, roughness: .65}));
+plinth.position.y = -0.05; scene.add(plinth);
+const grid = new T.GridHelper(14, 28, 0x405449, 0x24352e); grid.position.y = -0.09; scene.add(grid);
+
+const holder = new T.Group(); scene.add(holder);
+window.__renderer = renderer; window.__scene = scene; window.__camera = camera; window.__holder = holder;
+
+window.loadModel = async function(glbPath, camPos = [2.4, 1.65, 3.3], targetPos = [0, 0.22, 0]) {
+  while(holder.children.length > 0) holder.remove(holder.children[0]);
+  const gltf = await new GLTFLoader().loadAsync(glbPath);
+  holder.add(gltf.scene);
+  camera.position.set(...camPos);
+  camera.lookAt(...targetPos);
+  renderer.render(scene, camera);
+  window.__loaded = true;
+};
+window.__ready = true;
+</script></body></html>

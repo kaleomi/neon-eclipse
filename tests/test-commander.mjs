@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {COMMANDER,commanderCanSupport,refreshCommanderSupport,commandedCooldownRate,clearCommanderSupport} from '../src/commander-rules.js';
+import {ENEMY_TYPES,roleForStage} from '../src/enemy-rules.js';
+const actor=(type,x=0,y=0,z=0)=>({type,hp:100,group:{position:{x,y,z}}});
+const leader=actor('commander'),ally=actor('assault',12),other=actor('commander',1),boss={...actor('warden'),boss:true};
+assert(commanderCanSupport(leader,ally));ally.group.position.x=12.01;assert(!commanderCanSupport(leader,ally));ally.group.position.x=3;ally.group.position.y=1.21;assert(!commanderCanSupport(leader,ally));ally.group.position.y=1.2;assert(commanderCanSupport(leader,ally));ally.group.position.y=0;
+for(const type of ['commander','warden','swarmDrone','drone','sentry','hound'])assert(!commanderCanSupport(leader,actor(type)));
+for(const type of ['assault','ranged','heavy','shield','sniper','stalker','engineer'])assert(commanderCanSupport(leader,actor(type)));
+assert(!commanderCanSupport(leader,boss));assert(!commanderCanSupport({...leader,hp:0},ally));assert(!commanderCanSupport(leader,{...ally,hp:0}));assert(!commanderCanSupport(leader,{...ally,engineerBuilding:true}));
+refreshCommanderSupport([leader,other,ally,boss],()=>true);assert.equal(ally.commanderSource,other);assert.equal(commandedCooldownRate(ally),1.25,'never stacks');assert.equal(commandedCooldownRate(other),1);assert.equal(commandedCooldownRate(boss),1);assert.equal(other.commanderRecipients,1);
+refreshCommanderSupport([leader,other,ally],()=>false);assert.equal(commandedCooldownRate(ally),1);refreshCommanderSupport([leader,ally],()=>true);leader.hp=0;refreshCommanderSupport([leader,ally],()=>true);assert.equal(commandedCooldownRate(ally),1);leader.hp=100;refreshCommanderSupport([leader,ally],()=>true);clearCommanderSupport([leader,ally]);assert.equal(ally.commanderSource,null);
+assert.equal(ENEMY_TYPES.commander.attack.charge,1);assert.equal(ENEMY_TYPES.assault.attack.charge,.45);assert.equal(roleForStage({id:'extract'},1),'commander');assert.equal(roleForStage({id:'extract',roles:['ranged']},1),'ranged','other chapters explicit squads unchanged');assert.equal(COMMANDER.cooldownRate,1.25);
+console.log('PASS commander live/role/radius/layer/LOS gates, nearest single source, no boss/mechanical/self/stacking, kill/cover/clear removal, unchanged warnings and chapter-specific role selection');

@@ -1,0 +1,48 @@
+{
+  "asset": "energy-node-en01.glb",
+  "id": "EN01",
+  "name": "悬浮储能节点",
+  "type": "node",
+  "version": "environment-props-v1",
+  "units": "metres",
+  "axis": "+Y up, +Z front",
+  "pivot": "floor centre (y=0)",
+  "meshes": 12,
+  "triangles": 6424,
+  "materials": 7,
+  "bounds": {
+    "min": [
+      -0.675000011920929,
+      0,
+      -0.675000011920929
+    ],
+    "max": [
+      0.675000011920929,
+      1.8495000004768372,
+      0.675000011920929
+    ]
+  },
+  "bytes": 472424,
+  "sha256": "6ec1e910379897fa9ce8da08733ae890223372ed3cbdd4b1ecd93762e89a7cff",
+  "sourceHashes": {
+    "src/environment-prop-models.js": "bc995ac7f121c341aac625102d6db0a6b3948b47dc00815c01850de71cbbd617",
+    "scripts/build-environment-props.mjs": "e4e585e43d2d92d99882964824908753c0b631db800b0765d65f6e5c2f89feb4"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "parts": {
+    "core": "EN01_Core, pivot y=1.5",
+    "base": "EN01_Base, pivot y=0"
+  },
+  "budgets": {
+    "triangles": 7000,
+    "meshes": 12,
+    "materials": 7
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Shared authored procedural source. Game does not request these GLBs. Original gameplay proxies and rules are retained."
+}

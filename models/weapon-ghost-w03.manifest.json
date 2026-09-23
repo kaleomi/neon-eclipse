@@ -1,0 +1,125 @@
+{
+  "asset": "weapon-ghost-w03.glb",
+  "id": "W03",
+  "code": "GH-15",
+  "name": "幽灵消音手枪",
+  "weaponId": "ghost",
+  "weaponIndex": 2,
+  "version": "weapons-v2",
+  "units": "metres",
+  "axis": "+Y up, -Z front",
+  "pivot": "original weapon-local origin; canonical export scale 1",
+  "viewmodelScale": 0.65,
+  "meshes": 7,
+  "triangles": 3260,
+  "materials": 7,
+  "joints": 6,
+  "bounds": {
+    "min": [
+      -0.10649999976158142,
+      -0.34950000047683716,
+      -0.5839999914169312
+    ],
+    "max": [
+      0.10649999976158142,
+      0.1979999989271164,
+      0.28990450501441956
+    ]
+  },
+  "bytes": 602716,
+  "sha256": "240cf7cc11c82b2f2fde39ffc96dbb1ca88b6983c8982dbbeb8534264615b7b0",
+  "sourceHashes": {
+    "src/weapon-asset-models.js": "592cad5fc2fa6d18e4405e81156069c39d8b395b3f1a97907bf214ae7663c872",
+    "scripts/build-weapon-models.mjs": "657397532bc1929fbfe5c7f8efc04e96bf675dc96761129de79d0b8bbc326100"
+  },
+  "textures": 0,
+  "animations": [],
+  "externalDependencies": 0,
+  "rig": {
+    "skins": 7,
+    "jointNames": [
+      "W03_Body",
+      "W03_Grip_R",
+      "W03_Bolt",
+      "W03_Magazine",
+      "W03_Support_L",
+      "W03_Muzzle"
+    ],
+    "mode": "rigid one-joint-per-vertex weights",
+    "controls": {
+      "bolt": "W03_Bolt",
+      "magazine": "W03_Magazine"
+    }
+  },
+  "attachments": {
+    "right": {
+      "node": "W03_Grip_R",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0.015,
+        -0.16,
+        0.26,
+        1
+      ]
+    },
+    "left": {
+      "node": "W03_Support_L",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        -0.15,
+        -0.18,
+        0.22,
+        1
+      ]
+    },
+    "pumpSupport": null,
+    "muzzle": {
+      "node": "W03_Muzzle",
+      "matrix": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0.08,
+        -0.584,
+        1
+      ]
+    }
+  },
+  "generator": {
+    "three": "186",
+    "node": "24.15.0"
+  },
+  "runtime": "Same geometry; original .65 viewmodel scale and P01 grip trajectories. No arms, flash, feed-shell or weapon GLB network loading added."
+}

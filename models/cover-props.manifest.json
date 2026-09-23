@@ -1,0 +1,398 @@
+{
+  "version": "cover-props-v1",
+  "total": 8,
+  "assets": [
+    {
+      "asset": "cover-crate-cp02.glb",
+      "id": "CP02",
+      "name": "车站货箱",
+      "theme": "crate",
+      "chapter": "02 SWITCHYARD",
+      "source": "STATION_COVER[0]",
+      "version": "cover-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "size": [
+        2,
+        3.8,
+        2
+      ],
+      "bounds": {
+        "min": [
+          -1.0252000093460083,
+          -0.006000018212944269,
+          -1.0252000093460083
+        ],
+        "max": [
+          1.0640000104904175,
+          3.805999994277954,
+          1.0252000093460083
+        ]
+      },
+      "meshes": 5,
+      "triangles": 252,
+      "bytes": 23420,
+      "sha256": "93e26a3510168a02fa737a288a20bb7aadda509dab77e4c37a6fffffb63677b2",
+      "sourceHashes": {
+        "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+        "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "budgets": {
+        "triangles": 4000,
+        "meshes": 8
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+    },
+    {
+      "asset": "cover-relay-cp03.glb",
+      "id": "CP03",
+      "name": "天穹中继柜",
+      "theme": "relay",
+      "chapter": "03 OVERSEER",
+      "source": "ROOF_COVER[3]",
+      "version": "cover-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "size": [
+        5,
+        2.4,
+        3
+      ],
+      "bounds": {
+        "min": [
+          -2.5209999084472656,
+          -4.768371586472142e-8,
+          -1.5119999647140503
+        ],
+        "max": [
+          2.5209999084472656,
+          3.5,
+          1.5440000295639038
+        ]
+      },
+      "meshes": 5,
+      "triangles": 200,
+      "bytes": 19352,
+      "sha256": "da5b7897f46c51bdd301140dc0166034e6bacbc4d1baed98d79cf25349fcec34",
+      "sourceHashes": {
+        "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+        "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "budgets": {
+        "triangles": 4000,
+        "meshes": 8
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+    },
+    {
+      "asset": "cover-locker-cp04.glb",
+      "id": "CP04",
+      "name": "中枢服务器柜",
+      "theme": "locker",
+      "chapter": "04 ELEVATOR",
+      "source": "TOWER_WALLS[6]",
+      "version": "cover-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "size": [
+        2,
+        4,
+        2
+      ],
+      "bounds": {
+        "min": [
+          -1.0180000066757202,
+          0,
+          -1.0449999570846558
+        ],
+        "max": [
+          1.0180000066757202,
+          4,
+          1.0449999570846558
+        ]
+      },
+      "meshes": 7,
+      "triangles": 264,
+      "bytes": 26424,
+      "sha256": "8f1ffd231aeff90c1d981b7f3f9e1a551171fd6b1e3d73fc494b3337a0458fb7",
+      "sourceHashes": {
+        "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+        "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "budgets": {
+        "triangles": 4000,
+        "meshes": 8
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+    },
+    {
+      "asset": "cover-container-cp06.glb",
+      "id": "CP06",
+      "name": "港口集装箱",
+      "theme": "container",
+      "chapter": "06 LEVIATHAN",
+      "source": "HARBOR_CONTAINERS[2]",
+      "version": "cover-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "size": [
+        4.4,
+        3.4,
+        3
+      ],
+      "bounds": {
+        "min": [
+          -2.319999933242798,
+          -4.768371586472142e-8,
+          -1.5540000200271606
+        ],
+        "max": [
+          2.319999933242798,
+          3.4000000953674316,
+          1.5809999704360962
+        ]
+      },
+      "meshes": 5,
+      "triangles": 452,
+      "bytes": 35868,
+      "sha256": "ecf640ed799dc6893be7bfa9501cf314632b78f1940ef15801ceb449bc0ebac9",
+      "sourceHashes": {
+        "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+        "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "budgets": {
+        "triangles": 4000,
+        "meshes": 8
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+    },
+    {
+      "asset": "cover-pod-cp07.glb",
+      "id": "CP07",
+      "name": "轨道配重舱",
+      "theme": "pod",
+      "chapter": "07 TETHER",
+      "source": "ORBITAL_COVER[0]",
+      "version": "cover-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "size": [
+        3,
+        2.5,
+        3
+      ],
+      "bounds": {
+        "min": [
+          -1.5180000066757202,
+          0,
+          -1.5180000066757202
+        ],
+        "max": [
+          1.5180000066757202,
+          2.640000104904175,
+          1.5390000343322754
+        ]
+      },
+      "meshes": 5,
+      "triangles": 284,
+      "bytes": 24032,
+      "sha256": "de9383ea2f4eb874efa9416607e47cf4b628eb1f1a0279cd954a065709e795c9",
+      "sourceHashes": {
+        "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+        "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "budgets": {
+        "triangles": 4000,
+        "meshes": 8
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+    },
+    {
+      "asset": "cover-rack-cp08.glb",
+      "id": "CP08",
+      "name": "数据中心机柜",
+      "theme": "rack",
+      "chapter": "08 ABYSS",
+      "source": "DATACENTER_RACKS[0]",
+      "version": "cover-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "size": [
+        1.2,
+        2.4,
+        8
+      ],
+      "bounds": {
+        "min": [
+          -0.6510000228881836,
+          -4.768371586472142e-8,
+          -4.03000020980835
+        ],
+        "max": [
+          0.6600000262260437,
+          2.4000000953674316,
+          4.03000020980835
+        ]
+      },
+      "meshes": 5,
+      "triangles": 564,
+      "bytes": 45268,
+      "sha256": "bb2141b6689a28cda2f32302fe1d4f15b346de2b178397120f8a8a097058cf4e",
+      "sourceHashes": {
+        "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+        "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "budgets": {
+        "triangles": 4000,
+        "meshes": 8
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+    },
+    {
+      "asset": "cover-snowbank-cp09a.glb",
+      "id": "CP09A",
+      "name": "极地雪堆",
+      "theme": "snowbank",
+      "chapter": "09 GLACIER",
+      "source": "POLAR_BANKS[0]",
+      "version": "cover-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "size": [
+        6,
+        1.2,
+        1.4
+      ],
+      "bounds": {
+        "min": [
+          -3.0726001262664795,
+          0,
+          -0.6989648342132568
+        ],
+        "max": [
+          3.0726001262664795,
+          1.2496817111968994,
+          0.6989648342132568
+        ]
+      },
+      "meshes": 2,
+      "triangles": 824,
+      "bytes": 26512,
+      "sha256": "322a90454bf3395ac9db6e832e3fabb3b0889bb23c30afc1a28e0ddf57993633",
+      "sourceHashes": {
+        "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+        "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "budgets": {
+        "triangles": 4000,
+        "meshes": 8
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+    },
+    {
+      "asset": "cover-hut-cp09b.glb",
+      "id": "CP09B",
+      "name": "极地暖房墙",
+      "theme": "hut",
+      "chapter": "09 GLACIER",
+      "source": "POLAR_HUTS[0]",
+      "version": "cover-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "size": [
+        5,
+        3,
+        0.3
+      ],
+      "bounds": {
+        "min": [
+          -2.569999933242798,
+          0,
+          -0.2199999988079071
+        ],
+        "max": [
+          2.569999933242798,
+          3.049999952316284,
+          0.2199999988079071
+        ]
+      },
+      "meshes": 5,
+      "triangles": 192,
+      "bytes": 19056,
+      "sha256": "47cc7c9a0feabebc7133de4d0655beaa001c70ac201d00d7be594582a69960b7",
+      "sourceHashes": {
+        "src/cover-props.js": "b134ab8f9a828623ead87a827262af8b649f9fdbb5aba6e77ce123784f3137d5",
+        "scripts/build-cover-props.mjs": "e3c9371fd5aeb75681fa50055fdea1458e10ae13e991a91e1302b1787be16c76"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "budgets": {
+        "triangles": 4000,
+        "meshes": 8
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Review prototype only. Chapters dress their own collision boxes procedurally via src/cover-props.js; the game does not request this GLB."
+    }
+  ]
+}

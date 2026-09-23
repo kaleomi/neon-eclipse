@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {createBossFramework} from '../src/boss-framework.js';
+for(const config of [{},{maxHp:NaN},{maxHp:-1},{maxHp:10,windowSeconds:0},{maxHp:10,defeatSeconds:-1},{maxHp:10,tierThresholds:[.3,.6]}])assert.throws(()=>createBossFramework(config));
+const b=createBossFramework({maxHp:100});
+assert(!b.blocking);assert(!b.expose());assert.equal(b.hit(100).damage,0);
+b.reset(true);assert(b.alive);assert(b.blocking);assert.equal(b.state.phase,'shield');assert.equal(b.hit(100).damage,0);
+assert(b.expose());assert(!b.expose());assert.equal(b.state.windows,1);
+for(const n of [NaN,Infinity,-2,0])assert.equal(b.hit(n).damage,0);
+assert.equal(b.hit(50).damage,50);assert.equal(b.state.tier,2);
+for(const dt of [0,-1,NaN])b.tick(dt);assert.equal(b.state.timer,6);
+b.tick(5.99);assert.equal(b.state.phase,'exposed');assert.equal(b.tick(.01),'closed');assert.equal(b.hit(10).damage,0);
+b.expose();assert.deepEqual(b.hit(1000),{damage:50,killed:true});assert(!b.alive);assert(b.blocking,'defeat presentation gates exit');assert.equal(b.hit(1).killed,false);
+b.tick(.79);assert(b.blocking);assert.equal(b.tick(.01),'finished');assert(!b.blocking);b.reset();assert.equal(b.state.hp,100);assert.equal(b.state.windows,0);assert.equal(b.state.phase,'inactive');
+console.log('PASS: reusable boss config, inactive/shield/window, exact timer, damage cap, tiers, one-shot defeat, presentation gate and reset');

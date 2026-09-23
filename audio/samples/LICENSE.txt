@@ -4,3 +4,5 @@ License: https://sonniss.com/gdc-bundle-license/
 Commercial game synchronization permitted; attribution not required. Do not redistribute recordings as a standalone sound library. No AI/ML training. Full terms: official license URL above.
 Individual creators, original archive paths, download URLs and hashes: sources.json.
 Game derivatives: mono 44.1 kHz Vorbis, trimmed, peak normalized, loop crossfades. Original recordings retained in the separate local audition directory.
+
+Snow footsteps (step-snow-1..3.ogg): Corsica_S / OpenGameArt "42 Snow and Gravel Footsteps", CC0 1.0 (no attribution required). Source, download URL and hashes in sources.json.

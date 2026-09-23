@@ -1,0 +1,28 @@
+import * as T from '../node_modules/three/build/three.module.js';
+import {createDurability,overlapsRestoredPlayer} from './destructible-rules.js';
+import {BARREL,blastDamage,blastVisible} from './barrel-rules.js';
+import {createInteractivePropVisual,setInteractivePropState} from './interactive-prop-models.js';
+export function createBarrels(scene,obstacles,{onTopologyChange=()=>{},onBlast=()=>{},positions=[[-19,18],[19,18]],idPrefix='reactor'}={}){
+ const records=[],byMesh=new Map(),pending=[];
+ function remove(r){const i=obstacles.indexOf(r.collider);if(i>=0){obstacles.splice(i,1);return true;}return false;}
+ function paint(r){const s=r.durability.snapshot();r.mesh.material.emissiveIntensity=s.hp<20?.55:.16;setInteractivePropState(r.visual,s.hp<20?'danger':'ready');if(r.label){const {ctx,texture}=r.label;ctx.clearRect(0,0,512,128);ctx.beginPath();ctx.moveTo(20,3);ctx.lineTo(490,3);ctx.lineTo(509,22);ctx.lineTo(509,109);ctx.lineTo(490,125);ctx.lineTo(3,125);ctx.lineTo(3,20);ctx.closePath();const g=ctx.createLinearGradient(0,0,0,128);g.addColorStop(0,'#5b3739');g.addColorStop(.45,'#281923');g.addColorStop(1,'#110f18');ctx.fillStyle=g;ctx.fill();ctx.strokeStyle='#ff795c';ctx.lineWidth=3;ctx.stroke();ctx.strokeStyle='#886166';ctx.lineWidth=1;ctx.strokeRect(12,12,488,104);ctx.fillStyle='#ffb793';ctx.font='bold 34px sans-serif';ctx.textAlign='center';ctx.fillText(`爆炸桶 · ${Math.ceil(s.hp)} / ${BARREL.hp}`,256,48);ctx.font='26px sans-serif';ctx.fillText('危险半径 5m · 注意自伤',256,99);texture.needsUpdate=true;}}
+ for(const [i,pos] of positions.entries()){const [x,z]=pos,y=pos[2]||0;
+  const mesh=new T.Mesh(new T.CylinderGeometry(.55,.55,1.8,16),new T.MeshStandardMaterial({color:0x862b28,metalness:.65,roughness:.4,emissive:0xc73220,emissiveIntensity:.16}));mesh.position.set(x,.9+y,z);mesh.userData.barrelId=`${idPrefix}-barrel-${i+1}`;scene.add(mesh);
+  mesh.material.visible=false;
+  const visual=createInteractivePropVisual('barrel');visual.name='B01_Visual';visual.position.set(0,0,0);mesh.add(visual);
+  const dark=new T.MeshStandardMaterial({color:0x17242a,metalness:.85,roughness:.3});
+  for(const y of [-.82,-.52,.52,.82]){const hoop=new T.Mesh(new T.TorusGeometry(.557,.045,6,24),dark);hoop.rotation.x=Math.PI/2;hoop.position.y=y;mesh.add(hoop);hoop.visible=false;}
+  for(let j=0;j<8;j++){const strip=new T.Mesh(new T.BoxGeometry(.085,.46,.035),new T.MeshBasicMaterial({color:0xffb34f}));const a=j*Math.PI/4;strip.position.set(Math.sin(a)*.555,0,Math.cos(a)*.555);strip.rotation.set(0,a,.45);mesh.add(strip);strip.visible=false;}
+  const ring=new T.Mesh(new T.TorusGeometry(1,.025,4,48),new T.MeshBasicMaterial({color:0xff8050,transparent:true,opacity:.5,depthWrite:false}));ring.rotation.x=Math.PI/2;ring.position.set(x,.08+y,z);ring.visible=false;scene.add(ring);
+  const collider={mesh,x,z,w:1.1,d:1.1,h:1.8,bottom:y,top:y+1.8,cover:true};
+  const r={id:mesh.userData.barrelId,mesh,visual,collider,ring,life:0,enabled:false,durability:createDurability(BARREL.hp),label:null};
+  if(typeof document!=='undefined'){const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const texture=new T.CanvasTexture(canvas);texture.minFilter=T.LinearFilter;texture.generateMipmaps=false;const sprite=new T.Sprite(new T.SpriteMaterial({map:texture,depthWrite:false}));sprite.position.y=1.5;sprite.scale.set(2.8,.7,1);sprite.visible=false;mesh.add(sprite);r.label={ctx:canvas.getContext('2d'),texture,sprite};}
+  records.push(r);byMesh.set(mesh,r);paint(r);
+ }
+ function suspend(){pending.length=0;let changed=false;for(const r of records){changed=remove(r)||changed;r.enabled=false;r.mesh.visible=false;r.life=0;r.ring.visible=false;}if(changed)onTopologyChange();}
+ function reset(player=null){suspend();let changed=false;for(const r of records){r.durability.reset();r.enabled=!overlapsRestoredPlayer(r.collider,player)&&!obstacles.some(o=>Math.abs(o.x-r.collider.x)<(o.w+r.collider.w)/2&&Math.abs(o.z-r.collider.z)<(o.d+r.collider.d)/2&&(o.bottom??0)<r.collider.top&&(o.top??o.h)>r.collider.bottom);r.mesh.visible=r.enabled;if(r.enabled){obstacles.push(r.collider);changed=true;}paint(r);}if(changed)onTopologyChange();}
+ function hit(mesh,damage,source={player:false,weapon:null}){const r=byMesh.get(mesh);if(!r?.enabled)return null;const result=r.durability.hit(damage);if(!result.changed)return result;paint(r);if(result.newlyBroken){r.mesh.visible=false;if(remove(r))onTopologyChange();pending.push({r,source:{player:source.player===true,weapon:source.weapon}});}return result;}
+ function flush(){while(pending.length){const {r,source}=pending.shift(),point=r.mesh.position.clone(),cover=obstacles.slice();const chain=records.filter(o=>o.enabled&&!o.durability.snapshot().broken&&o!==r).map(o=>({o,damage:blastVisible(point,o.mesh.position,cover,o.mesh)?blastDamage(point,o.mesh.position):0}));r.life=.45;r.ring.visible=true;r.ring.scale.setScalar(.1);onBlast(point,source,cover);for(const {o,damage} of chain)if(damage>0)hit(o.mesh,damage,source);}}
+ function step(dt,camera){if(!Number.isFinite(dt)||dt<0)return;for(const r of records){r.life=Math.max(0,r.life-dt);r.ring.visible=r.life>0;r.ring.scale.setScalar(.1+(1-r.life/.45)*BARREL.radius);r.ring.material.opacity=.5*r.life/.45;if(r.label)r.label.sprite.visible=r.mesh.position.distanceTo(camera.position)<14;}}
+ reset();return {hit,flush,step,reset,suspend,isTarget:mesh=>{const r=byMesh.get(mesh);return !!r?.enabled&&!r.durability.snapshot().broken;},snapshot:()=>records.map(r=>({id:r.id,...r.durability.snapshot(),enabled:r.enabled,colliding:obstacles.includes(r.collider)}))};
+}

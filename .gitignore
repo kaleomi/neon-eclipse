@@ -1,5 +1,6 @@
 # dependencies
 node_modules/
+dist/
 desktop/node_modules/
 
 # generated desktop artifacts
@@ -19,3 +20,6 @@ nul
 
 # QA screenshots / probe scripts / scratch output (kept on disk, not tracked; see docs/mcp-asset-size-audit.md section 6)
 .tools/
+
+# QA screenshots from environment refresh sessions (kept on disk, not tracked)
+artifacts/

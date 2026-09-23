@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';
+const {chromium}=await import(process.env.VEHICLE_PLAYWRIGHT_MODULE||'playwright');
+const origin=new URL(process.env.VEHICLE_TEST_URL||'http://127.0.0.1:5173/vehicle.html').origin;
+// Isolated UI fixture, not a gameplay control API and never writes scores.
+const fixture=fs.readFileSync(new URL('../vehicle.html',import.meta.url),'utf8').replace('<script type="module" src="vehicle-app.js"></script>',`<script type="module">
+import * as T from '../node_modules/three/build/three.module.js';import {bindVehicleGuidance} from '../src/vehicle-guidance.js';import {RECON_TARGETS} from '../src/recon-rules.js';const ui=bindVehicleGuidance(),camera=new T.PerspectiveCamera(66,innerWidth/innerHeight,.1,2200);document.querySelector('#drive-overlay').hidden=true;
+Object.assign(document.body.dataset,{flightMissionType:'recon',flightMissionPhase:'route',driveActive:'true'});
+window.fixtureUpdate=({index=0,p={},reason='hold',progress=0,visible=true,recon=true}={})=>{const g=RECON_TARGETS[index],position={x:g.x,y:g.y+1.3,z:g.z,yaw:g.yaw,roll:0,verticalSpeed:0,speed:30,onGround:false,...p};camera.position.set(g.x,45,g.z+140);camera.lookAt(g.x,g.y,g.z);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();ui.update({camera,goal:g,position,visible,recon,mission:{phase:'route',recon:{reason,progress}}});};fixtureUpdate();</script>`);
+const browser=await chromium.launch({headless:true});const context=await browser.newContext();await context.route('**/scan-fixture.html',r=>r.fulfill({contentType:'text/html',body:fixture}));const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+try{
+ await page.goto(origin+'/scan-fixture.html');await page.waitForFunction(()=>window.fixtureUpdate);assert.equal(await page.locator('#recon-readiness [data-ok=true]').count(),6);
+ assert.match(await page.locator('#goal-scan-progress').textContent(),/按住 F/);
+ await page.evaluate(()=>fixtureUpdate({p:{y:100},reason:'altitude'}));assert.equal(await page.getAttribute('#recon-height-guide','data-height'),'high');assert.match(await page.locator('[data-check=height]').textContent(),/过高/);assert.match(await page.locator('#goal-scan-progress').textContent(),/等待条件/);
+ await page.evaluate(()=>fixtureUpdate({p:{yaw:1,speed:15,roll:.6},reason:'heading'}));assert.match(await page.locator('[data-check=heading]').textContent(),/向左转/);assert.match(await page.locator('[data-check=speed]').textContent(),/加速/);assert.match(await page.locator('[data-check=stable]').textContent(),/放平/);
+ await page.evaluate(()=>fixtureUpdate({reason:'blocked'}));assert.equal(await page.getAttribute('[data-check=scan]','data-ok'),'false');assert.match(await page.locator('[data-check=scan]').textContent(),/遮挡/);
+ await page.evaluate(()=>fixtureUpdate({reason:'ready',progress:.75}));assert.equal(await page.getAttribute('#goal-scan-progress','aria-valuenow'),'50');assert.equal(await page.getAttribute('#recon-height-guide','data-ready'),'true');
+ await page.evaluate(()=>fixtureUpdate({index:1,reason:'range'}));assert.match(await page.locator('#recon-height-guide strong').textContent(),/60–90/);assert.match(await page.locator('#world-goal>b').textContent(),/近海信标/);assert.equal(await page.getAttribute('#goal-scan-progress','aria-valuenow'),'0');
+ await page.evaluate(()=>fixtureUpdate({visible:false}));assert(await page.locator('#world-goal').isHidden());assert(await page.locator('#recon-height-guide').isHidden());
+ await page.evaluate(()=>fixtureUpdate({recon:false}));assert(await page.locator('#goal-scan-progress').isHidden());assert(await page.locator('#recon-height-guide').isHidden());assert(await page.locator('#world-goal').isVisible());
+ for(const [width,height] of [[1280,800],[960,720],[390,844],[320,640]]){await page.setViewportSize({width,height});await page.evaluate(()=>fixtureUpdate());assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert(await page.evaluate(()=>{const a=document.querySelector('#recon-height-guide').getBoundingClientRect(),b=document.querySelector('#world-goal').getBoundingClientRect();return a.right<=b.left||b.right<=a.left||a.bottom<=b.top||b.bottom<=a.top;}),'main guide and target label do not overlap');}
+ assert.deepEqual(errors,[]);console.log('PASS: native UI readiness, turn/speed/stability hints, obstruction, scan progress/reset, target switch, pause/mode cleanup and 320–1280 widths');
+}finally{await browser.close();}

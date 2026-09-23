@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {ENEMY_TYPES,BOSS_PHASES,roleForStage,turnTowards,facingDot,resolveEnemyDamage,createBossState,recordBossAttack,stepBossState,movementIntent} from '../src/enemy-rules.js';
+import {STAGES} from '../src/mission.js';
+for(const stage of STAGES){const types=Array.from({length:stage.count},(_,i)=>roleForStage(stage,i));assert(types.every(t=>ENEMY_TYPES[t]));assert.equal(types.filter(t=>t==='warden').length,stage.boss?1:0);}
+assert.deepEqual(new Set(Array.from({length:5},(_,i)=>roleForStage(STAGES[0],i))),new Set(['assault','ranged','heavy']));
+assert.equal(movementIntent('assault',8,true),'approach');assert.equal(movementIntent('heavy',8,true),'hold');assert.equal(movementIntent('ranged',8,true),'retreat');assert.equal(movementIntent('ranged',20,true),'strafe');assert.equal(movementIntent('ranged',30,true),'approach');assert.equal(movementIntent('ranged',10,false),'approach');
+assert(Math.abs(turnTowards(Math.PI-.1,-Math.PI+.1,.05)-(Math.PI-.05))<1e-9);
+const group={position:{x:0,z:0},rotation:{y:0}},front={x:0,z:10},rear={x:0,z:-10},side={x:10,z:0},heavy={type:'heavy',group};
+assert.equal(facingDot(group.position,0,front),1);assert.equal(facingDot(group.position,0,rear),-1);
+assert.equal(resolveEnemyDamage(heavy,100,'body',front).damage,30);assert.equal(resolveEnemyDamage(heavy,100,'body',side).damage,100);assert.equal(resolveEnemyDamage(heavy,100,'body',rear).damage,100);assert.equal(resolveEnemyDamage(heavy,100,'core',rear).damage,200);
+const boss={type:'warden',boss:true,hp:1000,maxHp:1000,group,bossState:createBossState()};
+assert(Math.abs(resolveEnemyDamage(boss,100,'core',front).damage-55)<1e-8);stepBossState(boss,1.2);recordBossAttack(boss.bossState);recordBossAttack(boss.bossState);
+assert(!stepBossState(boss,.1,false).opened,'last volley must finish before opening');assert(stepBossState(boss,.1,true).opened);assert.equal(boss.bossState.openRemaining,3.4);assert.equal(resolveEnemyDamage(boss,100,'core',front).damage,250);assert.equal(resolveEnemyDamage(boss,100,'body',front).damage,100);
+assert(stepBossState(boss,3.4).closed);assert(Math.abs(resolveEnemyDamage(boss,100,'core',front).damage-55)<1e-8);
+boss.hp=650;assert(stepBossState(boss,.01).changed);assert.equal(boss.bossState.phase,1);assert.equal(boss.bossState.transitionRemaining,1.2);assert.equal(boss.bossState.attacks,0);
+stepBossState(boss,1.2);for(let i=0;i<2;i++)recordBossAttack(boss.bossState);assert(!boss.bossState.openQueued);recordBossAttack(boss.bossState);assert(boss.bossState.openQueued);
+boss.hp=330;assert(stepBossState(boss,.01).changed);assert.equal(boss.bossState.phase,2);boss.hp=900;stepBossState(boss,.1);assert.equal(boss.bossState.phase,2,'phase cannot regress');
+assert.equal(BOSS_PHASES[0].attack.angles.length,1);assert.equal(BOSS_PHASES[1].attack.angles.length,5);assert.equal(BOSS_PHASES[2].attack.angles.length*BOSS_PHASES[2].attack.bursts,6);
+for(const p of Object.values(ENEMY_TYPES))if(p.attack)assert(p.attack.charge>=.45);
+console.log('PASS: stage squads, role tactics, slow turning, front/side/rear armor, boss phase thresholds/monotonicity, finished-volley exposure and damage windows');

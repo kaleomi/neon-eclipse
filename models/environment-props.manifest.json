@@ -1,0 +1,189 @@
+{
+  "version": "environment-props-v1",
+  "total": 4,
+  "assets": [
+    {
+      "asset": "vent-console-ev01.glb",
+      "id": "EV01",
+      "name": "隔离阀控制台",
+      "type": "vent",
+      "version": "environment-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "meshes": 6,
+      "triangles": 2988,
+      "materials": 6,
+      "bounds": {
+        "min": [
+          -0.296999990940094,
+          1.19209286886246e-09,
+          -0.29499998688697815
+        ],
+        "max": [
+          0.296999990940094,
+          1.090000033378601,
+          0.29500001668930054
+        ]
+      },
+      "bytes": 220472,
+      "sha256": "49c60d3a575579e9d232d6ace3e417d4eb6e6bd60158b7cdd26f7012ead6f3ce",
+      "sourceHashes": {
+        "src/environment-prop-models.js": "bc995ac7f121c341aac625102d6db0a6b3948b47dc00815c01850de71cbbd617",
+        "scripts/build-environment-props.mjs": "e4e585e43d2d92d99882964824908753c0b631db800b0765d65f6e5c2f89feb4"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "parts": {},
+      "budgets": {
+        "triangles": 6000,
+        "meshes": 6,
+        "materials": 7
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Shared authored procedural source. Game does not request these GLBs. Original gameplay proxies and rules are retained."
+    },
+    {
+      "asset": "light-console-el01.glb",
+      "id": "EL01",
+      "name": "照明配电控制台",
+      "type": "light",
+      "version": "environment-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "meshes": 6,
+      "triangles": 2760,
+      "materials": 6,
+      "bounds": {
+        "min": [
+          -0.296999990940094,
+          1.19209286886246e-09,
+          -0.29499998688697815
+        ],
+        "max": [
+          0.296999990940094,
+          1.090000033378601,
+          0.2980000078678131
+        ]
+      },
+      "bytes": 204044,
+      "sha256": "e2f97bc3c7ec20ca933e1be04f8bacb0d8b87d6b62c809d6370e531350333665",
+      "sourceHashes": {
+        "src/environment-prop-models.js": "bc995ac7f121c341aac625102d6db0a6b3948b47dc00815c01850de71cbbd617",
+        "scripts/build-environment-props.mjs": "e4e585e43d2d92d99882964824908753c0b631db800b0765d65f6e5c2f89feb4"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "parts": {},
+      "budgets": {
+        "triangles": 6000,
+        "meshes": 6,
+        "materials": 7
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Shared authored procedural source. Game does not request these GLBs. Original gameplay proxies and rules are retained."
+    },
+    {
+      "asset": "steam-nozzle-ev02.glb",
+      "id": "EV02",
+      "name": "环形排气喷口",
+      "type": "nozzle",
+      "version": "environment-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "meshes": 5,
+      "triangles": 1896,
+      "materials": 5,
+      "bounds": {
+        "min": [
+          -0.2460000067949295,
+          0,
+          -0.2460000067949295
+        ],
+        "max": [
+          0.2460000067949295,
+          0.48899999260902405,
+          0.2460000067949295
+        ]
+      },
+      "bytes": 140988,
+      "sha256": "6031a546139299cee344f2dfb378aa53c7ee2cec834cc8a9a0e51a4d275a068e",
+      "sourceHashes": {
+        "src/environment-prop-models.js": "bc995ac7f121c341aac625102d6db0a6b3948b47dc00815c01850de71cbbd617",
+        "scripts/build-environment-props.mjs": "e4e585e43d2d92d99882964824908753c0b631db800b0765d65f6e5c2f89feb4"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "parts": {},
+      "budgets": {
+        "triangles": 4000,
+        "meshes": 5,
+        "materials": 7
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Shared authored procedural source. Game does not request these GLBs. Original gameplay proxies and rules are retained."
+    },
+    {
+      "asset": "energy-node-en01.glb",
+      "id": "EN01",
+      "name": "悬浮储能节点",
+      "type": "node",
+      "version": "environment-props-v1",
+      "units": "metres",
+      "axis": "+Y up, +Z front",
+      "pivot": "floor centre (y=0)",
+      "meshes": 12,
+      "triangles": 6424,
+      "materials": 7,
+      "bounds": {
+        "min": [
+          -0.675000011920929,
+          0,
+          -0.675000011920929
+        ],
+        "max": [
+          0.675000011920929,
+          1.8495000004768372,
+          0.675000011920929
+        ]
+      },
+      "bytes": 472424,
+      "sha256": "6ec1e910379897fa9ce8da08733ae890223372ed3cbdd4b1ecd93762e89a7cff",
+      "sourceHashes": {
+        "src/environment-prop-models.js": "bc995ac7f121c341aac625102d6db0a6b3948b47dc00815c01850de71cbbd617",
+        "scripts/build-environment-props.mjs": "e4e585e43d2d92d99882964824908753c0b631db800b0765d65f6e5c2f89feb4"
+      },
+      "textures": 0,
+      "animations": [],
+      "externalDependencies": 0,
+      "parts": {
+        "core": "EN01_Core, pivot y=1.5",
+        "base": "EN01_Base, pivot y=0"
+      },
+      "budgets": {
+        "triangles": 7000,
+        "meshes": 12,
+        "materials": 7
+      },
+      "generator": {
+        "three": "186",
+        "node": "24.15.0"
+      },
+      "runtime": "Shared authored procedural source. Game does not request these GLBs. Original gameplay proxies and rules are retained."
+    }
+  ]
+}

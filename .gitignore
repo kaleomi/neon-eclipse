@@ -1,6 +1,7 @@
 # dependencies
 node_modules/
 dist/
+.npm-cache/
 desktop/node_modules/
 
 # generated desktop artifacts
